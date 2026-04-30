@@ -1,0 +1,191 @@
+"use client"
+
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { motion, AnimatePresence } from "framer-motion"
+import { Alert01Icon, Coins01Icon, House01Icon, House03Icon, Location01Icon, Search01Icon } from "@hugeicons/core-free-icons"
+import { HugeiconsIcon } from "@hugeicons/react"
+import RoomCard, { IRoom } from "./room-card"
+
+export default function SearchBar() {
+  const [filters, setFilters] = useState({
+    city: "",
+    maxPrice: "",
+    description: "",
+  })
+  const [results, setResults] = useState<IRoom[]>([])
+  const [searched, setSearched] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFilters({ ...filters, [e.target.name]: e.target.value })
+  }
+
+  const handleSearch = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault() // Prevent page reload on Enter key
+    
+    setLoading(true)
+    setError(null)
+    setResults([])
+    setSearched(true)
+
+    try {
+      const params = new URLSearchParams(filters).toString()
+      const res = await fetch(`/api/rooms/search?${params}`)
+      const data = await res.json()
+
+      if (res.ok) {
+        setResults(data.data || [])
+      } else {
+        setError(data.message || "Something went wrong")
+      }
+    } catch (err) {
+      setError("Failed to fetch search results.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <section className="relative z-10 -mt-16 px-4 sm:px-6 mb-12">
+      {/* 🔍 Search Bar - Transformed into a Form */}
+      <motion.form
+        onSubmit={handleSearch}
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, ease: "easeOut" }}
+        viewport={{ once: true }}
+        className="max-w-5xl mx-auto bg-white shadow-[0_8px_30px_rgb(0,0,0,0.08)] rounded-3xl md:rounded-full p-2 flex flex-col md:flex-row md:items-center border border-slate-100 md:divide-x md:divide-slate-200"
+      >
+        {/* Location Input */}
+        <div className="flex items-center gap-3 flex-1 px-4 py-3 hover:bg-slate-50 rounded-full transition-colors group cursor-text">
+          <HugeiconsIcon icon={Location01Icon} size={24}  className="text-slate-400 group-hover:text-primary transition-colors shrink-0" />
+          <div className="flex flex-col w-full">
+            <label className="text-[11px] font-bold text-slate-800 uppercase tracking-wider">Location</label>
+            <Input
+              name="city"
+              placeholder="Where are you moving?"
+              className="border-0 p-0 h-auto bg-transparent shadow-none focus-visible:ring-0 text-slate-600 placeholder:text-slate-400 font-medium text-base"
+              value={filters.city}
+              onChange={handleChange}
+            />
+          </div>
+        </div>
+
+        {/* Price Input */}
+        <div className="flex items-center gap-3 flex-1 px-4 py-3 hover:bg-slate-50 rounded-full transition-colors group cursor-text border-t md:border-t-0 border-slate-100">
+          <HugeiconsIcon icon={Coins01Icon} size={24}  className="text-slate-400 group-hover:text-primary transition-colors shrink-0" />
+          <div className="flex flex-col w-full">
+            <label className="text-[11px] font-bold text-slate-800 uppercase tracking-wider">Budget</label>
+            <Input
+              name="maxPrice"
+              type="number"
+              placeholder="Max price ($)"
+              className="border-0 p-0 h-auto bg-transparent shadow-none focus-visible:ring-0 text-slate-600 placeholder:text-slate-400 font-medium text-base"
+              value={filters.maxPrice}
+              onChange={handleChange}
+            />
+          </div>
+        </div>
+
+        {/* Keyword Input */}
+        <div className="flex items-center gap-3 flex-1 px-4 py-3 hover:bg-slate-50 rounded-full transition-colors group cursor-text border-t md:border-t-0 border-slate-100">
+          <HugeiconsIcon icon={House03Icon} size={24}  className="text-slate-400 group-hover:text-primary transition-colors shrink-0" />
+          <div className="flex flex-col w-full">
+            <label className="text-[11px] font-bold text-slate-800 uppercase tracking-wider">Keyword</label>
+            <Input
+              name="description"
+              placeholder="e.g. Studio, Balcony"
+              className="border-0 p-0 h-auto bg-transparent shadow-none focus-visible:ring-0 text-slate-600 placeholder:text-slate-400 font-medium text-base"
+              value={filters.description}
+              onChange={handleChange}
+            />
+          </div>
+        </div>
+
+        {/* Search Button */}
+        <div className="p-2 w-full md:w-auto mt-2 md:mt-0">
+          <Button
+            type="submit"
+            disabled={loading}
+            className="w-full md:w-auto bg-primary text-primary-foreground hover:bg-primary/90 px-8 py-6 rounded-full disabled:opacity-70 flex items-center justify-center gap-2 font-bold text-base shadow-md transition-transform hover:scale-[1.02] active:scale-95"
+          >
+            {loading ? (
+              <span className="animate-pulse">Searching...</span>
+            ) : (
+              <>
+                <HugeiconsIcon icon={Search01Icon} size={20}  /> 
+                <span className="md:hidden lg:inline">Search</span>
+              </>
+            )}
+          </Button>
+        </div>
+      </motion.form>
+
+      {/* 🏠 Search Results Area */}
+      <div className="max-w-7xl mx-auto mt-16 min-h-[200px]">
+        
+        {/* Error State */}
+        {error && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center text-red-500 bg-red-50 p-6 rounded-2xl max-w-md mx-auto">
+            <HugeiconsIcon icon={Alert01Icon} size={32} className="mb-2" />
+            <p className="font-medium text-center">{error}</p>
+          </motion.div>
+        )}
+
+        {/* Empty State */}
+        {!loading && searched && results.length === 0 && !error && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center text-slate-400 py-12">
+            <HugeiconsIcon icon={House01Icon} size={48}  className="mb-4 text-slate-300" />
+            <p className="text-lg font-medium text-slate-600">No properties found</p>
+            <p className="text-sm mt-1">Try adjusting your filters or searching a different area.</p>
+          </motion.div>
+        )}
+
+        {/* Loading State */}
+        {loading && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mt-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="animate-pulse flex flex-col gap-4">
+                <div className="bg-slate-200 rounded-2xl aspect-square w-full"></div>
+                <div className="h-4 bg-slate-200 rounded w-3/4"></div>
+                <div className="h-4 bg-slate-200 rounded w-1/2"></div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Results Grid */}
+        <AnimatePresence>
+          {!loading && results.length > 0 && (
+            <motion.div
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mt-6"
+              initial="hidden"
+              animate="visible"
+              variants={{
+                hidden: {},
+                visible: {
+                  transition: { staggerChildren: 0.1 }
+                }
+              }}
+            >
+              {results.map((room) => (
+                <motion.div
+                  key={room._id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.4 }}
+                >
+                  <RoomCard room={room} />
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </section>
+  )
+}
