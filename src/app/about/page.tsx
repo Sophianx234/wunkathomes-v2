@@ -1,31 +1,32 @@
 
-import { FaHandshake, FaHome, FaLock, FaMoneyBillWave, FaSmile, FaUsers } from "react-icons/fa"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import Header from "@/components/header"
 import Footer from "@/components/footer"
+import { Home02FreeIcons, LockIcon, Money02FreeIcons, Smile } from "@hugeicons/core-free-icons";
+import Navbar from "@/components/navbar";
+import { HugeiconsIcon } from "@hugeicons/react";
 
 export default function AboutPage() {
  const values = [
   {
-    icon: FaHome,
+    icon: Home02FreeIcons,
     title: "Comfort You Can Trust",
     description:
       "Every WunkatHomes room is carefully managed and maintained for a clean, safe, and comfortable stay.",
   },
   {
-    icon: FaLock,
+    icon: LockIcon,
     title: "Transparent & Secure",
     description:
       "No hidden fees or surprises. Every booking and payment is handled securely for your peace of mind.",
   },
   {
-    icon: FaMoneyBillWave,
+    icon: Money02FreeIcons,
     title: "Affordable Living",
     description:
       "Enjoy modern, well-kept spaces at prices that make sense. Quality living doesn’t have to be expensive.",
   },
   {
-    icon: FaSmile,
+    icon: Smile,
     title: "Simple Experience",
     description:
       "From browsing to booking, every step is designed to be smooth and hassle-free so you can move in with confidence.",
@@ -35,7 +36,7 @@ export default function AboutPage() {
 
   return (
     <div className="min-h-screen  bg-background">
-      <Header />
+      <Navbar />
       <main>
         {/* About Hero */}
        <section
@@ -112,7 +113,7 @@ We provide affordable, well-managed rooms with a seamless booking experience. no
                 return (
                   <Card key={idx} className="border border-border">
                     <CardHeader>
-                      <Icon className="w-8 h-8 text-primary mb-4" />
+                      <HugeiconsIcon icon={Icon} className="w-8 h-8 text-primary mb-4" />
                       <CardTitle>{value.title}</CardTitle>
                     </CardHeader>
                     <CardContent>

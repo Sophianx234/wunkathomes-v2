@@ -85,7 +85,7 @@ export default function Navbar() {
           {/* 3. Desktop Navigation & Actions (Right) */}
           <div className="hidden md:flex items-center gap-4 z-50 shrink-0">
             <nav className="flex items-center gap-6 mr-2 font-medium text-sm">
-              <Link href="/browse" className="text-slate-600 hover:text-indigo-600 transition">
+              <Link href="/rooms" className="text-slate-600 hover:text-indigo-600 transition">
                 Browse Rooms
               </Link>
               <Link href="/about" className="text-slate-600 hover:text-indigo-600 transition">
