@@ -21,6 +21,8 @@ import { inventory } from "@/lib/data"
 // --- Import the new Client Components ---
 import ImageGallery from "@/components/image-gallery"
 import SimilarCarousel from "@/components/similar-carousel"
+import ThingsToKnow from "@/components/things-to-know"
+import BookingCard from "@/components/booking-card"
 
 interface PropertyPageProps {
   params: Promise<{ slug: string }>
@@ -57,10 +59,13 @@ export default async function PropertyDetailsPage({ params }: PropertyPageProps)
     <main className="min-h-screen bg-white text-black pt-24 pb-32">
       
       {/* 1. Interactive Client-Side Gallery */}
+      <div className="max-w-6xl mx-auto">
+
       <ImageGallery images={listing.images} title={listing.title} />
+      </div>
 
       {/* 2. Main Content & Sticky Ledger */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20">
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20">
         
         {/* --- Left Column: Details --- */}
         <div className="lg:col-span-8 flex flex-col pb-12">
@@ -172,67 +177,10 @@ export default async function PropertyDetailsPage({ params }: PropertyPageProps)
         </div>
 
         {/* --- Right Column: Sticky Action Ledger --- */}
-        <div className="lg:col-span-4 relative hidden lg:block">
-          <div className="sticky top-32 p-8 border-2 border-black bg-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col rounded-xl">
-            <div className="mb-8">
-              <span className="text-sm font-bold uppercase tracking-widest text-slate-500 block mb-2">
-                {isRent ? 'Lease Valuation' : 'Acquisition Price'}
-              </span>
-              <div className="text-4xl font-black tracking-tight">
-                ${listing.price.toLocaleString()}
-                {isRent && <span className="text-lg text-slate-500 font-medium tracking-normal"> / mo</span>}
-              </div>
-            </div>
-
-            <div className="space-y-4 mb-8">
-              <div className="flex justify-between items-center py-3 border-b border-black/10">
-                <span className="text-sm font-medium text-slate-600">Verification</span>
-                <span className="text-sm font-bold text-black">Wunkat Standard</span>
-              </div>
-              <div className="flex justify-between items-center py-3 border-b border-black/10">
-                <span className="text-sm font-medium text-slate-600">Broker Fees</span>
-                <span className="text-sm font-bold text-green-600">$0 (Direct)</span>
-              </div>
-              {isRent && listing.terms.leaseTerm && (
-                <div className="flex justify-between items-center py-3 border-b border-black/10">
-                  <span className="text-sm font-medium text-slate-600">Minimum Term</span>
-                  <span className="text-sm font-bold text-black">{listing.terms.leaseTerm}</span>
-                </div>
-              )}
-            </div>
-
-            <div className="flex flex-col gap-3 mt-auto">
-              {isRent ? (
-                <>
-                  <Link href={`/checkout/${listing.slug}?type=deposit`} className="w-full">
-                    <button className="w-full py-4 bg-black text-white font-black uppercase tracking-widest text-xs rounded-lg hover:bg-slate-800 transition-colors">
-                      Pay Booking Deposit
-                    </button>
-                  </Link>
-                  <button className="w-full py-4 bg-white text-black font-black uppercase tracking-widest text-xs border-2 border-black rounded-lg hover:bg-slate-50 transition-colors flex items-center justify-center gap-2">
-                    <HugeiconsIcon icon={Calendar01Icon} size={16} />
-                    Schedule Viewing
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button className="w-full py-4 bg-black text-white font-black uppercase tracking-widest text-xs rounded-lg hover:bg-slate-800 transition-colors">
-                    Request Digital Contract
-                  </button>
-                  <button className="w-full py-4 bg-white text-black font-black uppercase tracking-widest text-xs border-2 border-black rounded-lg hover:bg-slate-50 transition-colors flex items-center justify-center gap-2">
-                    <HugeiconsIcon icon={Calendar01Icon} size={16} />
-                    Schedule Private Tour
-                  </button>
-                </>
-              )}
-            </div>
-            <p className="text-[10px] text-center text-slate-500 uppercase tracking-widest mt-6 font-bold leading-relaxed">
-              100% Owned by WunkatHomes. <br /> Secure hybrid payments.
-            </p>
-          </div>
-        </div>
+        <BookingCard listing={listing} isRent={isRent} />
 
       </section>
+      <ThingsToKnow isRent={isRent} />
 
       {/* 3. Interactive Client-Side Carousel */}
       <SimilarCarousel similar={similar} />
