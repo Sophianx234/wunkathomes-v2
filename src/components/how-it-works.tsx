@@ -1,84 +1,131 @@
-"use client"
+"use client";
 
-import { CalendarCheck, CreditCard, Search } from "@hugeicons/core-free-icons";
+import Image from "next/image";
+import { Search,  Key, FileEditIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { motion } from "framer-motion"
+import { motion } from "framer-motion";
 
 const steps = [
   {
-    icon: Search,
     number: "01",
-    title: "Explore Properties",
+    title: "Explore & Secure",
+    icon: Search,
     description:
-      "Discover a curated selection of WunkatHomes rooms designed for comfort and convenience. Find the perfect space that suits your lifestyle.",
+      "Discover our exclusive company-owned homes. Pay your booking deposit instantly online via Paystack to secure your space.",
+    imageSrc: "/mock-1.png", 
+    imageAlt: "WunkatHomes application showing property listing and deposit button",
   },
   {
-    icon: CalendarCheck,
     number: "02",
-    title: "Book & Subscribe",
+    title: "Sign & Settle",
+    icon: FileEditIcon,
     description:
-      "Choose your preferred room and subscription period. Enjoy a seamless booking process with instant confirmation and flexible renewal options.",
+      "Review and digitally sign your legally binding tenancy agreement on your phone. Complete your remaining rent balance via bank transfer.",
+    imageSrc: "/mock-1.png",
+    imageAlt: "WunkatHomes application showing digital lease agreement and signature",
   },
   {
-    icon: CreditCard,
     number: "03",
-    title: "Make Secure Payments",
+    title: "Receive Access",
+    icon: Key,
     description:
-      "Complete your subscription through our secure, transparent payment system. Your comfort and trust are our priority.",
+      "Once verified, receive your unique Smart Lock PIN immediately. Move in on your start date, managed entirely by WunkatHomes.",
+    imageSrc: "/mock-1.png",
+    imageAlt: "WunkatHomes active lease dashboard generating a Smart Lock PIN",
   },
 ];
 
-
 export default function HowItWorks() {
   return (
-    <section id="how" className="py-16 md:py-24 px-6 bg-gray-50">
+    <section id="how" className="py-24 px-6 bg-white text-primary overflow-hidden">
       <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-16">
+        {/* Section Header */}
+        <div className="text-center mb-20 md:mb-32">
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.6 }}
-            className="text-3xl md:text-5xl font-bold mb-4"
+            className="text-5xl md:text-7xl font-bold mb-6 tracking-tight"
           >
             How It Works
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-gray-600 text-lg max-w-2xl mx-auto"
+            className="text-neutral-800 text-lg md:text-xl max-w-2xl mx-auto"
           >
-            Three simple steps to find and secure your dream home.
+            Three seamless steps to secure, sign, and unlock your new WunkatHome.
           </motion.p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8">
+        {/* Steps Container */}
+        <div className="flex flex-col gap-24 md:gap-32">
           {steps.map((step, index) => {
-            const Icon = step.icon
+            const isEven = index % 2 !== 0;
+
             return (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.3 }}
-                transition={{ duration: 0.6, delay: index * 0.2 }}
-                className="bg-white p-8 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 group"
+              <div
+                key={step.number}
+                className={`flex flex-col md:flex-row items-center gap-12 lg:gap-24 ${
+                  isEven ? "md:flex-row-reverse" : ""
+                }`}
               >
-                <div className="flex items-start justify-between mb-6">
-                  <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center group-hover:bg-black group-hover:text-white transition-colors duration-300">
-                    <HugeiconsIcon icon={Icon}  className="w-6 h-6" />
+                {/* Mockup Image Side */}
+                <motion.div
+                  initial={{ opacity: 0, x: isEven ? 40 : -40 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, margin: "-100px" }}
+                  transition={{ duration: 0.7, ease: "easeOut" }}
+                  className="w-full md:w-1/2 flex justify-center relative"
+                >
+                  {/* Aspect ratio container for the isometric render */}
+                  <div className="relative w-full max-w-[500px] aspect-[4/3]">
+                    <Image
+                      src={step.imageSrc}
+                      alt={step.imageAlt}
+                      fill
+                      className="object-contain drop-shadow-2xl"
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      priority={index === 0}
+                    />
                   </div>
-                  <span className="text-3xl font-bold text-gray-200 group-hover:text-gray-300">
-                    {step.number}
-                  </span>
-                </div>
-                <h3 className="text-xl font-semibold mb-3">{step.title}</h3>
-                <p className="text-gray-600 leading-relaxed">{step.description}</p>
-              </motion.div>
-            )
+                </motion.div>
+
+                {/* Text Content Side */}
+                <motion.div
+                  initial={{ opacity: 0, x: isEven ? -40 : 40 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, margin: "-100px" }}
+                  transition={{ duration: 0.7, delay: 0.2, ease: "easeOut" }}
+                  className="w-full md:w-1/2 flex flex-col justify-center"
+                >
+                  <div className="flex items-start gap-6">
+                    {/* Massive Step Number */}
+                    <span className="text-7xl md:text-8xl font-black leading-none tracking-tighter text-primary select-none">
+                      {step.number}
+                    </span>
+
+                    <div className="pt-2">
+                      <div className="flex items-center gap-3 mb-4">
+                        <h3 className="text-3xl md:text-4xl font-bold tracking-tight">
+                          {step.title}
+                        </h3>
+                        <HugeiconsIcon icon={step.icon} className="w-6 h-6 text-primary" />
+                      </div>
+                      <p className="text-neutral-600 text-lg leading-relaxed max-w-md">
+                        {step.description}
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
+            );
           })}
         </div>
       </div>
     </section>
-  )
+  );
 }

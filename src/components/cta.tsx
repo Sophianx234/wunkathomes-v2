@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { motion } from "framer-motion"
-import { ArrowRight } from "@hugeicons/core-free-icons"
-import { HugeiconsIcon } from "@hugeicons/react"
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { ArrowRight } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 
 export default function Cta() {
   return (
@@ -53,8 +53,9 @@ export default function Cta() {
           transition={{ duration: 0.7, delay: 0.4 }}
           viewport={{ once: true, amount: 0.3 }}
         >
-          From exclusive penthouses to tranquil escapes. explore verified listings designed for modern lifestyles.  
-          Trust, transparency, and timeless design in every stay.
+          From exclusive penthouses to tranquil escapes. explore verified
+          listings designed for modern lifestyles. Trust, transparency, and
+          timeless design in every stay.
         </motion.p>
 
         {/* Button */}
@@ -67,10 +68,13 @@ export default function Cta() {
         >
           <Link
             href="login"
-            className="group inline-flex items-center gap-3 px-10 py-4 rounded-full bg-white text-black font-medium text-lg tracking-wide transition-all duration-300 hover:bg-gray-100 hover:shadow-xl hover:scale-[1.03]"
+            className="group inline-flex items-center gap-3 px-10 py-4 rounded-full bg-white text-primary font-medium text-lg tracking-wide transition-all duration-300 hover:bg-gray-100 hover:shadow-xl hover:scale-[1.03]"
           >
             Get Started
-            <HugeiconsIcon icon={ArrowRight}  className="w-4 h-4 transform transition-transform duration-300 group-hover:translate-x-1" />
+            <HugeiconsIcon
+              icon={ArrowRight}
+              className="w-4 h-4 transform transition-transform duration-300 group-hover:translate-x-1"
+            />
           </Link>
         </motion.div>
 
@@ -88,5 +92,5 @@ export default function Cta() {
       <div className="absolute top-10 left-10 w-64 h-64 bg-white/10 blur-3xl rounded-full" />
       <div className="absolute bottom-10 right-10 w-64 h-64 bg-white/10 blur-3xl rounded-full" />
     </section>
-  )
+  );
 }
