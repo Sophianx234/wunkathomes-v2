@@ -1,6 +1,4 @@
-
 import { notFound } from "next/navigation"
-import Image from "next/image"
 import Link from "next/link"
 import { 
   Location01Icon, 
@@ -10,182 +8,179 @@ import {
   Key01Icon,
   CheckmarkBadge01Icon,
   Calendar01Icon,
-  Shield
+  Shield01Icon,
+  StarIcon,
+  Wifi01Icon,
+  Car01Icon,
+  Building04Icon,
+  Map
 } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { inventory } from "@/lib/data"
+import { inventory } from "@/lib/data" 
 
-// === Next.js 15 Async Params ===
+// --- Import the new Client Components ---
+import ImageGallery from "@/components/image-gallery"
+import SimilarCarousel from "@/components/similar-carousel"
+
 interface PropertyPageProps {
   params: Promise<{ slug: string }>
 }
 
-// === Mock Database Fetch ===
-// In production: await Listing.findOne({ slug }).populate('propertyId')
-async function getListingBySlug(slug: string) {
+async function getListingData(slug: string) {
+  // Simulate DB Delay
   await new Promise((resolve) => setTimeout(resolve, 500))
-  return inventory.find((listing) => listing.slug === slug) || null
+  
+  const listing = inventory.find((item) => item.slug === slug) || null
+  const similar = inventory
+    .filter((item) => item.slug !== slug && item.listingType === listing?.listingType)
+    .slice(0, 5) // Increased slice so the carousel has enough items to scroll
+
+  return { listing, similar }
 }
 
 export default async function PropertyDetailsPage({ params }: PropertyPageProps) {
-  // NEXT.JS 15: Must await params
   const { slug } = await params
-  const listing = await getListingBySlug(slug)
+  const { listing, similar } = await getListingData(slug)
 
-  if (!listing) {
-    notFound()
-  }
+  if (!listing) notFound()
 
-  // FIXED: Check listingType instead of status
   const isRent = listing.listingType === "For_Rent"
 
-  // UX FIX: Safe fallbacks for the image gallery. 
-  // If the DB only returns 1 image, we duplicate it into the grid so the cinematic layout doesn't break or crash Next.js.
-  const mainImage = listing.images[0]
-  const topImage = listing.images[1] || listing.images[0]
-  const bottomImage = listing.images[2] || listing.images[0]
+  const reviews = [
+    { name: "Kwame A.", date: "October 2025", text: "The digital lease process was flawless. I signed on my phone, paid via Paystack, and the Tuya smart lock PIN was generated instantly. Zero agent hassle.", rating: 5 },
+    { name: "Sarah M.", date: "September 2025", text: "Pristine property. It looks exactly like the photos. The Wunkat maintenance ledger is very transparent. Highly recommend this standard of living.", rating: 5 },
+    { name: "David O.", date: "August 2025", text: "Finally, a real estate platform in Accra without the middleman. Moving in was just unlocking the door with my phone. The fiber internet was already active.", rating: 4.8 },
+    { name: "Elena R.", date: "July 2025", text: "Beautiful architecture and very secure. The hybrid payment system made it easy to wire the annual rent without massive gateway fees.", rating: 5 }
+  ]
 
   return (
     <main className="min-h-screen bg-white text-black pt-24 pb-32">
       
-      {/* === 1. Cinematic Asymmetric Gallery === */}
-      <section className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mb-12 md:mb-20">
-        <div className="grid grid-cols-1 md:grid-cols-4 grid-rows-2 gap-2 md:gap-4 h-[400px] md:h-[600px] lg:h-[700px] rounded-2xl md:rounded-[2rem] overflow-hidden">
-          {/* Main Massive Image */}
-          <div className="md:col-span-3 row-span-2 relative h-full w-full group overflow-hidden cursor-pointer">
-            <Image 
-              src={mainImage} 
-              alt={listing.title} 
-              fill 
-              className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out" 
-              priority
-            />
-          </div>
-          {/* Top Right Image */}
-          <div className="hidden md:block col-span-1 row-span-1 relative h-full w-full group overflow-hidden cursor-pointer">
-            <Image 
-              src={topImage} 
-              alt={`${listing.title} Interior`} 
-              fill 
-              className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out" 
-            />
-          </div>
-          {/* Bottom Right Image */}
-          <div className="hidden md:block col-span-1 row-span-1 relative h-full w-full group overflow-hidden cursor-pointer">
-            <Image 
-              src={bottomImage} 
-              alt={`${listing.title} Detail`} 
-              fill 
-              className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out" 
-            />
-            {/* View All Overlay */}
-            <div className="absolute inset-0 bg-black/40 hover:bg-black/20 transition-colors flex items-center justify-center">
-              <span className="text-white font-bold uppercase tracking-widest text-xs border border-white px-4 py-2">
-                View All Media
-              </span>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* 1. Interactive Client-Side Gallery */}
+      <ImageGallery images={listing.images} title={listing.title} />
 
-      {/* === 2. Main Content & Sticky Ledger === */}
+      {/* 2. Main Content & Sticky Ledger */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20">
         
         {/* --- Left Column: Details --- */}
-        <div className="lg:col-span-8 flex flex-col">
+        <div className="lg:col-span-8 flex flex-col pb-12">
           
-          {/* Header */}
-          <div className="mb-10">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="px-3 py-1 bg-black text-white text-[10px] font-bold uppercase tracking-widest">
-                {isRent ? 'Rental Portfolio' : 'Acquisition'}
-              </span>
-              <span className="flex items-center gap-1 text-slate-500 text-xs font-bold uppercase tracking-widest">
-                <HugeiconsIcon icon={CheckmarkBadge01Icon} size={14} className="text-blue-600" />
-                Verified Asset
-              </span>
-            </div>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tight leading-[1.1] mb-4">
+          <div className="mb-8">
+            <h1 className="text-3xl md:text-5xl font-black uppercase tracking-tight leading-[1.1] mb-4">
               {listing.title}
             </h1>
-            <div className="flex items-center gap-2 text-slate-500 font-medium">
-              <HugeiconsIcon icon={Location01Icon} size={18} />
-              {/* FIXED: Nested property location */}
-              {listing.property.location}
-            </div>
-          </div>
-
-          {/* Core Metrics Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 py-8 border-y border-black/10 mb-12">
-            <div className="flex flex-col gap-1">
-              <HugeiconsIcon icon={BedSingle02Icon} size={24} className="text-black mb-2" />
-              {/* FIXED: features.bedrooms */}
-              <span className="text-2xl font-black">{listing.features.bedrooms}</span>
-              <span className="text-xs uppercase tracking-widest text-slate-500 font-bold">Bedrooms</span>
-            </div>
-            <div className="flex flex-col gap-1">
-              <HugeiconsIcon icon={Bathtub01Icon} size={24} className="text-black mb-2" />
-              {/* FIXED: features.bathrooms */}
-              <span className="text-2xl font-black">{listing.features.bathrooms}</span>
-              <span className="text-xs uppercase tracking-widest text-slate-500 font-bold">Bathrooms</span>
-            </div>
-            <div className="flex flex-col gap-1">
-              <HugeiconsIcon icon={MaximizeIcon} size={24} className="text-black mb-2" />
-              {/* FIXED: features.sizeSqm */}
-              <span className="text-2xl font-black">{listing.features.sizeSqm}</span>
-              <span className="text-xs uppercase tracking-widest text-slate-500 font-bold">Square Meters</span>
-            </div>
-            <div className="flex flex-col gap-1">
-              {/* FIXED: smartLock.hasSmartLock */}
-              {listing.smartLock.hasSmartLock ? (
-                <HugeiconsIcon icon={Key01Icon} size={24} className="text-black mb-2" />
-              ) : (
-                <HugeiconsIcon icon={Shield} size={24} className="text-black mb-2" />
-              )}
-              <span className="text-2xl font-black">{listing.smartLock.hasSmartLock ? 'Tuya' : 'Secure'}</span>
-              <span className="text-xs uppercase tracking-widest text-slate-500 font-bold">
-                {listing.smartLock.hasSmartLock ? 'Smart Lock' : 'Access'}
+            <div className="flex flex-wrap items-center gap-4 text-sm font-bold uppercase tracking-widest text-slate-500">
+              <span className="flex items-center gap-1.5 text-black">
+                <HugeiconsIcon icon={StarIcon} size={16} className="fill-black" />
+                4.95 · 12 Reviews
+              </span>
+              <span>•</span>
+              <span className="flex items-center gap-1.5">
+                <HugeiconsIcon icon={Location01Icon} size={16} />
+                {listing.property.location}
               </span>
             </div>
           </div>
 
-          {/* Description */}
+          <div className="flex items-center justify-between py-6 border-y border-black/10 mb-8">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-black rounded-full flex items-center justify-center text-white">
+                <HugeiconsIcon icon={Building04Icon} size={24} />
+              </div>
+              <div>
+                <h3 className="text-lg font-black uppercase tracking-tight">Owned & Operated by Wunkat</h3>
+                <p className="text-sm font-medium text-slate-500">100% Verified Asset • Zero Brokers</p>
+              </div>
+            </div>
+            <HugeiconsIcon icon={CheckmarkBadge01Icon} size={28} className="text-blue-600" />
+          </div>
+
+          <div className="flex flex-wrap gap-6 mb-10">
+            {[
+              { icon: BedSingle02Icon, label: `${listing.features.bedrooms} Bedrooms` },
+              { icon: Bathtub01Icon, label: `${listing.features.bathrooms} Baths` },
+              { icon: MaximizeIcon, label: `${listing.features.sizeSqm} Sqm` },
+              { icon: listing.smartLock.hasSmartLock ? Key01Icon : Shield01Icon, label: listing.smartLock.hasSmartLock ? 'Smart Lock' : 'Secure Access' },
+            ].map((metric, i) => (
+              <div key={i} className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-black">
+                <HugeiconsIcon icon={metric.icon} size={20} className="text-slate-400" />
+                {metric.label}
+              </div>
+            ))}
+          </div>
+
           <div className="mb-12">
-            <h3 className="text-xl font-black uppercase tracking-widest mb-6">The Narrative</h3>
-            <p className="text-slate-600 text-lg leading-relaxed font-medium">
+            <h2 className="text-xl font-black uppercase tracking-widest mb-4">The Narrative</h2>
+            <p className="text-slate-600 text-base md:text-lg leading-relaxed font-medium">
               {listing.description}
             </p>
           </div>
 
-          {/* Terms & Conditions (Replacing Amenities to match Schema) */}
-          {listing.terms.leaseTerm && (
-            <div className="mb-12">
-              <h3 className="text-xl font-black uppercase tracking-widest mb-6">Lease Protocol</h3>
-              <div className="p-6 bg-slate-50 border border-slate-200">
-                <span className="text-sm font-bold uppercase tracking-widest text-slate-500 block mb-1">
-                  Required Term
-                </span>
-                <span className="text-lg font-black text-black">
-                  {listing.terms.leaseTerm}
-                </span>
-              </div>
+          <div className="mb-12 pt-10 border-t border-black/10">
+            <h2 className="text-xl font-black uppercase tracking-widest mb-6">Infrastructure</h2>
+            <div className="flex flex-wrap gap-3">
+              {["High-Speed Fiber", "Backup Generator", "Dedicated Parking", "Smart Climate Control", "24/7 Security Ledger"].map((amenity, idx) => (
+                <div key={idx} className="flex items-center gap-2 px-4 py-2.5 rounded-full border border-slate-200 text-sm font-bold text-slate-700 bg-slate-50">
+                  {idx === 0 ? <HugeiconsIcon icon={Wifi01Icon} size={16}/> : 
+                   idx === 2 ? <HugeiconsIcon icon={Car01Icon} size={16}/> : 
+                   <HugeiconsIcon icon={CheckmarkBadge01Icon} size={16} className="text-slate-400"/>}
+                  {amenity}
+                </div>
+              ))}
             </div>
-          )}
+          </div>
+
+          <div className="mb-12 pt-10 border-t border-black/10">
+            <h2 className="text-xl font-black uppercase tracking-widest mb-6">The Neighbourhood</h2>
+            <div className="w-full h-[250px] bg-slate-100 rounded-2xl border border-slate-200 flex flex-col items-center justify-center text-slate-400 mb-6">
+              <HugeiconsIcon icon={Map} size={32} className="mb-2" />
+              <span className="text-xs font-bold uppercase tracking-widest">Map API Integration Placeholder</span>
+            </div>
+            <h3 className="font-bold text-lg mb-2">{listing.property.location}</h3>
+            <p className="text-slate-600 font-medium">
+              Situated in a highly coveted enclave. Immediate access to major business districts, premium retail, and diplomatic zones. The exact geolocation and entry coordinates are securely transmitted to your dashboard upon lease execution.
+            </p>
+          </div>
+
+          <div className="pt-10 border-t border-black/10">
+            <div className="flex items-center gap-2 mb-8">
+              <HugeiconsIcon icon={StarIcon} size={24} className="fill-black" />
+              <h2 className="text-2xl font-black uppercase tracking-tight">4.95 · 12 Wunkat Reviews</h2>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {reviews.map((review, i) => (
+                <div key={i} className="flex flex-col">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center font-black text-slate-500">
+                      {review.name.charAt(0)}
+                    </div>
+                    <div>
+                      <div className="font-bold text-sm">{review.name}</div>
+                      <div className="text-xs text-slate-500 font-medium">{review.date}</div>
+                    </div>
+                  </div>
+                  <p className="text-slate-700 text-sm leading-relaxed">{review.text}</p>
+                </div>
+              ))}
+            </div>
+            <button className="mt-8 px-6 py-3 border-2 border-black font-bold uppercase tracking-widest text-[10px] hover:bg-black hover:text-white transition-colors">
+              Show all 12 reviews
+            </button>
+          </div>
 
         </div>
 
         {/* --- Right Column: Sticky Action Ledger --- */}
-        <div className="lg:col-span-4 relative">
-          <div className="sticky top-32 p-8 border-2 border-black bg-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col">
-            
+        <div className="lg:col-span-4 relative hidden lg:block">
+          <div className="sticky top-32 p-8 border-2 border-black bg-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col rounded-xl">
             <div className="mb-8">
               <span className="text-sm font-bold uppercase tracking-widest text-slate-500 block mb-2">
                 {isRent ? 'Lease Valuation' : 'Acquisition Price'}
               </span>
-              <div className="text-4xl md:text-5xl font-black tracking-tight">
-                {/* FIXED: Currency is hardcoded since it's removed from schema, formatting the number */}
+              <div className="text-4xl font-black tracking-tight">
                 ${listing.price.toLocaleString()}
-                {isRent && <span className="text-xl text-slate-500 font-medium tracking-normal"> / mo</span>}
+                {isRent && <span className="text-lg text-slate-500 font-medium tracking-normal"> / mo</span>}
               </div>
             </div>
 
@@ -196,51 +191,65 @@ export default async function PropertyDetailsPage({ params }: PropertyPageProps)
               </div>
               <div className="flex justify-between items-center py-3 border-b border-black/10">
                 <span className="text-sm font-medium text-slate-600">Broker Fees</span>
-                <span className="text-sm font-bold text-black">$0 (Direct)</span>
+                <span className="text-sm font-bold text-green-600">$0 (Direct)</span>
               </div>
-              {isRent && (
+              {isRent && listing.terms.leaseTerm && (
                 <div className="flex justify-between items-center py-3 border-b border-black/10">
-                  <span className="text-sm font-medium text-slate-600">Smart Lock Setup</span>
-                  <span className="text-sm font-bold text-black">Instant upon clearing</span>
+                  <span className="text-sm font-medium text-slate-600">Minimum Term</span>
+                  <span className="text-sm font-bold text-black">{listing.terms.leaseTerm}</span>
                 </div>
               )}
             </div>
 
-            {/* D2C Hybrid Payment / Booking Actions */}
             <div className="flex flex-col gap-3 mt-auto">
               {isRent ? (
                 <>
                   <Link href={`/checkout/${listing.slug}?type=deposit`} className="w-full">
-                    <button className="w-full py-4 bg-black text-white font-black uppercase tracking-widest text-xs hover:bg-slate-800 transition-colors">
+                    <button className="w-full py-4 bg-black text-white font-black uppercase tracking-widest text-xs rounded-lg hover:bg-slate-800 transition-colors">
                       Pay Booking Deposit
                     </button>
                   </Link>
-                  <button className="w-full py-4 bg-white text-black font-black uppercase tracking-widest text-xs border-2 border-black hover:bg-slate-50 transition-colors flex items-center justify-center gap-2">
+                  <button className="w-full py-4 bg-white text-black font-black uppercase tracking-widest text-xs border-2 border-black rounded-lg hover:bg-slate-50 transition-colors flex items-center justify-center gap-2">
                     <HugeiconsIcon icon={Calendar01Icon} size={16} />
                     Schedule Viewing
                   </button>
                 </>
               ) : (
                 <>
-                  <button className="w-full py-4 bg-black text-white font-black uppercase tracking-widest text-xs hover:bg-slate-800 transition-colors">
+                  <button className="w-full py-4 bg-black text-white font-black uppercase tracking-widest text-xs rounded-lg hover:bg-slate-800 transition-colors">
                     Request Digital Contract
                   </button>
-                  <button className="w-full py-4 bg-white text-black font-black uppercase tracking-widest text-xs border-2 border-black hover:bg-slate-50 transition-colors flex items-center justify-center gap-2">
+                  <button className="w-full py-4 bg-white text-black font-black uppercase tracking-widest text-xs border-2 border-black rounded-lg hover:bg-slate-50 transition-colors flex items-center justify-center gap-2">
                     <HugeiconsIcon icon={Calendar01Icon} size={16} />
                     Schedule Private Tour
                   </button>
                 </>
               )}
             </div>
-
             <p className="text-[10px] text-center text-slate-500 uppercase tracking-widest mt-6 font-bold leading-relaxed">
-              100% Owned by WunkatHomes. <br /> Secure hybrid payments powered by Paystack.
+              100% Owned by WunkatHomes. <br /> Secure hybrid payments.
             </p>
-
           </div>
         </div>
 
       </section>
+
+      {/* 3. Interactive Client-Side Carousel */}
+      <SimilarCarousel similar={similar} />
+
+      {/* Mobile Sticky Action Bar */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-black p-4 flex items-center justify-between z-50 lg:hidden">
+        <div>
+          <div className="text-xl font-black">${listing.price.toLocaleString()}{isRent && <span className="text-sm font-medium text-slate-500"> / mo</span>}</div>
+          <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500">{isRent ? 'Booking Deposit' : 'Acquisition'}</div>
+        </div>
+        <Link href={`/checkout/${listing.slug}?type=deposit`}>
+          <button className="px-6 py-3 bg-black text-white font-black uppercase tracking-widest text-[10px] rounded hover:bg-slate-800 transition-colors">
+            {isRent ? 'Reserve' : 'Acquire'}
+          </button>
+        </Link>
+      </div>
+
     </main>
   )
 }
