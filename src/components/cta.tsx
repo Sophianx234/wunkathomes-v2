@@ -1,96 +1,90 @@
-"use client";
+"use client"
 
-import Link from "next/link";
-import { motion } from "framer-motion";
-import { ArrowRight } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import Image from "next/image"
+import Link from "next/link"
+import { motion } from "framer-motion"
+import { ArrowRight01Icon } from "@hugeicons/core-free-icons"
+import { HugeiconsIcon } from "@hugeicons/react"
 
 export default function Cta() {
   return (
-    <section className="relative overflow-hidden">
-      {/* Background Image */}
-      <div className="absolute inset-0">
-        <img
-          src="/c-3.jpg"
-          alt="Luxury modern home"
-          className="w-full h-full object-cover object-center"
-        />
-        <div className="absolute inset-0 bg-black/60 md:bg-black/50" />
+    // Removed min-h-[70vh] to let the component act as a sleek, compact banner
+    <section className="flex flex-col lg:flex-row w-full border-y border-black/10 overflow-hidden bg-[#050505]">
+
+      {/* === Left Side: The Narrative (Text) === */}
+      {/* Tightened padding (p-8 to xl:p-16) to reduce unnecessary vertical space */}
+      <div className="w-full lg:w-1/2 flex flex-col justify-center p-8 lg:p-12 xl:p-16 relative z-10">
+        
+        {/* Subtle radial glow to give the dark side depth */}
+        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.03)_0%,transparent_50%)] pointer-events-none" />
+
+        <motion.div
+          initial={{ opacity: 0, x: -30 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.7, ease: "easeOut" }}
+          viewport={{ once: true }}
+          className="max-w-xl relative z-10"
+        >
+          {/* Eyebrow */}
+          <div className="flex items-center gap-3 mb-6">
+            <div className="h-[2px] w-8 bg-white/30" />
+            <span className="uppercase tracking-[0.3em] text-[10px] font-bold text-white/50">
+              The Final Step
+            </span>
+          </div>
+
+          {/* Headline - Scaled down slightly to fit smaller viewports seamlessly */}
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-medium tracking-tight leading-[1.1] text-white mb-5">
+            The key is already in <br />
+            <span className="italic font-light text-white/50">your pocket.</span>
+          </h2>
+
+          {/* Persuasive Body Copy */}
+          <p className="text-sm md:text-base text-white/60 font-light leading-relaxed mb-8 md:mb-10">
+            Join the hundreds of families who have abandoned the archaic real estate market. No third-party agents. No physical paperwork. Just verified luxury and instant smart-lock access.
+          </p>
+
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row items-center gap-3 md:gap-4">
+            <Link href="/explore?status=rent" className="w-full sm:w-auto">
+              <button className="w-full px-6 py-3.5 md:py-4 bg-white text-black font-black uppercase tracking-widest text-[10px] md:text-xs hover:bg-slate-200 transition-colors duration-300 flex items-center justify-center gap-2 md:gap-3 group">
+                Explore Rentals
+                <HugeiconsIcon
+                  icon={ArrowRight01Icon}
+                  size={16}
+                  className="group-hover:translate-x-1 transition-transform"
+                />
+              </button>
+            </Link>
+
+            <Link href="/explore?status=sale" className="w-full sm:w-auto">
+              <button className="w-full px-6 py-3.5 md:py-4 bg-transparent text-white font-black uppercase tracking-widest text-[10px] md:text-xs border border-white/30 hover:border-white transition-colors duration-300 flex items-center justify-center gap-3">
+                View Portfolio
+              </button>
+            </Link>
+          </div>
+        </motion.div>
       </div>
 
-      {/* Content */}
-      <div className="relative max-w-6xl mx-auto px-6 py-24 md:py-40 text-center text-white">
-        {/* Tagline */}
+      {/* === Right Side: The Visuals (Image) === */}
+      {/* Mobile height reduced to 300px. Desktop height naturally stretches to match the left text container. */}
+      <div className="w-full lg:w-1/2 relative h-[300px] lg:h-auto overflow-hidden">
         <motion.div
-          className="inline-block mb-5 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          viewport={{ once: true, amount: 0.3 }}
+          initial={{ scale: 1.1 }}
+          whileInView={{ scale: 1 }}
+          transition={{ duration: 1.5, ease: "easeOut" }}
+          viewport={{ once: true, amount: 0.2 }}
+          className="absolute inset-0 w-full h-full"
         >
-          <span className="text-sm uppercase tracking-widest font-medium text-gray-100">
-            Discover Extraordinary Living
-          </span>
+          <Image
+            src="/images/fam-2.jpg"
+            alt="Happy Family in a WunkatHomes Apartment"
+            fill
+            className="object-cover"
+          />
         </motion.div>
-
-        {/* Heading */}
-        <motion.h2
-          className="text-4xl md:text-6xl font-semibold leading-tight md:leading-[1.1] max-w-3xl mx-auto"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.2 }}
-          viewport={{ once: true, amount: 0.3 }}
-        >
-          Find your dream home with{" "}
-          <span className="text-white/90 font-light">WunkatHomes</span>
-        </motion.h2>
-
-        {/* Description */}
-        <motion.p
-          className="mt-6 text-lg md:text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed font-light"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.4 }}
-          viewport={{ once: true, amount: 0.3 }}
-        >
-          From exclusive penthouses to tranquil escapes. explore verified
-          listings designed for modern lifestyles. Trust, transparency, and
-          timeless design in every stay.
-        </motion.p>
-
-        {/* Button */}
-        <motion.div
-          className="mt-10"
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, delay: 0.6 }}
-          viewport={{ once: true, amount: 0.3 }}
-        >
-          <Link
-            href="login"
-            className="group inline-flex items-center gap-3 px-10 py-4 rounded-full bg-white text-primary font-medium text-lg tracking-wide transition-all duration-300 hover:bg-gray-100 hover:shadow-xl hover:scale-[1.03]"
-          >
-            Get Started
-            <HugeiconsIcon
-              icon={ArrowRight}
-              className="w-4 h-4 transform transition-transform duration-300 group-hover:translate-x-1"
-            />
-          </Link>
-        </motion.div>
-
-        {/* Accent line */}
-        <motion.div
-          className="mt-16 h-[1px] bg-gradient-to-r from-transparent via-white/30 to-transparent w-1/2 mx-auto"
-          initial={{ opacity: 0, scaleX: 0 }}
-          whileInView={{ opacity: 1, scaleX: 1 }}
-          transition={{ duration: 0.8, delay: 0.8 }}
-          viewport={{ once: true, amount: 0.3 }}
-        />
       </div>
 
-      {/* Decorative soft lights */}
-      <div className="absolute top-10 left-10 w-64 h-64 bg-white/10 blur-3xl rounded-full" />
-      <div className="absolute bottom-10 right-10 w-64 h-64 bg-white/10 blur-3xl rounded-full" />
     </section>
-  );
+  )
 }

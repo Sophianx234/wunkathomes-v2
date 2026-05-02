@@ -9,7 +9,6 @@ import SearchBar from "@/components/search-bar";
 export default function Home() {
   return (
     <div className="bg-white">
-      <Navbar />
       <main>
         {/* 1. The Hook: Emotional cinematic entry */}
         <Hero />
