@@ -8,22 +8,37 @@ import {
   Location01Icon,
   BedSingle02Icon,
   Bathtub01Icon,
-  Maximize02FreeIcons,
+  MaximizeIcon, // Updated to standard Hugeicon name
   ArrowLeft01Icon,
   ArrowRight01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 
+// Matches your updated Mongoose Schema
 export interface IProperty {
-  id: string | number;
+  id: string;
+  slug: string;
   title: string;
-  location: string;
-  price: string | number;
-  type: string;
-  beds: number;
-  baths: number;
-  sqft: string | number;
-  images: string[]; // Changed from 'image' to 'images' array
+  description: string;
+  price: number; 
+  listingType: 'For_Rent' | 'For_Sale';
+  status: 'Available' | 'Pending' | 'Rented' | 'Sold';
+  features: {
+    bedrooms: number;
+    bathrooms: number;
+    sizeSqm: number; 
+  };
+  terms: {
+    leaseTerm: string | null;
+  };
+  smartLock: {
+    hasSmartLock: boolean;
+  };
+  images: string[];
+  property: {
+    propertyType: 'Apartment' | 'Commercial' | 'House' | 'Land';
+    location: string;
+  };
 }
 
 interface PropertyCardProps {
@@ -70,6 +85,10 @@ export default function PropertyCard({
     });
   };
 
+  // Helper to format price based on Rent vs Sale
+  const formattedPrice = `$${property.price.toLocaleString()}`;
+  const priceSuffix = property.listingType === 'For_Rent' ? ' / mo' : '';
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -82,9 +101,10 @@ export default function PropertyCard({
     >
       {/* === Image Carousel Container === */}
       <div className="relative w-full aspect-[4/3] sm:aspect-[16/10] overflow-hidden mb-4 rounded-xl md:rounded-2xl bg-slate-100">
-        {/* Clickable Area to view property */}
+        
+        {/* Clickable Area to view property (Using SLUG) */}
         <Link
-          href={`/properties/${property.id}`}
+          href={`/properties/${property.slug}`}
           className="absolute inset-0 z-0"
         >
           <AnimatePresence initial={false} custom={direction}>
@@ -114,12 +134,13 @@ export default function PropertyCard({
 
         {/* Status Badge */}
         <div className="absolute top-3 left-3 z-10 bg-black/80 backdrop-blur-sm text-white px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-widest pointer-events-none">
-          {property.type}
+          {property.property.propertyType}
         </div>
 
         {/* Floating Price Tag */}
-        <div className="absolute bottom-3 right-3 z-10 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-sm font-black text-primary tracking-tight text-sm pointer-events-none">
-          {property.price}
+        <div className="absolute bottom-3 right-3 z-10 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-sm font-black text-black tracking-tight text-sm pointer-events-none">
+          {formattedPrice}
+          <span className="text-xs font-medium text-slate-500 tracking-normal">{priceSuffix}</span>
         </div>
 
         {/* Navigation Arrows (Visible on Hover) */}
@@ -131,7 +152,7 @@ export default function PropertyCard({
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -10 }}
                 onClick={(e) => paginate(-1, e)}
-                className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white/80 hover:bg-white backdrop-blur-md flex items-center justify-center text-primary shadow-sm transition-all"
+                className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white/80 hover:bg-white backdrop-blur-md flex items-center justify-center text-black shadow-sm transition-all"
               >
                 <HugeiconsIcon icon={ArrowLeft01Icon} size={16} />
               </motion.button>
@@ -141,7 +162,7 @@ export default function PropertyCard({
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 10 }}
                 onClick={(e) => paginate(1, e)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white/80 hover:bg-white backdrop-blur-md flex items-center justify-center text-primary shadow-sm transition-all"
+                className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white/80 hover:bg-white backdrop-blur-md flex items-center justify-center text-black shadow-sm transition-all"
               >
                 <HugeiconsIcon icon={ArrowRight01Icon} size={16} />
               </motion.button>
@@ -169,14 +190,15 @@ export default function PropertyCard({
       {/* === Minimalist Content Container === */}
       <div className="flex flex-col flex-1 px-1">
         <div className="mb-3 cursor-pointer">
-          <Link href={`/properties/${property.id}`}>
-            <h3 className="text-lg font-bold text-slate-900 leading-tight mb-1 group-hover:text-primary transition-colors line-clamp-1">
+          {/* Linked via Slug */}
+          <Link href={`/properties/${property.slug}`}>
+            <h3 className="text-lg font-bold text-slate-900 leading-tight mb-1 group-hover:text-black transition-colors line-clamp-1">
               {property.title}
             </h3>
           </Link>
           <p className="flex items-center gap-1.5 text-sm font-medium text-slate-500">
             <HugeiconsIcon icon={Location01Icon} size={14} />
-            {property.location}
+            {property.property.location}
           </p>
         </div>
 
@@ -188,7 +210,7 @@ export default function PropertyCard({
               size={16}
               className="text-slate-400"
             />
-            <span>{property.beds}</span>
+            <span>{property.features.bedrooms}</span>
           </div>
           <span className="text-slate-300 text-[10px]">●</span>
           <div className="flex items-center gap-1.5">
@@ -197,16 +219,16 @@ export default function PropertyCard({
               size={16}
               className="text-slate-400"
             />
-            <span>{property.baths}</span>
+            <span>{property.features.bathrooms}</span>
           </div>
           <span className="text-slate-300 text-[10px]">●</span>
           <div className="flex items-center gap-1.5">
             <HugeiconsIcon
-              icon={Maximize02FreeIcons}
+              icon={MaximizeIcon}
               size={16}
               className="text-slate-400"
             />
-            <span>{property.sqft} sqft</span>
+            <span>{property.features.sizeSqm} sqm</span>
           </div>
         </div>
       </div>

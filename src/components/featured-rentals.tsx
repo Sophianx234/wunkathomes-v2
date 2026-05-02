@@ -5,100 +5,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowDown01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import PropertyCard, { IProperty } from "./property-card";
+import { propertiesForRent } from "@/lib/data";
 
 // Dummy data specific to rentals (with monthly pricing and apartment/suite focus)
-const propertiesForRent: IProperty[] = [
-  {
-    id: "r1",
-    title: "The Ridge Executive Suite",
-    location: "Ridge, Accra",
-    price: "$3,500 / mo",
-    type: "Apartment",
-    beds: 2,
-    baths: 2.5,
-    sqft: "1,800",
-    images: [
-      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=2070&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1502672260266-1c1de2d9d0cb?q=80&w=2073&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1493809842364-78817add7ff6?q=80&w=2070&auto=format&fit=crop",
-    ],
-  },
-  {
-    id: "r2",
-    title: "Labone Garden Loft",
-    location: "Labone, Accra",
-    price: "$2,200 / mo",
-    type: "Apartment",
-    beds: 1,
-    baths: 1,
-    sqft: "1,100",
-    images: [
-      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=2070&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1502005097973-6a708b7cd211?q=80&w=2070&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1484154218962-a197022b5858?q=80&w=2074&auto=format&fit=crop",
-    ],
-  },
-  {
-    id: "r3",
-    title: "Cantonments City Townhouse",
-    location: "Cantonments, Accra",
-    price: "$4,500 / mo",
-    type: "Townhouse",
-    beds: 3,
-    baths: 3.5,
-    sqft: "2,600",
-    images: [
-      "https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?q=80&w=2070&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2070&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1600607687931-cecebd80d6c0?q=80&w=2070&auto=format&fit=crop",
-    ],
-  },
-  {
-    id: "r4",
-    title: "Dzorwulu Minimalist Flat",
-    location: "Dzorwulu, Accra",
-    price: "$1,800 / mo",
-    type: "Apartment",
-    beds: 2,
-    baths: 2,
-    sqft: "1,450",
-    images: [
-      "https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?q=80&w=2070&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1554995207-c18c203602cb?q=80&w=2070&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1505691938895-1758d7feb511?q=80&w=2070&auto=format&fit=crop",
-    ],
-  },
-  {
-    id: "r5",
-    title: "Airport City Penthouse",
-    location: "Airport City, Accra",
-    price: "$6,000 / mo",
-    type: "Apartment",
-    beds: 4,
-    baths: 4.5,
-    sqft: "3,800",
-    images: [
-      "https://images.unsplash.com/photo-1600607688969-a5bfcd64bd2b?q=80&w=2070&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?q=80&w=2070&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?q=80&w=2067&auto=format&fit=crop",
-    ],
-  },
-  {
-    id: "r6",
-    title: "East Legon Smart Studio",
-    location: "East Legon, Accra",
-    price: "$1,200 / mo",
-    type: "Studio",
-    beds: 1,
-    baths: 1,
-    sqft: "850",
-    images: [
-      "https://images.unsplash.com/photo-1536376072261-38c75010e6c9?q=80&w=2071&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1556020685-e631998f7c7b?q=80&w=2000&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1524758631624-e2822e304c36?q=80&w=2070&auto=format&fit=crop",
-    ],
-  },
-];
+
 
 export default function FeaturedRentals() {
   // State to manage how many cards are visible

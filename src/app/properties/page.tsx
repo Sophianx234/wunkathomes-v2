@@ -1,16 +1,15 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
-import { useSearchParams, useRouter } from "next/navigation"
-import { motion, AnimatePresence } from "framer-motion"
-import { 
-  FilterIcon, 
-  Location01Icon, 
-  Tag01Icon, 
+import {
+  ArrowDown01Icon,
+  Location01Icon,
   Search01Icon,
-  ArrowDown01Icon
+  Tag01Icon
 } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
+import { AnimatePresence, motion } from "framer-motion"
+import { useRouter, useSearchParams } from "next/navigation"
+import { useEffect, useMemo, useState } from "react"
 
 import {
   Select,
@@ -20,21 +19,11 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-import PropertyCard, { IProperty } from "@/components/property-card"
+import PropertyCard from "@/components/property-card"
+import { inventory } from "@/lib/data"
 
 // --- Expanded Dummy Data to demonstrate pagination properly ---
-const inventory: IProperty[] = [
-  { id: "1", title: "The Glasshouse Villa", location: "East Legon", price: "$1,250,000", type: "House", status: "For_Sale", beds: 4, baths: 4.5, sqft: "4,200", images: ["https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=2075"] },
-  { id: "2", title: "Cantonments Penthouse", location: "Cantonments", price: "$8,500 / mo", type: "Apartment", status: "For_Rent", beds: 3, baths: 3, sqft: "2,800", images: ["https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=2070"] },
-  { id: "3", title: "Airport City Corporate Hub", location: "Airport Residential", price: "$4,100,000", type: "Commercial", status: "For_Sale", beds: 0, baths: 6, sqft: "12,500", images: ["https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=2069"] },
-  { id: "4", title: "Osu Modern Townhouse", location: "Osu", price: "$4,500 / mo", type: "House", status: "For_Rent", beds: 3, baths: 3.5, sqft: "3,100", images: ["https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?q=80&w=2070"] },
-  { id: "5", title: "Aburi View Plots", location: "Other", price: "$150,000", type: "Land", status: "For_Sale", beds: 0, baths: 0, sqft: "10,000", images: ["https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2032"] },
-  { id: "6", title: "Labone Executive Suite", location: "Labone", price: "$1,450,000", type: "Apartment", status: "For_Sale", beds: 4, baths: 4.5, sqft: "4,500", images: ["https://images.unsplash.com/photo-1600607688969-a5bfcd64bd2b?q=80&w=2070"] },
-  { id: "7", title: "Ridge Diplomatic Residence", location: "Ridge", price: "$6,200 / mo", type: "House", status: "For_Rent", beds: 5, baths: 5.5, sqft: "5,100", images: ["https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2070"] },
-  { id: "8", title: "Spintex Prime Retail Space", location: "Spintex", price: "$850,000", type: "Commercial", status: "For_Sale", beds: 0, baths: 2, sqft: "3,400", images: ["https://images.unsplash.com/photo-1497366754035-f200968a6e72?q=80&w=2069"] },
-  { id: "9", title: "East Legon Smart Studio", location: "East Legon", price: "$1,200 / mo", type: "Apartment", status: "For_Rent", beds: 1, baths: 1, sqft: "850", images: ["https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=2070"] },
-  { id: "10", title: "Cantonments Corner Plot", location: "Cantonments", price: "$950,000", type: "Land", status: "For_Sale", beds: 0, baths: 0, sqft: "8,500", images: ["https://images.unsplash.com/photo-1524758631624-e2822e304c36?q=80&w=2070"] },
-]
+
 
 const PROPERTY_TYPES = ["All", "House", "Apartment", "Commercial", "Land"]
 const ITEMS_PER_PAGE = 8 // Shows exactly 2 rows on XL screens before needing to load more
@@ -104,32 +93,10 @@ export default function PropertiesPage() {
   const hasMore = visibleCount < filteredProperties.length
 
   return (
-    <div className="bg-white min-h-screen pt-24 md:pt-32 pb-24">
+    <div className="bg-white min-h-screen  pb-24">
       
       {/* === Editorial Header === */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: "easeOut" }}
-        >
-          <div className="flex items-center gap-3 mb-6">
-            <div className="h-[2px] w-8 bg-black" />
-            <span className="uppercase tracking-[0.2em] text-[10px] md:text-xs font-bold text-slate-500">
-              The Portfolio
-            </span>
-          </div>
-          <h1 className="text-5xl md:text-7xl font-black text-black leading-[0.9] tracking-tighter uppercase mb-6">
-            Acquire <br />
-            <span className="text-transparent" style={{ WebkitTextStroke: '2px black' }}>
-              Excellence.
-            </span>
-          </h1>
-          <p className="text-base md:text-lg text-slate-600 font-medium leading-relaxed max-w-xl">
-            Explore our curated inventory of 100% verified, D2C real estate. No agents. No friction.
-          </p>
-        </motion.div>
-      </div>
+      
 
       {/* === Sticky Glassmorphism Filter Bar === */}
       <div className="sticky top-[5rem] z-40 bg-white/80 backdrop-blur-xl border-y border-slate-200 shadow-sm mb-12 transition-all">

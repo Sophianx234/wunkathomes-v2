@@ -1,9 +1,7 @@
 import FeaturedRentals from "@/components/featured-rentals";
 import FeaturedSales from "@/components/featured-sales";
-import Footer from "@/components/footer";
 import Hero from "@/components/hero";
 import HowItWorks from "@/components/how-it-works";
-import Navbar from "@/components/navbar";
 import SearchBar from "@/components/search-bar";
 
 export default function Home() {
@@ -23,7 +21,6 @@ export default function Home() {
         {/* 4. The D2C Process: Explaining the digital/smart-lock advantage */}
         <HowItWorks />
       </main>
-      <Footer />
     </div>
   );
 }
