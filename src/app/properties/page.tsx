@@ -79,15 +79,22 @@ export default function PropertiesPage() {
   }
 
   // Derived state: Filtered properties (All that match)
+// Derived state: Filtered properties (All that match)
   const filteredProperties = useMemo(() => {
-    return inventory.filter((property) => {
-      const matchType = typeFilter === "All" || property.type.toLowerCase() === typeFilter.toLowerCase()
-      const matchStatus = statusFilter === "all" || property.status === statusFilter
-      const matchLocation = locationFilter === "all" || property.location === locationFilter
+    return inventory.filter((item) => {
+      // 1. Fixed Type: Nested under item.property.propertyType
+      const matchType = typeFilter === "All" || item.property.propertyType.toLowerCase() === typeFilter.toLowerCase()
+      
+      // 2. Fixed Status: The dropdown checks For_Rent/For_Sale, which maps to listingType
+      const matchStatus = statusFilter === "all" || item.listingType === statusFilter
+      
+      // 3. Fixed Location: Nested under item.property.location
+      const matchLocation = locationFilter === "all" || item.property.location === locationFilter
+      
       return matchType && matchStatus && matchLocation
     })
   }, [typeFilter, statusFilter, locationFilter])
-
+  
   // Derived state: Displayed properties (Paginated subset)
   const displayedProperties = filteredProperties.slice(0, visibleCount)
   const hasMore = visibleCount < filteredProperties.length

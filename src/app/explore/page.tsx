@@ -36,9 +36,58 @@ const exploreData = {
 }
 
 // A few highlight properties to show at the bottom
+// A few highlight properties to show at the bottom
 const highlightProperties: IProperty[] = [
-  { id: "1", title: "The Glasshouse Villa", location: "East Legon", price: "$1,250,000", type: "House", beds: 4, baths: 4.5, sqft: "4,200", images: ["https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=2075"] },
-  { id: "2", title: "Cantonments Penthouse", location: "Cantonments", price: "$8,500 / mo", type: "Apartment", beds: 3, baths: 3, sqft: "2,800", images: ["https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=2070"] },
+  { 
+    id: "1", 
+    slug: "glasshouse-villa",
+    title: "The Glasshouse Villa", 
+    description: "Subscription-based luxury. Fully managed, turnkey spaces.",
+    price: 1250000, 
+    listingType: "For_Sale",
+    status: "Available",
+    features: {
+      bedrooms: 4, 
+      bathrooms: 4.5, 
+      sizeSqm: 4200, 
+    },
+    terms: {
+      leaseTerm: null
+    },
+    smartLock: {
+      hasSmartLock: true
+    },
+    images: ["https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=2075"],
+    property: {
+      propertyType: "House",
+      location: "East Legon", 
+    }
+  },
+  { 
+    id: "2", 
+    slug: "cantonments-penthouse",
+    title: "Cantonments Penthouse", 
+    description: "100% verified portfolio assets. Seamless digital acquisition.",
+    price: 8500, 
+    listingType: "For_Rent",
+    status: "Available",
+    features: {
+      bedrooms: 3, 
+      bathrooms: 3, 
+      sizeSqm: 2800, 
+    },
+    terms: {
+      leaseTerm: "12 Months"
+    },
+    smartLock: {
+      hasSmartLock: true
+    },
+    images: ["https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=2070"],
+    property: {
+      propertyType: "Apartment",
+      location: "Cantonments", 
+    }
+  },
 ]
 
 

@@ -4,6 +4,7 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
+import GlobalConcierge from "@/components/global-concierge";
 
 const figtree = Figtree({subsets:['latin'],variable:'--font-sans'});
 
@@ -36,6 +37,7 @@ export default function RootLayout({
       <Navbar />
 
         {children}
+        <GlobalConcierge/>
         <Footer/>
         </body>
     </html>

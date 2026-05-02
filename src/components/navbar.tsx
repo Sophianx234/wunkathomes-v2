@@ -6,6 +6,7 @@ import {
   BitcoinTagIcon,
   Building05Icon,
   Cancel01Icon,
+  CreditCardPosIcon,
   CustomerSupportIcon,
   DashboardSquare01Icon,
   FavouriteIcon,
@@ -222,22 +223,25 @@ export default function Navbar() {
                   </div>
 
                   <div className="py-2 border-b border-slate-100">
-                    <Link href="/dashboard" onClick={() => setProfileOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition">
+                    <Link href="/user" onClick={() => setProfileOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition">
                       <HugeiconsIcon icon={DashboardSquare01Icon} size={18} /> My Dashboard
                     </Link>
-                    <Link href="/dashboard/saved" onClick={() => setProfileOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition">
+                    <Link href="/user/saved" onClick={() => setProfileOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition">
                       <HugeiconsIcon icon={FavouriteIcon} size={18} /> My Saved Homes
                     </Link>
-                    <Link href="/dashboard/leases" onClick={() => setProfileOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition">
+                    <Link href="/user/leases" onClick={() => setProfileOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition">
                       <HugeiconsIcon icon={File01Icon} size={18} /> My Leases / Bookings
+                    </Link>
+                    <Link href="/user/history" onClick={() => setProfileOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition">
+                      <HugeiconsIcon icon={CreditCardPosIcon}  size={18} /> My Payment History
                     </Link>
                   </div>
 
                   <div className="py-2 border-b  border-slate-100">
-                    <Link href="/dashboard/settings" onClick={() => setProfileOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition">
+                    <Link href="/user/settings" onClick={() => setProfileOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition">
                       <HugeiconsIcon icon={Settings01Icon} size={18} /> Account Settings
                     </Link>
-                    <Link href="/support" onClick={() => setProfileOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition">
+                    <Link href="/user/support" onClick={() => setProfileOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition">
                       <HugeiconsIcon icon={CustomerSupportIcon} size={18} /> Help & Support
                     </Link>
                   </div>
