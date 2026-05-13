@@ -2,7 +2,6 @@
 
 import * as React from "react"
 
-import { NavDocuments } from "@/components/nav-documents"
 import { NavMain } from "@/components/nav-main"
 import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
@@ -16,7 +15,20 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { DashboardSquare01Icon, Menu01Icon, ChartHistogramIcon, Folder01Icon, UserGroupIcon, Camera01Icon, File01Icon, Settings05Icon, HelpCircleIcon, SearchIcon, Database01Icon, Analytics01Icon, CommandIcon } from "@hugeicons/core-free-icons"
+import { 
+  DashboardSquare01Icon, 
+  Building01Icon, 
+  UserGroupIcon, 
+  File01Icon, 
+  Wallet01Icon, 
+  Calendar01Icon, 
+  LockIcon, 
+  Settings05Icon, 
+  HelpCircleIcon, 
+  SearchIcon 
+} from "@hugeicons/core-free-icons"
+import Image from "next/image"
+import Link from "next/link"
 
 const data = {
   user: {
@@ -24,6 +36,7 @@ const data = {
     email: "m@example.com",
     avatar: "/avatars/shadcn.jpg",
   },
+  // Arranged logically: Overview -> Assets -> People -> Contracts -> Money -> Physical Ops
   navMain: [
     {
       title: "Dashboard",
@@ -33,89 +46,56 @@ const data = {
       ),
     },
     {
-      title: "Lifecycle",
+      title: "Properties",
       url: "#",
       icon: (
-        <HugeiconsIcon icon={Menu01Icon} strokeWidth={2} />
+        <HugeiconsIcon icon={Building01Icon} strokeWidth={2} />
       ),
     },
     {
-      title: "Analytics",
-      url: "#",
-      icon: (
-        <HugeiconsIcon icon={ChartHistogramIcon} strokeWidth={2} />
-      ),
-    },
-    {
-      title: "Projects",
-      url: "#",
-      icon: (
-        <HugeiconsIcon icon={Folder01Icon} strokeWidth={2} />
-      ),
-    },
-    {
-      title: "Team",
+      title: "Tenant Management",
       url: "#",
       icon: (
         <HugeiconsIcon icon={UserGroupIcon} strokeWidth={2} />
       ),
     },
-  ],
-  navClouds: [
     {
-      title: "Capture",
-      icon: (
-        <HugeiconsIcon icon={Camera01Icon} strokeWidth={2} />
-      ),
-      isActive: true,
+      title: "Lease",
       url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Proposal",
       icon: (
         <HugeiconsIcon icon={File01Icon} strokeWidth={2} />
       ),
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
     },
     {
-      title: "Prompts",
-      icon: (
-        <HugeiconsIcon icon={File01Icon} strokeWidth={2} />
-      ),
+      title: "Transaction Management",
       url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
+      icon: (
+        <HugeiconsIcon icon={Wallet01Icon} strokeWidth={2} />
+      ),
+    },
+    {
+      title: "Tour",
+      url: "#",
+      icon: (
+        <HugeiconsIcon icon={Calendar01Icon} strokeWidth={2} />
+      ),
+    },
+    {
+      title: "Smartlock & Access",
+      url: "#",
+      icon: (
+        <HugeiconsIcon icon={LockIcon} strokeWidth={2} />
+      ),
     },
   ],
   navSecondary: [
+    {
+      title: "Search",
+      url: "#",
+      icon: (
+        <HugeiconsIcon icon={SearchIcon} strokeWidth={2} />
+      ),
+    },
     {
       title: "Settings",
       url: "#",
@@ -128,36 +108,6 @@ const data = {
       url: "#",
       icon: (
         <HugeiconsIcon icon={HelpCircleIcon} strokeWidth={2} />
-      ),
-    },
-    {
-      title: "Search",
-      url: "#",
-      icon: (
-        <HugeiconsIcon icon={SearchIcon} strokeWidth={2} />
-      ),
-    },
-  ],
-  documents: [
-    {
-      name: "Data Library",
-      url: "#",
-      icon: (
-        <HugeiconsIcon icon={Database01Icon} strokeWidth={2} />
-      ),
-    },
-    {
-      name: "Reports",
-      url: "#",
-      icon: (
-        <HugeiconsIcon icon={Analytics01Icon} strokeWidth={2} />
-      ),
-    },
-    {
-      name: "Word Assistant",
-      url: "#",
-      icon: (
-        <HugeiconsIcon icon={File01Icon} strokeWidth={2} />
       ),
     },
   ],
@@ -173,19 +123,32 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               asChild
               className="data-[slot=sidebar-menu-button]:p-1.5!"
             >
-              <a href="#">
-                <HugeiconsIcon icon={CommandIcon} strokeWidth={2} className="size-5!" />
-                <span className="text-base font-semibold">Acme Inc.</span>
-              </a>
+              <Link href="/" className="flex items-center gap-2 font-bold text-lg z-50 group shrink-0">
+                <div className="relative size-10">
+                  <Image
+                    fill  
+                    alt="WunkatHomes logo" 
+                    src="/images/home.png" 
+                    className="object-contain size-10 transition-transform" 
+                  />
+                </div>
+                <span className="pt-2 text-primary hidden sm:block tracking-tight text-slate-800">
+                  Wunkat<span className="text-slate-500">Homes</span>
+                </span>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
+      
       <SidebarContent>
+        {/* Render primary routes */}
         <NavMain items={data.navMain} />
-        <NavDocuments items={data.documents} />
+        
+        {/* Render utility routes at the bottom */}
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
+
       <SidebarFooter>
         <NavUser user={data.user} />
       </SidebarFooter>
