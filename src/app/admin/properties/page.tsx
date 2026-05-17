@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import PropertyCard, { IProperty } from "@/components/property-card";
 import { inventory } from "@/lib/data";
+import Link from "next/link";
 
 // --- DUMMY DATA MATCHING YOUR SCHEMA ---
 const mockProperties: IProperty[] = [
@@ -107,10 +108,10 @@ export default function PropertiesPage() {
     </div>
 
     {/* Create Property Button */}
-    <Button className="text-white bg-black hover:bg-slate-800 rounded-lg h-10 px-5 text-[14px] font-medium shrink-0 w-full md:w-auto">
+    <Link href="/admin/properties/create" className="text-white  flex items-center bg-black hover:bg-slate-800 rounded-lg h-10 px-5 text-[14px] font-medium shrink-0 w-full md:w-auto">
       <HugeiconsIcon icon={PlusSignIcon} size={18} strokeWidth={2} className="mr-2" />
       Create Property
-    </Button>
+    </Link>
   </div>
 
   {/* --- BOTTOM ROW: Unified Search & Filter Chrome --- */}
