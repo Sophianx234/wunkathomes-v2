@@ -60,7 +60,7 @@ const data = {
       ),
     },
     {
-      title: "Lease",
+      title: "Tenant Onboarding",
       url: "#",
       icon: (
         <HugeiconsIcon icon={File01Icon} strokeWidth={2} />

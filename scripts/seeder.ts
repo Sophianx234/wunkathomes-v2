@@ -1,11 +1,11 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import User from '@/schema/user';
-import Property from '@/schema/property';
-import Listing from '@/schema/listing';
-import Lease from '@/schema/lease';
-import Transaction from '@/schema/transaction';
-import Review from '@/schema/review';
+import User from '@/models/user';
+import Property from '@/models/property';
+import Listing from '@/models/listing';
+import Lease from '@/models/lease';
+import Transaction from '@/models/transaction';
+import Review from '@/models/review';
 import { connectToDatabase } from '@/config/DbConnect';
 
 // Load environment variables from .env.local
