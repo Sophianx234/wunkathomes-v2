@@ -35,3 +35,19 @@ export const PRICE_RANGES = [
   { min: 1500, max: 2000, label: "$1500 - $2000" },
   { min: 2000, max: Number.POSITIVE_INFINITY, label: "$2000+" },
 ]
+
+export const GHANA_REGIONS = ["Ahafo", "Ashanti", "Bono", "Bono East", "Central", "Eastern", "Greater Accra", "Northern", "Volta"];
+export const COMMON_AMENITIES = [
+  "Air Conditioning",
+  "Swimming Pool",
+  "Backup Generator",
+  "24/7 Security",
+  "Water Tank (Polytank)",
+  "Fitted Kitchen",
+  "Parking Space",
+  "Gym",
+  "Wi-Fi",
+  "Balcony",
+  "CCTV Surveillance",
+  "Elevator",
+];

@@ -1,214 +1,121 @@
-"use client";
+import PropertiesFilterBar from "@/components/properties-filter-bar";
+import PropertiesGrid from "@/components/properties-grid";
+import PropertiesGridSkeleton from "@/components/skeletons/properties-grid-skeleton";
+import Listing from "@/models/listing";
+import mongoose from "mongoose";
+import Property from "@/models/property"; // Make sure to import the Property model
+import { Suspense } from "react";
+import { IProperty } from "@/components/property-card";
+import { connectToDatabase } from "@/config/DbConnect";
 
-import React, { useState } from "react";
-import { HugeiconsIcon } from "@hugeicons/react";
-import { 
-  PlusSignIcon, 
-  Search01Icon, 
-  FilterIcon, 
-  ArrowUpRight01Icon, 
-  ArrowDownRight01Icon 
-} from "@hugeicons/core-free-icons";
+export default async function PropertiesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | undefined }>;
+}) {
+  await connectToDatabase();
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import PropertyCard, { IProperty } from "@/components/property-card";
-import { inventory } from "@/lib/data";
-import Link from "next/link";
+  const params = await searchParams;
+  
+  // 1. Build Property Query (for Asset Type & Location)
+  const propertyQuery: Record<string, any> = {};
+  let needsPropertyFetch = false;
 
-// --- DUMMY DATA MATCHING YOUR SCHEMA ---
-const mockProperties: IProperty[] = [
-  {
-    id: "1",
-    slug: "luxury-2-bed-cantonments",
-    title: "Luxury 2-Bedroom Suite",
-    description: "Modern apartment with pool access.",
-    price: 2500,
-    listingType: "For_Rent",
-    status: "Available",
-    features: { bedrooms: 2, bathrooms: 2, sizeSqm: 120 },
-    terms: { leaseTerm: "1 Year Minimum" },
-    smartLock: { hasSmartLock: true },
-    images: ["/images/prop1.jpg", "/images/prop1-2.jpg"],
-    property: { propertyType: "Apartment", location: "Cantonments, Accra" },
-  },
-  {
-    id: "2",
-    slug: "commercial-space-east-legon",
-    title: "Prime Commercial Retail Space",
-    description: "Ground floor retail space.",
-    price: 450000,
-    listingType: "For_Sale",
-    status: "Available",
-    features: { bedrooms: 0, bathrooms: 2, sizeSqm: 350 },
-    terms: { leaseTerm: null },
-    smartLock: { hasSmartLock: false },
-    images: ["/images/prop2.jpg"],
-    property: { propertyType: "Commercial", location: "East Legon, Accra" },
-  },
-  {
-    id: "3",
-    slug: "executive-4-bed-house",
-    title: "Executive 4-Bed Detached",
-    description: "Family home with large compound.",
-    price: 4000,
-    listingType: "For_Rent",
-    status: "Rented",
-    features: { bedrooms: 4, bathrooms: 4.5, sizeSqm: 400 },
-    terms: { leaseTerm: "2 Years" },
-    smartLock: { hasSmartLock: true },
-    images: ["/images/prop3.jpg"],
-    property: { propertyType: "House", location: "Airport Residential" },
+  if (params.assetType && params.assetType !== "all") {
+    propertyQuery.propertyType = params.assetType;
+    needsPropertyFetch = true;
   }
-];
 
-// --- SUB-COMPONENT: EDITORIAL STAT CARD ---
+  if (params.location && params.location !== "all") {
+    const locStr = params.location.replace("_", " "); // "east_legon" -> "east legon"
+    propertyQuery.$or = [
+      { "location.area": { $regex: locStr, $options: "i" } },
+      { "location.city": { $regex: locStr, $options: "i" } },
+      { "location.region": { $regex: locStr, $options: "i" } },
+    ];
+    needsPropertyFetch = true;
+  }
 
+  // 2. Build Listing Query
+  const listingQuery: Record<string, any> = {};
 
-export default function PropertiesPage() {
-  const [searchQuery, setSearchQuery] = useState("");
+  // If we applied property filters, fetch matching IDs first
+  if (needsPropertyFetch) {
+    const matchedProperties = await Property.find(propertyQuery).select("_id").lean();
+    const propertyIds = matchedProperties.map((p: any) => p._id);
+    
+    // If no properties match the criteria, force the listing query to return empty
+    if (propertyIds.length === 0) {
+      listingQuery.propertyId = { $in: [] };
+    } else {
+      listingQuery.propertyId = { $in: propertyIds };
+    }
+  }
+
+  // 3. Strict Text Search (Title & Slug only)
+  if (params.q) {
+    listingQuery.$or = [
+      { title: { $regex: params.q, $options: "i" } },
+      { slug: { $regex: params.q, $options: "i" } },
+    ];
+  }
+
+  // 4. Standard Listing Filters
+  if (params.listingType && params.listingType !== "all") {
+    listingQuery.listingType = params.listingType;
+  }
+  if (params.status && params.status !== "all") {
+    listingQuery.status = params.status;
+  }
+
+  // 5. Fetch Final Results
+  const rawListings = await Listing.find(listingQuery)
+    .populate("propertyId")
+    .sort({ createdAt: -1 })
+    .lean();
+
+  // Remap to IProperty shape and serialize securely
+  const listings: IProperty[] = rawListings.map((doc: any) => ({
+    id: doc._id.toString(),
+    slug: doc.slug,
+    title: doc.title,
+    description: doc.description,
+    price: doc.price,
+    listingType: doc.listingType,
+    status: doc.status,
+    features: {
+      bedrooms: doc.features?.bedrooms ?? 0,
+      bathrooms: doc.features?.bathrooms ?? 0,
+      sizeSqm: doc.features?.sizeSqm ?? 0,
+    },
+    terms: {
+      leaseTerm: doc.terms?.leaseTerm ?? null,
+    },
+    smartLock: {
+      hasSmartLock: doc.smartLock?.hasSmartLock ?? false,
+    },
+    images: doc.images ?? [],
+    // Property Mapping (Updated to match your nested location schema)
+    property: {
+      propertyType: doc.propertyId?.propertyType ?? "Unknown",
+      location: {
+        region: doc.propertyId?.location?.region ?? "Unknown",
+        area: doc.propertyId?.location?.area ?? "Unknown",
+        city: doc.propertyId?.location?.city ?? undefined,
+      },
+    },
+  }));
+
+  const totalAssets = await Listing.countDocuments(listingQuery);
 
   return (
     <div className="flex flex-col flex-1 w-full min-h-screen bg-slate-50">
       <div className="max-w-7xl w-full mx-auto p-6 md:p-8 space-y-8">
-        
-        {/* --- HEADER --- */}
-        
+        <PropertiesFilterBar totalAssets={totalAssets} />
 
-        {/* --- STAT METRICS --- */}
-        
-
-        {/* --- DATA CHROME (FILTER BAR) --- */}
-        <div className="flex flex-col gap-5 w-full">
-  
-  {/* --- TOP ROW: Property Type Pills & Action Button --- */}
-  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-    
-    {/* Property Type Pills (Horizontal Scroll on Mobile) */}
-    <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar w-full md:w-auto pb-1 md:pb-0">
-      <button className="whitespace-nowrap px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest bg-black text-white shadow-sm transition-all">
-        All Assets
-      </button>
-      <button className="whitespace-nowrap px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-900 transition-all">
-        Apartments
-      </button>
-      <button className="whitespace-nowrap px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-900 transition-all">
-        Commercial
-      </button>
-      <button className="whitespace-nowrap px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-900 transition-all">
-        Houses
-      </button>
-    </div>
-
-    {/* Create Property Button */}
-    <Link href="/admin/properties/create" className="text-white  flex items-center bg-black hover:bg-slate-800 rounded-lg h-10 px-5 text-[14px] font-medium shrink-0 w-full md:w-auto">
-      <HugeiconsIcon icon={PlusSignIcon} size={18} strokeWidth={2} className="mr-2" />
-      Create Property
-    </Link>
-  </div>
-
-  {/* --- BOTTOM ROW: Unified Search & Filter Chrome --- */}
-  <section className="flex flex-col xl:flex-row items-center gap-4 bg-white p-2 border border-slate-200 rounded-xl shadow-sm w-full">
-    
-    {/* Search Input */}
-    <div className="relative flex-1 w-full">
-      <HugeiconsIcon 
-        icon={Search01Icon} 
-        size={18} 
-        strokeWidth={2} 
-        className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" 
-      />
-      <Input 
-        placeholder="Search by title, location, or slug..." 
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        className="w-full pl-10 h-10 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-[14px] bg-transparent shadow-none"
-      />
-    </div>
-
-    <div className="h-6 w-px bg-slate-200 hidden xl:block" />
-
-    {/* Dropdowns & Counter Section */}
-    <div className="flex flex-wrap md:flex-nowrap items-center gap-2 w-full xl:w-auto px-2 pb-2 xl:pb-0">
-      
-      {/* 1. Location Dropdown (Added from reference) */}
-      <Select defaultValue="all">
-        <SelectTrigger className="w-full md:w-[140px] h-9 border-0 bg-slate-50 hover:bg-slate-100 text-[13px] font-medium text-slate-700 shadow-none focus:ring-0">
-          <SelectValue placeholder="Location" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All Areas</SelectItem>
-          <SelectItem value="east_legon">East Legon</SelectItem>
-          <SelectItem value="cantonments">Cantonments</SelectItem>
-          <SelectItem value="airport_res">Airport Res.</SelectItem>
-        </SelectContent>
-      </Select>
-
-      {/* 2. Listing Type Dropdown */}
-      <Select defaultValue="all">
-        <SelectTrigger className="w-full md:w-[130px] h-9 border-0 bg-slate-50 hover:bg-slate-100 text-[13px] font-medium text-slate-700 shadow-none focus:ring-0">
-          <SelectValue placeholder="Listing Type" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All Types</SelectItem>
-          <SelectItem value="rent">For Rent</SelectItem>
-          <SelectItem value="sale">For Sale</SelectItem>
-        </SelectContent>
-      </Select>
-
-      {/* 3. Status Dropdown */}
-      <Select defaultValue="available">
-        <SelectTrigger className="w-full md:w-[130px] h-9 border-0 bg-slate-50 hover:bg-slate-100 text-[13px] font-medium text-slate-700 shadow-none focus:ring-0">
-          <SelectValue placeholder="Status" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="available">Available</SelectItem>
-          <SelectItem value="pending">Pending</SelectItem>
-          <SelectItem value="rented">Rented / Sold</SelectItem>
-        </SelectContent>
-      </Select>
-
-      {/* Vertical Separator */}
-      <div className="h-6 w-px bg-slate-200 hidden md:block mx-1" />
-
-      {/* 4. Results Counter (Added from reference) */}
-      <div className="hidden md:flex items-center gap-2 pl-1 pr-2">
-        <span className="text-[22px] font-black text-slate-900 leading-none">
-          {mockProperties.length}
-        </span>
-        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-tight">
-          Assets<br/>Found
-        </span>
-      </div>
-
-      {/* Advanced Filter Icon Button */}
-      <Button variant="ghost" size="icon" className="h-9 w-9 text-slate-500 hover:text-slate-900 hover:bg-slate-100 shrink-0 ml-auto md:ml-0">
-        <HugeiconsIcon icon={FilterIcon} size={18} strokeWidth={2} />
-      </Button>
-
-    </div>
-  </section>
-
-</div>
-
-        {/* --- PROPERTY GRID --- */}
-        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-10">
-          {inventory.map((property, index) => (
-            <PropertyCard 
-              key={property.id} 
-              property={property} 
-              index={index} 
-            />
-          ))}
-        </section>
-
+        <Suspense fallback={<PropertiesGridSkeleton />}>
+          <PropertiesGrid listings={listings} />
+        </Suspense>
       </div>
     </div>
   );

@@ -9,7 +9,18 @@ const nextConfig: NextConfig = {
         hostname: 'images.unsplash.com',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        port: '',
+        pathname: '/**',
+      }
     ],
+  },
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "50mb", // Set this high enough to accommodate 10x 5MB images
+    },
   },
 };
 

@@ -8,15 +8,16 @@ import {
   Location01Icon,
   BedSingle02Icon,
   Bathtub01Icon,
-  MaximizeIcon, // Updated to standard Hugeicon name
+  MaximizeIcon,
   ArrowLeft01Icon,
   ArrowRight01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 
-// Matches your updated Mongoose Schema
+// Updated to perfectly match the populated Mongoose schemas
 export interface IProperty {
-  id: string;
+  _id?: string;
+  id?: string;
   slug: string;
   title: string;
   description: string;
@@ -26,18 +27,30 @@ export interface IProperty {
   features: {
     bedrooms: number;
     bathrooms: number;
-    sizeSqm: number; 
+    sizeSqm?: number; 
   };
   terms: {
     leaseTerm: string | null;
   };
-  smartLock: {
+  smartLock?: {
     hasSmartLock: boolean;
   };
   images: string[];
   property: {
-    propertyType: 'Apartment' | 'Commercial' | 'House' | 'Land';
-    location: string;
+    _id?: string;
+    propertyType: 'Apartment_Building' | 'Commercial' | 'House' | 'Land';
+    location: {
+      region: string;
+      area: string;
+      city?: string;
+    };
+    coordinates?: {
+      lat?: number;
+      lng?: number;
+    };
+    
+    landmarks?: string[];
+    generalAmenities?: string[];
   };
 }
 
@@ -87,7 +100,12 @@ export default function PropertyCard({
 
   // Helper to format price based on Rent vs Sale
   const formattedPrice = `$${property.price.toLocaleString()}`;
-  const priceSuffix = property.listingType === 'For_Rent' ? ' / mo' : '';
+  const priceSuffix = property.terms.leaseTerm ? property.terms.leaseTerm.split('_').join(' ') : '';
+
+  // Format Location string
+  const locationString = property.property.location.city 
+    ? `${property.property.location.area}, ${property.property.location.city}` 
+    : `${property.property.location.area}, ${property.property.location.region}`;
 
   return (
     <motion.div
@@ -122,7 +140,7 @@ export default function PropertyCard({
               className="absolute inset-0 w-full h-full"
             >
               <Image
-                src={property.images[currentImage]}
+                src={property.images[currentImage] || '/placeholder.jpg'}
                 alt={`${property.title} - Image ${currentImage + 1}`}
                 fill
                 className="object-cover"
@@ -134,13 +152,13 @@ export default function PropertyCard({
 
         {/* Status Badge */}
         <div className="absolute top-3 left-3 z-10 bg-black/80 backdrop-blur-sm text-white px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-widest pointer-events-none">
-          {property.property.propertyType}
+          {property.property.propertyType.replace('_', ' ')}
         </div>
 
         {/* Floating Price Tag */}
         <div className="absolute bottom-3 right-3 z-10 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-sm font-black text-black tracking-tight text-sm pointer-events-none">
           {formattedPrice}
-          <span className="text-xs font-medium text-slate-500 tracking-normal">{priceSuffix}</span>
+          <span className="text-xs font-medium text-slate-500 tracking-normal"> / {priceSuffix}</span>
         </div>
 
         {/* Navigation Arrows (Visible on Hover) */}
@@ -170,21 +188,27 @@ export default function PropertyCard({
           )}
         </AnimatePresence>
 
-        {/* Dot Indicators */}
-        {property.images.length > 1 && (
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5 bg-black/20 px-2 py-1 rounded-full backdrop-blur-md">
-            {property.images.map((_, i) => (
-              <div
-                key={i}
-                className={`transition-all duration-300 rounded-full ${
-                  i === currentImage
-                    ? "w-2 h-2 bg-white"
-                    : "w-1.5 h-1.5 bg-white/50"
-                }`}
-              />
-            ))}
-          </div>
-        )}
+        <AnimatePresence>
+  {isHovered && property.images.length > 1 && (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 10 }}
+      className="absolute bottom-1  left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5 bg-black/20 px-2 py-1 rounded-full backdrop-blur-md"
+    >
+      {property.images.map((_, i) => (
+        <div
+          key={i}
+          className={`transition-all duration-300 rounded-full ${
+            i === currentImage
+              ? "w-2 h-2 bg-white"
+              : "w-1.5 h-1.5 bg-white/50"
+          }`}
+        />
+      ))}
+    </motion.div>
+  )}
+</AnimatePresence>
       </div>
 
       {/* === Minimalist Content Container === */}
@@ -196,9 +220,9 @@ export default function PropertyCard({
               {property.title}
             </h3>
           </Link>
-          <p className="flex items-center gap-1.5 text-sm font-medium text-slate-500">
+          <p className="flex items-center gap-1.5 text-sm font-medium text-slate-500 line-clamp-1">
             <HugeiconsIcon icon={Location01Icon} size={14} />
-            {property.property.location}
+            {locationString}
           </p>
         </div>
 
@@ -221,15 +245,20 @@ export default function PropertyCard({
             />
             <span>{property.features.bathrooms}</span>
           </div>
-          <span className="text-slate-300 text-[10px]">●</span>
-          <div className="flex items-center gap-1.5">
-            <HugeiconsIcon
-              icon={MaximizeIcon}
-              size={16}
-              className="text-slate-400"
-            />
-            <span>{property.features.sizeSqm} sqm</span>
-          </div>
+          
+          {property.features.sizeSqm && (
+            <>
+              <span className="text-slate-300 text-[10px]">●</span>
+              <div className="flex items-center gap-1.5">
+                <HugeiconsIcon
+                  icon={MaximizeIcon}
+                  size={16}
+                  className="text-slate-400"
+                />
+                <span>{property.features.sizeSqm} sqm</span>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </motion.div>
