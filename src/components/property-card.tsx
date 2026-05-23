@@ -13,6 +13,7 @@ import {
   ArrowRight01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { formatLeaseTerm } from "@/lib/helpers";
 
 // Updated to perfectly match the populated Mongoose schemas
 export interface IProperty {
@@ -100,7 +101,7 @@ export default function PropertyCard({
 
   // Helper to format price based on Rent vs Sale
   const formattedPrice = `$${property.price.toLocaleString()}`;
-  const priceSuffix = property.terms.leaseTerm ? property.terms.leaseTerm.split('_').join(' ') : '';
+  const priceSuffix = formatLeaseTerm(property.terms.leaseTerm);
 
   // Format Location string
   const locationString = property.property.location.city 
@@ -122,7 +123,7 @@ export default function PropertyCard({
         
         {/* Clickable Area to view property (Using SLUG) */}
         <Link
-          href={`/properties/${property.slug}`}
+          href={`properties/${property.slug}`}
           className="absolute inset-0 z-0"
         >
           <AnimatePresence initial={false} custom={direction}>
@@ -158,7 +159,7 @@ export default function PropertyCard({
         {/* Floating Price Tag */}
         <div className="absolute bottom-3 right-3 z-10 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-sm font-black text-black tracking-tight text-sm pointer-events-none">
           {formattedPrice}
-          <span className="text-xs font-medium text-slate-500 tracking-normal"> / {priceSuffix}</span>
+          <span className="text-xs font-medium text-slate-500 tracking-normal"> {priceSuffix}</span>
         </div>
 
         {/* Navigation Arrows (Visible on Hover) */}
