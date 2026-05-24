@@ -10,6 +10,7 @@ import {
   Dumbbell01Icon,
   ElectricTower02FreeIcons,
   Key01Icon,
+  Landmark,
   Location01Icon,
   MaximizeIcon,
   Restaurant01Icon,
@@ -35,15 +36,14 @@ import ImageGallery from "@/components/image-gallery"
 import { PropertyMap } from "@/components/property-map-dynamic"
 import SimilarCarousel from "@/components/similar-carousel"
 import ThingsToKnow from "@/components/things-to-know"
-import ReviewForm from "@/components/review-form" // Ensure this exists
-import { formatLeaseTerm } from "@/lib/helpers"
+import ReviewForm from "@/components/review-form" 
+import { formatLeaseTerm, getNeighborhoodDescription } from "@/lib/helpers"
 import { Toaster } from "@/components/ui/sonner"
 
 interface PropertyPageProps {
   params: Promise<{ slug: string }>
 }
 
-// 1. Map Amenity Strings to their HugeIcon equivalents
 const AMENITY_ICONS: Record<string, any> = {
   "Air Conditioning": SnowIcon,
   "Swimming Pool": SwimmingIcon,
@@ -59,7 +59,6 @@ const AMENITY_ICONS: Record<string, any> = {
   "Elevator": ArrowUpDown,
 };
 
-// Helper to format the nested Mongoose location object into a clean string for the UI
 const formatLocation = (locationObj: any) => {
   if (!locationObj) return "Unknown Location";
   return locationObj.city 
@@ -67,7 +66,6 @@ const formatLocation = (locationObj: any) => {
     : `${locationObj.area}, ${locationObj.region}`;
 };
 
-// Helper to serialize raw MongoDB documents into strict IProperty objects
 const mapToIProperty = (doc: any): IProperty & { property: { generalAmenities: string[] } } => ({
   id: doc._id.toString(),
   slug: doc.slug,
@@ -98,6 +96,7 @@ const mapToIProperty = (doc: any): IProperty & { property: { generalAmenities: s
       lat: doc.propertyId.coordinates.lat,
       lng: doc.propertyId.coordinates.lng
     } : undefined,
+    landmarks: doc.propertyId?.landmarks ?? [],
     generalAmenities: doc.propertyId?.generalAmenities ?? [],
   },
 });
@@ -108,8 +107,7 @@ async function getListingData(slug: string) {
   const rawListing = await Listing.findOne({ slug })
     .populate("propertyId")
     .lean()
-
-  // Make sure to return an empty array for reviews if the listing isn't found
+console.log("Fetched listing data:", rawListing);
   if (!rawListing) return { listing: null, similar: [], reviews: [] }
 
   const rawSimilar = await Listing.find({ 
@@ -120,19 +118,16 @@ async function getListingData(slug: string) {
     .limit(5)
     .lean()
 
-  // 1. Fetch Real Reviews
   const rawReviews = await Review.find({ listingId: rawListing._id })
-    .populate("userId", "name") // Assumes your User schema has a 'name' field
+    .populate("userId", "name") 
     .sort({ createdAt: -1 })
     .lean()
 
-  // Serialize reviews for the frontend
   const serializedReviews = rawReviews.map(r => ({
     id: r._id.toString(),
     rating: r.rating,
     comment: r.comment,
     date: r.createdAt,
-    // Safely handle missing populated user data
     userName: r.userId?.name || "Verified Guest" 
   }));
 
@@ -151,7 +146,6 @@ export default async function PropertyDetailsPage({ params }: PropertyPageProps)
 
   const isRent = listing.listingType === "For_Rent"
 
-  // 2. Calculate Real Average Rating
   const reviewCount = reviews.length;
   const averageRating = reviewCount > 0 
     ? (reviews.reduce((acc, curr) => acc + curr.rating, 0) / reviewCount).toFixed(2)
@@ -239,23 +233,24 @@ export default async function PropertyDetailsPage({ params }: PropertyPageProps)
             <PropertyMap lat={listing.property.coordinates?.lat} lng={listing.property.coordinates?.lng} />
             <h3 className="font-bold text-lg mb-2">{listing.property.location}</h3>
             <p className="text-slate-600 font-medium">
-              Located in a welcoming neighborhood with convenient access to shopping, business centers, and dining. For your privacy and security, the exact address details and check-in instructions are provided once your booking is confirmed.
+              {getNeighborhoodDescription(listing.property)}
             </p>
           </div>
 
-          {/* 3. REVIEWS SECTION */}
+          {/* === REVIEWS SECTION === */}
           <div className="pt-10 border-t border-black/10">
-            <div className="flex items-center gap-2 mb-8">
-              <HugeiconsIcon icon={StarIcon} size={24} className={reviewCount > 0 ? "fill-black" : ""} />
-              <h2 className="text-2xl font-black uppercase tracking-tight">
-                {reviewCount > 0 ? `${averageRating} · ${reviewCount} Reviews` : "No Reviews Yet"}
-              </h2>
+            <div className="flex items-center justify-between gap-2 mb-8">
+              <div className="flex items-center gap-2">
+                {reviewCount > 0 && <HugeiconsIcon icon={StarIcon} size={24} className={reviewCount > 0 ? "fill-black" : ""} />}
+                <h2 className="text-2xl font-black uppercase tracking-tight">
+                  {reviewCount > 0 ? `${averageRating} · ${reviewCount} Reviews` : "No Reviews Yet"}
+                </h2>
+              </div>
             </div>
             
-            {/* The Write a Review Form */}
+            {/* Review Form controls its own toggle view automatically */}
             <ReviewForm listingId={listing.id} />
             
-            {/* Displaying Real Reviews */}
             {reviewCount > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
                 {reviews.map((review) => (
@@ -293,10 +288,10 @@ export default async function PropertyDetailsPage({ params }: PropertyPageProps)
         <BookingCard listing={listing} isRent={isRent} />
       </section>
       
-      <ThingsToKnow isRent={isRent} />
+      <ThingsToKnow isRent={isRent} propertyType={listing.property.propertyType} />
 
       {similar.length > 0 && (
-        <SimilarCarousel similar={similar} />
+        <SimilarCarousel similar={similar} propertyType={listing.property.propertyType} />
       )}
 
       {/* Mobile Sticky Action Bar */}
@@ -311,7 +306,7 @@ export default async function PropertyDetailsPage({ params }: PropertyPageProps)
           </button>
         </Link>
       </div>
-<Toaster position="top-right" />
+      <Toaster position="top-right" />
     </main>
   )
 }

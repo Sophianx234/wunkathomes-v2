@@ -31,6 +31,7 @@ import { AnimatePresence, motion, useMotionValueEvent, useScroll } from "framer-
 import Image from "next/image"
 import Link from "next/link"
 import { useEffect, useRef, useState } from "react"
+import { LoginModal } from "./login-modal"
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
@@ -363,6 +364,9 @@ export default function Navbar() {
           </motion.div>
         )}
       </AnimatePresence>
+      <LoginModal>
+  <Button variant="outline">Sign In</Button>
+</LoginModal>
     </header>
   )
 }

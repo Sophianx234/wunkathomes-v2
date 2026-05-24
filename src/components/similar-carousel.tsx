@@ -4,8 +4,11 @@ import { useRef } from "react"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { ArrowLeft01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons"
 import PropertyCard, { IProperty } from "@/components/property-card"
-
-export default function SimilarCarousel({ similar }: { similar: IProperty[] }) {
+type similarProps = {
+  similar: IProperty[]
+  propertyType: string
+}
+export default function SimilarCarousel({ similar, propertyType }: similarProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
 
   const scroll = (direction: 'left' | 'right') => {
@@ -25,7 +28,7 @@ export default function SimilarCarousel({ similar }: { similar: IProperty[] }) {
       {/* Header & Arrow Controls */}
       <div className="flex items-center justify-between mb-8">
         <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight">
-          Similar Apartments
+          Similar {similar[0]?.property.propertyType.split('_')[0] || propertyType} Listings
         </h2>
         <div className="flex items-center gap-3">
           <button onClick={() => scroll('left')} className="w-10 h-10 rounded-full border-2 border-black flex items-center justify-center text-black hover:bg-black hover:text-white transition-colors">
@@ -44,7 +47,7 @@ export default function SimilarCarousel({ similar }: { similar: IProperty[] }) {
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {similar.map((property, index) => (
-          <div key={property.id} className="min-w-[300px] md:min-w-[200px] flex-shrink-0 snap-start">
+          <div key={property.id} className="min-w-[300px] md:min-w-[300px] flex-shrink-0 snap-start">
             <PropertyCard property={property} index={index} />
           </div>
         ))}

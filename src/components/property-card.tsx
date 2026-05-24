@@ -14,6 +14,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { formatLeaseTerm } from "@/lib/helpers";
+import { usePathname } from "next/navigation";
 
 // Updated to perfectly match the populated Mongoose schemas
 export interface IProperty {
@@ -40,16 +41,11 @@ export interface IProperty {
   property: {
     _id?: string;
     propertyType: 'Apartment_Building' | 'Commercial' | 'House' | 'Land';
-    location: {
-      region: string;
-      area: string;
-      city?: string;
-    };
+    location: any; // Changed to 'any' to accept both strings and objects safely
     coordinates?: {
       lat?: number;
       lng?: number;
     };
-    
     landmarks?: string[];
     generalAmenities?: string[];
   };
@@ -68,7 +64,6 @@ export default function PropertyCard({
   const [direction, setDirection] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
 
-  // Framer Motion variants for the smooth slide effect
   const slideVariants = {
     enter: (direction: number) => ({
       x: direction > 0 ? "100%" : "-100%",
@@ -87,7 +82,7 @@ export default function PropertyCard({
   };
 
   const paginate = (newDirection: number, e: React.MouseEvent) => {
-    e.preventDefault(); // Prevents the <Link> from triggering
+    e.preventDefault(); 
     e.stopPropagation();
 
     setDirection(newDirection);
@@ -99,15 +94,34 @@ export default function PropertyCard({
     });
   };
 
-  // Helper to format price based on Rent vs Sale
   const formattedPrice = `$${property.price.toLocaleString()}`;
-  const priceSuffix = formatLeaseTerm(property.terms.leaseTerm);
+  const priceSuffix = formatLeaseTerm(property.terms?.leaseTerm);
 
-  // Format Location string
-  const locationString = property.property.location.city 
-    ? `${property.property.location.area}, ${property.property.location.city}` 
-    : `${property.property.location.area}, ${property.property.location.region}`;
+  // --- FIX: Bulletproof Location String ---
+  let locationString = "Unknown Location";
+  if (typeof property.property?.location === 'string') {
+    // If it comes from a page passing a formatted string
+    locationString = property.property.location;
+  } else if (property.property?.location) {
+    // If it comes from a page passing the raw Mongoose object
+    const loc = property.property.location;
+    locationString = loc.city ? `${loc.area}, ${loc.city}` : `${loc.area}, ${loc.region}`;
+  }
+const pathname = usePathname(); // 2. Get current route
+  
+  // 3. Logic to determine the correct path
+  // If we are already in admin, we want to go to /admin/properties/slug
+  // If we are at the root, we want /properties/slug
+  const getHref = () => {
+    if (pathname.startsWith("/admin")) {
+      // Remove trailing slash if present, then append the slug
+      ;
+      return `/admin/properties/${property.slug}`;
+    }
+    return `/properties/${property.slug}`;
+  };
 
+  const href = getHref()
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -121,9 +135,8 @@ export default function PropertyCard({
       {/* === Image Carousel Container === */}
       <div className="relative w-full aspect-[4/3] sm:aspect-[16/10] overflow-hidden mb-4 rounded-xl md:rounded-2xl bg-slate-100">
         
-        {/* Clickable Area to view property (Using SLUG) */}
         <Link
-          href={`properties/${property.slug}`}
+          href={href} // Fixed missing leading slash here!
           className="absolute inset-0 z-0"
         >
           <AnimatePresence initial={false} custom={direction}>
@@ -153,7 +166,7 @@ export default function PropertyCard({
 
         {/* Status Badge */}
         <div className="absolute top-3 left-3 z-10 bg-black/80 backdrop-blur-sm text-white px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-widest pointer-events-none">
-          {property.property.propertyType.replace('_', ' ')}
+          {property.property.propertyType.split('_')[0]}
         </div>
 
         {/* Floating Price Tag */}
@@ -190,33 +203,32 @@ export default function PropertyCard({
         </AnimatePresence>
 
         <AnimatePresence>
-  {isHovered && property.images.length > 1 && (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 10 }}
-      className="absolute bottom-1  left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5 bg-black/20 px-2 py-1 rounded-full backdrop-blur-md"
-    >
-      {property.images.map((_, i) => (
-        <div
-          key={i}
-          className={`transition-all duration-300 rounded-full ${
-            i === currentImage
-              ? "w-2 h-2 bg-white"
-              : "w-1.5 h-1.5 bg-white/50"
-          }`}
-        />
-      ))}
-    </motion.div>
-  )}
-</AnimatePresence>
+          {isHovered && property.images.length > 1 && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5 bg-black/20 px-2 py-1 rounded-full backdrop-blur-md"
+            >
+              {property.images.map((_, i) => (
+                <div
+                  key={i}
+                  className={`transition-all duration-300 rounded-full ${
+                    i === currentImage
+                      ? "w-2 h-2 bg-white"
+                      : "w-1.5 h-1.5 bg-white/50"
+                  }`}
+                />
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* === Minimalist Content Container === */}
       <div className="flex flex-col flex-1 px-1">
         <div className="mb-3 cursor-pointer">
-          {/* Linked via Slug */}
-          <Link href={`/properties/${property.slug}`}>
+          <Link href={href}>
             <h3 className="text-lg font-bold text-slate-900 leading-tight mb-1 group-hover:text-black transition-colors line-clamp-1">
               {property.title}
             </h3>
