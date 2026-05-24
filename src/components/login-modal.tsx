@@ -12,9 +12,10 @@ import {
 import { LoginForm } from "./login-form";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { GalleryHorizontalEndIcon } from "@hugeicons/core-free-icons";
+import Logo from "./logo";
 
 interface LoginModalProps {
-  children: ReactNode; // This allows you to wrap any button/link to trigger the modal
+  children: ReactNode; 
 }
 
 export function LoginModal({ children }: LoginModalProps) {
@@ -23,12 +24,14 @@ export function LoginModal({ children }: LoginModalProps) {
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] p-0 overflow-hidden border-0">
-        <div className="p-8 bg-background">
-          <DialogHeader className="text-center flex flex-col items-center mb-6">
-            <div className="flex size-10 items-center justify-center rounded-lg bg-primary text-primary-foreground mb-4">
-              <HugeiconsIcon icon={GalleryHorizontalEndIcon} className="size-5" />
-            </div>
+      
+      <DialogContent 
+        className="sm:max-w-[425px] p-0 border-0 max-h-[90vh] overflow-y-auto flex flex-col [&::-webkit-scrollbar]:hidden"
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+      >
+        <div className="p-8 bg-background flex-1">
+          <DialogHeader className="text-center flex flex-col items-center mb-6 shrink-0">
+            <Logo />
             <DialogTitle className="text-2xl font-bold">Welcome back</DialogTitle>
             <DialogDescription className="text-sm">
               Login with your Apple or Google account

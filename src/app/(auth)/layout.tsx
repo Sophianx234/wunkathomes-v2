@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import GlobalConcierge from "@/components/global-concierge";
+import { Toaster } from "sonner";
 
 const figtree = Figtree({subsets:['latin'],variable:'--font-sans'});
 
@@ -36,6 +37,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
 
         {children}
+        <Toaster position="top-right"/>
         </body>
     </html>
   );
