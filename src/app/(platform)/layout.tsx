@@ -5,6 +5,8 @@ import { cn } from "@/lib/utils";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import GlobalConcierge from "@/components/global-concierge";
+import { getSession } from "@/lib/session";
+import { StoreInitializer } from "@/lib/session-initializer";
 
 const figtree = Figtree({subsets:['latin'],variable:'--font-sans'});
 
@@ -28,12 +30,14 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const sessionUser = await getSession()
   return (
     <html
       lang="en"
       className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, "font-sans", figtree.variable)}
     >
       <body className="min-h-full flex flex-col">
+        <StoreInitializer user={sessionUser} />
       <Navbar />
 
         {children}
