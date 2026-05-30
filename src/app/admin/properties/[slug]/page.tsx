@@ -26,10 +26,7 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 
 import { connectToDatabase } from "@/config/DbConnect"
-import Listing from "@/models/listing"
 import Review from "@/models/review"
-import '@/models/user'
-import { IProperty } from "@/types"
 
 import BookingCard from "@/components/booking-card"
 import ImageGallery from "@/components/image-gallery"
@@ -39,7 +36,13 @@ import ThingsToKnow from "@/components/things-to-know"
 import ReviewForm from "@/components/review-form" 
 import { formatLeaseTerm, getNeighborhoodDescription } from "@/lib/helpers"
 import { Toaster } from "@/components/ui/sonner"
-
+import SavePropertyButton from "@/components/ui/saved-property-button"
+import Listing from "@/models/listing";
+import "@/models/property";
+import '@/models/user'
+import { IProperty } from "@/components/property-card"
+import { getSession, SessionPayload } from "@/lib/session"
+import SavedProperty from "@/models/saved"
 interface PropertyPageProps {
   params: Promise<{ slug: string }>
 }
@@ -103,7 +106,6 @@ const mapToIProperty = (doc: any): IProperty & { property: { generalAmenities: s
 
 async function getListingData(slug: string) {
   await connectToDatabase()
-
   const rawListing = await Listing.findOne({ slug })
     .populate("propertyId")
     .lean()
@@ -138,11 +140,24 @@ console.log("Fetched listing data:", rawListing);
   }
 }
 
+
 export default async function PropertyDetailsPage({ params }: PropertyPageProps) {
   const { slug } = await params
   const { listing, similar, reviews } = await getListingData(slug)
-
+  const session = await getSession() as SessionPayload
+  
   if (!listing) notFound()
+    let isSaved = false; 
+        if (session && session.userId && listing.id) {
+        const existingSave = await SavedProperty.findOne({
+          user: session.userId,
+          property: listing.id // Assuming listing.id is the MongoDB ObjectId for this listing
+        }).lean();
+        
+        if (existingSave) {
+          isSaved = true;
+        }
+      }
 
   const isRent = listing.listingType === "For_Rent"
 
@@ -164,7 +179,10 @@ export default async function PropertyDetailsPage({ params }: PropertyPageProps)
             <h1 className="text-3xl md:text-5xl font-black uppercase tracking-tight leading-[1.1] mb-4">
               {listing.title}
             </h1>
+              <div className="flex items-center justify-between">
             <div className="flex flex-wrap items-center gap-4 text-sm font-bold uppercase tracking-widest text-slate-500">
+
+
               <span className="flex items-center gap-1.5 text-black">
                 <HugeiconsIcon icon={StarIcon} size={16} className={reviewCount > 0 ? "fill-black" : ""} />
                 {averageRating} {reviewCount > 0 && `· ${reviewCount} Reviews`}
@@ -175,6 +193,10 @@ export default async function PropertyDetailsPage({ params }: PropertyPageProps)
                 {listing.property.location}
               </span>
             </div>
+            <div className="mt-2 shrink-0">
+                            <SavePropertyButton propertyId={listing.id || listing.slug} initialIsSaved={isSaved} />
+                          </div>
+              </div>
           </div>
 
           <div className="flex items-center justify-between py-6 border-y border-black/10 mb-8">

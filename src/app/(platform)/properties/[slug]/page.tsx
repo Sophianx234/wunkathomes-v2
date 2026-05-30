@@ -23,6 +23,9 @@ import ImageGallery from "@/components/image-gallery"
 import SimilarCarousel from "@/components/similar-carousel"
 import ThingsToKnow from "@/components/things-to-know"
 import BookingCard from "@/components/booking-card"
+import SavePropertyButton from "@/components/ui/saved-property-button"
+import { getSession, SessionPayload } from "@/lib/session"
+import SavedProperty from "@/models/saved"
 
 interface PropertyPageProps {
   params: Promise<{ slug: string }>
@@ -43,9 +46,19 @@ async function getListingData(slug: string) {
 export default async function PropertyDetailsPage({ params }: PropertyPageProps) {
   const { slug } = await params
   const { listing, similar } = await getListingData(slug)
-
+ const session = await getSession() as SessionPayload 
   if (!listing) notFound()
-
+let isSaved = false; 
+    if (session && session.userId && listing.id) {
+    const existingSave = await SavedProperty.findOne({
+      user: session.userId,
+      property: listing.id // Assuming listing.id is the MongoDB ObjectId for this listing
+    }).lean();
+    
+    if (existingSave) {
+      isSaved = true;
+    }
+  }
   const isRent = listing.listingType === "For_Rent"
 
   const reviews = [
@@ -74,6 +87,8 @@ export default async function PropertyDetailsPage({ params }: PropertyPageProps)
             <h1 className="text-3xl md:text-5xl font-black uppercase tracking-tight leading-[1.1] mb-4">
               {listing.title}
             </h1>
+            <div className="flex items-center justify-between gap-4 ">
+
             <div className="flex flex-wrap items-center gap-4 text-sm font-bold uppercase tracking-widest text-slate-500">
               <span className="flex items-center gap-1.5 text-black">
                 <HugeiconsIcon icon={StarIcon} size={16} className="fill-black" />
@@ -84,6 +99,13 @@ export default async function PropertyDetailsPage({ params }: PropertyPageProps)
                 <HugeiconsIcon icon={Location01Icon} size={16} />
                 {listing.property.location}
               </span>
+            </div>
+            <div className="mt-2 shrink-0">
+                <SavePropertyButton 
+                  propertyId={listing.id || listing.slug} 
+                  initialIsSaved={isSaved} 
+                />
+              </div>
             </div>
           </div>
 

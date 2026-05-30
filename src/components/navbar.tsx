@@ -41,10 +41,12 @@ import { LoginModal } from "./login-modal";
 import { logoutAction } from "@/actions/auth.action";
 import { LogoutButton } from "./logout-button";
 
+// 1. Import the Zustand hook
+import { useUserStore } from "@/store/user-store";
+
 export default function Navbar() {
-  // --- MOCK AUTH STATE ---
-  // TODO: Replace this with your actual auth hook (e.g., const { data: session } = useSession() )
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  // 2. Consume the global user state
+  const { user, isLoggedIn } = useUserStore();
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -316,11 +318,12 @@ export default function Navbar() {
                       className="absolute right-0 top-14 w-64 bg-white border border-slate-200 shadow-xl rounded-xl overflow-hidden flex flex-col py-2"
                     >
                       <div className="px-4 py-3 border-b border-slate-100">
+                        {/* 3. Dynamically inject User Name and Email */}
                         <p className="font-semibold text-slate-800">
-                          Test Tenant
+                          {user?.name || "User"}
                         </p>
                         <p className="text-sm text-slate-500">
-                          tenant@example.com
+                          {user?.email}
                         </p>
                       </div>
 
@@ -446,10 +449,11 @@ export default function Navbar() {
                     <HugeiconsIcon icon={UserCircleIcon} size={32} />
                   </div>
                   <div>
+                    {/* 4. Dynamically inject User Name and Email for Mobile */}
                     <p className="font-semibold text-slate-800 text-lg">
-                      Test Tenant
+                      {user?.name || "User"}
                     </p>
-                    <p className="text-sm text-slate-500">tenant@example.com</p>
+                    <p className="text-sm text-slate-500">{user?.email}</p>
                   </div>
                 </div>
               )}
@@ -590,15 +594,11 @@ export default function Navbar() {
                       <HugeiconsIcon icon={CustomerSupportIcon} size={20} />{" "}
                       Help & Support
                     </Link>
-                    <button
-                      onClick={() => {
-                        toggleMenu();
-                        setIsLoggedIn(false);
-                      }}
-                      className="flex items-center gap-3 text-lg font-medium text-red-600 hover:text-red-700 transition mt-2"
-                    >
-                      <HugeiconsIcon icon={Logout03Icon} size={20} /> Log Out
-                    </button>
+                    
+                    {/* 5. Swapped static button for the Server Action Form in Mobile Menu */}
+                    <form action={logoutAction} className="w-full mt-2" onSubmit={toggleMenu}>
+                      <LogoutButton />
+                    </form>
                   </nav>
                 </>
               ) : (

@@ -2,7 +2,7 @@
 import jwt from "jsonwebtoken"
 import { cookies } from "next/headers"
 
-interface SessionPayload {
+export interface SessionPayload {
   userId: string | object;
   email: string;
   role: string;

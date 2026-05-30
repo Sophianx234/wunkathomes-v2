@@ -4,8 +4,17 @@ import { connectToDatabase } from "@/config/DbConnect"
 import User from "@/models/user"
 import bcrypt from "bcryptjs"
 import { z } from "zod"
-import { createSession, deleteSession } from "@/lib/session" // Import the helper
+import { createSession, deleteSession, getSession } from "@/lib/session" // Import the helper
 import { redirect } from "next/navigation"
+
+const passwordSchema = z.object({
+  currentPassword: z.string().min(1, "Current password is required"),
+  newPassword: z.string().min(8, "New password must be at least 8 characters"),
+  confirmPassword: z.string().min(1, "Please confirm your new password"),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "New passwords do not match",
+  path: ["confirmPassword"],
+})
 
 const signupSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -159,4 +168,62 @@ export async function logoutAction() {
   
   // Redirect to the homepage
   redirect("/")
+}
+
+
+export async function changePasswordAction(prevState: any, formData: FormData) {
+  try {
+    // 1. Get current logged-in user
+    const session = await getSession()
+    if (!session || !session.userId) {
+      return { success: false, error: "Unauthorized. Please log in again." }
+    }
+
+    // 2. Validate form inputs
+    const validatedFields = passwordSchema.safeParse({
+      currentPassword: formData.get("currentPassword"),
+      newPassword: formData.get("newPassword"),
+      confirmPassword: formData.get("confirmPassword"),
+    })
+
+    if (!validatedFields.success) {
+      return {
+        success: false,
+        error: validatedFields.error.errors[0].message,
+      }
+    }
+
+    const { currentPassword, newPassword } = validatedFields.data
+
+    // 3. Connect to DB and fetch user (including the hidden password field)
+    await connectToDatabase()
+    const user = await User.findById(session.userId).select("+password")
+    
+    if (!user) {
+      return { success: false, error: "User not found." }
+    }
+
+    // 4. Verify current password
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.password)
+    if (!isPasswordValid) {
+      return { success: false, error: "Incorrect current password." }
+    }
+
+    // 5. Hash and save the new password
+    const hashedNewPassword = await bcrypt.hash(newPassword, 12)
+    user.password = hashedNewPassword
+    await user.save()
+
+    return { 
+      success: true, 
+      message: "Password updated successfully!" 
+    }
+
+  } catch (error: any) {
+    console.error("Change password error:", error)
+    return { 
+      success: false, 
+      error: "An unexpected error occurred. Please try again." 
+    }
+  }
 }

@@ -1,204 +1,249 @@
-"use client";
+"use client"
 
-import Image from "next/image";
+import React, { useState } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import { HugeiconsIcon } from "@hugeicons/react"
 import { 
-  CustomerSupportIcon, 
-  MessageMultiple01Icon, 
-  SmartPhone01Icon,
-  Alert02Icon,
-  Key01Icon,
-  HelpCircleIcon,
-  ArrowDown01Icon,
+  Search01Icon, 
+  ArrowDown01Icon, 
+  ArrowRight01Icon,
+  UserCircleIcon, 
+  CreditCardPosIcon, 
+  File01Icon, 
+  Wrench01Icon,
+  Call02Icon,
   Mail01Icon,
-  Wrench01Icon
-} from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
-import { useState } from "react";
+  Home09Icon
+} from "@hugeicons/core-free-icons"
 
-export default function SupportPage() {
-  const [openFaq, setOpenFaq] = useState<number | null>(0);
+// --- Mock Data Tailored to Property Management ---
+const supportCategories = [
+  {
+    id: "getting-started",
+    title: "Getting Started",
+    icon: UserCircleIcon,
+    description: "Account setup, saving homes, and scheduling tours."
+  },
+  {
+    id: "payments",
+    title: "Payments & Rent",
+    icon: CreditCardPosIcon,
+    description: "Invoices, payment methods, and auto-pay setup."
+  },
+  {
+    id: "leasing",
+    title: "Leases & Contracts",
+    icon: File01Icon,
+    description: "Signing, renewing, or terminating your lease."
+  },
+  {
+    id: "maintenance",
+    title: "Maintenance",
+    icon: Wrench01Icon,
+    description: "Submitting requests and emergency contacts."
+  }
+]
 
-  // Mock Data: Fetch from DB based on user session
-  const portfolioManager = {
-    name: "Sarah Mensah",
-    title: "Senior Portfolio Manager",
-    phone: "+233 24 123 4567",
-    email: "sarah.m@wunkathomes.com",
-    image: "/images/team/sarah.jpg" // Replace with actual image
-  };
+const faqs = [
+  {
+    question: "How do I pay my rent online?",
+    answer: "You can pay your rent directly through the 'Payments' tab in your dashboard. We accept major credit cards, debit cards, and direct bank transfers (ACH). You can also set up Auto-Pay to ensure you never miss a deadline."
+  },
+  {
+    question: "How secure is my payment and personal information?",
+    answer: "Your security is our top priority. All payment transactions are encrypted using bank-level AES-256 encryption and processed through certified third-party payment gateways. We do not store your raw credit card numbers on our servers."
+  },
+  {
+    question: "How do I submit a maintenance request?",
+    answer: "Log into your account, navigate to your active lease, and click 'Request Maintenance'. Please provide a detailed description of the issue and attach photos if possible. Our team aims to respond to all non-emergency requests within 24 hours."
+  },
+  {
+    question: "What happens if I need to break my lease early?",
+    answer: "Breaking a lease early is subject to the terms outlined in your specific contract. Typically, this involves a notice period and an early termination fee. Please contact your property manager directly through the portal to discuss your options."
+  },
+  {
+    question: "How do I schedule a tour for a property?",
+    answer: "Navigate to the property listing you are interested in and click the 'Schedule a Tour' button. You can select an available date and time that works best for you. A confirmation will be sent to your email and WhatsApp."
+  }
+]
 
-  const faqs = [
-    {
-      question: "How does the $500 Refundable Hold work?",
-      answer: "When you place a hold, the asset is removed from the public market for 72 hours. Your funds are held securely in escrow via Paystack. If you decline the property after physical inspection, the $500 is reversed to your original payment method instantly."
-    },
-    {
-      question: "How do I access the property for my viewing?",
-      answer: "Once your hold is placed or your Wunkat ID is verified, you can generate a temporary Tuya Smart-Lock PIN from your dashboard. This PIN will be active for 45 minutes around your scheduled viewing time."
-    },
-    {
-      question: "Can I pay my annual rent in installments?",
-      answer: "Currently, WunkatHomes requires annual upfront clearance for rental properties via our secure Virtual Account wire system. However, specific installment plans can be negotiated directly with your Portfolio Manager."
-    },
-    {
-      question: "My Smart Lock PIN isn't working. What do I do?",
-      answer: "Ensure your Bluetooth is enabled if using the app proximity unlock. If the keypad is unresponsive, contact the 24/7 Asset Emergency line immediately for an remote override."
-    }
-  ];
+export default function HelpAndSupportPage() {
+  const [searchQuery, setSearchQuery] = useState("")
+  const [activeCategory, setActiveCategory] = useState("payments") // Default active tab
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(1) // Open second FAQ by default
+
+  const toggleFaq = (index: number) => {
+    setOpenFaqIndex(openFaqIndex === index ? null : index)
+  }
 
   return (
-    <div className="max-w-5xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500 py-8 md:py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-slate-50/50 pb-24">
       
-      {/* === Header === */}
-      <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-black/10 pb-8">
-        <div>
-          <h1 className="text-3xl md:text-4xl font-black uppercase tracking-tight text-black mb-3">
-            Concierge & Support
+      {/* --- HERO & SEARCH SECTION --- */}
+      <section className="bg-white border-b border-slate-200 pt-16 pb-20 px-4 relative overflow-hidden">
+        {/* Decorative background element */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-slate-100/50 rounded-full blur-3xl -z-10 pointer-events-none" />
+        
+        <div className="max-w-3xl mx-auto text-center">
+          <h1 className="text-3xl md:text-5xl font-bold text-slate-900 mb-4 tracking-tight">
+            Hello, how can we help?
           </h1>
-          <p className="text-sm md:text-base font-medium text-slate-500 max-w-xl">
-            Direct access to your dedicated portfolio management team and 24/7 physical asset emergency response.
+          <p className="text-slate-500 text-lg mb-10">
+            Search our knowledge base or browse categories below.
+          </p>
+
+          <form 
+            onSubmit={(e) => e.preventDefault()} 
+            className="relative max-w-2xl mx-auto flex items-center bg-white border border-slate-200 rounded-2xl shadow-sm p-1.5 focus-within:ring-2 focus-within:ring-zinc-950/20 focus-within:border-zinc-950 transition-all"
+          >
+            <div className="pl-4 pr-2 text-slate-400">
+              <HugeiconsIcon icon={Search01Icon} size={20} />
+            </div>
+            <input 
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Ask a question... (e.g. 'How to pay rent')"
+              className="w-full py-3 bg-transparent text-slate-900 placeholder:text-slate-400 focus:outline-none text-[15px]"
+            />
+            <button 
+              type="submit"
+              className="bg-zinc-950 hover:bg-zinc-800 text-white px-6 py-3 rounded-xl font-medium transition-colors shrink-0"
+            >
+              Search
+            </button>
+          </form>
+          
+          <p className="text-xs text-slate-400 mt-6 uppercase tracking-wider font-semibold">
+            Or choose a category to quickly find the help you need
           </p>
         </div>
-      </div>
+      </section>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+      <div className="max-w-5xl mx-auto px-4 -mt-8 relative z-10">
         
-        {/* === LEFT COLUMN: The Human Touch & Emergencies === */}
-        <div className="lg:col-span-5 flex flex-col gap-8">
-          
-          {/* Section 1: Dedicated Portfolio Manager */}
-          <div className="bg-white border-2 border-black rounded-2xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] p-6 md:p-8">
-            <div className="flex items-center gap-2 mb-6">
-              <HugeiconsIcon icon={CustomerSupportIcon} size={20} className="text-black" />
-              <h2 className="text-sm font-black uppercase tracking-widest text-black">
-                Your Dedicated Manager
-              </h2>
-            </div>
-
-            <div className="flex flex-col items-center text-center mb-8">
-              <div className="w-24 h-24 bg-slate-200 rounded-full mb-4 relative overflow-hidden border-2 border-slate-100">
-                {/* Fallback avatar */}
-                <div className="absolute inset-0 flex items-center justify-center text-slate-400 bg-slate-100">
-                  <HugeiconsIcon icon={CustomerSupportIcon} size={32} />
+        {/* --- CATEGORY CARDS --- */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-16">
+          {supportCategories.map((category) => {
+            const isActive = activeCategory === category.id
+            return (
+              <button
+                key={category.id}
+                onClick={() => setActiveCategory(category.id)}
+                className={`flex flex-col items-center text-center p-6 rounded-2xl bg-white border transition-all duration-200 ${
+                  isActive 
+                    ? "border-zinc-950 shadow-md ring-1 ring-zinc-950 scale-105" 
+                    : "border-slate-200 shadow-sm hover:border-slate-300 hover:shadow-md hover:-translate-y-1"
+                }`}
+              >
+                <div className={`p-3 rounded-full mb-4 transition-colors ${
+                  isActive ? "bg-zinc-950 text-white" : "bg-slate-100 text-slate-600"
+                }`}>
+                  <HugeiconsIcon icon={category.icon} size={24} />
                 </div>
-                {/* <Image src={portfolioManager.image} alt={portfolioManager.name} fill className="object-cover relative z-10" /> */}
-              </div>
-              <h3 className="text-xl font-black uppercase tracking-tight text-black">
-                {portfolioManager.name}
-              </h3>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mt-1">
-                {portfolioManager.title}
-              </p>
-            </div>
-
-            <div className="flex flex-col gap-3">
-              {/* WhatsApp Button */}
-              <button className="w-full py-4 bg-green-600 text-white font-black uppercase tracking-widest text-[11px] rounded-xl hover:bg-green-700 transition-colors shadow-lg shadow-green-600/20 flex items-center justify-center gap-2">
-                <HugeiconsIcon icon={MessageMultiple01Icon} size={18} />
-                Message on WhatsApp
+                <h3 className={`font-semibold text-[15px] mb-2 ${isActive ? "text-zinc-950" : "text-slate-800"}`}>
+                  {category.title}
+                </h3>
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  {category.description}
+                </p>
               </button>
-              
-              <div className="grid grid-cols-2 gap-3">
-                <button className="w-full py-3 bg-slate-50 text-black font-black uppercase tracking-widest text-[10px] border border-slate-200 rounded-xl hover:bg-slate-100 transition-colors flex items-center justify-center gap-1.5">
-                  <HugeiconsIcon icon={SmartPhone01Icon} size={14} /> Call
-                </button>
-                <button className="w-full py-3 bg-slate-50 text-black font-black uppercase tracking-widest text-[10px] border border-slate-200 rounded-xl hover:bg-slate-100 transition-colors flex items-center justify-center gap-1.5">
-                  <HugeiconsIcon icon={Mail01Icon} size={14} /> Email
-                </button>
-              </div>
-            </div>
-            
-            <p className="text-[9px] text-center font-medium text-slate-500 mt-6 leading-relaxed">
-              Available Monday - Saturday <br /> 8:00 AM to 6:00 PM GMT.
-            </p>
-          </div>
-
-          {/* Section 2: Asset Emergencies */}
-          <div className="bg-red-50 border border-red-200 rounded-2xl p-6 md:p-8">
-            <h2 className="text-xs font-black uppercase tracking-widest text-red-800 mb-4 flex items-center gap-2">
-              <HugeiconsIcon icon={Alert02Icon} size={16} />
-              24/7 Asset Emergency
-            </h2>
-            <p className="text-[11px] font-medium text-red-800/80 mb-6 leading-relaxed">
-              For immediate physical infrastructure issues at an active Wunkat property only.
-            </p>
-            
-            <div className="space-y-3">
-              <button className="w-full py-3 bg-white text-red-700 font-bold uppercase tracking-widest text-[10px] border border-red-200 rounded-xl hover:bg-red-100 transition-colors flex items-center justify-between px-4 shadow-sm">
-                <span className="flex items-center gap-2">
-                  <HugeiconsIcon icon={Key01Icon} size={14} /> Smart Lock Failure
-                </span>
-                <span>Dial Ext. 1</span>
-              </button>
-              <button className="w-full py-3 bg-white text-red-700 font-bold uppercase tracking-widest text-[10px] border border-red-200 rounded-xl hover:bg-red-100 transition-colors flex items-center justify-between px-4 shadow-sm">
-                <span className="flex items-center gap-2">
-                  <HugeiconsIcon icon={Wrench01Icon} size={14} /> Plumbing / Electrical
-                </span>
-                <span>Dial Ext. 2</span>
-              </button>
-            </div>
-          </div>
-
+            )
+          })}
         </div>
 
-        {/* === RIGHT COLUMN: Knowledge Ledger (FAQs) === */}
-        <div className="lg:col-span-7">
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 md:p-8 shadow-sm h-full">
-            <h2 className="text-sm font-black uppercase tracking-widest text-black mb-8 flex items-center gap-2 pb-6 border-b border-slate-100">
-              <HugeiconsIcon icon={HelpCircleIcon} size={18} />
-              The Knowledge Ledger
-            </h2>
+        {/* --- FAQ ACCORDION SECTION --- */}
+        <section className="bg-white rounded-3xl border border-slate-200 shadow-sm p-8 md:p-12 mb-16">
+          <div className="text-center mb-10">
+            <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-3">Frequently Asked Questions</h2>
+            <p className="text-slate-500 max-w-2xl mx-auto">
+              Everything you need to know about managing your home, payments, and account on WunkatHomes.
+            </p>
+          </div>
 
-            <div className="flex flex-col gap-4">
-              {faqs.map((faq, index) => {
-                const isOpen = openFaq === index;
-                return (
-                  <div 
-                    key={index} 
-                    className={`border border-slate-200 rounded-xl overflow-hidden transition-colors ${isOpen ? 'bg-slate-50' : 'bg-white hover:bg-slate-50/50'}`}
+          <div className="max-w-3xl mx-auto divide-y divide-slate-100">
+            {faqs.map((faq, index) => {
+              const isOpen = openFaqIndex === index
+              
+              return (
+                <div key={index} className="py-2">
+                  <button
+                    onClick={() => toggleFaq(index)}
+                    className="flex w-full items-center justify-between py-4 text-left focus:outline-none group"
                   >
-                    <button 
-                      onClick={() => setOpenFaq(isOpen ? null : index)}
-                      className="w-full text-left p-5 flex items-center justify-between focus:outline-none"
-                    >
-                      <span className="text-xs md:text-sm font-bold text-black uppercase tracking-widest leading-snug pr-4">
-                        {faq.question}
-                      </span>
+                    <span className={`font-medium pr-4 transition-colors ${isOpen ? "text-zinc-950" : "text-slate-700 group-hover:text-zinc-950"}`}>
+                      {faq.question}
+                    </span>
+                    <div className={`p-1 rounded-full border transition-all duration-300 shrink-0 flex items-center justify-center ${
+                      isOpen ? "bg-zinc-950 border-zinc-950 text-white" : "bg-white border-slate-200 text-slate-400 group-hover:border-slate-300"
+                    }`}>
                       <HugeiconsIcon 
                         icon={ArrowDown01Icon} 
-                        size={18} 
-                        className={`text-slate-400 shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-180 text-black' : ''}`} 
+                        size={16} 
+                        className={`transition-transform duration-300 ${isOpen ? "rotate-180" : "rotate-0"}`} 
                       />
-                    </button>
-                    
-                    <div 
-                      className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? 'max-h-48 opacity-100' : 'max-h-0 opacity-0'}`}
-                    >
-                      <div className="p-5 pt-0 text-[11px] md:text-xs font-medium text-slate-600 leading-relaxed border-t border-slate-200/50 mt-2 mx-5">
-                        {faq.answer}
-                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  </button>
+                  
+                  {/* Framer Motion for buttery smooth height expansion */}
+                  <AnimatePresence initial={false}>
+                    {isOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                        className="overflow-hidden"
+                      >
+                        <p className="pb-6 text-[15px] leading-relaxed text-slate-600 pr-12">
+                          {faq.answer}
+                        </p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              )
+            })}
+          </div>
+        </section>
+
+        {/* --- BOTTOM CONTACT SECTION --- */}
+        <section className="text-center">
+          <h2 className="text-2xl font-bold text-slate-900 mb-3">You still have a question?</h2>
+          <p className="text-slate-500 mb-10 max-w-lg mx-auto">
+            If you cannot find the answer to your question in our FAQ, you can always contact us. We will answer you shortly!
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+            
+            {/* Phone Card */}
+            <div className="bg-white border border-slate-200 rounded-2xl p-8 flex flex-col items-center justify-center hover:shadow-md transition-shadow">
+              <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 mb-4">
+                <HugeiconsIcon icon={Call02Icon} size={24} />
+              </div>
+              <h3 className="font-bold text-slate-900 text-lg mb-1">+ (233) 000-000-000</h3>
+              <p className="text-sm text-slate-500 mb-4">We are always happy to help.</p>
+              <button className="text-sm font-semibold text-zinc-950 flex items-center gap-1 hover:underline underline-offset-4">
+                Call us now <HugeiconsIcon icon={ArrowRight01Icon} size={16} />
+              </button>
             </div>
 
-            <div className="mt-10 p-6 bg-slate-100 rounded-xl border border-slate-200 text-center">
-              <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">
-                Still have questions?
-              </h4>
-              <p className="text-[11px] text-slate-600 mb-4">
-                Our support team operates out of the Wunkat Hub in Accra.
-              </p>
-              <button className="text-[10px] font-bold uppercase tracking-widest border-b-[1.5px] border-black pb-0.5 hover:text-slate-500 hover:border-slate-500 transition-colors text-black">
-                Send a General Inquiry
+            {/* Email Card */}
+            <div className="bg-white border border-slate-200 rounded-2xl p-8 flex flex-col items-center justify-center hover:shadow-md transition-shadow">
+              <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 mb-4">
+                <HugeiconsIcon icon={Mail01Icon} size={24} />
+              </div>
+              <h3 className="font-bold text-slate-900 text-lg mb-1">support@wunkathomes.com</h3>
+              <p className="text-sm text-slate-500 mb-4">The best way to get an answer faster.</p>
+              <button className="text-sm font-semibold text-zinc-950 flex items-center gap-1 hover:underline underline-offset-4">
+                Send an email <HugeiconsIcon icon={ArrowRight01Icon} size={16} />
               </button>
             </div>
 
           </div>
-        </div>
+        </section>
 
       </div>
     </div>
-  );
+  )
 }
