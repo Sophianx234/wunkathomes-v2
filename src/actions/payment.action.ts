@@ -5,6 +5,7 @@ import { getSession } from "@/lib/session"
 import Transaction from "@/models/transaction"
 import Listing from "@/models/listing"
 import { revalidatePath } from "next/cache"
+import Lease from "@/models/lease"
 
 export async function verifyPaystackPayment(reference: string, listingId: string, expectedAmountInGhs: number) {
   try {
@@ -45,20 +46,24 @@ export async function verifyPaystackPayment(reference: string, listingId: string
       return { success: true, message: "Payment was already verified!" };
     }
 
+    const newLease = await Lease.create({
+      listingId: listingId,
+      userId: session.userId,
+      totalRentAmount: amountPaidInGhs,
+      status: "Pending_Verification" 
+    });
     // 4. Record the Transaction in the database using your updated Schema
-    await Transaction.create({
+  await Transaction.create({
       userId: session.userId,
       listingId: listingId,
+      leaseId: newLease._id, // LINK THE TRANSACTION TO THE NEW LEASE
       amount: amountPaidInGhs,
-      currency: data.data.currency, // Usually 'GHS'
+      currency: data.data.currency,
       paymentPurpose: "Upfront_Rent", 
-      
-      // Paystack specific fields
       reference: reference,
-      paystackTransactionId: data.data.id.toString(), // Paystack's internal ID
-      channel: data.data.channel || "card", // e.g., 'mobile_money', 'card'
-      paystackFee: data.data.fees ? (data.data.fees / 100) : 0, // Convert fee from pesewas to GHS
-      
+      paystackTransactionId: data.data.id.toString(),
+      channel: data.data.channel || "card",
+      paystackFee: data.data.fees ? (data.data.fees / 100) : 0,
       status: "Success",
       paidAt: new Date(data.data.paid_at)
     });
@@ -69,6 +74,7 @@ export async function verifyPaystackPayment(reference: string, listingId: string
     // 6. Revalidate routes to clear cached UI
     revalidatePath("/admin/transactions");
     revalidatePath("/explore");
+    revalidatePath("/user/leases");
     revalidatePath(`/properties/${listingId}`); // If you use listingId in the URL
 
     return { success: true, message: "Payment secured successfully!" };

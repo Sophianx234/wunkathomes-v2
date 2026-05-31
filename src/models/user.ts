@@ -33,13 +33,23 @@ const userSchema = new mongoose.Schema({
     enum: ['Unverified', 'Pending', 'Verified', 'Rejected'],
     default: 'Unverified',
   },
-  ghanaCardNumber: {
-    type: String,
-    select: false, // Security: Prevents this field from being returned in standard queries unless explicitly requested
+  legalName: {
+    type: String, // Separate from the display 'name', this must match the ID exactly
   },
-  ghanaCardUrl: {
+  dateOfBirth: {
+    type: Date,
+  },
+  idDocumentType: {
     type: String,
-    select: false, // Security: Link to the uploaded image of the card (e.g., AWS S3 or Cloudinary)
+    enum: ['GHA', 'VOTER'],
+  },
+  idDocumentNumber: {
+    type: String,
+    select: false, // Security: hide by default
+  },
+  idVerificationPhotoUrl: {
+    type: String, // S3/Cloudinary link to the "Selfie with ID" photo
+    select: false, 
   },
   accountStatus: {
   type: String,

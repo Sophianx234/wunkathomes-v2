@@ -93,7 +93,7 @@ export default async function SavedPropertiesPage() {
           </div>
         ) : (
           /* EMPTY STATE */
-          <div className="flex flex-col items-center justify-center py-20 px-4 text-center bg-white border border-slate-200 rounded-3xl shadow-sm max-w-3xl mx-auto mt-8">
+          <div className="flex flex-col items-center justify-center py-20 px-4 text-center bg-white    mx-auto mt-8">
             <div className="h-20 w-20 bg-slate-50 rounded-full flex items-center justify-center mb-6 border border-slate-100">
               <HugeiconsIcon icon={Home09Icon} size={32} className="text-slate-300" />
             </div>

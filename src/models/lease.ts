@@ -13,7 +13,6 @@ const leaseSchema = new mongoose.Schema({
   },
   startDate: {
     type: Date,
-    required: true,
   },
   endDate: {
     type: Date, // Nullable if it's a permanent sale
@@ -24,21 +23,33 @@ const leaseSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['Pending_Deposit', 'Pending_Balance', 'Active', 'Expired', 'Cancelled'],
-    default: 'Pending_Deposit',
+    enum: [
+      'Awaiting_Payment',       // User selected dates but hasn't paid
+      'Pending_Verification',   // Paid, but needs to do the Selfie/ID step
+      'Awaiting_Admin_Approval',// KYC submitted, Admin needs to check it
+      'Active',                 // Admin approved, PIN issued, tenant is in
+      'Expired',                // Lease ended naturally
+      'Cancelled'               // Refunded or voided
+    ],
+    default: 'Awaiting_Payment',
   },
   documentUrl: {
     type: String, // Link to the signed PDF agreement
   },
-  // Add this inside your Lease schema
-signatureAudit: {
-  isSigned: { type: Boolean, default: false },
-  signedAt: { type: Date },
-  ipAddress: { type: String }, // e.g., "197.251.x.x"
-  userAgent: { type: String }, // e.g., "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0...)"
-  typedName: { type: String }, // The exact name they typed to sign
-  documentHash: { type: String } // Optional: A cryptographic hash of the PDF to prove it wasn't altered
-}
+  smartLockPin: {
+    type: String,
+    select: false, // Security: Never send this to the frontend unless explicitly requested by the authenticated tenant
+  },
+
+  
+  signatureAudit: {
+    isSigned: { type: Boolean, default: false },
+    signedAt: { type: Date },
+    ipAddress: { type: String }, 
+    userAgent: { type: String }, 
+    typedName: { type: String }, 
+    documentHash: { type: String } 
+  }
 }, { timestamps: true });
 
 const Lease = mongoose.models.Lease || mongoose.model('Lease', leaseSchema);
