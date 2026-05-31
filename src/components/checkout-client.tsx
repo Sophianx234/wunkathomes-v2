@@ -4,12 +4,11 @@ import { useState } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
-import { usePaystackPayment } from "react-paystack" // 1. Import Paystack Hook
-import { toast } from "sonner" // Assuming you use Sonner for toasts
+import { usePaystackPayment } from "react-paystack"
+import { toast } from "sonner" 
 
 import { 
   ArrowLeft01Icon, 
-  LockKeyIcon, 
   CheckmarkBadge01Icon,
   CreditCardIcon,
   SmartPhone01Icon,
@@ -28,7 +27,11 @@ interface CheckoutClientProps {
 export default function CheckoutClient({ listing, currentUser }: CheckoutClientProps) {
   const searchParams = useSearchParams()
   const router = useRouter()
-  const type = searchParams.get('type') 
+  
+  // Setup default move-in date to tomorrow
+  const tomorrow = new Date()
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  const defaultDate = tomorrow.toISOString().split('T')[0]
 
   // --- State ---
   const [formData, setFormData] = useState({
@@ -36,20 +39,19 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
     email: currentUser?.email || "",
     phone: currentUser?.phone || ""
   })
+  const [moveInDate, setMoveInDate] = useState(defaultDate)
   const [isProcessing, setIsProcessing] = useState(false)
 
- const USD_TO_GHS_RATE = 15.00; 
+  const USD_TO_GHS_RATE = 15.00; 
   const priceInGhs = listing.price * USD_TO_GHS_RATE;
 
-  // 2. Paystack Configuration
+  // Paystack Configuration
   const paystackConfig = {
     reference: new Date().getTime().toString(),
     email: formData.email,
-    // amount must be in the lowest denomination (Pesewas)
-    // So we take the GHS price and multiply by 100
     amount: Math.round(priceInGhs * 100), 
     publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY as string,
-    currency: "GHS", // <--- CHANGED FROM "USD" TO "GHS"
+    currency: "GHS", 
     metadata: {
       custom_fields: [
         {
@@ -66,6 +68,11 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
           display_name: "Property Slug",
           variable_name: "property_slug",
           value: listing.slug,
+        },
+        {
+          display_name: "Move-In Date",
+          variable_name: "move_in_date",
+          value: moveInDate,
         }
       ],
     },
@@ -81,41 +88,42 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
     return "Location available upon booking";
   }
 
-  // 3. Handle Paystack Success & Close events
-const onSuccess = async (paystackResponse: any) => {
+  // Handle Paystack Success & Close events
+  const onSuccess = async (paystackResponse: any) => {
     toast.loading("Verifying your payment securely...", { id: "payment-toast" });
 
-    // Call the Server Action
+    // Call the Server Action, now passing the moveInDate
     const result = await verifyPaystackPayment(
       paystackResponse.reference, 
       listing._id, 
-      priceInGhs 
+      priceInGhs,
+      moveInDate 
     );
 
     if (result.success) {
       toast.success(result.message, { id: "payment-toast" });
       
-      // NEW: Redirect to the dedicated success page, passing the reference ID
       setTimeout(() => {
         router.push(`/checkout/success?reference=${paystackResponse.reference}`); 
-      }, 1000); // Shorter delay so they get to the success page faster
+      }, 1000); 
       
     } else {
       toast.error(result.message, { id: "payment-toast" });
       setIsProcessing(false);
     }
   }
+
   const onClose = () => {
     setIsProcessing(false)
     toast.error("Payment cancelled. Your reservation is not complete.")
   }
 
-  // 4. Form Submit Handler
+  // Form Submit Handler
   const handlePayment = (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!formData.email || !formData.legalName || !formData.phone) {
-      toast.error("Please complete all tenant details.")
+    if (!formData.email || !formData.legalName || !formData.phone || !moveInDate) {
+      toast.error("Please complete all required details.")
       return
     }
 
@@ -197,6 +205,24 @@ const onSuccess = async (paystackResponse: any) => {
                       className="w-full p-4 border border-slate-300 rounded-lg text-sm font-bold focus:outline-none focus:border-black focus:ring-1 focus:ring-black bg-slate-50 focus:bg-white transition-all"
                     />
                   </div>
+                </div>
+
+                {/* Move-In Date Selector */}
+                <div className="pt-2">
+                  <label className="block text-[11px] font-bold uppercase tracking-widest text-slate-500 mb-2">
+                    Expected Move-In Date
+                  </label>
+                  <input 
+                    required
+                    type="date" 
+                    min={defaultDate}
+                    value={moveInDate}
+                    onChange={e => setMoveInDate(e.target.value)}
+                    className="w-full p-4 border border-slate-300 rounded-lg text-sm font-bold focus:outline-none focus:border-black focus:ring-1 focus:ring-black bg-slate-50 focus:bg-white transition-all"
+                  />
+                  <p className="text-[10px] text-slate-400 mt-2 font-medium">
+                    Your digital lease and Smart Lock PIN will activate at 12:00 AM on this date.
+                  </p>
                 </div>
               </div>
             </div>

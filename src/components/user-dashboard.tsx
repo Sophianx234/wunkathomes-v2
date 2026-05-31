@@ -17,6 +17,7 @@ import {
 } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import Image from "next/image"
+import Link from "next/link"
 
 // Define the shape of the data passed from the Server Component
 export interface DashboardProps {
@@ -297,7 +298,7 @@ export function UserDashboard({ user, lease, listing }: DashboardProps) {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 
                 {/* Maintenance */}
-                <button className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:border-primary hover:shadow-md transition-all text-left flex flex-col gap-4 group">
+                <Link href="/user/maintenance" className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:border-primary hover:shadow-md transition-all text-left flex flex-col gap-4 group">
                   <div className="w-10 h-10 bg-slate-50 text-slate-600 rounded-full flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-colors">
                     <HugeiconsIcon icon={Wrench01Icon} size={20} />
                   </div>
@@ -305,10 +306,10 @@ export function UserDashboard({ user, lease, listing }: DashboardProps) {
                     <h4 className="font-bold text-slate-900 mb-1">Report an Issue</h4>
                     <p className="text-xs text-slate-500 leading-relaxed font-medium">Create a maintenance ticket for plumbing, AC, or smart lock issues.</p>
                   </div>
-                </button>
+                </Link>
 
                 {/* Ledger */}
-                <button className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:border-primary hover:shadow-md transition-all text-left flex flex-col gap-4 group">
+                <Link href="/user/transactions" className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:border-primary hover:shadow-md transition-all text-left flex flex-col gap-4 group">
                   <div className="w-10 h-10 bg-slate-50 text-slate-600 rounded-full flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-colors">
                     <HugeiconsIcon icon={CreditCardIcon} size={20} />
                   </div>
@@ -316,10 +317,10 @@ export function UserDashboard({ user, lease, listing }: DashboardProps) {
                     <h4 className="font-bold text-slate-900 mb-1">Payment Ledger</h4>
                     <p className="text-xs text-slate-500 leading-relaxed font-medium">View your transaction history and download official receipts.</p>
                   </div>
-                </button>
+                </Link>
 
                 {/* Documents */}
-                <button className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:border-primary hover:shadow-md transition-all text-left flex flex-col gap-4 group">
+                <Link href="/user/documents" className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:border-primary hover:shadow-md transition-all text-left flex flex-col gap-4 group">
                   <div className="w-10 h-10 bg-slate-50 text-slate-600 rounded-full flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-colors">
                     <HugeiconsIcon icon={SignatureIcon} size={20} />
                   </div>
@@ -327,7 +328,7 @@ export function UserDashboard({ user, lease, listing }: DashboardProps) {
                     <h4 className="font-bold text-slate-900 mb-1">Lease Document</h4>
                     <p className="text-xs text-slate-500 leading-relaxed font-medium">Download a PDF copy of your signed digital tenancy agreement.</p>
                   </div>
-                </button>
+                </Link>
 
               </div>
 

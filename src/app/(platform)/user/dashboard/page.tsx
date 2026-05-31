@@ -16,6 +16,12 @@ export default async function DashboardPage() {
  
   const dbUser = await User.findById(session.userId).lean()
   if (!dbUser) redirect("/login")
+
+
+  // 2. KYC not done? Go do KYC.
+  if (dbUser.kycStatus === 'Unverified' || dbUser.kycStatus === 'Rejected') {
+    redirect("/user/kyc-verification") 
+  }
   // Fetch the active or pending lease for this user.
   // We use .select('+smartLockPin') because your schema hides the PIN by default.
   const dbLease = await Lease.findOne({
@@ -26,6 +32,9 @@ export default async function DashboardPage() {
     .populate('listingId')
     .lean()
 
+if (dbUser.kycStatus === 'Verified' && !dbLease.signatureAudit?.isSigned) {
+    redirect("/user/sign-lease") 
+  }
   // If they don't have a lease yet, show a fallback or redirect
   if (!dbLease) {
     return (

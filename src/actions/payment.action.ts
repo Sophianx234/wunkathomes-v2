@@ -7,7 +7,7 @@ import Listing from "@/models/listing"
 import { revalidatePath } from "next/cache"
 import Lease from "@/models/lease"
 
-export async function verifyPaystackPayment(reference: string, listingId: string, expectedAmountInGhs: number) {
+export async function verifyPaystackPayment(reference: string, listingId: string, expectedAmountInGhs: number,selectedMoveInDate: string) {
   try {
     const session = await getSession();
     if (!session || !session.userId) {
@@ -50,6 +50,7 @@ export async function verifyPaystackPayment(reference: string, listingId: string
       listingId: listingId,
       userId: session.userId,
       totalRentAmount: amountPaidInGhs,
+      startDate: new Date(selectedMoveInDate),
       status: "Pending_Verification" 
     });
     // 4. Record the Transaction in the database using your updated Schema
