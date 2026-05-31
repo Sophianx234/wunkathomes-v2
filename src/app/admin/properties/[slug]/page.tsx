@@ -69,7 +69,7 @@ const formatLocation = (locationObj: any) => {
     : `${locationObj.area}, ${locationObj.region}`;
 };
 
-const mapToIProperty = (doc: any): IProperty & { property: { generalAmenities: string[] } } => ({
+export const mapToIProperty = (doc: any): IProperty & { property: { generalAmenities: string[] } } => ({
   id: doc._id.toString(),
   slug: doc.slug,
   listingType: doc.listingType,

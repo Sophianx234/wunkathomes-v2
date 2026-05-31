@@ -1,42 +1,62 @@
 import mongoose from 'mongoose';
 
 const transactionSchema = new mongoose.Schema({
-  leaseId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Lease',
-    required: true,
-  },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true, // The person who paid
+    required: true,
+  },
+  listingId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Listing',
+    required: true, 
+  },
+  leaseId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Lease',
+    // Populated later when the digital lease is generated
   },
   amount: {
     type: Number,
-    required: true,
+    required: true, // The amount the user was charged
+  },
+  currency: {
+    type: String,
+    enum: ['GHS', 'USD'],
+    default: 'GHS',
   },
   paymentPurpose: {
     type: String,
-    enum: ['Booking_Deposit', 'Rent_Balance', 'Monthly_Renewal', 'Purchase'],
+    enum: ['Upfront_Rent', 'Rent_Balance', 'Monthly_Renewal', 'Purchase'],
     required: true,
   },
-  paymentMethod: {
+  // --- PAYSTACK SPECIFIC FIELDS ---
+  reference: {
     type: String,
-    enum: ['Paystack', 'Bank_Transfer', 'Cash'],
-    required: true,
+    required: true, 
+    unique: true, // The unique string you passed to usePaystackPayment
   },
-  transactionReference: {
+  paystackTransactionId: {
+    type: String, 
+    // Paystack's internal numerical ID (useful for webhooks and refunds)
+  },
+  channel: {
     type: String,
-    required: true, // Paystack ID or Bank reference
-    unique: true,
+    enum: ['card', 'mobile_money', 'bank', 'pending'],
+    default: 'pending',
+    // Populated upon verification: Tells the admin if they paid via MTN, Visa, etc.
   },
-  proofOfPaymentUrl: {
-    type: String, // Image URL for uploaded bank transfer receipts
+  paystackFee: {
+    type: Number,
+    // Great for accounting: How much Paystack took from this transaction
   },
   status: {
     type: String,
-    enum: ['Pending_Verification', 'Completed', 'Failed', 'Refunded'],
-    default: 'Pending_Verification', // Bank transfers default to this until Admin approves
+    enum: ['Pending', 'Success', 'Failed', 'Refunded', 'Abandoned'],
+    default: 'Pending', 
+  },
+  paidAt: {
+    type: Date, // Exact timestamp from Paystack when funds cleared
   }
 }, { timestamps: true });
 

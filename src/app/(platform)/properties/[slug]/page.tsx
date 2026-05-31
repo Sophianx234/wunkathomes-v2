@@ -26,12 +26,16 @@ import BookingCard from "@/components/booking-card"
 import SavePropertyButton from "@/components/ui/saved-property-button"
 import { getSession, SessionPayload } from "@/lib/session"
 import SavedProperty from "@/models/saved"
+import { connectToDatabase } from "@/config/DbConnect"
+import Review from "@/models/review"
+import { mapToIProperty } from "@/app/admin/properties/[slug]/page"
+import Listing from "@/models/listing"
 
 interface PropertyPageProps {
   params: Promise<{ slug: string }>
 }
 
-async function getListingData(slug: string) {
+async function getListingDatax(slug: string) {
   // Simulate DB Delay
   await new Promise((resolve) => setTimeout(resolve, 500))
   
@@ -42,6 +46,42 @@ async function getListingData(slug: string) {
 
   return { listing, similar }
 }
+async function getListingData(slug: string) {
+  await connectToDatabase()
+  const rawListing = await Listing.findOne({ slug })
+    .populate("propertyId")
+    .lean()
+console.log("Fetched listing data:", rawListing);
+  if (!rawListing) return { listing: null, similar: [], reviews: [] }
+
+  const rawSimilar = await Listing.find({ 
+    listingType: rawListing.listingType, 
+    slug: { $ne: slug } 
+  })
+    .populate("propertyId")
+    .limit(5)
+    .lean()
+
+  const rawReviews = await Review.find({ listingId: rawListing._id })
+    .populate("userId", "name") 
+    .sort({ createdAt: -1 })
+    .lean()
+
+  const serializedReviews = rawReviews.map(r => ({
+    id: r._id.toString(),
+    rating: r.rating,
+    comment: r.comment,
+    date: r.createdAt,
+    userName: r.userId?.name || "Verified Guest" 
+  }));
+
+  return { 
+    listing: mapToIProperty(rawListing), 
+    similar: rawSimilar.map(mapToIProperty),
+    reviews: serializedReviews
+  }
+}
+
 
 export default async function PropertyDetailsPage({ params }: PropertyPageProps) {
   const { slug } = await params
