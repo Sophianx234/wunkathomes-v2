@@ -2,40 +2,38 @@ import { redirect } from "next/navigation"
 import { getSession, SessionPayload } from "@/lib/session"
 import User from "@/models/user"
 import Lease from "@/models/lease"
-import "@/models/listing" // Ensure listing is registered for population
+import "@/models/listing" 
+import "@/models/property" // Ensure Property is loaded for deep population
 
-// Import your beautifully built Client Component
 import { UserDashboard } from "@/components/user-dashboard" 
 import { connectToDatabase } from "@/config/DbConnect"
 
 export default async function DashboardPage() {
-  // 1. Session Check
-  const session = await getSession() as SessionPayload
-  await connectToDatabase()
- 
- 
-  const dbUser = await User.findById(session.userId).lean()
-  if (!dbUser) redirect("/login")
+  const session = await getSession() as SessionPayload;
+  if (!session?.userId) redirect("/login");
 
+  await connectToDatabase();
 
-  // 2. KYC not done? Go do KYC.
+  const dbUser = await User.findById(session.userId).lean();
+  if (!dbUser) redirect("/login");
+
+  // 1. KYC Check
   if (dbUser.kycStatus === 'Unverified' || dbUser.kycStatus === 'Rejected') {
-    redirect("/user/kyc-verification") 
+    redirect("/user/kyc-verification"); 
   }
-  // Fetch the active or pending lease for this user.
-  // We use .select('+smartLockPin') because your schema hides the PIN by default.
+
+  // 2. Fetch the Lease with Deep Population (Lease -> Listing -> Property)
   const dbLease = await Lease.findOne({
     userId: session.userId,
     status: { $in: ['Awaiting_Admin_Approval', 'Active'] }
   })
     .select('+smartLockPin')
-    .populate('listingId')
-    .lean()
+    .populate({
+      path: 'listingId',
+      populate: { path: 'propertyId' } // Populates the parent property for amenities/location
+    })
+    .lean();
 
-if (dbUser.kycStatus === 'Verified' && !dbLease.signatureAudit?.isSigned) {
-    redirect("/user/sign-lease") 
-  }
-  // If they don't have a lease yet, show a fallback or redirect
   if (!dbLease) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-500 font-bold uppercase tracking-widest text-sm">
@@ -44,40 +42,55 @@ if (dbUser.kycStatus === 'Verified' && !dbLease.signatureAudit?.isSigned) {
     )
   }
 
-  // 3. Serialize the Data (Convert ObjectIds and Dates to strings for the Client)
+  // 3. Signature Check (MUST happen after we confirm dbLease exists!)
+  if (dbUser.kycStatus === 'Verified' && !dbLease.signatureAudit?.isSigned) {
+    redirect("/user/sign-lease"); 
+  }
+
+  // 4. Calculate End Date (Default to 1 year if not explicitly set)
+  let endDate = dbLease.endDate;
+  if (!endDate && dbLease.startDate) {
+    const end = new Date(dbLease.startDate);
+    end.setFullYear(end.getFullYear() + 1); // Add 12 months
+    endDate = end;
+  }
+
+  // 5. Serialize the Data
   const serializedUser = {
     name: dbUser.name,
     kycStatus: dbUser.kycStatus || "Unverified",
-  }
+  };
 
   const serializedLease = {
     id: dbLease._id.toString(),
     status: dbLease.status,
     totalRentAmount: dbLease.totalRentAmount,
     startDate: dbLease.startDate ? new Date(dbLease.startDate).toISOString() : new Date().toISOString(),
-    endDate: dbLease.endDate ? new Date(dbLease.endDate).toISOString() : undefined,
+    endDate: endDate ? new Date(endDate).toISOString() : undefined,
     smartLockPin: dbLease.smartLockPin,
     signatureAudit: {
       isSigned: dbLease.signatureAudit?.isSigned || false,
     }
-  }
+  };
 
-  // Extract populated listing details safely
-  const listingDoc = dbLease.listingId as any
-  
-  // Safely extract location (handling both string and object location schemas)
-  const loc = listingDoc?.propertyId?.location || listingDoc?.location
-  const locationString = loc ? (typeof loc === 'string' ? loc : `${loc.area}, ${loc.city || loc.region}`) : "Accra, Ghana"
+  const listingDoc = dbLease.listingId as any;
+  const propertyDoc = listingDoc?.propertyId;
+  const loc = propertyDoc?.location || listingDoc?.location;
+  const locationString = loc ? (typeof loc === 'string' ? loc : `${loc.area}, ${loc.city || loc.region}`) : "Accra, Ghana";
 
   const serializedListing = {
     title: listingDoc?.title || "WunkatHomes Property",
     images: listingDoc?.images || [],
     location: locationString,
-    wifiNetwork: "Wunkat_5G", // Placeholder until added to schema
-    wifiPassword: "wunkat2026", // Placeholder until added to schema
-  }
+    propertyType: propertyDoc?.propertyType?.replace('_', ' ') || "Property",
+    bedrooms: listingDoc?.features?.bedrooms || 0,
+    bathrooms: listingDoc?.features?.bathrooms || 0,
+    sizeSqm: listingDoc?.features?.sizeSqm || 0,
+    amenities: propertyDoc?.generalAmenities || [],
+    wifiNetwork: "Wunkat_5G", 
+    wifiPassword: "wunkat2026", 
+  };
 
-  // 4. Render the Client Component with the Default Export
   return (
     <UserDashboard 
       user={serializedUser} 
