@@ -37,19 +37,32 @@ export default function DocumentVaultClient({ data }: DocumentVaultClientProps) 
   }
 
   return (
-    <>
-      {/* Force professional A4 portrait formatting for the printed document */}
+      <>
       <style dangerouslySetInnerHTML={{__html: `
         @media print {
           @page {
             size: A4 portrait;
-            margin: 20mm;
+            margin: 15mm;
           }
-          /* Hide browser-generated headers and footers (URLs, dates) */
-          @page :first { margin-top: 20mm; }
+          /* Nuke all global heights that cause blank pages */
+          html, body, #__next, main {
+            height: auto !important;
+            min-height: auto !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: visible !important;
+          }
+          /* Strip background colors */
           body { 
             -webkit-print-color-adjust: exact; 
             print-color-adjust: exact;
+            background: white !important;
+          }
+            footer,navbar{
+            display: none !important;}
+          /* Force standard block rendering to fix pagination breaking */
+          * {
+            float: none !important;
           }
         }
       `}} />
@@ -83,7 +96,7 @@ export default function DocumentVaultClient({ data }: DocumentVaultClientProps) 
             {/* ========================================================= */}
             {/* HTML DOCUMENT VIEWER (THIS IS WHAT PRINTS) */}
             {/* ========================================================= */}
-            <div className="lg:col-span-8 bg-white border border-zinc-200 rounded-2xl shadow-sm flex flex-col print:border-none print:shadow-none print:w-full print:block">
+            <div className="lg:col-span-8 bg-white border border-zinc-200 rounded-2xl  flex flex-col print:border-none print:shadow-none print:w-full print:block">
               
               {/* Viewer Header - HIDDEN DURING PRINT */}
    
@@ -154,7 +167,7 @@ export default function DocumentVaultClient({ data }: DocumentVaultClientProps) 
             {/* AUDIT TRAIL SIDEBAR - HIDDEN DURING PRINT */}
             {/* ========================================================= */}
             <div className="lg:col-span-4 space-y-6 print:hidden">
-              <div className="bg-white p-6 rounded-2xl border border-zinc-200 shadow-sm sticky top-12">
+              <div className="bg-white p-6 rounded-2xl border border-zinc-200  sticky top-12">
                 <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-4 flex items-center gap-1.5">
                   Signature Details
                 </h3>

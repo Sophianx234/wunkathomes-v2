@@ -279,7 +279,7 @@ export function UserDashboard({ user, lease, listing }: DashboardProps) {
               <HugeiconsIcon icon={CreditCardIcon} size={20} />
             </div>
             <div>
-              <h4 className="font-bold text-slate-900 mb-1">Payment Ledger</h4>
+              <h4 className="font-bold text-slate-900 mb-1">Payment History</h4>
               <p className="text-xs text-slate-500 leading-relaxed font-medium">View your transaction history and download official receipts.</p>
             </div>
           </Link>
@@ -290,7 +290,7 @@ export function UserDashboard({ user, lease, listing }: DashboardProps) {
             </div>
             <div>
               <h4 className="font-bold text-slate-900 mb-1">Lease Document</h4>
-              <p className="text-xs text-slate-500 leading-relaxed font-medium">Download a PDF copy of your signed digital tenancy agreement.</p>
+              <p className="text-xs text-slate-500 leading-relaxed font-medium">Download a PDF copy of your signed tenancy agreement document.</p>
             </div>
           </Link>
 
