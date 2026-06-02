@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { SubmitButton } from "@/components/submit-button";
 
 // 1. IMPORT THE REAL ACTION
-import { submitMaintenanceRequest, ActionState } from "@/actions/maintenance.action";
+import { submitMaintenanceRequest, ActionState } from "@/actions/user/maintenance.action";
 
 // 2. DEFINE INITIAL STATE
 const initialState: ActionState = { success: false, message: "" };

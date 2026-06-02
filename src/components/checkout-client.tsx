@@ -17,7 +17,7 @@ import {
 } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { IProperty } from "@/components/property-card"
-import { verifyPaystackPayment } from "@/actions/payment.action"
+import { verifyPaystackPayment } from "@/actions/user/payment.action"
 
 interface CheckoutClientProps {
   listing: IProperty | any;

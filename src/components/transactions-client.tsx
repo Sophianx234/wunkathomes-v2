@@ -111,7 +111,6 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-2">
           <div>
             <h1 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-zinc-900">Payment History</h1>
-            <p className="text-sm font-medium text-zinc-500 mt-1">Easily track your rent payments, deposits, and download your digital receipts.</p>
           </div>
 
           <Tabs value={activeTab} onValueChange={(val) => setActiveTab(val as any)} className="w-full md:w-auto">

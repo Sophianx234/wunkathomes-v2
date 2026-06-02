@@ -2,8 +2,15 @@
 
 import { useState, useActionState, useEffect } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Loading03Icon, StarIcon, cancelIcon } from "@hugeicons/core-free-icons";
-import { submitReviewAction, ReviewActionState } from "@/actions/review.action";
+import {
+  Loading03Icon,
+  StarIcon,
+  cancelIcon,
+} from "@hugeicons/core-free-icons";
+import {
+  submitReviewAction,
+  ReviewActionState,
+} from "@/actions/user/review.action";
 import { toast } from "sonner";
 import { useParams } from "next/navigation";
 
@@ -17,11 +24,14 @@ export default function ReviewForm({ listingId }: ReviewFormProps) {
   const params = useParams();
   const slug = params.slug as string;
 
-  const [state, formAction, isPending] = useActionState(submitReviewAction, initialState);
-  
+  const [state, formAction, isPending] = useActionState(
+    submitReviewAction,
+    initialState,
+  );
+
   // New state to toggle form visibility
   const [isOpen, setIsOpen] = useState(false);
-  
+
   const [hoveredStar, setHoveredStar] = useState<number>(0);
   const [selectedRating, setSelectedRating] = useState<number>(0);
   const [comment, setComment] = useState("");
@@ -53,8 +63,8 @@ export default function ReviewForm({ listingId }: ReviewFormProps) {
     <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 mb-8 animate-in fade-in zoom-in-95 duration-200">
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-black text-lg">Leave a Review</h3>
-        <button 
-          type="button" 
+        <button
+          type="button"
           onClick={() => {
             setIsOpen(false);
             setSelectedRating(0);
@@ -82,19 +92,21 @@ export default function ReviewForm({ listingId }: ReviewFormProps) {
               onClick={() => setSelectedRating(star)}
               className="focus:outline-none transition-transform hover:scale-110"
             >
-              <HugeiconsIcon 
-                icon={StarIcon} 
-                size={28} 
+              <HugeiconsIcon
+                icon={StarIcon}
+                size={28}
                 className={`transition-colors ${
-                  star <= (hoveredStar || selectedRating) 
-                    ? "fill-black text-black" 
+                  star <= (hoveredStar || selectedRating)
+                    ? "fill-black text-black"
                     : "text-slate-300"
-                }`} 
+                }`}
               />
             </button>
           ))}
           <span className="ml-3 text-sm font-medium text-slate-500">
-            {selectedRating > 0 ? `${selectedRating} out of 5` : "Select a rating"}
+            {selectedRating > 0
+              ? `${selectedRating} out of 5`
+              : "Select a rating"}
           </span>
         </div>
 
@@ -115,7 +127,13 @@ export default function ReviewForm({ listingId }: ReviewFormProps) {
             disabled={isPending || selectedRating === 0}
             className="px-6 py-3 flex items-center bg-black text-white font-bold uppercase tracking-widest text-[10px] rounded-md hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isPending && <HugeiconsIcon icon={Loading03Icon} size={16} className="inline-block animate-spin mr-2" />}
+            {isPending && (
+              <HugeiconsIcon
+                icon={Loading03Icon}
+                size={16}
+                className="inline-block animate-spin mr-2"
+              />
+            )}
             {isPending ? "Submitting..." : "Post Review"}
           </button>
         </div>
