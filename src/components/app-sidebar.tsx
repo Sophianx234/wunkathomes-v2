@@ -87,6 +87,11 @@ const data = {
           url: "/admin/access-control",
           icon: <HugeiconsIcon icon={LockIcon} strokeWidth={2} />,
         },
+        {
+          title: "Support ",
+          url: "/admin/support",
+          icon: <HugeiconsIcon icon={HelpCircleIcon} strokeWidth={2} />,
+        },
       ]
     }
   ],

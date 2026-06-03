@@ -516,14 +516,14 @@ export default function AccessControlDashboard() {
               <TabsList className="h-10 bg-zinc-100/80 border border-zinc-200/60 p-1 rounded-xl w-full flex">
                 <TabsTrigger
                   value="tenant"
-                  className="text-[13px] font-semibold data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg px-6 flex items-center justify-center gap-2 flex-1"
+                  className="text-[13px] font-semibold data-[state=active]:bg-white  rounded-lg px-6 flex items-center justify-center gap-2 flex-1"
                 >
                   <HugeiconsIcon icon={UserGroupIcon} size={15} /> View by
                   Tenant
                 </TabsTrigger>
                 <TabsTrigger
                   value="unit"
-                  className="text-[13px] font-semibold data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg px-6 flex items-center justify-center gap-2 flex-1"
+                  className="text-[13px] font-semibold data-[state=active]:bg-white  rounded-lg px-6 flex items-center justify-center gap-2 flex-1"
                 >
                   <HugeiconsIcon icon={GridIcon} size={15} /> View by Unit
                 </TabsTrigger>

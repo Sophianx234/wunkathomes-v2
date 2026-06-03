@@ -58,7 +58,6 @@ export default async function TourManagementPage() {
         
         {/* Pass the real server data to the interactive client component */}
         <TourTable initialTours={tours} />
-        <Toaster position="top-right" />
       </div>
     </div>
   );
