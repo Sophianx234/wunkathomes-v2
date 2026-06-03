@@ -1,14 +1,14 @@
-"use client"
+"use client";
 
-import React from "react"
-import { 
+import React from "react";
+import {
   Home09Icon,
   UserCircleIcon,
   TickDouble02Icon,
   CreditCardIcon,
-  SmartPhone01Icon
-} from "@hugeicons/core-free-icons"
-import { HugeiconsIcon } from "@hugeicons/react"
+  SmartPhone01Icon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 
 interface PrintReceiptProps {
   transaction: any;
@@ -16,35 +16,52 @@ interface PrintReceiptProps {
 
 export default function PrintReceipt({ transaction }: PrintReceiptProps) {
   // --- Formatting logic specific to the print ticket ---
-  const formattedDateShort = new Date(transaction.paidAt || transaction.createdAt).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  }).toUpperCase()
+  const formattedDateShort = new Date(
+    transaction.paidAt || transaction.createdAt,
+  )
+    .toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    })
+    .toUpperCase();
 
-  const formattedTimeShort = new Date(transaction.paidAt || transaction.createdAt).toLocaleTimeString('en-US', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false
-  })
+  const formattedTimeShort = new Date(
+    transaction.paidAt || transaction.createdAt,
+  ).toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
 
-  const loc = transaction.listingId?.propertyId?.location
-  const locationString = loc ? (typeof loc === 'string' ? loc : `${loc.area}, ${loc.city || loc.region}`) : "Accra, Ghana"
+  const loc = transaction.listingId?.propertyId?.location;
+  const locationString = loc
+    ? typeof loc === "string"
+      ? loc
+      : `${loc.area}, ${loc.city || loc.region}`
+    : "Accra, Ghana";
 
   const generateBarcodeLines = () => {
     const lines = [];
     const seed = transaction.reference || "WUNKAT123456";
     for (let i = 0; i < 40; i++) {
       const width = (seed.charCodeAt(i % seed.length) % 4) + 1;
-      lines.push(<div key={i} className="bg-black h-12" style={{ width: `${width}px`, marginRight: '2px' }} />);
+      lines.push(
+        <div
+          key={i}
+          className="bg-primary h-12"
+          style={{ width: `${width}px`, marginRight: "2px" }}
+        />,
+      );
     }
     return lines;
-  }
+  };
 
   return (
     <>
-      <style dangerouslySetInnerHTML={{
-        __html: `
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
           @media print {
             @page { 
               margin: 0 !important; 
@@ -78,28 +95,35 @@ export default function PrintReceipt({ transaction }: PrintReceiptProps) {
               overflow: hidden !important;
             }
           }
-        `
-      }} />
+        `,
+        }}
+      />
 
       {/* Outer Wrapper: Acts as the full-screen flex container on print */}
-      <div 
+      <div
         id="isolated-print-receipt"
         className="hidden"
-        style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }} 
+        style={{ WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" }}
       >
         {/* Inner Wrapper: Controls the actual width of the ticket */}
         <div className="w-full max-w-md px-4">
-          
           <div className="w-full bg-white border-2 border-slate-200 rounded-t-3xl relative overflow-hidden print:break-inside-avoid ">
-            
             {/* Top Section */}
             <div className="pt-8 pb-6 px-8 text-center flex flex-col items-center">
               <div className="w-14 h-14 bg-green-50 rounded-full flex items-center justify-center mb-4">
-                <HugeiconsIcon icon={TickDouble02Icon} size={28} className="text-green-500" />
+                <HugeiconsIcon
+                  icon={TickDouble02Icon}
+                  size={28}
+                  className="text-green-500"
+                />
               </div>
-              <h1 className="text-2xl font-black text-slate-900 mb-2">Thank you</h1>
+              <h1 className="text-2xl font-black text-slate-900 mb-2">
+                Thank you
+              </h1>
               <p className="text-sm font-medium text-slate-500">
-                Your payment has been processed<br/>successfully.
+                Your payment has been processed
+                <br />
+                successfully.
               </p>
             </div>
 
@@ -114,50 +138,80 @@ export default function PrintReceipt({ transaction }: PrintReceiptProps) {
             <div className="pt-4 pb-8 px-8">
               <div className="flex justify-between items-start mb-5">
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Ticket ID</p>
-                  <p className="font-mono font-bold text-sm text-slate-900">{transaction.reference}</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">
+                    Ticket ID
+                  </p>
+                  <p className="font-mono font-bold text-sm text-slate-900">
+                    {transaction.reference}
+                  </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Amount</p>
-                  <p className="font-black text-lg text-slate-900">${transaction.amount?.toLocaleString()}</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">
+                    Amount
+                  </p>
+                  <p className="font-black text-lg text-slate-900">
+                    ${transaction.amount?.toLocaleString()}
+                  </p>
                 </div>
               </div>
 
               <div className="mb-5">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Date & Time</p>
-                <p className="font-bold text-sm text-slate-900">{formattedDateShort} | {formattedTimeShort}</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">
+                  Date & Time
+                </p>
+                <p className="font-bold text-sm text-slate-900">
+                  {formattedDateShort} | {formattedTimeShort}
+                </p>
               </div>
 
               <div className="mb-5">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Property</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">
+                  Property
+                </p>
                 <p className="font-bold text-sm text-slate-900 flex items-center gap-2">
                   {transaction.listingId?.title || "WunkatHomes Property"}
                 </p>
-                <p className="text-xs font-medium text-slate-500 mt-1">{locationString}</p>
+                <p className="text-xs font-medium text-slate-500 mt-1">
+                  {locationString}
+                </p>
               </div>
 
               <div className="mb-6">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Tenant</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">
+                  Tenant
+                </p>
                 <p className="font-bold text-sm text-slate-900 flex items-center gap-2">
                   {transaction.userId?.name || "Verified User"}
                 </p>
-                <p className="text-xs font-medium text-slate-500 mt-1">{transaction.userId?.email || "N/A"}</p>
+                <p className="text-xs font-medium text-slate-500 mt-1">
+                  {transaction.userId?.email || "N/A"}
+                </p>
               </div>
 
               {/* Payment Method Badge */}
               <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 flex items-center gap-3 mb-6">
                 <div className="w-8 h-8 bg-white rounded-full  flex items-center justify-center shrink-0">
-                  {transaction.channel === 'mobile_money' ? (
-                    <HugeiconsIcon icon={SmartPhone01Icon} size={16} className="text-yellow-600" />
+                  {transaction.channel === "mobile_money" ? (
+                    <HugeiconsIcon
+                      icon={SmartPhone01Icon}
+                      size={16}
+                      className="text-yellow-600"
+                    />
                   ) : (
-                    <HugeiconsIcon icon={CreditCardIcon} size={16} className="text-blue-600" />
+                    <HugeiconsIcon
+                      icon={CreditCardIcon}
+                      size={16}
+                      className="text-blue-600"
+                    />
                   )}
                 </div>
                 <div>
                   <p className="text-sm font-bold text-slate-900 capitalize">
-                    {transaction.channel?.replace('_', ' ') || 'Secure Gateway'}
+                    {transaction.channel?.replace("_", " ") || "Secure Gateway"}
                   </p>
-                  <p className="text-[10px] font-medium text-slate-500 uppercase tracking-widest">Paid via Paystack</p>
+                  <p className="text-[10px] font-medium text-slate-500 uppercase tracking-widest">
+                    Paid via Paystack
+                  </p>
                 </div>
               </div>
 
@@ -176,12 +230,14 @@ export default function PrintReceipt({ transaction }: PrintReceiptProps) {
           {/* Ticket Bottom Teeth */}
           <div className="flex justify-between w-full px-2 -mt-3 z-10 print:break-inside-avoid">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="w-8 h-8 bg-white border-t-2 border-slate-200 rounded-full" />
+              <div
+                key={i}
+                className="w-8 h-8 bg-white border-t-2 border-slate-200 rounded-full"
+              />
             ))}
           </div>
-
         </div>
       </div>
     </>
-  )
+  );
 }

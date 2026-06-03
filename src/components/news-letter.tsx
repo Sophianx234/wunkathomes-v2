@@ -1,40 +1,40 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { ArrowRight, Envelope } from "@hugeicons/core-free-icons"
-import { HugeiconsIcon } from "@hugeicons/react"
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { ArrowRight, Envelope } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 
 export default function NewsLetter() {
-  const [email, setEmail] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [status, setStatus] = useState("")
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setStatus("")
+    e.preventDefault();
+    setLoading(true);
+    setStatus("");
 
     try {
       const res = await fetch("/api/newsletter", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
-      })
+      });
 
       if (res.ok) {
-        const data = await res.json()
-        setStatus(data.message)
-        setEmail("")
+        const data = await res.json();
+        setStatus(data.message);
+        setEmail("");
       } else {
-        setStatus("Failed to subscribe. Try again.")
+        setStatus("Failed to subscribe. Try again.");
       }
     } catch (err) {
-      setStatus("Something went wrong.")
+      setStatus("Something went wrong.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <section className="relative bg-white overflow-hidden">
@@ -61,7 +61,9 @@ export default function NewsLetter() {
             viewport={{ once: true }}
           >
             <h3 className="text-2xl font-semibold">Luxury Meets Lifestyle</h3>
-            <p className="text-sm text-gray-200">Curated spaces, crafted for comfort.</p>
+            <p className="text-sm text-gray-200">
+              Curated spaces, crafted for comfort.
+            </p>
           </motion.div>
         </motion.div>
 
@@ -76,13 +78,13 @@ export default function NewsLetter() {
           >
             {/* Subheading */}
             <motion.div
-              className="inline-flex items-center gap-2 bg-black text-white px-4 py-2 rounded-full text-sm uppercase tracking-wide"
+              className="inline-flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-full text-sm uppercase tracking-wide"
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
               viewport={{ once: true }}
             >
-              <HugeiconsIcon icon={Envelope}  className="w-4 h-4" />
+              <HugeiconsIcon icon={Envelope} className="w-4 h-4" />
               <span>Join Our Community</span>
             </motion.div>
 
@@ -95,7 +97,9 @@ export default function NewsLetter() {
               viewport={{ once: true }}
             >
               Get Exclusive <br />
-              <span className="font-light text-gray-700">Real Estate Insights</span>
+              <span className="font-light text-gray-700">
+                Real Estate Insights
+              </span>
             </motion.h2>
 
             {/* Description */}
@@ -106,7 +110,8 @@ export default function NewsLetter() {
               transition={{ duration: 0.6, delay: 0.2 }}
               viewport={{ once: true }}
             >
-             Receive exclusive updates on new properties, market insights, and smart investment opportunities from WunkatHomes.
+              Receive exclusive updates on new properties, market insights, and
+              smart investment opportunities from WunkatHomes.
             </motion.p>
 
             {/* Form */}
@@ -129,17 +134,22 @@ export default function NewsLetter() {
               <button
                 type="submit"
                 disabled={loading}
-                className="group inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-black text-white font-medium hover:bg-gray-900 transition-all duration-300"
+                className="group inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-primary text-white font-medium hover:bg-gray-900 transition-all duration-300"
               >
                 {loading ? "Subscribing..." : "Subscribe"}
-                <HugeiconsIcon icon={ArrowRight} className="w-4 h-4 transform transition-transform duration-300 group-hover:translate-x-1" />
+                <HugeiconsIcon
+                  icon={ArrowRight}
+                  className="w-4 h-4 transform transition-transform duration-300 group-hover:translate-x-1"
+                />
               </button>
             </motion.form>
 
             {/* Status */}
             <motion.p
               className={`text-sm mt-2 pl-4 ${
-                status.includes("successfully") ? "text-green-600" : "text-red-600"
+                status.includes("successfully")
+                  ? "text-green-600"
+                  : "text-red-600"
               }`}
               initial={{ opacity: 0 }}
               animate={{ opacity: status ? 1 : 0 }}
@@ -169,5 +179,5 @@ export default function NewsLetter() {
         </div>
       </div>
     </section>
-  )
+  );
 }

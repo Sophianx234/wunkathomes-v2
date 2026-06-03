@@ -10,7 +10,7 @@ export default function Hero() {
   return (
     // REMOVED min-h-[650px]. Added a much safer min-h-[500px] just for extreme mobile landscape.
     // Changed to flex-col and justify-end to ensure content behaves perfectly within the viewport boundaries.
-    <section className="relative w-full h-[calc(100vh-5rem)] min-h-[500px] bg-black overflow-hidden flex flex-col justify-end pb-28 md:pb-36">
+    <section className="relative w-full h-[calc(100vh-5rem)] min-h-[500px] bg-primary overflow-hidden flex flex-col justify-end pb-28 md:pb-36">
       {/* === Cinematic Background (Slow continuous zoom) === */}
       <motion.div
         initial={{ scale: 1 }}
@@ -34,7 +34,7 @@ export default function Hero() {
 
       {/* === High-End Vignette Overlay === */}
       <div className="absolute inset-0 z-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
-      <div className="absolute inset-0 z-0 bg-black/10" />
+      <div className="absolute inset-0 z-0 bg-primary/10" />
 
       {/* === Content Container === */}
       <div className="relative  z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row justify-between items-end gap-8 md:gap-12">
@@ -74,7 +74,7 @@ export default function Hero() {
             className="flex flex-col sm:flex-row gap-4"
           >
             <Link href="/properties">
-              <button className="w-full sm:w-auto px-6 md:px-8 py-3 md:py-4 bg-white text-primary font-bold uppercase rounded-md tracking-widest text-[10px] md:text-xs hover:bg-black hover:text-white border-2 border-white transition-all duration-300 flex items-center justify-center gap-3 group">
+              <button className="w-full sm:w-auto px-6 md:px-8 py-3 md:py-4 bg-white text-primary font-bold uppercase rounded-md tracking-widest text-[10px] md:text-xs hover:bg-primary hover:text-white border-2 border-white transition-all duration-300 flex items-center justify-center gap-3 group">
                 View Portfolio
                 <HugeiconsIcon
                   icon={ArrowRight01Icon}

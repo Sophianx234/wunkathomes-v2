@@ -237,7 +237,7 @@ export function VerificationDashboard({
                   />
                   <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="absolute bottom-0 right-0 w-8 h-8 bg-primary rounded-full border-2 border-white flex items-center justify-center hover:bg-black transition-colors cursor-pointer shadow-sm"
+                    className="absolute bottom-0 right-0 w-8 h-8 bg-primary rounded-full border-2 border-white flex items-center justify-center hover:bg-primary transition-colors cursor-pointer shadow-sm"
                   >
                     <HugeiconsIcon
                       icon={Camera02Icon}
@@ -282,7 +282,7 @@ export function VerificationDashboard({
               Have questions or concerns regarding your WunkateHomes
               verification? Our experts are here to help!
             </p>
-            <button className="w-full py-3 bg-primary hover:bg-black text-white text-xs font-bold uppercase tracking-widest rounded-lg transition-colors shadow-primary/20">
+            <button className="w-full py-3 bg-primary hover:bg-primary text-white text-xs font-bold uppercase tracking-widest rounded-lg transition-colors shadow-primary/20">
               Chat With Us
             </button>
           </div>
@@ -590,7 +590,7 @@ export function VerificationDashboard({
                   <button
                     onClick={() => setStep(2)}
                     disabled={!idNumber || !fullName || !dob}
-                    className="px-8 py-3 bg-primary text-white text-xs font-bold uppercase tracking-widest rounded-lg hover:bg-black transition-colors disabled:opacity-50 disabled:bg-slate-300 flex items-center gap-2 "
+                    className="px-8 py-3 bg-primary text-white text-xs font-bold uppercase tracking-widest rounded-lg hover:bg-primary transition-colors disabled:opacity-50 disabled:bg-slate-300 flex items-center gap-2 "
                   >
                     Next Step{" "}
                     <HugeiconsIcon icon={ArrowRight01Icon} size={16} />
@@ -602,7 +602,7 @@ export function VerificationDashboard({
                       disabled={
                         !photoData || !hasProfilePicture || isSubmitting
                       }
-                      className="px-8 py-3 bg-primary text-white text-xs font-bold uppercase tracking-widest rounded-lg hover:bg-black transition-colors disabled:opacity-50 disabled:bg-slate-300 flex items-center gap-2 "
+                      className="px-8 py-3 bg-primary text-white text-xs font-bold uppercase tracking-widest rounded-lg hover:bg-primary transition-colors disabled:opacity-50 disabled:bg-slate-300 flex items-center gap-2 "
                     >
                       {isSubmitting && (
                         <HugeiconsIcon

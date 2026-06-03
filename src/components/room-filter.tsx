@@ -1,23 +1,23 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Filter, Search } from "@hugeicons/core-free-icons"
-import { HugeiconsIcon } from "@hugeicons/react"
-import { AMENITIES, BEDROOM_OPTIONS } from "@/lib/constants"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Filter, Search } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { AMENITIES, BEDROOM_OPTIONS } from "@/lib/constants";
 
 interface RoomFiltersProps {
-  onFilter: (filters: FilterState) => void
+  onFilter: (filters: FilterState) => void;
 }
 
 export interface FilterState {
-  search: string
-  location: string
-  bedrooms: number | null
-  maxPrice: number
-  amenities: string[]
+  search: string;
+  location: string;
+  bedrooms: number | null;
+  maxPrice: number;
+  amenities: string[];
 }
 
 export function RoomFilters({ onFilter }: RoomFiltersProps) {
@@ -27,21 +27,21 @@ export function RoomFilters({ onFilter }: RoomFiltersProps) {
     bedrooms: null,
     maxPrice: 5000,
     amenities: [],
-  })
-  const [showFilters, setShowFilters] = useState(false)
+  });
+  const [showFilters, setShowFilters] = useState(false);
 
   const handleFilterChange = (key: keyof FilterState, value: any) => {
-    const newFilters = { ...filters, [key]: value }
-    setFilters(newFilters)
-    onFilter(newFilters)
-  }
+    const newFilters = { ...filters, [key]: value };
+    setFilters(newFilters);
+    onFilter(newFilters);
+  };
 
   const handleAmenityToggle = (amenity: string) => {
     const updated = filters.amenities.includes(amenity)
       ? filters.amenities.filter((a) => a !== amenity)
-      : [...filters.amenities, amenity]
-    handleFilterChange("amenities", updated)
-  }
+      : [...filters.amenities, amenity];
+    handleFilterChange("amenities", updated);
+  };
 
   const handleReset = () => {
     const reset = {
@@ -50,10 +50,10 @@ export function RoomFilters({ onFilter }: RoomFiltersProps) {
       bedrooms: null,
       maxPrice: 5000,
       amenities: [],
-    }
-    setFilters(reset)
-    onFilter(reset)
-  }
+    };
+    setFilters(reset);
+    onFilter(reset);
+  };
 
   return (
     <div className="space-y-4">
@@ -61,7 +61,10 @@ export function RoomFilters({ onFilter }: RoomFiltersProps) {
       <Card className="p-4 border border-border">
         <div className="flex gap-2">
           <div className="flex-1 relative">
-            <HugeiconsIcon icon={Search}  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+            <HugeiconsIcon
+              icon={Search}
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4"
+            />
             <Input
               placeholder="Search rooms..."
               value={filters.search}
@@ -119,21 +122,23 @@ export function RoomFilters({ onFilter }: RoomFiltersProps) {
 
           {/* Price Range */}
           <div>
-            <label className="block text-sm font-semibold mb-3">Max Price: ${filters.maxPrice}</label>
+            <label className="block text-sm font-semibold mb-3">
+              Max Price: ${filters.maxPrice}
+            </label>
             <input
-  type="range"
-  min="0"
-  max="5000"
-  step="100"
-  value={filters.maxPrice}
-  onChange={(e) =>
-    handleFilterChange("maxPrice", Number.parseInt(e.target.value))
-  }
-  className="w-full appearance-none h-2 rounded-xl bg-black"
-  style={{
-    accentColor: "black",
-  }}
-/>
+              type="range"
+              min="0"
+              max="5000"
+              step="100"
+              value={filters.maxPrice}
+              onChange={(e) =>
+                handleFilterChange("maxPrice", Number.parseInt(e.target.value))
+              }
+              className="w-full appearance-none h-2 rounded-xl bg-primary"
+              style={{
+                accentColor: "black",
+              }}
+            />
 
             <div className="flex justify-between text-xs text-muted-foreground mt-2">
               <span>$0</span>
@@ -143,10 +148,15 @@ export function RoomFilters({ onFilter }: RoomFiltersProps) {
 
           {/* Amenities */}
           <div>
-            <label className="block text-sm font-semibold mb-3">Amenities</label>
+            <label className="block text-sm font-semibold mb-3">
+              Amenities
+            </label>
             <div className="grid grid-cols-2 gap-2">
               {AMENITIES.map((amenity) => (
-                <label key={amenity} className="flex items-center gap-2 cursor-pointer">
+                <label
+                  key={amenity}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
                   <input
                     type="checkbox"
                     checked={filters.amenities.includes(amenity)}
@@ -161,7 +171,11 @@ export function RoomFilters({ onFilter }: RoomFiltersProps) {
 
           {/* Actions */}
           <div className="flex gap-2">
-            <Button onClick={handleReset} variant="outline" className="flex-1 bg-transparent">
+            <Button
+              onClick={handleReset}
+              variant="outline"
+              className="flex-1 bg-transparent"
+            >
               Reset Filters
             </Button>
             <Button onClick={() => setShowFilters(false)} className="flex-1">
@@ -171,5 +185,5 @@ export function RoomFilters({ onFilter }: RoomFiltersProps) {
         </Card>
       )}
     </div>
-  )
+  );
 }

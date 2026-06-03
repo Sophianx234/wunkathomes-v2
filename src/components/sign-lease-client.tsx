@@ -174,7 +174,7 @@ export default function SignLeaseClient({ data }: SignLeaseClientProps) {
 
           <form onSubmit={handleSign} className="space-y-8 mb-auto">
             {/* Consent Checkbox */}
-            <label className="flex items-start gap-4 cursor-pointer group p-4 border border-zinc-800 rounded-xl hover:bg-zinc-900 transition-colors">
+            <label className="flex items-start gap-4 cursor-pointer group p-4 border border-zinc-800 rounded-xl hover:bg-primary transition-colors">
               <div className="relative flex items-center justify-center mt-1 shrink-0">
                 <input
                   type="checkbox"
@@ -214,7 +214,7 @@ export default function SignLeaseClient({ data }: SignLeaseClientProps) {
                   placeholder={data.tenantName}
                   value={typedName}
                   onChange={(e) => setTypedName(e.target.value)}
-                  className="w-full pl-12 p-4 bg-zinc-900 border border-zinc-800 rounded-xl text-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-medium placeholder:text-zinc-700"
+                  className="w-full pl-12 p-4 bg-primary border border-zinc-800 rounded-xl text-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-medium placeholder:text-zinc-700"
                 />
               </div>
             </div>

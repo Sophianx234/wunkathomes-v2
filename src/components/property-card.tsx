@@ -23,13 +23,13 @@ export interface IProperty {
   slug: string;
   title: string;
   description: string;
-  price: number; 
-  listingType: 'For_Rent' | 'For_Sale';
-  status: 'Available' | 'Pending' | 'Rented' | 'Sold';
+  price: number;
+  listingType: "For_Rent" | "For_Sale";
+  status: "Available" | "Pending" | "Rented" | "Sold";
   features: {
     bedrooms: number;
     bathrooms: number;
-    sizeSqm?: number; 
+    sizeSqm?: number;
   };
   terms: {
     leaseTerm: string | null;
@@ -40,7 +40,7 @@ export interface IProperty {
   images: string[];
   property: {
     _id?: string;
-    propertyType: 'Apartment_Building' | 'Commercial' | 'House' | 'Land';
+    propertyType: "Apartment_Building" | "Commercial" | "House" | "Land";
     location: any; // Changed to 'any' to accept both strings and objects safely
     coordinates?: {
       lat?: number;
@@ -82,7 +82,7 @@ export default function PropertyCard({
   };
 
   const paginate = (newDirection: number, e: React.MouseEvent) => {
-    e.preventDefault(); 
+    e.preventDefault();
     e.stopPropagation();
 
     setDirection(newDirection);
@@ -99,29 +99,30 @@ export default function PropertyCard({
 
   // --- FIX: Bulletproof Location String ---
   let locationString = "Unknown Location";
-  if (typeof property.property?.location === 'string') {
+  if (typeof property.property?.location === "string") {
     // If it comes from a page passing a formatted string
     locationString = property.property.location;
   } else if (property.property?.location) {
     // If it comes from a page passing the raw Mongoose object
     const loc = property.property.location;
-    locationString = loc.city ? `${loc.area}, ${loc.city}` : `${loc.area}, ${loc.region}`;
+    locationString = loc.city
+      ? `${loc.area}, ${loc.city}`
+      : `${loc.area}, ${loc.region}`;
   }
-const pathname = usePathname(); // 2. Get current route
-  
+  const pathname = usePathname(); // 2. Get current route
+
   // 3. Logic to determine the correct path
   // If we are already in admin, we want to go to /admin/properties/slug
   // If we are at the root, we want /properties/slug
   const getHref = () => {
     if (pathname.startsWith("/admin")) {
       // Remove trailing slash if present, then append the slug
-      ;
       return `/admin/properties/${property.slug}`;
     }
     return `/properties/${property.slug}`;
   };
 
-  const href = getHref()
+  const href = getHref();
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -134,7 +135,6 @@ const pathname = usePathname(); // 2. Get current route
     >
       {/* === Image Carousel Container === */}
       <div className="relative w-full aspect-[4/3] sm:aspect-[16/10] overflow-hidden mb-4 rounded-xl md:rounded-2xl bg-slate-100">
-        
         <Link
           href={href} // Fixed missing leading slash here!
           className="absolute inset-0 z-0"
@@ -154,7 +154,7 @@ const pathname = usePathname(); // 2. Get current route
               className="absolute inset-0 w-full h-full"
             >
               <Image
-                src={property.images[currentImage] || '/placeholder.jpg'}
+                src={property.images[currentImage] || "/placeholder.jpg"}
                 alt={`${property.title} - Image ${currentImage + 1}`}
                 fill
                 className="object-cover"
@@ -165,14 +165,17 @@ const pathname = usePathname(); // 2. Get current route
         </Link>
 
         {/* Status Badge */}
-        <div className="absolute top-3 left-3 z-10 bg-black/80 backdrop-blur-sm text-white px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-widest pointer-events-none">
-          {property.property.propertyType.split('_')[0]}
+        <div className="absolute top-3 left-3 z-10 bg-primary/80 backdrop-blur-sm text-white px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-widest pointer-events-none">
+          {property.property.propertyType.split("_")[0]}
         </div>
 
         {/* Floating Price Tag */}
         <div className="absolute bottom-3 right-3 z-10 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-sm font-black text-black tracking-tight text-sm pointer-events-none">
           {formattedPrice}
-          <span className="text-xs font-medium text-slate-500 tracking-normal"> {priceSuffix}</span>
+          <span className="text-xs font-medium text-slate-500 tracking-normal">
+            {" "}
+            {priceSuffix}
+          </span>
         </div>
 
         {/* Navigation Arrows (Visible on Hover) */}
@@ -208,7 +211,7 @@ const pathname = usePathname(); // 2. Get current route
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
-              className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5 bg-black/20 px-2 py-1 rounded-full backdrop-blur-md"
+              className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5 bg-primary/20 px-2 py-1 rounded-full backdrop-blur-md"
             >
               {property.images.map((_, i) => (
                 <div
@@ -258,7 +261,7 @@ const pathname = usePathname(); // 2. Get current route
             />
             <span>{property.features.bathrooms}</span>
           </div>
-          
+
           {property.features.sizeSqm && (
             <>
               <span className="text-slate-300 text-[10px]">●</span>

@@ -120,7 +120,7 @@ export default function BookingCard({ listing, isRent }: BookingCardProps) {
                 href={`/checkout/${listing.slug}?type=deposit`}
                 className="w-full"
               >
-                <button className="w-full py-4 bg-black text-white font-black uppercase tracking-widest text-xs rounded-lg hover:bg-slate-800 transition-colors">
+                <button className="w-full py-4 bg-primary text-white font-black uppercase tracking-widest text-xs rounded-lg hover:bg-slate-800 transition-colors">
                   {isRent ? "Reserve Now" : "Reserve to Buy"}
                 </button>
               </Link>
@@ -194,7 +194,7 @@ export default function BookingCard({ listing, isRent }: BookingCardProps) {
               <button
                 onClick={() => handleNext("PHONE")}
                 disabled={!selectedDate || !selectedTime}
-                className="w-full py-4 bg-black text-white font-black uppercase tracking-widest text-xs rounded-lg hover:bg-slate-800 transition-colors mt-2 disabled:opacity-30 disabled:cursor-not-allowed"
+                className="w-full py-4 bg-primary text-white font-black uppercase tracking-widest text-xs rounded-lg hover:bg-slate-800 transition-colors mt-2 disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 Continue
               </button>
@@ -250,7 +250,7 @@ export default function BookingCard({ listing, isRent }: BookingCardProps) {
               <button
                 type="submit"
                 disabled={isPending || phoneNumber.length < 9}
-                className="w-full py-4 flex items-center justify-center bg-black text-white font-black uppercase tracking-widest text-xs rounded-lg hover:bg-slate-800 transition-colors mt-2 disabled:opacity-30 disabled:cursor-not-allowed"
+                className="w-full py-4 flex items-center justify-center bg-primary text-white font-black uppercase tracking-widest text-xs rounded-lg hover:bg-slate-800 transition-colors mt-2 disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 {isPending && (
                   <HugeiconsIcon

@@ -61,3 +61,29 @@ export async function activateLeaseAndGeneratePin(leaseId: string) {
     return { success: false, error: "An internal error occurred." };
   }
 }
+
+export async function rejectTenantPaperwork(leaseId: string, userId: string) {
+  try {
+    const session = await getSession();
+    if (!session || !['Admin', 'Manager'].includes(session.role)) {
+      return { success: false, error: "Unauthorized access." };
+    }
+
+    await connectToDatabase();
+
+    // 1. Mark User KYC as Rejected
+    await User.findByIdAndUpdate(userId, { kycStatus: 'Rejected' });
+    
+    // 2. Reset Lease signature status to force a resubmission
+    await Lease.findByIdAndUpdate(leaseId, { 
+      'signatureAudit.isSigned': false,
+      status: 'Pending_Verification' // Push them back to the verification stage
+    });
+
+    revalidatePath("/admin/activations");
+    return { success: true, message: "Paperwork rejected. Tenant will be prompted to resubmit." };
+  } catch (error) {
+    console.error("Failed to reject paperwork:", error);
+    return { success: false, error: "An internal error occurred." };
+  }
+}

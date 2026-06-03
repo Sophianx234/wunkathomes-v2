@@ -130,7 +130,7 @@ function AdminNotesEditor({
           variant="ghost"
           disabled={isPending}
           onClick={() => onSave(notes)}
-          className="h-7 text-[11px] bg-black text-white rounded-sm hover:text-zinc-900 border transition-all hover:border-zinc-900"
+          className="h-7 text-[11px] bg-primary text-white rounded-sm hover:text-zinc-900 border transition-all hover:border-zinc-900"
         >
           {isPending ? "Saving..." : "Save Notes"}
         </Button>
@@ -475,7 +475,7 @@ export default function TourTable({
               {/* Pinned Conversion Footer */}
               <div className="p-4 bg-white border-t border-zinc-200/80 shadow-[0_-8px_20px_rgba(0,0,0,0.03)] z-20">
                 <Button
-                  className="w-full h-11 rounded-md bg-zinc-900 text-white hover:bg-zinc-800 text-[13px] font-semibold shadow-sm transition-all"
+                  className="w-full h-11 rounded-md bg-primary text-white hover:bg-zinc-800 text-[13px] font-semibold shadow-sm transition-all"
                   onClick={() => {
                     navigator.clipboard.writeText(
                       `${window.location.origin}/checkout/${selectedTour.listing.slug}?type=deposit`,

@@ -4,11 +4,11 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useRef, useTransition, useState, useEffect } from "react";
 import Link from "next/link";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { 
-  PlusSignIcon, 
-  Search01Icon, 
+import {
+  PlusSignIcon,
+  Search01Icon,
   FilterIcon,
-  ReloadIcon // Assuming you want a reset icon, or you can just use text
+  ReloadIcon, // Assuming you want a reset icon, or you can just use text
 } from "@hugeicons/core-free-icons";
 
 import { Button } from "@/components/ui/button";
@@ -25,12 +25,14 @@ interface PropertiesFilterBarProps {
   totalAssets: number;
 }
 
-export default function PropertiesFilterBar({ totalAssets }: PropertiesFilterBarProps) {
+export default function PropertiesFilterBar({
+  totalAssets,
+}: PropertiesFilterBarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
-  
+
   // Local state for the search input so we can clear it reliably on reset
   const [searchTerm, setSearchTerm] = useState(searchParams.get("q") || "");
   const debounceTimerRef = useRef<NodeJS.Timeout>(null);
@@ -51,7 +53,7 @@ export default function PropertiesFilterBar({ totalAssets }: PropertiesFilterBar
       }
       return params.toString();
     },
-    [searchParams]
+    [searchParams],
   );
 
   const handleFilterChange = (key: string, value: string) => {
@@ -63,7 +65,7 @@ export default function PropertiesFilterBar({ totalAssets }: PropertiesFilterBar
   const handleSearch = (term: string) => {
     setSearchTerm(term); // Update input UI immediately
     if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
-    
+
     debounceTimerRef.current = setTimeout(() => {
       handleFilterChange("q", term);
     }, 600); // 600ms debounce prevents spamming the server while typing
@@ -78,7 +80,7 @@ export default function PropertiesFilterBar({ totalAssets }: PropertiesFilterBar
   };
 
   const currentAssetType = searchParams.get("assetType") || "all";
-  
+
   // Check if there are any active filters to determine if we should show the reset button
   const hasActiveFilters = Array.from(searchParams.keys()).length > 0;
 
@@ -86,37 +88,46 @@ export default function PropertiesFilterBar({ totalAssets }: PropertiesFilterBar
     <div className="flex flex-col gap-5 w-full">
       {/* --- TOP ROW: Property Type Pills & Action Button --- */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        
         {/* Property Type Pills (Horizontal Scroll on Mobile) */}
         <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar w-full md:w-auto pb-1 md:pb-0">
-          <button 
+          <button
             onClick={() => handleFilterChange("assetType", "all")}
             className={`whitespace-nowrap px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${
-              currentAssetType === "all" ? "bg-black text-white" : "bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-900"
+              currentAssetType === "all"
+                ? "bg-primary text-white"
+                : "bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-900"
             }`}
           >
             All Assets
           </button>
-          <button 
-            onClick={() => handleFilterChange("assetType", "Apartment_Building")}
+          <button
+            onClick={() =>
+              handleFilterChange("assetType", "Apartment_Building")
+            }
             className={`whitespace-nowrap px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${
-              currentAssetType === "Apartment_Building" ? "bg-black text-white" : "bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-900"
+              currentAssetType === "Apartment_Building"
+                ? "bg-primary text-white"
+                : "bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-900"
             }`}
           >
             Apartments
           </button>
-          <button 
+          <button
             onClick={() => handleFilterChange("assetType", "Commercial")}
             className={`whitespace-nowrap px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${
-              currentAssetType === "Commercial" ? "bg-black text-white" : "bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-900"
+              currentAssetType === "Commercial"
+                ? "bg-primary text-white"
+                : "bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-900"
             }`}
           >
             Commercial
           </button>
-          <button 
+          <button
             onClick={() => handleFilterChange("assetType", "House")}
             className={`whitespace-nowrap px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${
-              currentAssetType === "House" ? "bg-black text-white" : "bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-900"
+              currentAssetType === "House"
+                ? "bg-primary text-white"
+                : "bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-900"
             }`}
           >
             Houses
@@ -124,27 +135,34 @@ export default function PropertiesFilterBar({ totalAssets }: PropertiesFilterBar
         </div>
 
         {/* Create Property Button */}
-        <Link href="/admin/properties/create" className="text-white flex items-center bg-black hover:bg-slate-800 rounded-lg h-10 px-5 text-[14px] font-medium shrink-0 w-full md:w-auto transition-colors">
-          <HugeiconsIcon icon={PlusSignIcon} size={18} strokeWidth={2} className="mr-2" />
+        <Link
+          href="/admin/properties/create"
+          className="text-white flex items-center bg-primary hover:bg-slate-800 rounded-lg h-10 px-5 text-[14px] font-medium shrink-0 w-full md:w-auto transition-colors"
+        >
+          <HugeiconsIcon
+            icon={PlusSignIcon}
+            size={18}
+            strokeWidth={2}
+            className="mr-2"
+          />
           Create Property
         </Link>
       </div>
 
       {/* --- BOTTOM ROW: Unified Search & Filter Chrome --- */}
       <section className="flex flex-col xl:flex-row items-center gap-4 bg-white p-2 border border-slate-200 rounded-xl w-full">
-        
         {/* Search Input */}
         <div className="relative flex-1 w-full">
-          <HugeiconsIcon 
-            icon={Search01Icon} 
-            size={18} 
-            strokeWidth={2} 
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" 
+          <HugeiconsIcon
+            icon={Search01Icon}
+            size={18}
+            strokeWidth={2}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
           />
-          <Input 
+          <Input
             value={searchTerm} // Now controlled
             onChange={(e) => handleSearch(e.target.value)}
-            placeholder="Search by title, location, or slug..." 
+            placeholder="Search by title, location, or slug..."
             className="w-full pl-10 h-10 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-[14px] bg-transparent shadow-none"
           />
         </div>
@@ -153,9 +171,8 @@ export default function PropertiesFilterBar({ totalAssets }: PropertiesFilterBar
 
         {/* Dropdowns & Counter Section */}
         <div className="flex flex-wrap md:flex-nowrap items-center gap-2 w-full xl:w-auto px-2 pb-2 xl:pb-0">
-          
           {/* 1. Location Dropdown (Using value instead of defaultValue) */}
-          <Select 
+          <Select
             value={searchParams.get("location") || "all"}
             onValueChange={(val) => handleFilterChange("location", val)}
           >
@@ -171,7 +188,7 @@ export default function PropertiesFilterBar({ totalAssets }: PropertiesFilterBar
           </Select>
 
           {/* 2. Listing Type Dropdown */}
-          <Select 
+          <Select
             value={searchParams.get("listingType") || "all"}
             onValueChange={(val) => handleFilterChange("listingType", val)}
           >
@@ -186,7 +203,7 @@ export default function PropertiesFilterBar({ totalAssets }: PropertiesFilterBar
           </Select>
 
           {/* 3. Status Dropdown */}
-          <Select 
+          <Select
             value={searchParams.get("status") || "all"}
             onValueChange={(val) => handleFilterChange("status", val)}
           >
@@ -206,19 +223,23 @@ export default function PropertiesFilterBar({ totalAssets }: PropertiesFilterBar
           <div className="h-6 w-px bg-slate-200 hidden md:block mx-1" />
 
           {/* 4. Results Counter */}
-          <div className={`hidden md:flex items-center gap-2 pl-1 pr-2 transition-opacity ${isPending ? "opacity-50" : "opacity-100"}`}>
+          <div
+            className={`hidden md:flex items-center gap-2 pl-1 pr-2 transition-opacity ${isPending ? "opacity-50" : "opacity-100"}`}
+          >
             <span className="text-[22px] font-black text-slate-900 leading-none">
               {totalAssets}
             </span>
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-tight">
-              Assets<br/>Found
+              Assets
+              <br />
+              Found
             </span>
           </div>
 
           {/* Reset Filters Button (Shows only when filters are active) */}
           {hasActiveFilters && (
-            <Button 
-            variant='outline'
+            <Button
+              variant="outline"
               onClick={handleReset}
               className="h-9 px-3 text-[13px] font-medium  rounded-sm py-1 shadow-xs bg-white text-black shrink-0 transition-colors"
             >
@@ -227,10 +248,13 @@ export default function PropertiesFilterBar({ totalAssets }: PropertiesFilterBar
           )}
 
           {/* Advanced Filter Icon Button */}
-          <Button variant="ghost" size="icon" className="h-9 w-9 text-slate-500 hover:text-slate-900 hover:bg-slate-100 shrink-0 ml-auto md:ml-0">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-9 w-9 text-slate-500 hover:text-slate-900 hover:bg-slate-100 shrink-0 ml-auto md:ml-0"
+          >
             <HugeiconsIcon icon={FilterIcon} size={18} strokeWidth={2} />
           </Button>
-
         </div>
       </section>
     </div>

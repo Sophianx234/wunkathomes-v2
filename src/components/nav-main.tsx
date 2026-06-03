@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
+import * as React from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -10,21 +10,21 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 
 export function NavMain({
   items,
 }: {
   items: {
-    title: string
+    title: string;
     items: {
-      title: string
-      url: string
-      icon?: React.ReactNode
-    }[]
-  }[]
+      title: string;
+      url: string;
+      icon?: React.ReactNode;
+    }[];
+  }[];
 }) {
-  const pathname = usePathname()
+  const pathname = usePathname();
 
   return (
     <>
@@ -37,16 +37,16 @@ export function NavMain({
             <SidebarMenu>
               {group.items.map((item) => {
                 // Check if current route exactly matches, or if we are inside a nested route
-                const isActive = pathname === item.url 
+                const isActive = pathname === item.url;
 
                 return (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton 
-                      asChild 
+                    <SidebarMenuButton
+                      asChild
                       tooltip={item.title}
                       className={`transition-all duration-200 ${
-                        isActive 
-                          ? "bg-zinc-950 text-white hover:bg-zinc-900 hover:text-white" 
+                        isActive
+                          ? "bg-zinc-950 text-white hover:bg-primary hover:text-white"
                           : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
                       }`}
                     >
@@ -56,12 +56,12 @@ export function NavMain({
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
-                )
+                );
               })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       ))}
     </>
-  )
+  );
 }
