@@ -37,7 +37,7 @@ export function NavMain({
             <SidebarMenu>
               {group.items.map((item) => {
                 // Check if current route exactly matches, or if we are inside a nested route
-                const isActive = pathname === item.url || (item.url !== "/" && pathname?.startsWith(item.url))
+                const isActive = pathname === item.url 
 
                 return (
                   <SidebarMenuItem key={item.title}>

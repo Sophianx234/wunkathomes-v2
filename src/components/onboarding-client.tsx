@@ -1,24 +1,36 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
-import { 
-  Search01Icon, 
-  FilterIcon, 
-  CheckmarkCircle01Icon,
-  Time01Icon,
+import {
   Alert01Icon,
+  CheckmarkCircle01Icon,
   File02Icon,
-  SmartPhone01Icon,
+  FilterIcon,
   Key01Icon,
+  Search01Icon,
+  SmartPhone01Icon,
   TickDouble01Icon,
-  ArrowRight01Icon
+  Time01Icon,
+  Loading03Icon
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { useMemo, useState, useTransition, useEffect } from "react";
+import { toast } from "sonner";
 
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Sheet,
+  SheetContent,
+} from "@/components/ui/sheet";
 import {
   Table,
   TableBody,
@@ -28,21 +40,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Tabs,
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
-import {
-  Sheet,
-  SheetContent,
-} from "@/components/ui/sheet";
+import { activateLeaseAndGeneratePin, approveTenantPaperwork } from "@/actions/admin/onboarding.action";
+
 
 // --- TYPES ---
 type PipelineStage = "awaiting_paperwork" | "ready_for_access" | "recent";
@@ -51,6 +54,7 @@ interface ActivationRecord {
   id: string;
   pipelineStage: PipelineStage;
   user: {
+    id: string;
     name: string;
     email: string;
     phone: string;
@@ -72,95 +76,74 @@ interface ActivationRecord {
   smartLockPin?: string;
 }
 
-// --- MOCK DATA ---
-const MOCK_ACTIVATIONS: ActivationRecord[] = [
-  {
-    id: "act_001",
-    pipelineStage: "awaiting_paperwork",
-    user: {
-      name: "Emmanuel Osei",
-      email: "e.osei@example.com",
-      phone: "+233 24 555 0192",
-      profilePicture: "https://i.pravatar.cc/150?u=emmanuel",
-      ghanaCardNumber: "GHA-716253412-9",
-      ghanaCardUrl: "https://images.unsplash.com/photo-1621839673705-6617adf9e890?q=80&w=400&auto=format&fit=crop",
-    },
-    lease: { id: "LSE-8821", propertyName: "Airport Residential", unitNumber: "Apt 12B", startDate: "2026-06-01" },
-    checklist: { depositPaid: true, ghanaCardVerified: "Pending", leaseSigned: "Pending" },
-  },
-  {
-    id: "act_002",
-    pipelineStage: "ready_for_access",
-    user: {
-      name: "Sarah Mensah",
-      email: "sarah.m@example.com",
-      phone: "+233 50 123 4455",
-      profilePicture: "https://i.pravatar.cc/150?u=sarah",
-      ghanaCardNumber: "GHA-998273645-1",
-      ghanaCardUrl: "https://images.unsplash.com/photo-1621839673705-6617adf9e890?q=80&w=400&auto=format&fit=crop",
-    },
-    lease: { id: "LSE-9910", propertyName: "Cantonments Villas", unitNumber: "Villa 4", startDate: "2026-05-20" },
-    checklist: { depositPaid: true, ghanaCardVerified: "Verified", leaseSigned: "Signed" },
-  },
-  {
-    id: "act_003",
-    pipelineStage: "recent",
-    user: {
-      name: "David Tetteh",
-      email: "dtetteh@example.com",
-      phone: "+233 20 999 8877",
-      profilePicture: "",
-      ghanaCardNumber: "GHA-112233445-5",
-      ghanaCardUrl: "https://images.unsplash.com/photo-1621839673705-6617adf9e890?q=80&w=400&auto=format&fit=crop",
-    },
-    lease: { id: "LSE-4432", propertyName: "The Heights", unitNumber: "Apt 2A", startDate: "2026-05-01" },
-    checklist: { depositPaid: true, ghanaCardVerified: "Verified", leaseSigned: "Signed" },
-    smartLockPin: "492011",
-  }
-];
+interface ActivationsClientProps {
+  data: ActivationRecord[];
+  availableProperties: string[];
+}
 
-// --- UTILS ---
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 };
 
 // --- MAIN COMPONENT ---
-export default function ActivationsPage() {
+export default function OnboardingClient({ data, availableProperties }: ActivationsClientProps) {
   const [activeTab, setActiveTab] = useState<PipelineStage>("awaiting_paperwork");
   const [searchQuery, setSearchQuery] = useState("");
+  const [propertyFilter, setPropertyFilter] = useState("all");
   
-  // Sheet State
-  const [selectedActivation, setSelectedActivation] = useState<ActivationRecord | null>(null);
+  const [selectedActivationId, setSelectedActivationId] = useState<string | null>(null);
   
-  // Simulation States for the Command Center
-  const [isLegalApproved, setIsLegalApproved] = useState(false);
-  const [generatedPin, setGeneratedPin] = useState<string | null>(null);
+  // React 18 Transition hook for snappy server actions
+  const [isPending, startTransition] = useTransition();
 
-  // Reset internal sheet state when opening a new record
-  const handleOpenSheet = (record: ActivationRecord) => {
-    setSelectedActivation(record);
-    setIsLegalApproved(record.checklist.ghanaCardVerified === "Verified" && record.checklist.leaseSigned === "Signed");
-    setGeneratedPin(record.smartLockPin || null);
-  };
+  // Find the currently selected record from the fresh data (this prevents the sheet from holding stale data after a revalidatePath)
+  const selectedActivation = useMemo(() => {
+    return data.find(r => r.id === selectedActivationId) || null;
+  }, [data, selectedActivationId]);
 
-  // Derived Data
+  // Derived Data & Filtering
   const filteredData = useMemo(() => {
-    return MOCK_ACTIVATIONS.filter(record => {
+    return data.filter(record => {
       const matchesTab = record.pipelineStage === activeTab;
       const matchesSearch = record.user.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                             record.lease.propertyName.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesTab && matchesSearch;
+      const matchesProperty = propertyFilter === "all" || record.lease.propertyName === propertyFilter;
+      
+      return matchesTab && matchesSearch && matchesProperty;
     });
-  }, [activeTab, searchQuery]);
+  }, [data, activeTab, searchQuery, propertyFilter]);
 
-  const awaitingCount = MOCK_ACTIVATIONS.filter(r => r.pipelineStage === "awaiting_paperwork").length;
+  const awaitingCount = data.filter(r => r.pipelineStage === "awaiting_paperwork").length;
 
-  const handleSimulatePinSync = () => {
-    // Simulate API call to Smart Lock provider
-    setTimeout(() => {
-      setGeneratedPin(Math.floor(100000 + Math.random() * 900000).toString());
-    }, 800);
+  // --- Server Action Handlers ---
+  const handleApprovePaperwork = () => {
+    if (!selectedActivation) return;
+    
+    startTransition(async () => {
+      const result = await approveTenantPaperwork(selectedActivation.id, selectedActivation.user.id);
+      if (result.success) {
+        toast.success(result.message);
+      } else {
+        toast.error(result.error);
+      }
+    });
   };
+
+  const handleGeneratePin = () => {
+    if (!selectedActivation) return;
+
+    startTransition(async () => {
+      const result = await activateLeaseAndGeneratePin(selectedActivation.id);
+      if (result.success) {
+        toast.success(result.message);
+      } else {
+        toast.error(result.error);
+      }
+    });
+  };
+
+  const isLegalApproved = selectedActivation?.checklist.ghanaCardVerified === "Verified" && 
+                          selectedActivation?.checklist.leaseSigned === "Signed";
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] p-6 lg:pb-10 font-sans">
@@ -207,14 +190,15 @@ export default function ActivationsPage() {
           <div className="h-4 w-px bg-zinc-200 hidden xl:block" />
 
           <div className="flex flex-wrap md:flex-nowrap items-center gap-2 w-full xl:w-auto px-2 pb-1 xl:pb-0">
-            <Select defaultValue="all">
-              <SelectTrigger className="w-full md:w-[140px] h-8 border-0 bg-zinc-50/50 hover:bg-zinc-100 text-[12px] font-medium text-zinc-700 shadow-none focus:ring-0 rounded-md">
+            <Select value={propertyFilter} onValueChange={setPropertyFilter}>
+              <SelectTrigger className="w-full md:w-[160px] h-8 border-0 bg-zinc-50/50 hover:bg-zinc-100 text-[12px] font-medium text-zinc-700 shadow-none focus:ring-0 rounded-md">
                 <SelectValue placeholder="Property" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Properties</SelectItem>
-                <SelectItem value="airport">Airport Res.</SelectItem>
-                <SelectItem value="cantonments">Cantonments</SelectItem>
+                {availableProperties.map(prop => (
+                  <SelectItem key={prop} value={prop}>{prop}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
 
@@ -229,7 +213,12 @@ export default function ActivationsPage() {
               </span>
             </div>
 
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 shrink-0 ml-auto md:ml-0 rounded-md">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => { setSearchQuery(""); setPropertyFilter("all"); }}
+              className="h-8 w-8 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 shrink-0 ml-auto md:ml-0 rounded-md"
+            >
               <HugeiconsIcon icon={FilterIcon} size={14} />
             </Button>
           </div>
@@ -252,9 +241,8 @@ export default function ActivationsPage() {
                 <TableRow 
                   key={record.id} 
                   className="group border-zinc-100 hover:bg-zinc-50/50 transition-colors cursor-pointer"
-                  onClick={() => handleOpenSheet(record)}
+                  onClick={() => setSelectedActivationId(record.id)}
                 >
-                  {/* Col 1: Tenant */}
                   <TableCell className="py-3 align-middle">
                     <div className="flex items-center gap-3">
                       <Avatar className="h-9 w-9 border border-zinc-200/60 shadow-sm">
@@ -268,7 +256,6 @@ export default function ActivationsPage() {
                     </div>
                   </TableCell>
 
-                  {/* Col 2: Property */}
                   <TableCell className="py-3 align-middle">
                     <div className="flex flex-col">
                       <span className="text-[13px] font-medium text-zinc-900 leading-tight">{record.lease.propertyName}</span>
@@ -276,32 +263,26 @@ export default function ActivationsPage() {
                     </div>
                   </TableCell>
 
-                  {/* Col 3: Move-In Date */}
                   <TableCell className="py-3 align-middle">
                     <span className="text-[13px] font-medium text-zinc-700">
                       {formatDate(record.lease.startDate)}
                     </span>
                   </TableCell>
 
-                  {/* Col 4: Checklist Grid */}
                   <TableCell className="py-3 align-middle">
                     <div className="flex items-center gap-1.5">
-                      {/* Deposit */}
                       <Badge variant="outline" className={`px-1.5 py-0 border-0 rounded text-[9px] uppercase tracking-wider font-bold h-5 flex items-center gap-1 ${record.checklist.depositPaid ? 'bg-emerald-50/50 text-emerald-700 ring-1 ring-emerald-200/60' : 'bg-zinc-100 text-zinc-500'}`}>
                         <HugeiconsIcon icon={CheckmarkCircle01Icon} size={10} /> Deposit
                       </Badge>
-                      {/* ID Card */}
                       <Badge variant="outline" className={`px-1.5 py-0 border-0 rounded text-[9px] uppercase tracking-wider font-bold h-5 flex items-center gap-1 ${record.checklist.ghanaCardVerified === 'Verified' ? 'bg-emerald-50/50 text-emerald-700 ring-1 ring-emerald-200/60' : 'bg-amber-50/50 text-amber-700 ring-1 ring-amber-300/60'}`}>
                         {record.checklist.ghanaCardVerified === 'Verified' ? <HugeiconsIcon icon={CheckmarkCircle01Icon} size={10} /> : <HugeiconsIcon icon={Time01Icon} size={10} />} ID
                       </Badge>
-                      {/* Lease */}
                       <Badge variant="outline" className={`px-1.5 py-0 border-0 rounded text-[9px] uppercase tracking-wider font-bold h-5 flex items-center gap-1 ${record.checklist.leaseSigned === 'Signed' ? 'bg-emerald-50/50 text-emerald-700 ring-1 ring-emerald-200/60' : 'bg-amber-50/50 text-amber-700 ring-1 ring-amber-300/60'}`}>
                         {record.checklist.leaseSigned === 'Signed' ? <HugeiconsIcon icon={CheckmarkCircle01Icon} size={10} /> : <HugeiconsIcon icon={Time01Icon} size={10} />} Lease
                       </Badge>
                     </div>
                   </TableCell>
 
-                  {/* Col 5: Action */}
                   <TableCell className="py-3 align-middle text-right">
                     {activeTab === "awaiting_paperwork" && (
                       <Button variant="outline" size="sm" className="h-8 text-[11px] font-semibold border-zinc-200 text-zinc-700 rounded-lg">
@@ -335,7 +316,7 @@ export default function ActivationsPage() {
       </div>
 
       {/* COMMAND CENTER SHEET */}
-      <Sheet open={!!selectedActivation} onOpenChange={(open) => !open && setSelectedActivation(null)}>
+      <Sheet open={!!selectedActivation} onOpenChange={(open) => !open && setSelectedActivationId(null)}>
         <SheetContent className="w-full sm:max-w-[440px] p-0 bg-[#FAFAFA] border-l border-zinc-200/60 flex flex-col font-sans shadow-2xl">
           {selectedActivation && (
             <>
@@ -372,24 +353,27 @@ export default function ActivationsPage() {
                 
                 {/* 1. Legal & Paperwork Block */}
                 <section className="bg-white border border-zinc-200/60 rounded-xl p-5 shadow-[0_1px_4px_rgba(0,0,0,0.01)] space-y-5">
-                  <div className="flex items-center gap-2">
-                    <HugeiconsIcon icon={File02Icon} size={18} className="text-zinc-400" />
-                    <h3 className="text-[13px] font-semibold text-zinc-900 tracking-tight">Legal & Identity</h3>
-                  </div>
+                  
 
                   {/* ID Card Display */}
                   <div className="border border-zinc-200/80 rounded-lg overflow-hidden group">
-                    <div className="h-24 w-full bg-zinc-100 relative cursor-pointer">
-                      <img 
-                        src={selectedActivation.user.ghanaCardUrl} 
-                        alt="Ghana Card" 
-                        className="w-full h-full object-cover mix-blend-multiply opacity-80 group-hover:scale-105 transition-transform duration-500"
-                      />
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/10 transition-colors">
-                        <span className="opacity-0 group-hover:opacity-100 bg-white/90 backdrop-blur-sm text-zinc-900 text-[10px] uppercase font-bold tracking-wider px-3 py-1.5 rounded-full shadow-sm transition-opacity">
-                          View Card
-                        </span>
-                      </div>
+                    <div className="h-24 w-full bg-zinc-100 relative cursor-pointer flex items-center justify-center">
+                      {selectedActivation.user.ghanaCardUrl ? (
+                        <>
+                          <img 
+                            src={selectedActivation.user.ghanaCardUrl} 
+                            alt="Ghana Card" 
+                            className="w-full h-full object-cover mix-blend-multiply opacity-80 group-hover:scale-105 transition-transform duration-500"
+                          />
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/10 transition-colors">
+                            <span className="opacity-0 group-hover:opacity-100 bg-white/90 backdrop-blur-sm text-zinc-900 text-[10px] uppercase font-bold tracking-wider px-3 py-1.5 rounded-full shadow-sm transition-opacity">
+                              View Card
+                            </span>
+                          </div>
+                        </>
+                      ) : (
+                        <span className="text-xs text-zinc-400 font-medium">No ID Photo Uploaded</span>
+                      )}
                     </div>
                     <div className="p-2.5 bg-zinc-50/50 flex justify-between items-center border-t border-zinc-200/60">
                       <span className="text-[12px] font-mono font-medium text-zinc-700 tracking-tight">{selectedActivation.user.ghanaCardNumber}</span>
@@ -411,8 +395,10 @@ export default function ActivationsPage() {
                   {!isLegalApproved && (
                     <Button 
                       className="w-full h-9 bg-zinc-900 text-white rounded-lg hover:bg-zinc-800 text-[12px] font-semibold"
-                      onClick={() => setIsLegalApproved(true)}
+                      onClick={handleApprovePaperwork}
+                      disabled={isPending}
                     >
+                      {isPending ? <HugeiconsIcon icon={Loading03Icon} className="animate-spin mr-2" size={14} /> : null}
                       Approve Legal Paperwork
                     </Button>
                   )}
@@ -434,18 +420,19 @@ export default function ActivationsPage() {
                     Provision the smart lock at <span className="font-medium text-zinc-700">{selectedActivation.lease.propertyName} ({selectedActivation.lease.unitNumber})</span>. The tenant will receive their PIN via SMS instantly.
                   </p>
 
-                  {generatedPin ? (
+                  {selectedActivation.smartLockPin ? (
                     <div className="mt-4 p-4 rounded-xl border border-emerald-200/60 bg-emerald-50/30 flex flex-col items-center justify-center space-y-2 animate-in fade-in zoom-in-95 duration-300">
                       <p className="text-[11px] font-bold text-emerald-600 uppercase tracking-widest">Active PIN Code</p>
-                      <p className="text-3xl font-mono font-semibold tracking-[0.2em] text-zinc-900">{generatedPin}</p>
+                      <p className="text-3xl font-mono font-semibold tracking-[0.2em] text-zinc-900">{selectedActivation.smartLockPin}</p>
                       <p className="text-[11px] text-emerald-700/80 font-medium">Successfully synced to hardware.</p>
                     </div>
                   ) : (
                     <Button 
                       className="w-full h-10 mt-2 rounded-lg bg-zinc-900 text-white hover:bg-zinc-800 text-[13px] font-semibold shadow-sm"
-                      onClick={handleSimulatePinSync}
+                      onClick={handleGeneratePin}
+                      disabled={isPending}
                     >
-                      <HugeiconsIcon icon={Key01Icon} size={14} className="mr-2" />
+                      {isPending ? <HugeiconsIcon icon={Loading03Icon} className="animate-spin mr-2" size={14} /> : <HugeiconsIcon icon={Key01Icon} size={14} className="mr-2" />}
                       Generate & Sync Smart Lock PIN
                     </Button>
                   )}

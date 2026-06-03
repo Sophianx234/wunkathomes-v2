@@ -64,7 +64,7 @@ const data = {
         },
         {
           title: "Tenant Onboarding",
-          url: "/admin/activations",
+          url: "/admin/manage/tenants/onboarding",
           icon: <HugeiconsIcon icon={File01Icon} strokeWidth={2} />,
         },
         {

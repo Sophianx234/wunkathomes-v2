@@ -1,33 +1,32 @@
 "use client";
 
-import React, { useState, useMemo, useTransition } from "react";
-import { toast } from "sonner";
-import { 
-  Search01Icon, 
-  FilterIcon, 
-  MoreHorizontalIcon, 
-  Copy01Icon, 
-  FileDownloadIcon, 
-  WhatsappIcon,
-  SmartPhone01Icon,
-  ShieldIcon,
-  Cancel01Icon,
-  ArrowUpRight01Icon,
-  Loading03Icon
-} from "@hugeicons/core-free-icons";
-
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+  ArrowUpRight01Icon,
+  Cancel01Icon,
+  Copy01Icon,
+  Download01Icon,
+  FilterIcon,
+  Loading03Icon,
+  MoreHorizontalIcon,
+  Search01Icon,
+  ShieldIcon,
+  SmartPhone01Icon,
+  WhatsappIcon
+} from "@hugeicons/core-free-icons";
+import { useMemo, useState, useTransition } from "react";
+import { toast } from "sonner";
+
+import { toggleAccountStatus } from "@/actions/admin/tenant.action";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -36,17 +35,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
   Sheet,
   SheetContent,
 } from "@/components/ui/sheet";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { toggleAccountStatus } from "@/actions/admin/tenant.action";
 
 // --- TYPES ---
 interface TenantRecord {
@@ -366,7 +366,7 @@ export default function ManageTenantsClient({ data, availableRegions, availableS
                             Tenant
                           </Badge>
                           {selectedTenant.user.kycStatus === 'Verified' && (
-                            <div className="flex items-center text-indigo-600 text-xs font-medium">
+                            <div className="flex items-center text-green-600 text-xs font-medium">
                               <HugeiconsIcon icon={ShieldIcon} size={14} className="mr-1" /> Verified
                             </div>
                           )}
@@ -385,7 +385,7 @@ export default function ManageTenantsClient({ data, availableRegions, availableS
                   <section className="space-y-4">
                     <div className="flex items-center justify-between">
                       <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Occupied Asset</h3>
-                      <Button variant="link" className="h-auto p-0 text-[11px] font-medium text-zinc-500 hover:text-indigo-600 tracking-wide">
+                      <Button variant="link" className="h-auto p-0 text-[11px] font-medium text-zinc-500 hover:text-primary tracking-wide">
                         View Property <HugeiconsIcon icon={ArrowUpRight01Icon} size={14} className="ml-1" strokeWidth={2.5} />
                       </Button>
                     </div>
@@ -403,7 +403,7 @@ export default function ManageTenantsClient({ data, availableRegions, availableS
                         )}
                       </div>
                       <div className="flex flex-col justify-center">
-                        <h4 className="text-sm font-semibold tracking-tight text-zinc-900 group-hover:text-indigo-600 transition-colors">
+                        <h4 className="text-sm font-semibold tracking-tight text-zinc-900 group-hover:text-primary transition-colors">
                           {selectedTenant.lease.propertyName}
                         </h4>
                         <p className="text-[12px] text-zinc-500 mt-0.5">
@@ -485,7 +485,7 @@ export default function ManageTenantsClient({ data, availableRegions, availableS
 
                   {/* Section 3: Recent Ledger */}
                   <section className="space-y-4">
-                    <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Recent Ledger</h3>
+                    <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Recent Transactions</h3>
                     <div className="space-y-3">
                       {selectedTenant.transactions.length > 0 ? (
                         selectedTenant.transactions.map((tx) => (
@@ -512,10 +512,9 @@ export default function ManageTenantsClient({ data, availableRegions, availableS
               </div>
 
               {/* Fixed Footer Block */}
-              <div className="absolute bottom-0 left-0 w-full bg-white border-t border-zinc-200 p-4 space-y-2 shadow-[0_-4px_12px_rgba(0,0,0,0.02)]">
-                <Button variant="outline" className="w-full rounded-lg h-10 border-zinc-200 hover:bg-zinc-50 text-zinc-900 font-medium shadow-sm">
-                  <HugeiconsIcon icon={FileDownloadIcon} size={16} className="mr-2 text-zinc-500" />
-                  Download Signed Lease
+              <div className="absolute bottom-0 left-0 w-full bg-white border-t border-zinc-200 p-4 space-y-2 ">
+                <Button variant="outline" className="w-full rounded-lg h-10 border-zinc-200 hover:bg-zinc-50 text-zinc-900 font-medium ">
+                  View Tenancy Agreement
                 </Button>
                 
                 <div className="pt-1">
