@@ -50,7 +50,7 @@ export function LoginForm({
     } else if (state?.success) {
       toast.success(state.message);
       // Route user to dashboard upon success
-      router.push("/dashboard");
+      router.push(state?.redirectUrl||"/");
     }
   }, [state, router]);
 

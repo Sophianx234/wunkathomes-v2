@@ -31,12 +31,18 @@ import {
   SearchIcon 
 } from "@hugeicons/core-free-icons"
 
+// --- TYPES ---
+interface AuthenticatedUser {
+  name: string;
+  email: string;
+  avatar: string;
+}
+
+interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
+  user: AuthenticatedUser;
+}
+
 const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
   // Arranged logically: Platform -> People/Contracts -> Financial/Ops
   navMain: [
     {
@@ -82,6 +88,7 @@ const data = {
           url: "/admin/manage/transactions",
           icon: <HugeiconsIcon icon={Wallet01Icon} strokeWidth={2} />,
         },
+        
         {
           title: "Smartlock & Access",
           url: "/admin/access-control",
@@ -107,14 +114,14 @@ const data = {
       icon: <HugeiconsIcon icon={Settings05Icon} strokeWidth={2} />,
     },
     {
-      title: "Get Help",
-      url: "/admin/help",
-      icon: <HugeiconsIcon icon={HelpCircleIcon} strokeWidth={2} />,
-    },
+          title: "Team Management",
+          url: "/admin/manage/team",
+          icon: <HugeiconsIcon icon={UserGroupIcon} strokeWidth={2} />,
+        },
   ],
 }
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({ user, ...props }: AppSidebarProps) {
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -151,7 +158,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarContent>
 
       <SidebarFooter>
-        <NavUser user={data.user} />
+        {/* Dynamically render the fresh user data */}
+        <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>
   )

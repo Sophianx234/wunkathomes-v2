@@ -4,6 +4,7 @@ import { connectToDatabase } from "@/config/DbConnect"
 import User from "@/models/user"
 import bcrypt from "bcryptjs"
 import { z } from "zod"
+import crypto from "crypto"
 import { createSession, deleteSession, getSession } from "@/lib/session" // Import the helper
 import { redirect } from "next/navigation"
 
@@ -147,11 +148,20 @@ export async function loginAction(prevState: any, formData: FormData) {
       role: user.role,
     })
 
-    // 6. Return success
+    let targetRoute = "/admin"; // Default route
+    if (user.role === "Admin") {
+      targetRoute = "/admin/dashboard";
+    } else if (user.role === "User") {
+      targetRoute = "/";
+    }
+
+    // 6. Return success with the exact URL
     return { 
       success: true, 
-      message: "Welcome back!" 
+      message: "Welcome back!",
+      redirectUrl: targetRoute, // <-- Pass the URL, not the role
     }
+   
 
   } catch (error: any) {
     console.error("Login error:", error)
@@ -225,5 +235,107 @@ export async function changePasswordAction(prevState: any, formData: FormData) {
       success: false, 
       error: "An unexpected error occurred. Please try again." 
     }
+  }
+}
+
+
+export async function forgotPasswordAction(prevState: any, formData: FormData) {
+  try {
+    const email = formData.get("email") as string;
+
+    if (!email) {
+      return { success: false, error: "Please enter your email address." };
+    }
+
+    await connectToDatabase();
+    const user = await User.findOne({ email });
+
+    // For security, do not reveal if a user exists or not. 
+    // Always return a generic success message.
+    if (!user) {
+      return { 
+        success: true, 
+        message: "If an account exists, a reset link has been sent." 
+      };
+    }
+
+    // Generate a secure reset token
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    const hashedToken = crypto.createHash("sha256").update(resetToken).digest("hex");
+
+    // Token expires in 1 hour
+    user.passwordResetToken = hashedToken;
+    user.passwordResetExpires = Date.now() + 3600000; 
+    await user.save();
+
+    // The raw token goes in the URL, the hashed token is in the DB
+    const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${resetToken}`;
+
+    // TODO: Send Email using your provider (Resend, Nodemailer, etc.)
+    // await sendEmail({
+    //   to: user.email,
+    //   subject: "Password Reset Request",
+    //   html: `<p>Click <a href="${resetUrl}">here</a> to reset your password.</p>`
+    // });
+    
+    console.log("Reset URL (for testing):", resetUrl);
+
+    return { 
+      success: true, 
+      message: "If an account exists, a reset link has been sent." 
+    };
+
+  } catch (error) {
+    console.error("Forgot password error:", error);
+    return { success: false, error: "An unexpected error occurred." };
+  }
+}
+
+export async function resetPasswordAction(prevState: any, formData: FormData) {
+  try {
+    const token = formData.get("token") as string;
+    const password = formData.get("password") as string;
+    const confirmPassword = formData.get("confirmPassword") as string;
+
+    if (!token) return { success: false, error: "Invalid or missing token." };
+    if (password !== confirmPassword) {
+      return { success: false, error: "Passwords do not match." };
+    }
+    if (password.length < 8) {
+      return { success: false, error: "Password must be at least 8 characters long." };
+    }
+
+    await connectToDatabase();
+
+    // Hash the token from the URL to compare it with the DB
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+    // Find user with valid token that hasn't expired
+    const user = await User.findOne({
+      passwordResetToken: hashedToken,
+      passwordResetExpires: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return { success: false, error: "Token is invalid or has expired." };
+    }
+
+    // Hash new password and save
+    user.password = await bcrypt.hash(password, 12);
+    
+    // Clear the reset fields
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+    await user.save();
+
+    return { 
+      success: true, 
+      message: "Password reset successfully! You can now log in.",
+      redirectUrl: "/login" // Routing approach discussed earlier
+    };
+
+  } catch (error) {
+    console.error("Reset password error:", error);
+    return { success: false, error: "An unexpected error occurred." };
   }
 }

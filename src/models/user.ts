@@ -27,6 +27,14 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
+  passwordResetToken: {
+    type: String,
+    select: false, // Security: hide by default so it doesn't leak in API calls
+  },
+  passwordResetExpires: {
+    type: Date, // Mongoose handles Date.now() integer conversion automatically
+    select: false,
+  },
   // --- NEW KYC / IDENTITY FIELDS ---
   kycStatus: {
     type: String,

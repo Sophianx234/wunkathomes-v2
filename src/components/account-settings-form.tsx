@@ -24,6 +24,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 
 import { changePasswordAction } from "@/actions/user/auth.action";
+import { updateProfileAction } from "@/actions/user/profile.action";
 
 interface InitialUser {
   name: string;
@@ -170,7 +171,8 @@ export default function AccountSettingsForm({
       formData.append("countryCode", countryCode);
       if (avatarFile) formData.append("profilePicture", avatarFile);
 
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+    // Call the server action with the FormData
+    const result = await updateProfileAction(formData);
       toast.success("Profile updated successfully!");
     } catch (error) {
       toast.error("Failed to update profile. Please try again.");
