@@ -446,62 +446,12 @@ export default function AccessControlDashboard() {
         {/* PAGE HEADER & METRICS */}
         {/* 1. Changed 'grid grid-cols-2' to 'flex flex-col md:flex-row' */}
         <div className="flex flex-col md:flex-row  w-full items-start md:items-center justify-between gap-4 border-b border-zinc-200/60 pb-4">
-          {/* Left Side: Pills */}
-          <div className="flex flex-col md:flex-row md:items-center gap-4 w-full md:w-auto">
-            {/* Dynamic Pills based on Perspective */}
-            <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar w-full md:w-auto pb-1 md:pb-0">
-              {perspective === "tenant" ? (
-                <>
-                  <button
-                    onClick={() => setTenantPill("all")}
-                    className={`whitespace-nowrap px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-widest shadow-sm transition-all ${tenantPill === "all" ? "bg-black text-white" : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"}`}
-                  >
-                    All Tenants
-                  </button>
-                  <button
-                    onClick={() => setTenantPill("revoked")}
-                    className={`whitespace-nowrap px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-widest shadow-sm transition-all ${tenantPill === "revoked" ? "bg-black text-white" : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"}`}
-                  >
-                    Locked Out
-                  </button>
-                  <button
-                    onClick={() => setTenantPill("grace")}
-                    className={`whitespace-nowrap px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-widest shadow-sm transition-all ${tenantPill === "grace" ? "bg-black text-white" : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"}`}
-                  >
-                    Grace Period
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button
-                    onClick={() => setUnitPill("all")}
-                    className={`whitespace-nowrap px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-widest shadow-sm transition-all ${unitPill === "all" ? "bg-black text-white" : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"}`}
-                  >
-                    All Units
-                  </button>
-                  <button
-                    onClick={() => setUnitPill("vacant")}
-                    className={`whitespace-nowrap px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-widest shadow-sm transition-all ${unitPill === "vacant" ? "bg-black text-white" : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"}`}
-                  >
-                    Vacant Units
-                  </button>
-                  <button
-                    onClick={() => setUnitPill("low_battery")}
-                    className={`whitespace-nowrap px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-widest shadow-sm transition-all ${unitPill === "low_battery" ? "bg-black text-white" : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"}`}
-                  >
-                    Low Battery
-                  </button>
-                  <button
-                    onClick={() => setUnitPill("offline")}
-                    className={`whitespace-nowrap px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-widest shadow-sm transition-all ${unitPill === "offline" ? "bg-black text-white" : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"}`}
-                  >
-                    Offline
-                  </button>
-                </>
-              )}
-            </div>
+         
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
+              Smartlock & Access Control
+            </h1>
           </div>
-
           {/* Right Side: Tabs */}
           {/* 2. Added flex & justify-end so the tabs push to the right boundary */}
           <div className="w-full md:w-auto flex md:justify-end">

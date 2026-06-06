@@ -240,9 +240,7 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
             <h1 className="text-2xl font-bold tracking-tight text-zinc-900">
               Team & Access Control
             </h1>
-            <p className="text-sm text-zinc-500 mt-1">
-              Manage internal staff members and their permission levels.
-            </p>
+          
           </div>
           <Button
             onClick={() => setIsInviteOpen(true)}

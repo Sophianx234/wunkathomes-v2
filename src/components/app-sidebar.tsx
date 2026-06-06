@@ -91,12 +91,12 @@ const data = {
         
         {
           title: "Smartlock & Access",
-          url: "/admin/access-control",
+          url: "/admin/manage/access-control",
           icon: <HugeiconsIcon icon={LockIcon} strokeWidth={2} />,
         },
         {
           title: "Support ",
-          url: "/admin/support",
+          url: "/admin/manage/maintenance",
           icon: <HugeiconsIcon icon={HelpCircleIcon} strokeWidth={2} />,
         },
       ]
