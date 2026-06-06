@@ -14,6 +14,7 @@ import { connectToDatabase } from "@/config/DbConnect";
 import Property from "@/models/property";
 import Listing from "@/models/listing";
 import { uploadToCloudinary } from "@/lib/cloudinary";
+import { getSession, SessionPayload } from "@/lib/session";
 
 // --- Rate Limiter Configuration (Production-Ready) ---
 const redis = Redis.fromEnv();
@@ -248,6 +249,217 @@ export async function createPropertyAction(prevState: ActionState, formData: For
       success: false, 
       message: "An unexpected system error occurred while processing your request.", 
       error: "An unexpected system error occurred while processing your request." 
+    };
+  }
+}
+
+
+// Add these to your Zod schemas at the top of the file
+const editPropertySchema = createPropertySchema.extend({
+  listingId: z.string().min(1, "Listing ID is required"),
+  propertyId: z.string().min(1, "Property ID is required"),
+  // Override media to be optional, since the user might not upload NEW images during an edit
+  media: z.array(
+      z.instanceof(File)
+        .refine((file) => file.size <= MAX_FILE_SIZE, "Max file size is 5MB.")
+        .refine((file) => ACCEPTED_IMAGE_TYPES.includes(file.type), "Only .jpg, .jpeg, .png and .webp formats are supported.")
+    ).optional(),
+});
+
+export async function editPropertyAction(prevState: ActionState, formData: FormData): Promise<ActionState> {
+  try {
+    // 1. Authorization & Rate Limiting (Same as Create)
+    const session = await getSession() as SessionPayload;
+    if (!session?.userId) return { error: "Unauthorized" };
+  
+
+    const landmarksStr = formData.get("landmarks") as string | null;
+    const landmarksArray = landmarksStr 
+      ? landmarksStr.split(",").map(item => item.trim()).filter(Boolean)
+      : [];
+
+    // Parse the existing images passed from the client
+    const existingImagesRaw = formData.get("existingImages") as string;
+    const existingImages = existingImagesRaw ? JSON.parse(existingImagesRaw) : [];
+
+    const rawData = {
+      listingId: formData.get("listingId"),
+      propertyId: formData.get("propertyId"),
+      title: formData.get("title"),
+      listingType: formData.get("listingType"),
+      propertyType: formData.get("propertyType"),
+      description: formData.get("description"),
+      price: formData.get("price"),
+      leaseTerm: formData.get("leaseTerm"),
+      status: formData.get("status") || "Available",
+      
+      bedrooms: formData.get("bedrooms"),
+      bathrooms: formData.get("bathrooms"),
+      sizeSqm: formData.get("sizeSqm") ? formData.get("sizeSqm") : undefined,
+      
+      region: formData.get("region"),
+      city: formData.get("city"),
+      area: formData.get("area"),
+      lat: formData.get("lat"),
+      lng: formData.get("lng"),
+      
+      amenities: formData.getAll("amenities"),
+      landmarks: landmarksArray,
+      
+      hasSmartLock: formData.get("hasSmartLock") === "on" || formData.get("hasSmartLock") === "true",
+      accessInstructions: formData.get("accessInstructions"),
+      
+      // If no files were uploaded, getAll("media") returns an array with an empty File object. We filter it out.
+      media: formData.getAll("media").filter((file: any) => file.size > 0), 
+    };
+
+    const validationResult = editPropertySchema.safeParse(rawData);
+
+    if (!validationResult.success) {
+      console.error("Edit validation failed:", validationResult.error.flatten());
+      return {
+        success: false,
+        message: "Validation failed. Please check your input.",
+        error: "Invalid input data. Please check your form fields." 
+      };
+    }
+
+    const validData = validationResult.data;
+
+    // 2. Upload NEW files to Cloudinary (if any)
+    let newImageUrls: string[] = [];
+    if (validData.media && validData.media.length > 0) {
+      newImageUrls = await uploadToCloudinary(validData.media, `wunkathomes/properties`); 
+    }
+
+    // Merge existing preserved images with the newly uploaded ones
+    const finalImageUrls = [...existingImages, ...newImageUrls];
+
+    // 3. Database Operations
+    await connectToDatabase();
+    const dbSession = await mongoose.startSession();
+    dbSession.startTransaction();
+
+    try {
+      // 3a. Update Property
+      await Property.findByIdAndUpdate(validData.propertyId, {
+        propertyType: validData.propertyType,
+        location: {
+          region: validData.region,
+          area: validData.area,
+          city: validData.city || undefined,
+        },
+        coordinates: {
+          lat: validData.lat,
+          lng: validData.lng,
+        },
+        landmarks: validData.landmarks,
+        generalAmenities: validData.amenities,
+      }, { session: dbSession, new: true });
+
+      // 3b. Update Listing
+      // (Note: Slug will not auto-update on Mongoose .findByIdAndUpdate. 
+      // If you want the slug to change when the title changes, you must manually run the slug logic here, 
+      // or rely on a standard .save() rather than .findByIdAndUpdate).
+      await Listing.findByIdAndUpdate(validData.listingId, {
+        listingType: validData.listingType,
+        status: validData.status,
+        price: validData.price,
+        title: validData.title,
+        description: validData.description,
+        features: {                     
+          bedrooms: validData.bedrooms,
+          bathrooms: validData.bathrooms,
+          sizeSqm: validData.sizeSqm || undefined,
+        },
+        terms: {
+          leaseTerm: validData.leaseTerm || undefined,
+        },
+        smartLock: {
+          hasSmartLock: validData.hasSmartLock,
+          accessInstructions: validData.accessInstructions || undefined,
+        },
+        images: finalImageUrls,
+      }, { session: dbSession, new: true });
+
+      await dbSession.commitTransaction();
+      
+    } catch (dbError) {
+      await dbSession.abortTransaction();
+      throw dbError; 
+    } finally {
+      dbSession.endSession();
+    }
+
+    revalidatePath("/admin/properties");
+
+    return { 
+      success: true, 
+      message: "Property updated successfully.",
+    };
+  } catch (error) {
+    console.error("Edit property action error:", error);
+    return { 
+      success: false, 
+      message: "An unexpected system error occurred.", 
+      error: "An unexpected system error occurred." 
+    };
+  }
+}
+export async function deletePropertyAction(listingId: string) {
+  try {
+    // 1. Connect to DB and verify the listing exists
+    const session = await getSession();
+    if (!session || session.role !== "Admin") {
+      // FIX: Changed 'error' to 'message'
+      return { success: false, message: "Unauthorized. Admin access required." }; 
+    }
+    
+    await connectToDatabase();
+    
+    const listing = await Listing.findById(listingId);
+    if (!listing) {
+      return { success: false, message: "Asset not found or already deleted." };
+    }
+
+    const propertyId = listing.propertyId;
+
+    // 2. Start a transaction for safe deletion
+    const dbSession = await mongoose.startSession();
+    dbSession.startTransaction();
+
+    try {
+      // 3a. Delete the Listing document
+      await Listing.findByIdAndDelete(listingId, { session: dbSession });
+      
+      // 3b. Delete the underlying base Property document
+      if (propertyId) {
+        await Property.findByIdAndDelete(propertyId, { session: dbSession });
+      }
+
+      // 4. Commit the changes
+      await dbSession.commitTransaction();
+      
+    } catch (dbError) {
+      await dbSession.abortTransaction();
+      throw dbError; 
+    } finally {
+      dbSession.endSession();
+    }
+
+    // 5. Revalidate the cache to instantly remove the card from the UI
+    revalidatePath("/admin/properties");
+
+    return { 
+      success: true, 
+      message: "Asset and all related data deleted successfully." 
+    };
+
+  } catch (error) {
+    console.error("[CRITICAL] Failed to delete property:", error);
+    return { 
+      success: false, 
+      message: "An unexpected system error occurred while trying to delete the asset." 
     };
   }
 }

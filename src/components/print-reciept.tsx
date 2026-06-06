@@ -49,7 +49,7 @@ export default function PrintReceipt({ transaction }: PrintReceiptProps) {
       lines.push(
         <div
           key={i}
-          className="bg-primary h-12"
+          className="bg-black h-12"
           style={{ width: `${width}px`, marginRight: "2px" }}
         />,
       );

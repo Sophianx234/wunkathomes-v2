@@ -66,7 +66,7 @@ export default function UserCommandCenter() {
 
             <div className="flex flex-col sm:flex-row gap-4 items-center">
               {/* In production, this opens your PDF signature modal or page */}
-              <button className="w-full sm:w-auto px-8 py-4 bg-primary text-white font-black uppercase tracking-widest text-xs rounded-xl hover:bg-slate-800 transition-colors shadow-lg shadow-black/20 flex items-center justify-center gap-2">
+              <button className="w-full sm:w-auto px-8 py-4 bg-black text-white font-black uppercase tracking-widest text-xs rounded-xl hover:bg-slate-800 transition-colors shadow-lg shadow-black/20 flex items-center justify-center gap-2">
                 <HugeiconsIcon icon={File02Icon} size={16} />
                 Review & Sign Contract
               </button>

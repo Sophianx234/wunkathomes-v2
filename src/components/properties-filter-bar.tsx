@@ -94,7 +94,7 @@ export default function PropertiesFilterBar({
             onClick={() => handleFilterChange("assetType", "all")}
             className={`whitespace-nowrap px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${
               currentAssetType === "all"
-                ? "bg-primary text-white"
+                ? "bg-black text-white"
                 : "bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-900"
             }`}
           >
@@ -106,7 +106,7 @@ export default function PropertiesFilterBar({
             }
             className={`whitespace-nowrap px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${
               currentAssetType === "Apartment_Building"
-                ? "bg-primary text-white"
+                ? "bg-black text-white"
                 : "bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-900"
             }`}
           >
@@ -116,7 +116,7 @@ export default function PropertiesFilterBar({
             onClick={() => handleFilterChange("assetType", "Commercial")}
             className={`whitespace-nowrap px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${
               currentAssetType === "Commercial"
-                ? "bg-primary text-white"
+                ? "bg-black text-white"
                 : "bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-900"
             }`}
           >
@@ -126,7 +126,7 @@ export default function PropertiesFilterBar({
             onClick={() => handleFilterChange("assetType", "House")}
             className={`whitespace-nowrap px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${
               currentAssetType === "House"
-                ? "bg-primary text-white"
+                ? "bg-black text-white"
                 : "bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-900"
             }`}
           >
@@ -137,7 +137,7 @@ export default function PropertiesFilterBar({
         {/* Create Property Button */}
         <Link
           href="/admin/properties/create"
-          className="text-white flex items-center bg-primary hover:bg-slate-800 rounded-lg h-10 px-5 text-[14px] font-medium shrink-0 w-full md:w-auto transition-colors"
+          className="text-white flex items-center bg-black hover:bg-slate-800 rounded-lg h-10 px-5 text-[14px] font-medium shrink-0 w-full md:w-auto transition-colors"
         >
           <HugeiconsIcon
             icon={PlusSignIcon}

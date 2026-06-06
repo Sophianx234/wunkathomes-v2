@@ -137,7 +137,7 @@ function AdminNotesEditor({
           variant="ghost"
           disabled={isPending}
           onClick={() => onSave(notes)}
-          className="h-7 text-[11px] bg-primary text-white rounded-sm hover:text-zinc-900 border transition-all hover:border-zinc-900"
+          className="h-7 text-[11px] bg-black text-white rounded-sm hover:text-zinc-900 border transition-all hover:border-zinc-900"
         >
           {isPending ? "Saving..." : "Save Notes"}
         </Button>
@@ -188,13 +188,17 @@ export default function TourTable({
     setSheetStatus(newStatus);
 
     startTransition(async () => {
-      const res = await updateTourAction(selectedTour.id, { status: newStatus });
+      const res = await updateTourAction(selectedTour.id, {
+        status: newStatus,
+      });
       if (res.success) {
         toast.success("Status updated successfully!");
-        
+
         // Update local dataset to instantly move it across tabs
         setTours((prev) =>
-          prev.map((t) => (t.id === selectedTour.id ? { ...t, status: newStatus } : t))
+          prev.map((t) =>
+            t.id === selectedTour.id ? { ...t, status: newStatus } : t,
+          ),
         );
         setSelectedTour({ ...selectedTour, status: newStatus });
       } else {
@@ -211,7 +215,9 @@ export default function TourTable({
       if (res.success) {
         toast.success("Notes saved successfully!");
         setTours((prev) =>
-          prev.map((t) => (t.id === selectedTour.id ? { ...t, notes: newNotes } : t))
+          prev.map((t) =>
+            t.id === selectedTour.id ? { ...t, notes: newNotes } : t,
+          ),
         );
         setSelectedTour({ ...selectedTour, notes: newNotes });
       } else {
@@ -241,7 +247,8 @@ export default function TourTable({
   // 3. Apply Search and Status Filters
   const filteredData = useMemo(() => {
     return tabData.filter((tour) => {
-      const matchesStatus = statusFilter === "all" || tour.status === statusFilter;
+      const matchesStatus =
+        statusFilter === "all" || tour.status === statusFilter;
       const searchLower = searchQuery.toLowerCase();
       const matchesSearch =
         tour.phoneNumber.includes(searchQuery) ||
@@ -252,7 +259,9 @@ export default function TourTable({
     });
   }, [tabData, searchQuery, statusFilter]);
 
-  const activeCount = tours.filter((t) => ["Pending_Time", "Confirmed"].includes(t.status)).length;
+  const activeCount = tours.filter((t) =>
+    ["Pending_Time", "Confirmed"].includes(t.status),
+  ).length;
 
   return (
     <div className="space-y-6">
@@ -265,7 +274,7 @@ export default function TourTable({
           {activeCount > 0 && activeTab === "active" && (
             <Badge
               variant="secondary"
-              className="bg-primary text-white hover:bg-zinc-800 text-[11px] px-2 h-5 flex items-center justify-center rounded-full"
+              className="bg-black text-white hover:bg-zinc-800 text-[11px] px-2 h-5 flex items-center justify-center rounded-full"
             >
               {activeCount} Active
             </Badge>
@@ -278,10 +287,16 @@ export default function TourTable({
           className="w-full md:w-auto"
         >
           <TabsList className="h-9 bg-zinc-100/50 border border-zinc-200/60 p-0.5 rounded-lg">
-            <TabsTrigger value="active" className="text-[13px] font-medium data-[state=active]:bg-white  rounded-md px-4">
+            <TabsTrigger
+              value="active"
+              className="text-[13px] font-medium data-[state=active]:bg-white  rounded-md px-4"
+            >
               Active Leads
             </TabsTrigger>
-            <TabsTrigger value="history" className="text-[13px] font-medium data-[state=active]:bg-white  rounded-md px-4">
+            <TabsTrigger
+              value="history"
+              className="text-[13px] font-medium data-[state=active]:bg-white  rounded-md px-4"
+            >
               Tour History
             </TabsTrigger>
           </TabsList>
@@ -291,7 +306,11 @@ export default function TourTable({
       {/* DYNAMIC FILTER BAR */}
       <section className="flex flex-col xl:flex-row items-center gap-4 bg-white p-1.5 border border-zinc-200/60 rounded-xl shadow-[0_1px_4px_rgba(0,0,0,0.01)] w-full">
         <div className="relative flex-1 w-full">
-          <HugeiconsIcon icon={Search01Icon} size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+          <HugeiconsIcon
+            icon={Search01Icon}
+            size={16}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"
+          />
           <Input
             placeholder="Search by phone, location, or property..."
             value={searchQuery}
@@ -303,7 +322,10 @@ export default function TourTable({
         <div className="h-4 w-px bg-zinc-200 hidden xl:block" />
 
         <div className="flex flex-wrap md:flex-nowrap items-center gap-2 w-full xl:w-auto px-2 pb-1 xl:pb-0">
-          <Select value={statusFilter} onValueChange={(val) => setStatusFilter(val as any)}>
+          <Select
+            value={statusFilter}
+            onValueChange={(val) => setStatusFilter(val as any)}
+          >
             <SelectTrigger className="w-full md:w-[160px] h-8 border-0 bg-zinc-50/50 hover:bg-zinc-100 text-[12px] font-medium text-zinc-700 shadow-none focus:ring-0 rounded-md">
               <SelectValue placeholder="Filter by Status" />
             </SelectTrigger>
@@ -347,10 +369,18 @@ export default function TourTable({
         <Table>
           <TableHeader className="bg-zinc-50/30">
             <TableRow className="border-zinc-200/60">
-              <TableHead className="font-medium text-zinc-500 text-xs h-10 w-[200px]">Date & Time</TableHead>
-              <TableHead className="font-medium text-zinc-500 text-xs h-10">Lead Contact</TableHead>
-              <TableHead className="font-medium text-zinc-500 text-xs h-10">Property</TableHead>
-              <TableHead className="font-medium text-zinc-500 text-xs h-10">Status</TableHead>
+              <TableHead className="font-medium text-zinc-500 text-xs h-10 w-[200px]">
+                Date & Time
+              </TableHead>
+              <TableHead className="font-medium text-zinc-500 text-xs h-10">
+                Lead Contact
+              </TableHead>
+              <TableHead className="font-medium text-zinc-500 text-xs h-10">
+                Property
+              </TableHead>
+              <TableHead className="font-medium text-zinc-500 text-xs h-10">
+                Status
+              </TableHead>
               <TableHead className="text-right w-[140px]"></TableHead>
             </TableRow>
           </TableHeader>
@@ -372,7 +402,10 @@ export default function TourTable({
                     </span>
                   </div>
                 </TableCell>
-                <TableCell className="py-3 align-middle" onClick={(e) => e.stopPropagation()}>
+                <TableCell
+                  className="py-3 align-middle"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <div className="flex items-center gap-2">
                     <span className="text-[13px] font-mono font-medium text-zinc-800 tracking-tight">
                       {tour.phoneNumber}
@@ -395,7 +428,8 @@ export default function TourTable({
                 <TableCell className="py-3 align-middle">
                   <div className="flex flex-col">
                     <span className="text-[13px] font-medium text-zinc-900 leading-tight">
-                      {tour.listing.property.propertyName || tour.listing.property.location}
+                      {tour.listing.property.propertyName ||
+                        tour.listing.property.location}
                     </span>
                     <span className="text-[11px] text-zinc-500 mt-0.5 truncate max-w-[200px]">
                       {tour.listing.title}
@@ -424,8 +458,13 @@ export default function TourTable({
 
             {filteredData.length === 0 && (
               <TableRow>
-                <TableCell colSpan={5} className="h-32 text-center text-zinc-500 text-sm">
-                  {activeTab === "active" ? "No active leads match the current filters." : "No history found."}
+                <TableCell
+                  colSpan={5}
+                  className="h-32 text-center text-zinc-500 text-sm"
+                >
+                  {activeTab === "active"
+                    ? "No active leads match the current filters."
+                    : "No history found."}
                 </TableCell>
               </TableRow>
             )}
@@ -434,7 +473,10 @@ export default function TourTable({
       </div>
 
       {/* LEAD CRM PANEL (Sheet) */}
-      <Sheet open={!!selectedTour} onOpenChange={(open) => !open && setSelectedTour(null)}>
+      <Sheet
+        open={!!selectedTour}
+        onOpenChange={(open) => !open && setSelectedTour(null)}
+      >
         <SheetContent className="w-full sm:max-w-[440px] p-0 bg-[#FAFAFA] border-l border-zinc-200/60 flex flex-col font-sans shadow-2xl">
           {selectedTour && (
             <>
@@ -448,7 +490,8 @@ export default function TourTable({
                     <p className="text-[12px] text-zinc-500 flex items-center gap-1.5 font-medium">
                       <HugeiconsIcon icon={Calendar01Icon} size={12} />
                       {formatRelativeDate(selectedTour.scheduledDate)} at{" "}
-                      {selectedTour.confirmedTime || formatTime(selectedTour.scheduledDate)}
+                      {selectedTour.confirmedTime ||
+                        formatTime(selectedTour.scheduledDate)}
                     </p>
                   </div>
                   <a
@@ -460,7 +503,11 @@ export default function TourTable({
                       size="icon"
                       className="h-10 w-10 rounded-full bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20 transition-colors shrink-0"
                     >
-                      <HugeiconsIcon icon={WhatsappIcon} size={20} strokeWidth={2} />
+                      <HugeiconsIcon
+                        icon={WhatsappIcon}
+                        size={20}
+                        strokeWidth={2}
+                      />
                     </Button>
                   </a>
                 </div>
@@ -492,7 +539,10 @@ export default function TourTable({
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                       <div className="absolute bottom-3 left-3 text-white">
                         <p className="text-[10px] font-bold uppercase tracking-wider text-white/80">
-                          {selectedTour.listing.property.propertyType.replace("_", " ")}
+                          {selectedTour.listing.property.propertyType.replace(
+                            "_",
+                            " ",
+                          )}
                         </p>
                         <p className="text-[15px] font-semibold leading-tight">
                           {selectedTour.listing.title}
@@ -567,7 +617,7 @@ export default function TourTable({
               {/* Pinned Conversion Footer */}
               <div className="p-4 bg-white border-t border-zinc-200/80 shadow-[0_-8px_20px_rgba(0,0,0,0.03)] z-20">
                 <Button
-                  className="w-full h-11 rounded-md bg-primary text-white hover:bg-zinc-800 text-[13px] font-semibold shadow-sm transition-all"
+                  className="w-full h-11 rounded-md bg-black text-white hover:bg-zinc-800 text-[13px] font-semibold shadow-sm transition-all"
                   onClick={() => {
                     navigator.clipboard.writeText(
                       `${window.location.origin}/checkout/${selectedTour.listing.slug}?type=deposit`,

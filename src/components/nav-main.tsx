@@ -46,7 +46,7 @@ export function NavMain({
                       tooltip={item.title}
                       className={`transition-all duration-200 ${
                         isActive
-                          ? "bg-zinc-950 text-white hover:bg-primary hover:text-white"
+                          ? "bg-zinc-950 text-white hover:bg-black hover:text-white"
                           : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
                       }`}
                     >

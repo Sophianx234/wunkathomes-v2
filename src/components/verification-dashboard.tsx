@@ -237,7 +237,7 @@ export function VerificationDashboard({
                   />
                   <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="absolute bottom-0 right-0 w-8 h-8 bg-primary rounded-full border-2 border-white flex items-center justify-center hover:bg-primary transition-colors cursor-pointer shadow-sm"
+                    className="absolute bottom-0 right-0 w-8 h-8 bg-black rounded-full border-2 border-white flex items-center justify-center hover:bg-black transition-colors cursor-pointer shadow-sm"
                   >
                     <HugeiconsIcon
                       icon={Camera02Icon}
@@ -279,10 +279,10 @@ export function VerificationDashboard({
               Need help?
             </h3>
             <p className="text-xs text-slate-500 leading-relaxed mb-6">
-              Have questions or concerns regarding your WunkateHomes
+              Have questions or concerns regarding your wunkathomesHomes
               verification? Our experts are here to help!
             </p>
-            <button className="w-full py-3 bg-primary hover:bg-primary text-white text-xs font-bold uppercase tracking-widest rounded-lg transition-colors shadow-primary/20">
+            <button className="w-full py-3 bg-black hover:bg-black text-white text-xs font-bold uppercase tracking-widest rounded-lg transition-colors shadow-primary/20">
               Chat With Us
             </button>
           </div>
@@ -327,9 +327,9 @@ export function VerificationDashboard({
                     <div
                       className={`w-6 h-6 rounded-full flex items-center justify-center z-10 transition-colors ${
                         step > s
-                          ? "bg-primary text-white"
+                          ? "bg-black text-white"
                           : step === s
-                            ? "bg-primary border-4 border-blue-100 text-transparent"
+                            ? "bg-black border-4 border-blue-100 text-transparent"
                             : "bg-slate-100 border-2 border-slate-200 text-transparent"
                       }`}
                     >
@@ -344,7 +344,7 @@ export function VerificationDashboard({
                   </div>
                   {index < 3 && (
                     <div
-                      className={`flex-1 h-0.5 mx-2 transition-colors ${step > s ? "bg-primary" : "bg-slate-200"}`}
+                      className={`flex-1 h-0.5 mx-2 transition-colors ${step > s ? "bg-black" : "bg-slate-200"}`}
                     />
                   )}
                 </React.Fragment>
@@ -590,7 +590,7 @@ export function VerificationDashboard({
                   <button
                     onClick={() => setStep(2)}
                     disabled={!idNumber || !fullName || !dob}
-                    className="px-8 py-3 bg-primary text-white text-xs font-bold uppercase tracking-widest rounded-lg hover:bg-primary transition-colors disabled:opacity-50 disabled:bg-slate-300 flex items-center gap-2 "
+                    className="px-8 py-3 bg-black text-white text-xs font-bold uppercase tracking-widest rounded-lg hover:bg-black transition-colors disabled:opacity-50 disabled:bg-slate-300 flex items-center gap-2 "
                   >
                     Next Step{" "}
                     <HugeiconsIcon icon={ArrowRight01Icon} size={16} />
@@ -602,7 +602,7 @@ export function VerificationDashboard({
                       disabled={
                         !photoData || !hasProfilePicture || isSubmitting
                       }
-                      className="px-8 py-3 bg-primary text-white text-xs font-bold uppercase tracking-widest rounded-lg hover:bg-primary transition-colors disabled:opacity-50 disabled:bg-slate-300 flex items-center gap-2 "
+                      className="px-8 py-3 bg-black text-white text-xs font-bold uppercase tracking-widest rounded-lg hover:bg-black transition-colors disabled:opacity-50 disabled:bg-slate-300 flex items-center gap-2 "
                     >
                       {isSubmitting && (
                         <HugeiconsIcon

@@ -43,7 +43,7 @@ export default function GlobalConcierge() {
         animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: 1, type: "spring", stiffness: 200, damping: 20 }}
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-[100] w-14 h-14 bg-primary text-white rounded-full flex items-center justify-center border-2 border-transparent hover:border-slate-400 transition-colors shadow-[0px_8px_24px_rgba(0,0,0,0.2)] group"
+        className="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-[100] w-14 h-14 bg-black text-white rounded-full flex items-center justify-center border-2 border-transparent hover:border-slate-400 transition-colors shadow-[0px_8px_24px_rgba(0,0,0,0.2)] group"
         aria-label="Open Concierge"
       >
         <HugeiconsIcon
@@ -66,7 +66,7 @@ export default function GlobalConcierge() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsOpen(false)}
-              className="fixed inset-0 bg-primary/40 backdrop-blur-sm z-[110]"
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[110]"
             />
 
             {/* The Drawer Panel */}

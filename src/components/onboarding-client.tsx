@@ -372,7 +372,7 @@ export default function OnboardingClient({
             {awaitingCount > 0 && (
               <Badge
                 variant="secondary"
-                className="bg-primary text-white hover:bg-zinc-800 text-[11px] px-2 h-5 flex items-center justify-center rounded-full"
+                className="bg-black text-white hover:bg-zinc-800 text-[11px] px-2 h-5 flex items-center justify-center rounded-full"
               >
                 {awaitingCount} New
               </Badge>
@@ -708,7 +708,7 @@ export default function OnboardingClient({
                             alt="Ghana Card"
                             className="w-full h-full object-cover mix-blend-multiply opacity-80 group-hover:scale-105 transition-transform duration-500"
                           />
-                          <div className="absolute inset-0 flex items-center justify-center bg-primary/0 group-hover:bg-primary/10 transition-colors">
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/10 transition-colors">
                             <span className="opacity-0 group-hover:opacity-100 bg-white/90 backdrop-blur-sm text-zinc-900 text-[10px] uppercase font-bold tracking-wider px-3 py-1.5 rounded-full shadow-sm transition-opacity">
                               View Full Size
                             </span>
@@ -763,7 +763,7 @@ export default function OnboardingClient({
                   {!isLegalApproved && (
                     <div className="flex gap-3">
                       <Button
-                        className="flex-1 h-9 bg-primary text-white rounded-lg hover:bg-zinc-800 text-[12px] font-semibold"
+                        className="flex-1 h-9 bg-black text-white rounded-lg hover:bg-zinc-800 text-[12px] font-semibold"
                         onClick={handleApprovePaperwork}
                         disabled={isPending}
                       >
@@ -835,7 +835,7 @@ export default function OnboardingClient({
                     </div>
                   ) : (
                     <Button
-                      className="w-full h-10 mt-2 rounded-lg bg-primary text-white hover:bg-zinc-800 text-[13px] font-semibold shadow-sm"
+                      className="w-full h-10 mt-2 rounded-lg bg-black text-white hover:bg-zinc-800 text-[13px] font-semibold shadow-sm"
                       onClick={handleGeneratePin}
                       disabled={isPending}
                     >

@@ -9,7 +9,7 @@ import {
   Shield02Icon,
   Mail01Icon,
   UserCircleIcon,
-  Tick02Icon
+  Tick02Icon,
 } from "@hugeicons/core-free-icons";
 import { useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -62,11 +62,11 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { HugeiconsIcon } from "@hugeicons/react";
 
 // Import all required Server Actions
-import { 
+import {
   inviteTeamMemberAction,
   updateTeamMemberRole,
   toggleTeamAccountStatus,
-  cancelInvitation
+  cancelInvitation,
 } from "@/actions/admin/invitation.action";
 
 // --- TYPES ---
@@ -91,8 +91,10 @@ const getRoleBadgeStyle = (role: string) => {
 };
 
 const getStatusBadgeStyle = (status: string) => {
-  if (status === "Suspended") return "bg-rose-50 text-rose-700 border-rose-200/60";
-  if (status === "Pending_Invite") return "bg-amber-50 text-amber-700 border-amber-200/60";
+  if (status === "Suspended")
+    return "bg-rose-50 text-rose-700 border-rose-200/60";
+  if (status === "Pending_Invite")
+    return "bg-amber-50 text-amber-700 border-amber-200/60";
   return "bg-teal-50 text-teal-700 border-teal-200/60"; // Active
 };
 
@@ -142,9 +144,10 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
   // Search & Filter implementation
   const filteredData = useMemo(() => {
     return data.filter((member) => {
-      const matchesTab = activeTab === "team" 
-        ? member.accountStatus !== "Pending_Invite" 
-        : member.accountStatus === "Pending_Invite";
+      const matchesTab =
+        activeTab === "team"
+          ? member.accountStatus !== "Pending_Invite"
+          : member.accountStatus === "Pending_Invite";
 
       const matchesSearch =
         !searchQuery ||
@@ -184,7 +187,7 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
     startTransition(async () => {
       // NOTE: Replace with your actual remove action
       // const result = await removeTeamMemberAction(userId);
-      await new Promise(res => setTimeout(res, 1000)); 
+      await new Promise((res) => setTimeout(res, 1000));
       toast.success("User revoked and removed from team.");
     });
   };
@@ -193,7 +196,7 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
     e.preventDefault();
     startTransition(async () => {
       const result = await inviteTeamMemberAction(inviteEmail, inviteRole);
-      
+
       if (result.success) {
         toast.success(result.message);
         setIsInviteOpen(false);
@@ -214,10 +217,10 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
   const handleUpdateRole = (e: React.FormEvent) => {
     e.preventDefault();
     if (!memberToEdit) return;
-    
+
     startTransition(async () => {
       const result = await updateTeamMemberRole(memberToEdit.id, newRole);
-      
+
       if (result.success) {
         toast.success(result.message);
         setIsEditRoleOpen(false);
@@ -231,14 +234,17 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
   return (
     <div className="min-h-screen bg-[#FAFAFA] p-6 lg:pb-10 font-sans">
       <div className="max-w-[1200px] mx-auto space-y-6">
-        
         {/* PAGE HEADER */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-200/60 pb-4">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-zinc-900">Team & Access Control</h1>
-            <p className="text-sm text-zinc-500 mt-1">Manage internal staff members and their permission levels.</p>
+            <h1 className="text-2xl font-bold tracking-tight text-zinc-900">
+              Team & Access Control
+            </h1>
+            <p className="text-sm text-zinc-500 mt-1">
+              Manage internal staff members and their permission levels.
+            </p>
           </div>
-          <Button 
+          <Button
             onClick={() => setIsInviteOpen(true)}
             className="bg-zinc-900 hover:bg-zinc-800 rounded-sm text-white shadow-sm h-10 px-5 shrink-0"
           >
@@ -254,14 +260,14 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
           className="w-full"
         >
           <TabsList className="h-9 bg-zinc-100/50 border border-zinc-200/60 p-0.5 rounded-lg mb-2">
-            <TabsTrigger 
-              value="team" 
+            <TabsTrigger
+              value="team"
               className="text-[13px] font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md px-4"
             >
               Active Team
             </TabsTrigger>
-            <TabsTrigger 
-              value="pending" 
+            <TabsTrigger
+              value="pending"
               className="text-[13px] font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md px-4"
             >
               Pending Invites
@@ -325,47 +331,79 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
           <Table>
             <TableHeader className="bg-zinc-50/50">
               <TableRow className="border-zinc-200/80 hover:bg-transparent">
-                <TableHead className="font-medium text-zinc-500 text-xs h-10">Team Member</TableHead>
-                <TableHead className="font-medium text-zinc-500 text-xs h-10">System Role</TableHead>
-                <TableHead className="font-medium text-zinc-500 text-xs h-10">Status</TableHead>
-                <TableHead className="font-medium text-zinc-500 text-xs h-10 hidden md:table-cell">Last Active</TableHead>
+                <TableHead className="font-medium text-zinc-500 text-xs h-10">
+                  Team Member
+                </TableHead>
+                <TableHead className="font-medium text-zinc-500 text-xs h-10">
+                  System Role
+                </TableHead>
+                <TableHead className="font-medium text-zinc-500 text-xs h-10">
+                  Status
+                </TableHead>
+                <TableHead className="font-medium text-zinc-500 text-xs h-10 hidden md:table-cell">
+                  Last Active
+                </TableHead>
                 <TableHead className="w-[50px]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredData.map((member) => (
-                <TableRow key={member.id} className="group border-zinc-100 hover:bg-zinc-50/80 transition-colors">
-                  
+                <TableRow
+                  key={member.id}
+                  className="group border-zinc-100 hover:bg-zinc-50/80 transition-colors"
+                >
                   {/* MEMBER PROFILE */}
                   <TableCell className="py-4">
                     <div className="flex items-center gap-3">
-                      <Avatar className={`h-10 w-10 border ${member.accountStatus === "Suspended" ? "opacity-50 grayscale border-zinc-200" : "border-zinc-200"}`}>
+                      <Avatar
+                        className={`h-10 w-10 border ${member.accountStatus === "Suspended" ? "opacity-50 grayscale border-zinc-200" : "border-zinc-200"}`}
+                      >
                         <AvatarImage src={member.profilePicture} />
                         <AvatarFallback className="bg-zinc-100 text-zinc-600 text-xs">
-                          {member.name ? member.name.charAt(0) : <HugeiconsIcon icon={UserCircleIcon} size={16} />}
+                          {member.name ? (
+                            member.name.charAt(0)
+                          ) : (
+                            <HugeiconsIcon icon={UserCircleIcon} size={16} />
+                          )}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col">
-                        <span className={`text-sm font-semibold leading-tight ${member.accountStatus === "Suspended" ? "text-zinc-400 line-through" : "text-zinc-900"}`}>
+                        <span
+                          className={`text-sm font-semibold leading-tight ${member.accountStatus === "Suspended" ? "text-zinc-400 line-through" : "text-zinc-900"}`}
+                        >
                           {member.name || "Pending User"}
                         </span>
-                        <span className="text-xs text-zinc-500 mt-0.5 font-medium">{member.email}</span>
+                        <span className="text-xs text-zinc-500 mt-0.5 font-medium">
+                          {member.email}
+                        </span>
                       </div>
                     </div>
                   </TableCell>
 
                   {/* ROLE BADGE */}
                   <TableCell className="py-4 align-middle">
-                    <Badge variant="outline" className={`px-2 py-0.5 rounded-sm font-semibold text-[11px] uppercase tracking-widest border-transparent ${getRoleBadgeStyle(member.role)}`}>
-                      {member.role === 'Admin' && <HugeiconsIcon icon={Shield02Icon} size={12} className="mr-1.5" />}
+                    <Badge
+                      variant="outline"
+                      className={`px-2 py-0.5 rounded-sm font-semibold text-[11px] uppercase tracking-widest border-transparent ${getRoleBadgeStyle(member.role)}`}
+                    >
+                      {member.role === "Admin" && (
+                        <HugeiconsIcon
+                          icon={Shield02Icon}
+                          size={12}
+                          className="mr-1.5"
+                        />
+                      )}
                       {member.role}
                     </Badge>
                   </TableCell>
 
                   {/* STATUS */}
                   <TableCell className="py-4 align-middle">
-                    <Badge variant="outline" className={`px-2 py-0.5 rounded-sm font-medium border text-[11px] uppercase tracking-wider ${getStatusBadgeStyle(member.accountStatus)}`}>
-                      {member.accountStatus.replace('_', ' ')}
+                    <Badge
+                      variant="outline"
+                      className={`px-2 py-0.5 rounded-sm font-medium border text-[11px] uppercase tracking-wider ${getStatusBadgeStyle(member.accountStatus)}`}
+                    >
+                      {member.accountStatus.replace("_", " ")}
                     </Badge>
                   </TableCell>
 
@@ -380,29 +418,44 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
                   <TableCell className="py-4 align-middle text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-zinc-900 data-[state=open]:bg-zinc-100 data-[state=open]:text-zinc-900">
-                          <HugeiconsIcon icon={MoreHorizontalIcon} size={18} strokeWidth={2} />
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-zinc-400 hover:text-zinc-900 data-[state=open]:bg-zinc-100 data-[state=open]:text-zinc-900"
+                        >
+                          <HugeiconsIcon
+                            icon={MoreHorizontalIcon}
+                            size={18}
+                            strokeWidth={2}
+                          />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-48 rounded-xl shadow-lg border-zinc-200 font-sans p-1">
-                        
+                      <DropdownMenuContent
+                        align="end"
+                        className="w-48 rounded-xl shadow-lg border-zinc-200 font-sans p-1"
+                      >
                         {member.accountStatus === "Pending_Invite" ? (
                           <>
-                            <DropdownMenuItem 
-                              onClick={() => toast.info("Resend feature coming soon")}
+                            <DropdownMenuItem
+                              onClick={() =>
+                                toast.info("Resend feature coming soon")
+                              }
                               className="text-sm cursor-pointer text-zinc-700 rounded-lg"
                             >
                               Resend Invitation
                             </DropdownMenuItem>
                             <DropdownMenuSeparator className="bg-zinc-100 mx-2" />
-                            <DropdownMenuItem 
-                              onClick={() => openConfirm({
-                                title: "Cancel Invitation",
-                                description: `Are you sure you want to cancel the pending invitation for ${member.email}? The link will no longer work.`,
-                                actionText: "Cancel Invite",
-                                isDestructive: true,
-                                onConfirm: () => handleCancelInvite(member.id)
-                              })}
+                            <DropdownMenuItem
+                              onClick={() =>
+                                openConfirm({
+                                  title: "Cancel Invitation",
+                                  description: `Are you sure you want to cancel the pending invitation for ${member.email}? The link will no longer work.`,
+                                  actionText: "Cancel Invite",
+                                  isDestructive: true,
+                                  onConfirm: () =>
+                                    handleCancelInvite(member.id),
+                                })
+                              }
                               className="text-sm cursor-pointer text-rose-600 focus:bg-rose-50 focus:text-rose-700 rounded-lg"
                             >
                               Cancel Invitation
@@ -410,58 +463,71 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
                           </>
                         ) : (
                           <>
-                            <DropdownMenuItem 
+                            <DropdownMenuItem
                               onClick={() => handleOpenEditRole(member)}
                               className="text-sm cursor-pointer text-zinc-700 rounded-lg"
                             >
                               Edit Role
                             </DropdownMenuItem>
-                            
+
                             <DropdownMenuSeparator className="bg-zinc-100 mx-2" />
 
                             {member.accountStatus === "Active" ? (
-                              <DropdownMenuItem 
-                                onClick={() => openConfirm({
-                                  title: "Suspend User Access",
-                                  description: `Are you sure you want to suspend ${member.name}? They will immediately lose access to the dashboard.`,
-                                  actionText: "Suspend Access",
-                                  isDestructive: true,
-                                  onConfirm: () => handleToggleStatus(member.id, member.accountStatus)
-                                })}
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  openConfirm({
+                                    title: "Suspend User Access",
+                                    description: `Are you sure you want to suspend ${member.name}? They will immediately lose access to the dashboard.`,
+                                    actionText: "Suspend Access",
+                                    isDestructive: true,
+                                    onConfirm: () =>
+                                      handleToggleStatus(
+                                        member.id,
+                                        member.accountStatus,
+                                      ),
+                                  })
+                                }
                                 className="text-sm cursor-pointer text-amber-600 focus:bg-amber-50 focus:text-amber-700 rounded-lg"
                               >
                                 Suspend Access
                               </DropdownMenuItem>
                             ) : member.accountStatus === "Suspended" ? (
-                              <DropdownMenuItem 
-                                onClick={() => openConfirm({
-                                  title: "Restore User Access",
-                                  description: `Are you sure you want to restore access for ${member.name}? They will regain their previous permissions.`,
-                                  actionText: "Restore Access",
-                                  isDestructive: false,
-                                  onConfirm: () => handleToggleStatus(member.id, member.accountStatus)
-                                })}
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  openConfirm({
+                                    title: "Restore User Access",
+                                    description: `Are you sure you want to restore access for ${member.name}? They will regain their previous permissions.`,
+                                    actionText: "Restore Access",
+                                    isDestructive: false,
+                                    onConfirm: () =>
+                                      handleToggleStatus(
+                                        member.id,
+                                        member.accountStatus,
+                                      ),
+                                  })
+                                }
                                 className="text-sm cursor-pointer text-teal-600 focus:bg-teal-50 focus:text-teal-700 rounded-lg"
                               >
                                 Restore Access
                               </DropdownMenuItem>
                             ) : null}
 
-                            <DropdownMenuItem 
-                              onClick={() => openConfirm({
-                                title: "Revoke & Remove User",
-                                description: `This action is permanent. ${member.name} will be removed from the team and all active sessions will be terminated.`,
-                                actionText: "Remove User",
-                                isDestructive: true,
-                                onConfirm: () => handleRemoveUser(member.id)
-                              })}
+                            <DropdownMenuItem
+                              onClick={() =>
+                                openConfirm({
+                                  title: "Revoke & Remove User",
+                                  description: `This action is permanent. ${member.name} will be removed from the team and all active sessions will be terminated.`,
+                                  actionText: "Remove User",
+                                  isDestructive: true,
+                                  onConfirm: () => handleRemoveUser(member.id),
+                                })
+                              }
                               className="text-sm cursor-pointer text-rose-600 focus:bg-rose-50 focus:text-rose-700 rounded-lg"
                             >
                               Revoke & Remove User
                             </DropdownMenuItem>
                           </>
                         )}
-
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
@@ -470,8 +536,13 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
 
               {filteredData.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={5} className="h-32 text-center text-zinc-500 text-sm">
-                    {activeTab === "team" ? "No active team members found." : "No pending invites."}
+                  <TableCell
+                    colSpan={5}
+                    className="h-32 text-center text-zinc-500 text-sm"
+                  >
+                    {activeTab === "team"
+                      ? "No active team members found."
+                      : "No pending invites."}
                   </TableCell>
                 </TableRow>
               )}
@@ -481,7 +552,12 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
       </div>
 
       {/* --- UNIVERSAL CONFIRMATION DIALOG --- */}
-      <AlertDialog open={confirmDialog.isOpen} onOpenChange={(open) => setConfirmDialog(prev => ({ ...prev, isOpen: open }))}>
+      <AlertDialog
+        open={confirmDialog.isOpen}
+        onOpenChange={(open) =>
+          setConfirmDialog((prev) => ({ ...prev, isOpen: open }))
+        }
+      >
         <AlertDialogContent className="font-sans border-zinc-200 rounded-2xl p-0 overflow-hidden sm:max-w-[400px]">
           <div className="p-6 pb-4">
             <AlertDialogHeader>
@@ -497,13 +573,17 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
             <AlertDialogCancel className="mt-0 border-0 shadow-none hover:bg-zinc-200/50 text-zinc-500 font-medium">
               Cancel
             </AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogAction
               onClick={(e) => {
                 e.preventDefault(); // Prevent auto-close until our action finishes if desired, but we'll manually close it
                 confirmDialog.onConfirm();
-                setConfirmDialog(prev => ({ ...prev, isOpen: false }));
+                setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
               }}
-              className={confirmDialog.isDestructive ? "bg-rose-600 text-white hover:bg-rose-700 min-w-[120px]" : "bg-zinc-900 text-white hover:bg-zinc-800 min-w-[120px]"}
+              className={
+                confirmDialog.isDestructive
+                  ? "bg-rose-600 text-white hover:bg-rose-700 min-w-[120px]"
+                  : "bg-zinc-900 text-white hover:bg-zinc-800 min-w-[120px]"
+              }
             >
               {confirmDialog.actionText}
             </AlertDialogAction>
@@ -516,22 +596,31 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
         <DialogContent className="sm:max-w-[425px] p-0 overflow-hidden bg-white rounded-2xl border border-zinc-200 font-sans">
           <form onSubmit={handleInviteUser}>
             <div className="px-6 pt-6 pb-4 border-b border-zinc-100">
-              <DialogTitle className="text-xl font-bold text-zinc-900">Invite Team Member</DialogTitle>
+              <DialogTitle className="text-xl font-bold text-zinc-900">
+                Invite Team Member
+              </DialogTitle>
               <DialogDescription className="text-sm text-zinc-500 mt-1">
-                They will receive an email with a secure link to join the dashboard.
+                They will receive an email with a secure link to join the
+                dashboard.
               </DialogDescription>
             </div>
-            
+
             <div className="p-6 space-y-6">
               {/* Email Input */}
               <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-widest text-zinc-500">Email Address</label>
+                <label className="text-xs font-bold uppercase tracking-widest text-zinc-500">
+                  Email Address
+                </label>
                 <div className="relative">
-                  <HugeiconsIcon icon={Mail01Icon} size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
-                  <Input 
-                    type="email" 
-                    required 
-                    placeholder="colleague@wunkatehomes.com"
+                  <HugeiconsIcon
+                    icon={Mail01Icon}
+                    size={16}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"
+                  />
+                  <Input
+                    type="email"
+                    required
+                    placeholder="colleague@wunkathomeshomes.com"
                     value={inviteEmail}
                     onChange={(e) => setInviteEmail(e.target.value)}
                     className="pl-9 h-11 border-zinc-200 bg-zinc-50 focus-visible:ring-1 focus-visible:ring-zinc-900 focus-visible:bg-white transition-all shadow-none"
@@ -541,30 +630,76 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
 
               {/* Role Selection */}
               <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2 block">System Role</label>
+                <label className="text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2 block">
+                  System Role
+                </label>
                 <div className="grid gap-3">
-                  <label className={`relative flex cursor-pointer rounded-xl border p-4 transition-all hover:bg-zinc-50 ${inviteRole === 'Manager' ? 'border-zinc-900 bg-zinc-50 ring-1 ring-zinc-900' : 'border-zinc-200 bg-white'}`}>
-                    <input type="radio" name="role" value="Manager" className="sr-only" checked={inviteRole === 'Manager'} onChange={() => setInviteRole('Manager')} />
+                  <label
+                    className={`relative flex cursor-pointer rounded-xl border p-4 transition-all hover:bg-zinc-50 ${inviteRole === "Manager" ? "border-zinc-900 bg-zinc-50 ring-1 ring-zinc-900" : "border-zinc-200 bg-white"}`}
+                  >
+                    <input
+                      type="radio"
+                      name="role"
+                      value="Manager"
+                      className="sr-only"
+                      checked={inviteRole === "Manager"}
+                      onChange={() => setInviteRole("Manager")}
+                    />
                     <div className="flex w-full items-center justify-between">
                       <div className="flex flex-col gap-1 pr-4">
-                        <span className="text-sm font-bold text-zinc-900">Manager</span>
-                        <span className="text-xs text-zinc-500 leading-relaxed">Can view tenants, approve KYC, and manage smart locks. Cannot view overall financials.</span>
+                        <span className="text-sm font-bold text-zinc-900">
+                          Manager
+                        </span>
+                        <span className="text-xs text-zinc-500 leading-relaxed">
+                          Can view tenants, approve KYC, and manage smart locks.
+                          Cannot view overall financials.
+                        </span>
                       </div>
-                      <div className={`h-5 w-5 rounded-full border flex items-center justify-center shrink-0 ${inviteRole === 'Manager' ? 'border-zinc-900 bg-zinc-900' : 'border-zinc-300'}`}>
-                        {inviteRole === 'Manager' && <HugeiconsIcon icon={Tick02Icon} size={12} className="text-white" />}
+                      <div
+                        className={`h-5 w-5 rounded-full border flex items-center justify-center shrink-0 ${inviteRole === "Manager" ? "border-zinc-900 bg-zinc-900" : "border-zinc-300"}`}
+                      >
+                        {inviteRole === "Manager" && (
+                          <HugeiconsIcon
+                            icon={Tick02Icon}
+                            size={12}
+                            className="text-white"
+                          />
+                        )}
                       </div>
                     </div>
                   </label>
 
-                  <label className={`relative flex cursor-pointer rounded-xl border p-4 transition-all hover:bg-zinc-50 ${inviteRole === 'Admin' ? 'border-zinc-900 bg-zinc-50 ring-1 ring-zinc-900' : 'border-zinc-200 bg-white'}`}>
-                    <input type="radio" name="role" value="Admin" className="sr-only" checked={inviteRole === 'Admin'} onChange={() => setInviteRole('Admin')} />
+                  <label
+                    className={`relative flex cursor-pointer rounded-xl border p-4 transition-all hover:bg-zinc-50 ${inviteRole === "Admin" ? "border-zinc-900 bg-zinc-50 ring-1 ring-zinc-900" : "border-zinc-200 bg-white"}`}
+                  >
+                    <input
+                      type="radio"
+                      name="role"
+                      value="Admin"
+                      className="sr-only"
+                      checked={inviteRole === "Admin"}
+                      onChange={() => setInviteRole("Admin")}
+                    />
                     <div className="flex w-full items-center justify-between">
                       <div className="flex flex-col gap-1 pr-4">
-                        <span className="text-sm font-bold text-zinc-900">Administrator</span>
-                        <span className="text-xs text-zinc-500 leading-relaxed">Full system access including financial ledger, global settings, and role management.</span>
+                        <span className="text-sm font-bold text-zinc-900">
+                          Administrator
+                        </span>
+                        <span className="text-xs text-zinc-500 leading-relaxed">
+                          Full system access including financial ledger, global
+                          settings, and role management.
+                        </span>
                       </div>
-                      <div className={`h-5 w-5 rounded-full border flex items-center justify-center shrink-0 ${inviteRole === 'Admin' ? 'border-zinc-900 bg-zinc-900' : 'border-zinc-300'}`}>
-                        {inviteRole === 'Admin' && <HugeiconsIcon icon={Tick02Icon} size={12} className="text-white" />}
+                      <div
+                        className={`h-5 w-5 rounded-full border flex items-center justify-center shrink-0 ${inviteRole === "Admin" ? "border-zinc-900 bg-zinc-900" : "border-zinc-300"}`}
+                      >
+                        {inviteRole === "Admin" && (
+                          <HugeiconsIcon
+                            icon={Tick02Icon}
+                            size={12}
+                            className="text-white"
+                          />
+                        )}
                       </div>
                     </div>
                   </label>
@@ -573,11 +708,28 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
             </div>
 
             <DialogFooter className="px-6 py-4 bg-zinc-50 border-t border-zinc-100 sm:justify-between items-center">
-              <Button type="button" variant="ghost" onClick={() => setIsInviteOpen(false)} className="text-zinc-500 hover:text-zinc-900">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setIsInviteOpen(false)}
+                className="text-zinc-500 hover:text-zinc-900"
+              >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isPending} className="bg-zinc-900 hover:bg-zinc-800 text-white min-w-[120px]">
-                {isPending ? <HugeiconsIcon icon={Loading03Icon} size={16} className="animate-spin" /> : "Send Invitation"}
+              <Button
+                type="submit"
+                disabled={isPending}
+                className="bg-zinc-900 hover:bg-zinc-800 text-white min-w-[120px]"
+              >
+                {isPending ? (
+                  <HugeiconsIcon
+                    icon={Loading03Icon}
+                    size={16}
+                    className="animate-spin"
+                  />
+                ) : (
+                  "Send Invitation"
+                )}
               </Button>
             </DialogFooter>
           </form>
@@ -589,38 +741,90 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
         <DialogContent className="sm:max-w-[425px] p-0 overflow-hidden bg-white rounded-2xl border border-zinc-200 font-sans">
           <form onSubmit={handleUpdateRole}>
             <div className="px-6 pt-6 pb-4 border-b border-zinc-100">
-              <DialogTitle className="text-xl font-bold text-zinc-900">Edit System Role</DialogTitle>
+              <DialogTitle className="text-xl font-bold text-zinc-900">
+                Edit System Role
+              </DialogTitle>
               <DialogDescription className="text-sm text-zinc-500 mt-1">
-                Change permission level for <span className="font-semibold text-zinc-900">{memberToEdit?.name}</span>.
+                Change permission level for{" "}
+                <span className="font-semibold text-zinc-900">
+                  {memberToEdit?.name}
+                </span>
+                .
               </DialogDescription>
             </div>
-            
+
             <div className="p-6 space-y-6">
               <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2 block">System Role</label>
+                <label className="text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2 block">
+                  System Role
+                </label>
                 <div className="grid gap-3">
-                  <label className={`relative flex cursor-pointer rounded-xl border p-4 transition-all hover:bg-zinc-50 ${newRole === 'Manager' ? 'border-zinc-900 bg-zinc-50 ring-1 ring-zinc-900' : 'border-zinc-200 bg-white'}`}>
-                    <input type="radio" name="edit-role" value="Manager" className="sr-only" checked={newRole === 'Manager'} onChange={() => setNewRole('Manager')} />
+                  <label
+                    className={`relative flex cursor-pointer rounded-xl border p-4 transition-all hover:bg-zinc-50 ${newRole === "Manager" ? "border-zinc-900 bg-zinc-50 ring-1 ring-zinc-900" : "border-zinc-200 bg-white"}`}
+                  >
+                    <input
+                      type="radio"
+                      name="edit-role"
+                      value="Manager"
+                      className="sr-only"
+                      checked={newRole === "Manager"}
+                      onChange={() => setNewRole("Manager")}
+                    />
                     <div className="flex w-full items-center justify-between">
                       <div className="flex flex-col gap-1 pr-4">
-                        <span className="text-sm font-bold text-zinc-900">Manager</span>
-                        <span className="text-xs text-zinc-500 leading-relaxed">Can view tenants, approve KYC, and manage smart locks. Cannot view overall financials.</span>
+                        <span className="text-sm font-bold text-zinc-900">
+                          Manager
+                        </span>
+                        <span className="text-xs text-zinc-500 leading-relaxed">
+                          Can view tenants, approve KYC, and manage smart locks.
+                          Cannot view overall financials.
+                        </span>
                       </div>
-                      <div className={`h-5 w-5 rounded-full border flex items-center justify-center shrink-0 ${newRole === 'Manager' ? 'border-zinc-900 bg-zinc-900' : 'border-zinc-300'}`}>
-                        {newRole === 'Manager' && <HugeiconsIcon icon={Tick02Icon} size={12} className="text-white" />}
+                      <div
+                        className={`h-5 w-5 rounded-full border flex items-center justify-center shrink-0 ${newRole === "Manager" ? "border-zinc-900 bg-zinc-900" : "border-zinc-300"}`}
+                      >
+                        {newRole === "Manager" && (
+                          <HugeiconsIcon
+                            icon={Tick02Icon}
+                            size={12}
+                            className="text-white"
+                          />
+                        )}
                       </div>
                     </div>
                   </label>
 
-                  <label className={`relative flex cursor-pointer rounded-xl border p-4 transition-all hover:bg-zinc-50 ${newRole === 'Admin' ? 'border-zinc-900 bg-zinc-50 ring-1 ring-zinc-900' : 'border-zinc-200 bg-white'}`}>
-                    <input type="radio" name="edit-role" value="Admin" className="sr-only" checked={newRole === 'Admin'} onChange={() => setNewRole('Admin')} />
+                  <label
+                    className={`relative flex cursor-pointer rounded-xl border p-4 transition-all hover:bg-zinc-50 ${newRole === "Admin" ? "border-zinc-900 bg-zinc-50 ring-1 ring-zinc-900" : "border-zinc-200 bg-white"}`}
+                  >
+                    <input
+                      type="radio"
+                      name="edit-role"
+                      value="Admin"
+                      className="sr-only"
+                      checked={newRole === "Admin"}
+                      onChange={() => setNewRole("Admin")}
+                    />
                     <div className="flex w-full items-center justify-between">
                       <div className="flex flex-col gap-1 pr-4">
-                        <span className="text-sm font-bold text-zinc-900">Administrator</span>
-                        <span className="text-xs text-zinc-500 leading-relaxed">Full system access including financial ledger, global settings, and role management.</span>
+                        <span className="text-sm font-bold text-zinc-900">
+                          Administrator
+                        </span>
+                        <span className="text-xs text-zinc-500 leading-relaxed">
+                          Full system access including financial ledger, global
+                          settings, and role management.
+                        </span>
                       </div>
-                      <div className={`h-5 w-5 rounded-full border flex items-center justify-center shrink-0 ${newRole === 'Admin' ? 'border-zinc-900 bg-zinc-900' : 'border-zinc-300'}`}>
-                        {newRole === 'Admin' && <HugeiconsIcon icon={Tick02Icon} size={12} className="text-white" />}
+                      <div
+                        className={`h-5 w-5 rounded-full border flex items-center justify-center shrink-0 ${newRole === "Admin" ? "border-zinc-900 bg-zinc-900" : "border-zinc-300"}`}
+                      >
+                        {newRole === "Admin" && (
+                          <HugeiconsIcon
+                            icon={Tick02Icon}
+                            size={12}
+                            className="text-white"
+                          />
+                        )}
                       </div>
                     </div>
                   </label>
@@ -629,11 +833,28 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
             </div>
 
             <DialogFooter className="px-6 py-4 bg-zinc-50 border-t border-zinc-100 sm:justify-between items-center">
-              <Button type="button" variant="ghost" onClick={() => setIsEditRoleOpen(false)} className="text-zinc-500 hover:text-zinc-900">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setIsEditRoleOpen(false)}
+                className="text-zinc-500 hover:text-zinc-900"
+              >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isPending || newRole === memberToEdit?.role} className="bg-zinc-900 hover:bg-zinc-800 text-white min-w-[120px]">
-                {isPending ? <HugeiconsIcon icon={Loading03Icon} size={16} className="animate-spin" /> : "Save Changes"}
+              <Button
+                type="submit"
+                disabled={isPending || newRole === memberToEdit?.role}
+                className="bg-zinc-900 hover:bg-zinc-800 text-white min-w-[120px]"
+              >
+                {isPending ? (
+                  <HugeiconsIcon
+                    icon={Loading03Icon}
+                    size={16}
+                    className="animate-spin"
+                  />
+                ) : (
+                  "Save Changes"
+                )}
               </Button>
             </DialogFooter>
           </form>

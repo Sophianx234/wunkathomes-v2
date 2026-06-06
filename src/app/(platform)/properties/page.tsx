@@ -122,7 +122,7 @@ export default function PropertiesPage() {
                 onClick={() => handleTypeChange(type)}
                 className={`whitespace-nowrap px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-300 ${
                   typeFilter === type
-                    ? "bg-primary text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)] -translate-y-[1px]"
+                    ? "bg-black text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)] -translate-y-[1px]"
                     : "bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-black"
                 }`}
               >
@@ -293,7 +293,7 @@ export default function PropertiesPage() {
                 >
                   <button
                     onClick={handleLoadMore}
-                    className="px-10 py-4 bg-white text-black font-bold uppercase tracking-widest text-xs border-2 border-black hover:bg-primary hover:text-white transition-all duration-300 flex items-center justify-center gap-3 group"
+                    className="px-10 py-4 bg-white text-black font-bold uppercase tracking-widest text-xs border-2 border-black hover:bg-black hover:text-white transition-all duration-300 flex items-center justify-center gap-3 group"
                   >
                     Load More Properties
                     <HugeiconsIcon
@@ -334,7 +334,7 @@ export default function PropertiesPage() {
                 setLocationFilter("all");
                 router.push("/properties", { scroll: false });
               }}
-              className="px-8 py-4 bg-primary text-white font-bold uppercase tracking-widest text-xs hover:bg-slate-800 transition-colors duration-300"
+              className="px-8 py-4 bg-black text-white font-bold uppercase tracking-widest text-xs hover:bg-slate-800 transition-colors duration-300"
             >
               Clear All Filters
             </button>

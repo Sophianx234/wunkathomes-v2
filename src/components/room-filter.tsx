@@ -134,7 +134,7 @@ export function RoomFilters({ onFilter }: RoomFiltersProps) {
               onChange={(e) =>
                 handleFilterChange("maxPrice", Number.parseInt(e.target.value))
               }
-              className="w-full appearance-none h-2 rounded-xl bg-primary"
+              className="w-full appearance-none h-2 rounded-xl bg-black"
               style={{
                 accentColor: "black",
               }}

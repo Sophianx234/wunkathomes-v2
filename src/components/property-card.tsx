@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
 import {
   Location01Icon,
   BedSingle02Icon,
@@ -11,10 +12,36 @@ import {
   MaximizeIcon,
   ArrowLeft01Icon,
   ArrowRight01Icon,
+  MoreHorizontalIcon,
+  PencilEdit01Icon,
+  Delete01Icon,
+  Loading03Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { formatLeaseTerm } from "@/lib/helpers";
 import { usePathname } from "next/navigation";
+
+// --- Shadcn Imports ---
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { deletePropertyAction } from "@/actions/user/property.action";
+
+// IMPORT YOUR SERVER ACTION HERE
+// import { deletePropertyAction } from "@/actions/admin/property.action"; 
 
 // Updated to perfectly match the populated Mongoose schemas
 export interface IProperty {
@@ -41,7 +68,7 @@ export interface IProperty {
   property: {
     _id?: string;
     propertyType: "Apartment_Building" | "Commercial" | "House" | "Land";
-    location: any; // Changed to 'any' to accept both strings and objects safely
+    location: any;
     coordinates?: {
       lat?: number;
       lng?: number;
@@ -63,6 +90,10 @@ export default function PropertyCard({
   const [currentImage, setCurrentImage] = useState(0);
   const [direction, setDirection] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+
+  // --- Deletion State & Transitions ---
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   const slideVariants = {
     enter: (direction: number) => ({
@@ -94,189 +125,297 @@ export default function PropertyCard({
     });
   };
 
+// --- DELETE EXECUTION ---
+  const handleDeleteConfirm = () => {
+    // Look for either _id or id safely
+    const targetId = property._id || property.id;
+
+    if (!targetId) {
+      toast.error("Error: Missing property ID.");
+      setIsDeleteDialogOpen(false);
+      return;
+    }
+
+    startTransition(async () => {
+      try {
+        console.log("Attempting to delete property with ID:", targetId);
+        const result = await deletePropertyAction(targetId); // Pass the safe targetId
+        
+        if (result.success) {
+          setIsDeleteDialogOpen(false);
+          toast.success(result.message);
+        } else {
+          toast.error(result.message || "Failed to delete property.");
+          setIsDeleteDialogOpen(false);
+        }
+      } catch (error) {
+        console.error("Delete Action Error:", error);
+        toast.error("An unexpected error occurred.");
+        setIsDeleteDialogOpen(false);
+      }
+    });
+  };
+
   const formattedPrice = `$${property.price.toLocaleString()}`;
   const priceSuffix = formatLeaseTerm(property.terms?.leaseTerm);
 
-  // --- FIX: Bulletproof Location String ---
   let locationString = "Unknown Location";
   if (typeof property.property?.location === "string") {
-    // If it comes from a page passing a formatted string
     locationString = property.property.location;
   } else if (property.property?.location) {
-    // If it comes from a page passing the raw Mongoose object
     const loc = property.property.location;
     locationString = loc.city
       ? `${loc.area}, ${loc.city}`
       : `${loc.area}, ${loc.region}`;
   }
-  const pathname = usePathname(); // 2. Get current route
 
-  // 3. Logic to determine the correct path
-  // If we are already in admin, we want to go to /admin/properties/slug
-  // If we are at the root, we want /properties/slug
+  const pathname = usePathname();
+  const isAdminView = pathname.startsWith("/admin");
+
   const getHref = () => {
-    if (pathname.startsWith("/admin")) {
-      // Remove trailing slash if present, then append the slug
+    if (isAdminView) {
       return `/admin/properties/${property.slug}`;
     }
     return `/properties/${property.slug}`;
   };
 
   const href = getHref();
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.5, delay: index * 0.1, ease: "easeOut" }}
-      className="group flex flex-col w-full"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      {/* === Image Carousel Container === */}
-      <div className="relative w-full aspect-[4/3] sm:aspect-[16/10] overflow-hidden mb-4 rounded-xl md:rounded-2xl bg-slate-100">
-        <Link
-          href={href} // Fixed missing leading slash here!
-          className="absolute inset-0 z-0"
-        >
-          <AnimatePresence initial={false} custom={direction}>
-            <motion.div
-              key={currentImage}
-              custom={direction}
-              variants={slideVariants}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              transition={{
-                x: { type: "spring", stiffness: 300, damping: 30 },
-                opacity: { duration: 0.2 },
-              }}
-              className="absolute inset-0 w-full h-full"
-            >
-              <Image
-                src={property.images[currentImage] || "/placeholder.jpg"}
-                alt={`${property.title} - Image ${currentImage + 1}`}
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              />
-            </motion.div>
-          </AnimatePresence>
-        </Link>
-
-        {/* Status Badge */}
-        <div className="absolute top-3 left-3 z-10 bg-primary/80 backdrop-blur-sm text-white px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-widest pointer-events-none">
-          {property.property.propertyType.split("_")[0]}
-        </div>
-
-        {/* Floating Price Tag */}
-        <div className="absolute bottom-3 right-3 z-10 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-sm font-black text-black tracking-tight text-sm pointer-events-none">
-          {formattedPrice}
-          <span className="text-xs font-medium text-slate-500 tracking-normal">
-            {" "}
-            {priceSuffix}
-          </span>
-        </div>
-
-        {/* Navigation Arrows (Visible on Hover) */}
-        <AnimatePresence>
-          {isHovered && property.images.length > 1 && (
-            <>
-              <motion.button
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
-                onClick={(e) => paginate(-1, e)}
-                className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white/80 hover:bg-white backdrop-blur-md flex items-center justify-center text-black shadow-sm transition-all"
+    <>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5, delay: index * 0.1, ease: "easeOut" }}
+        className="group flex flex-col w-full relative"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        {/* === Image Carousel Container === */}
+        <div className="relative w-full aspect-[4/3] sm:aspect-[16/10] overflow-hidden mb-4 rounded-xl md:rounded-2xl bg-slate-100">
+          <Link href={href} className="absolute inset-0 z-0">
+            <AnimatePresence initial={false} custom={direction}>
+              <motion.div
+                key={currentImage}
+                custom={direction}
+                variants={slideVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{
+                  x: { type: "spring", stiffness: 300, damping: 30 },
+                  opacity: { duration: 0.2 },
+                }}
+                className="absolute inset-0 w-full h-full"
               >
-                <HugeiconsIcon icon={ArrowLeft01Icon} size={16} />
-              </motion.button>
-
-              <motion.button
-                initial={{ opacity: 0, x: 10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 10 }}
-                onClick={(e) => paginate(1, e)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white/80 hover:bg-white backdrop-blur-md flex items-center justify-center text-black shadow-sm transition-all"
-              >
-                <HugeiconsIcon icon={ArrowRight01Icon} size={16} />
-              </motion.button>
-            </>
-          )}
-        </AnimatePresence>
-
-        <AnimatePresence>
-          {isHovered && property.images.length > 1 && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-              className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5 bg-primary/20 px-2 py-1 rounded-full backdrop-blur-md"
-            >
-              {property.images.map((_, i) => (
-                <div
-                  key={i}
-                  className={`transition-all duration-300 rounded-full ${
-                    i === currentImage
-                      ? "w-2 h-2 bg-white"
-                      : "w-1.5 h-1.5 bg-white/50"
-                  }`}
+                <Image
+                  src={property.images[currentImage] || "/placeholder.jpg"}
+                  alt={`${property.title} - Image ${currentImage + 1}`}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 />
-              ))}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      {/* === Minimalist Content Container === */}
-      <div className="flex flex-col flex-1 px-1">
-        <div className="mb-3 cursor-pointer">
-          <Link href={href}>
-            <h3 className="text-lg font-bold text-slate-900 leading-tight mb-1 group-hover:text-black transition-colors line-clamp-1">
-              {property.title}
-            </h3>
+              </motion.div>
+            </AnimatePresence>
           </Link>
-          <p className="flex items-center gap-1.5 text-sm font-medium text-slate-500 line-clamp-1">
-            <HugeiconsIcon icon={Location01Icon} size={14} />
-            {locationString}
-          </p>
-        </div>
 
-        {/* Elegant Specs Row */}
-        <div className="flex items-center gap-4 text-slate-700 font-medium text-sm mt-auto pt-1">
-          <div className="flex items-center gap-1.5">
-            <HugeiconsIcon
-              icon={BedSingle02Icon}
-              size={16}
-              className="text-slate-400"
-            />
-            <span>{property.features.bedrooms}</span>
-          </div>
-          <span className="text-slate-300 text-[10px]">●</span>
-          <div className="flex items-center gap-1.5">
-            <HugeiconsIcon
-              icon={Bathtub01Icon}
-              size={16}
-              className="text-slate-400"
-            />
-            <span>{property.features.bathrooms}</span>
+          {/* Status Badge */}
+          <div className="absolute top-3 left-3 z-10 bg-black/80 backdrop-blur-sm text-white px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-widest pointer-events-none">
+            {property.property.propertyType.split("_")[0]}
           </div>
 
-          {property.features.sizeSqm && (
-            <>
-              <span className="text-slate-300 text-[10px]">●</span>
-              <div className="flex items-center gap-1.5">
-                <HugeiconsIcon
-                  icon={MaximizeIcon}
-                  size={16}
-                  className="text-slate-400"
-                />
-                <span>{property.features.sizeSqm} sqm</span>
-              </div>
-            </>
+          {/* --- ADMIN QUICK ACTIONS (Dropdown) --- */}
+          {isAdminView && (
+            <div className="absolute top-3 right-3 z-20">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button 
+                    onClick={(e) => e.stopPropagation()} 
+                    className="h-8 w-8 rounded-full bg-white/90 hover:bg-white backdrop-blur-sm flex items-center justify-center text-slate-700 shadow-sm transition-colors focus:outline-none"
+                  >
+                    <HugeiconsIcon icon={MoreHorizontalIcon} size={18} />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-40 rounded-xl font-sans">
+                  <DropdownMenuItem asChild className="cursor-pointer">
+                    <Link href={`/admin/properties/${property.slug}/edit`} className="flex items-center gap-2">
+                      <HugeiconsIcon icon={PencilEdit01Icon} size={14} />
+                      Edit Details
+                    </Link>
+                  </DropdownMenuItem>
+                  
+                  {/* UPDATE: Trigger Local Modal */}
+                  <DropdownMenuItem 
+                    className="cursor-pointer text-rose-600 focus:text-rose-700 focus:bg-rose-50"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsDeleteDialogOpen(true);
+                    }}
+                  >
+                    <HugeiconsIcon icon={Delete01Icon} size={14} className="mr-2" />
+                    Delete Asset
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           )}
+
+          {/* Floating Price Tag */}
+          <div className="absolute bottom-3 right-3 z-10 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-sm font-black text-black tracking-tight text-sm pointer-events-none">
+            {formattedPrice}
+            <span className="text-xs font-medium text-slate-500 tracking-normal">
+              {" "}
+              {priceSuffix}
+            </span>
+          </div>
+
+          {/* Navigation Arrows */}
+          <AnimatePresence>
+            {isHovered && property.images.length > 1 && (
+              <>
+                <motion.button
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -10 }}
+                  onClick={(e) => paginate(-1, e)}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white/80 hover:bg-white backdrop-blur-md flex items-center justify-center text-black shadow-sm transition-all"
+                >
+                  <HugeiconsIcon icon={ArrowLeft01Icon} size={16} />
+                </motion.button>
+
+                <motion.button
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 10 }}
+                  onClick={(e) => paginate(1, e)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white/80 hover:bg-white backdrop-blur-md flex items-center justify-center text-black shadow-sm transition-all"
+                >
+                  <HugeiconsIcon icon={ArrowRight01Icon} size={16} />
+                </motion.button>
+              </>
+            )}
+          </AnimatePresence>
+
+          <AnimatePresence>
+            {isHovered && property.images.length > 1 && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5 bg-black/20 px-2 py-1 rounded-full backdrop-blur-md"
+              >
+                {property.images.map((_, i) => (
+                  <div
+                    key={i}
+                    className={`transition-all duration-300 rounded-full ${
+                      i === currentImage
+                        ? "w-2 h-2 bg-white"
+                        : "w-1.5 h-1.5 bg-white/50"
+                    }`}
+                  />
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-      </div>
-    </motion.div>
+
+        {/* === Minimalist Content Container === */}
+        <div className="flex flex-col flex-1 px-1">
+          <div className="mb-3 cursor-pointer">
+            <Link href={href}>
+              <h3 className="text-lg font-bold text-slate-900 leading-tight mb-1 group-hover:text-black transition-colors line-clamp-1">
+                {property.title}
+              </h3>
+            </Link>
+            <p className="flex items-center gap-1.5 text-sm font-medium text-slate-500 line-clamp-1">
+              <HugeiconsIcon icon={Location01Icon} size={14} />
+              {locationString}
+            </p>
+          </div>
+
+          {/* Elegant Specs Row */}
+          <div className="flex items-center gap-4 text-slate-700 font-medium text-sm mt-auto pt-1">
+            <div className="flex items-center gap-1.5">
+              <HugeiconsIcon
+                icon={BedSingle02Icon}
+                size={16}
+                className="text-slate-400"
+              />
+              <span>{property.features.bedrooms}</span>
+            </div>
+            <span className="text-slate-300 text-[10px]">●</span>
+            <div className="flex items-center gap-1.5">
+              <HugeiconsIcon
+                icon={Bathtub01Icon}
+                size={16}
+                className="text-slate-400"
+              />
+              <span>{property.features.bathrooms}</span>
+            </div>
+
+            {property.features.sizeSqm && (
+              <>
+                <span className="text-slate-300 text-[10px]">●</span>
+                <div className="flex items-center gap-1.5">
+                  <HugeiconsIcon
+                    icon={MaximizeIcon}
+                    size={16}
+                    className="text-slate-400"
+                  />
+                  <span>{property.features.sizeSqm} sqm</span>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </motion.div>
+
+      {/* --- WARNING MODAL --- */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent className="bg-white border-rose-100 shadow-xl">
+          <AlertDialogHeader>
+            <div className="flex items-center gap-3 mb-2">
+              
+              <AlertDialogTitle className="text-slate-900 text-xl font-bold">
+                Delete Property Asset?
+              </AlertDialogTitle>
+            </div>
+            <AlertDialogDescription className="text-slate-600 text-sm leading-relaxed">
+              This action cannot be undone. This will permanently delete{" "}
+              <span className="font-bold text-slate-900">{property.title}</span>,
+              including all media, smart lock configurations, and listing data from the database. 
+              <br/><br/>
+              <span className="text-rose-600 font-medium">Warning:</span> If there are active leases tied to this asset, they will be orphaned.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-6">
+            <AlertDialogCancel 
+              disabled={isPending}
+              className="bg-white text-slate-700 hover:bg-slate-50 border-slate-200 mt-0"
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={(e) => {
+                e.preventDefault();
+                handleDeleteConfirm();
+              }}
+              disabled={isPending}
+              className="bg-rose-600 text-white hover:bg-rose-700 focus:ring-rose-600 min-w-[140px]"
+            >
+              {isPending ? (
+                <>
+                  <HugeiconsIcon icon={Loading03Icon} size={16} className="animate-spin mr-2" />
+                  Deleting...
+                </>
+              ) : (
+                "Yes, Delete Asset"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }

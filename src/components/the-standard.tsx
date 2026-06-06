@@ -52,7 +52,7 @@ export default function TheStandard() {
           >
             <div className="max-w-2xl">
               <div className="flex items-center gap-3 mb-4">
-                <div className="h-[2px] w-8 bg-primary" />
+                <div className="h-[2px] w-8 bg-black" />
                 <span className="uppercase tracking-[0.3em] text-[10px] md:text-xs font-bold text-slate-500">
                   The Wunkat Standard
                 </span>
@@ -94,7 +94,7 @@ export default function TheStandard() {
                   viewport={{ once: true, amount: 0.3 }}
                   transition={{ duration: 0.7, ease: "easeOut" }}
                   // Changed to justify-between to anchor text to the top and icons to the bottom
-                  className={`group relative p-8 sm:p-10 lg:p-16 xl:p-20 flex flex-col justify-between transition-colors duration-500 hover:bg-primary
+                  className={`group relative p-8 sm:p-10 lg:p-16 xl:p-20 flex flex-col justify-between transition-colors duration-500 hover:bg-black
                     ${isEven ? "order-1 " : "order-1 lg:order-2 "}
                   `}
                 >

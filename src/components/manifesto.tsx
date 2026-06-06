@@ -81,7 +81,7 @@ export default function Manifesto() {
                 behavior: "smooth",
               })
             }
-            className="w-full sm:w-auto px-8 py-4 bg-white text-black font-black uppercase tracking-widest text-xs hover:bg-primary hover:text-white border-2 border-transparent hover:border-white transition-all duration-300 flex items-center justify-center sm:justify-start gap-3 group"
+            className="w-full sm:w-auto px-8 py-4 bg-white text-black font-black uppercase tracking-widest text-xs hover:bg-black hover:text-white border-2 border-transparent hover:border-white transition-all duration-300 flex items-center justify-center sm:justify-start gap-3 group"
           >
             Read The Standard
             <HugeiconsIcon

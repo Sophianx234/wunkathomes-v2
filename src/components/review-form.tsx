@@ -52,7 +52,7 @@ export default function ReviewForm({ listingId }: ReviewFormProps) {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="mb-8 px-6 py-3.5 border-2 border-black font-bold uppercase tracking-widest text-[10px] hover:bg-primary hover:text-white transition-colors rounded"
+        className="mb-8 px-6 py-3.5 border-2 border-black font-bold uppercase tracking-widest text-[10px] hover:bg-black hover:text-white transition-colors rounded"
       >
         Write a Review
       </button>
@@ -125,7 +125,7 @@ export default function ReviewForm({ listingId }: ReviewFormProps) {
           <button
             type="submit"
             disabled={isPending || selectedRating === 0}
-            className="px-6 py-3 flex items-center bg-primary text-white font-bold uppercase tracking-widest text-[10px] rounded-md hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-3 flex items-center bg-black text-white font-bold uppercase tracking-widest text-[10px] rounded-md hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isPending && (
               <HugeiconsIcon

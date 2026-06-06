@@ -613,7 +613,7 @@ export default function ManageTenantsClient({
                               alt="ID Card"
                               className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
                             />
-                            <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/10 transition-colors duration-300 flex items-center justify-center">
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center">
                               <span className="opacity-0 group-hover:opacity-100 bg-white/90 backdrop-blur-sm text-zinc-900 text-xs font-medium px-3 py-1.5 rounded-full shadow-sm transition-opacity duration-300">
                                 Click to expand
                               </span>
@@ -716,7 +716,7 @@ export default function ManageTenantsClient({
                       }
                       disabled={isPending}
                       variant="ghost"
-                      className="w-full h-10 rounded-lg bg-primary text-white hover:text-white hover:bg-zinc-800 font-medium transition-colors shadow-sm"
+                      className="w-full h-10 rounded-lg bg-black text-white hover:text-white hover:bg-zinc-800 font-medium transition-colors shadow-sm"
                     >
                       {isPending ? (
                         <HugeiconsIcon

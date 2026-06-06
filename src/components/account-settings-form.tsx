@@ -171,8 +171,8 @@ export default function AccountSettingsForm({
       formData.append("countryCode", countryCode);
       if (avatarFile) formData.append("profilePicture", avatarFile);
 
-    // Call the server action with the FormData
-    const result = await updateProfileAction(formData);
+      // Call the server action with the FormData
+      const result = await updateProfileAction(formData);
       toast.success("Profile updated successfully!");
     } catch (error) {
       toast.error("Failed to update profile. Please try again.");
@@ -262,7 +262,7 @@ export default function AccountSettingsForm({
                       className="text-slate-400"
                     />
                   )}
-                  <div className="absolute inset-0 bg-primary/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                     <HugeiconsIcon
                       icon={Camera01Icon}
                       className="w-6 h-6 text-white"

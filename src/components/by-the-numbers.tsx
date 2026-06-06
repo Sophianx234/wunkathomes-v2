@@ -66,7 +66,7 @@ const metrics = [
 
 export default function ByTheNumbers() {
   return (
-    <section className="bg-primary text-white py-24  relative overflow-hidden">
+    <section className="bg-black text-white py-24  relative overflow-hidden">
       {/* Subtle Background Texture */}
       <div
         className="absolute inset-0 opacity-[0.03] pointer-events-none"

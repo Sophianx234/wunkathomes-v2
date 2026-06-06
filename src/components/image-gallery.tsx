@@ -85,8 +85,8 @@ export default function ImageGallery({ images, title }: ImageGalleryProps) {
               fill
               className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
             />
-            <div className="absolute inset-0 bg-primary/40 hover:bg-primary/20 transition-colors flex items-center justify-center">
-              <span className="text-white font-bold uppercase tracking-widest text-[10px] border border-white px-4 py-2 bg-primary/50 backdrop-blur-sm">
+            <div className="absolute inset-0 bg-black/40 hover:bg-black/20 transition-colors flex items-center justify-center">
+              <span className="text-white font-bold uppercase tracking-widest text-[10px] border border-white px-4 py-2 bg-black/50 backdrop-blur-sm">
                 View All Media
               </span>
             </div>
@@ -101,12 +101,12 @@ export default function ImageGallery({ images, title }: ImageGalleryProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-primary/95 backdrop-blur-xl flex items-center justify-center"
+            className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex items-center justify-center"
           >
             {/* Close Button */}
             <button
               onClick={() => setIsOpen(false)}
-              className="absolute top-6 right-6 z-50 text-white/70 hover:text-white transition-colors p-2 bg-primary/50 rounded-full"
+              className="absolute top-6 right-6 z-50 text-white/70 hover:text-white transition-colors p-2 bg-black/50 rounded-full"
             >
               <HugeiconsIcon icon={Cancel01Icon} size={28} />
             </button>
@@ -128,13 +128,13 @@ export default function ImageGallery({ images, title }: ImageGalleryProps) {
               <>
                 <button
                   onClick={prev}
-                  className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 text-white hover:text-black transition-colors p-3 hover:bg-white bg-primary/50 border border-white/20 rounded-full"
+                  className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 text-white hover:text-black transition-colors p-3 hover:bg-white bg-black/50 border border-white/20 rounded-full"
                 >
                   <HugeiconsIcon icon={ArrowLeft01Icon} size={24} />
                 </button>
                 <button
                   onClick={next}
-                  className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 text-white hover:text-black transition-colors p-3 hover:bg-white bg-primary/50 border border-white/20 rounded-full"
+                  className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 text-white hover:text-black transition-colors p-3 hover:bg-white bg-black/50 border border-white/20 rounded-full"
                 >
                   <HugeiconsIcon icon={ArrowRight01Icon} size={24} />
                 </button>
@@ -142,7 +142,7 @@ export default function ImageGallery({ images, title }: ImageGalleryProps) {
             )}
 
             {/* Counter */}
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white font-bold uppercase tracking-widest text-[10px] bg-primary/50 border border-white/20 px-4 py-2 rounded-full backdrop-blur-md">
+            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white font-bold uppercase tracking-widest text-[10px] bg-black/50 border border-white/20 px-4 py-2 rounded-full backdrop-blur-md">
               {currentIndex + 1} / {images.length}
             </div>
           </motion.div>

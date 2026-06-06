@@ -143,7 +143,7 @@ function ExploreView() {
       {/* === 1. Immersive Editorial Hero === */}
       <section className="relative h-[80vh] md:h-[90vh] w-full flex items-end pb-12 md:pb-24">
         {/* Background Image with Parallax-style positioning */}
-        <div className="absolute inset-0 z-0 bg-primary">
+        <div className="absolute inset-0 z-0 bg-black">
           <motion.div
             key={content.heroImage} // Forces re-animation when mode changes
             initial={{ scale: 1.1, opacity: 0 }}
@@ -199,7 +199,7 @@ function ExploreView() {
             <Link
               href={`/properties?status=For_${mode.charAt(0).toUpperCase() + mode.slice(1)}`}
             >
-              <button className="px-8 py-4 bg-white text-black font-bold uppercase tracking-widest text-xs hover:bg-primary hover:text-white border-2 border-white transition-all duration-300 flex items-center gap-3 group">
+              <button className="px-8 py-4 bg-white text-black font-bold uppercase tracking-widest text-xs hover:bg-black hover:text-white border-2 border-white transition-all duration-300 flex items-center gap-3 group">
                 View Inventory
                 <HugeiconsIcon
                   icon={ArrowRight01Icon}
@@ -236,7 +236,7 @@ function ExploreView() {
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-700"
               />
-              <div className="absolute inset-0 bg-primary/30 group-hover:bg-primary/40 transition-colors" />
+              <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors" />
               <div className="absolute bottom-8 left-8 right-8 flex justify-between items-end">
                 <h3 className="text-3xl md:text-4xl font-black text-white uppercase">
                   {content.collections[0].title}
@@ -264,7 +264,7 @@ function ExploreView() {
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-700"
                 />
-                <div className="absolute inset-0 bg-primary/30 group-hover:bg-primary/40 transition-colors" />
+                <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors" />
                 <div className="absolute bottom-6 left-6 right-6 flex justify-between items-end">
                   <h3 className="text-2xl font-black text-white uppercase max-w-[150px] leading-tight">
                     {content.collections[1].title}
@@ -290,7 +290,7 @@ function ExploreView() {
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-700"
                 />
-                <div className="absolute inset-0 bg-primary/30 group-hover:bg-primary/40 transition-colors" />
+                <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors" />
                 <div className="absolute bottom-6 left-6 right-6 flex justify-between items-end">
                   <h3 className="text-2xl font-black text-white uppercase max-w-[150px] leading-tight">
                     {content.collections[2].title}
@@ -311,7 +311,7 @@ function ExploreView() {
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
             <div>
               <div className="flex items-center gap-3 mb-4">
-                <div className="h-[2px] w-8 bg-primary" />
+                <div className="h-[2px] w-8 bg-black" />
                 <span className="uppercase tracking-[0.2em] text-[10px] md:text-xs font-bold text-slate-500">
                   Featured
                 </span>
@@ -350,7 +350,7 @@ export default function ExplorePage() {
   return (
     <Suspense
       fallback={
-        <div className="h-screen w-full bg-primary flex items-center justify-center text-white font-bold uppercase tracking-widest text-sm animate-pulse">
+        <div className="h-screen w-full bg-black flex items-center justify-center text-white font-bold uppercase tracking-widest text-sm animate-pulse">
           Initializing Protocol...
         </div>
       }

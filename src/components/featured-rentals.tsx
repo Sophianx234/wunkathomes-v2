@@ -35,7 +35,7 @@ export default function FeaturedRentals() {
             className="max-w-2xl"
           >
             <div className="flex items-center gap-3 mb-3">
-              <div className="h-[2px] w-8 bg-primary" />
+              <div className="h-[2px] w-8 bg-black" />
               <span className="uppercase tracking-[0.2em] text-[10px] md:text-xs font-bold text-slate-500">
                 Flexible Living
               </span>
@@ -89,7 +89,7 @@ export default function FeaturedRentals() {
             >
               <button
                 onClick={handleLoadMore}
-                className="px-10 py-4 bg-transparent text-primary font-bold uppercase tracking-widest text-xs border-2 border-black hover:bg-primary hover:text-white transition-all duration-300 flex items-center justify-center gap-3 group"
+                className="px-10 py-4 bg-transparent text-primary font-bold uppercase tracking-widest text-xs border-2 border-black hover:bg-black hover:text-white transition-all duration-300 flex items-center justify-center gap-3 group"
               >
                 Load More Rentals
                 <HugeiconsIcon

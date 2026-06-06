@@ -8,9 +8,11 @@ import { Upload01Icon, Cancel01Icon } from "@hugeicons/core-free-icons";
 interface MediaUploadProps {
   files: File[];
   setFiles: React.Dispatch<React.SetStateAction<File[]>>;
+  existingImages?: string[]; // Made optional for the Create page
+  setExistingImages?: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
-export function MediaUpload({ files, setFiles }: MediaUploadProps) {
+export function MediaUpload({ files, setFiles, existingImages = [], setExistingImages }: MediaUploadProps) {
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       setFiles((prev) => [...prev, ...acceptedFiles]);
@@ -32,6 +34,14 @@ export function MediaUpload({ files, setFiles }: MediaUploadProps) {
   const removeFile = (indexToRemove: number) => {
     setFiles((prev) => prev.filter((_, index) => index !== indexToRemove));
   };
+
+  const removeExistingFile = (indexToRemove: number) => {
+    if (setExistingImages) {
+      setExistingImages((prev) => prev.filter((_, index) => index !== indexToRemove));
+    }
+  };
+
+  const hasMedia = files.length > 0 || existingImages.length > 0;
 
   return (
     <div className="bg-white rounded-lg border border-slate-200 p-8">
@@ -70,11 +80,38 @@ export function MediaUpload({ files, setFiles }: MediaUploadProps) {
         </p>
       </div>
 
-      {files.length > 0 && (
+      {hasMedia && (
         <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+          
+          {/* 1. Render Existing Database Images */}
+          {existingImages.map((url, index) => (
+            <div
+              key={`existing-${index}`}
+              className="relative group rounded-lg overflow-hidden border border-slate-200 bg-slate-50 aspect-square flex items-center justify-center"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={url}
+                alt={`existing-${index}`}
+                className="w-full h-full object-cover"
+              />
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  removeExistingFile(index);
+                }}
+                className="absolute top-2 right-2 h-6 w-6 rounded-full bg-black/50 hover:bg-black text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <HugeiconsIcon icon={Cancel01Icon} size={14} />
+              </button>
+            </div>
+          ))}
+
+          {/* 2. Render Newly Uploaded Local Files */}
           {files.map((file, index) => (
             <div
-              key={index}
+              key={`new-${index}`}
               className="relative group rounded-lg overflow-hidden border border-slate-200 bg-slate-50 aspect-square flex items-center justify-center"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -86,15 +123,16 @@ export function MediaUpload({ files, setFiles }: MediaUploadProps) {
               <button
                 type="button"
                 onClick={(e) => {
-                  e.stopPropagation(); // Prevents the dropzone from opening if you click remove
+                  e.stopPropagation();
                   removeFile(index);
                 }}
-                className="absolute top-2 right-2 h-6 w-6 rounded-full bg-primary/50 hover:bg-primary text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute top-2 right-2 h-6 w-6 rounded-full bg-black/50 hover:bg-black text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
               >
                 <HugeiconsIcon icon={Cancel01Icon} size={14} />
               </button>
             </div>
           ))}
+
         </div>
       )}
     </div>

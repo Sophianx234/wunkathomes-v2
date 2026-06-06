@@ -2,8 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 // Import your specific DB, Model, Session, and Cloudinary helper paths
-import { getSession } from "@/lib/session"; 
-import { uploadToCloudinary } from "@/lib/cloudinary"; 
+import { getSession } from "@/lib/session";
+import { uploadToCloudinary } from "@/lib/cloudinary";
 import { connectToDatabase } from "@/config/DbConnect";
 import User from "@/models/user";
 
@@ -21,7 +21,7 @@ export async function updateProfileAction(formData: FormData) {
     const name = formData.get("name") as string;
     const phoneNumber = formData.get("phoneNumber") as string;
     const countryCode = formData.get("countryCode") as string;
-    
+
     // Extract the image file
     const profilePhotoFile = formData.get("profilePicture") as File | null;
 
@@ -43,9 +43,9 @@ export async function updateProfileAction(formData: FormData) {
     if (profilePhotoFile && profilePhotoFile.size > 0) {
       const profilePhotoUrl = await uploadToCloudinary(
         profilePhotoFile,
-        `wunkatehomes/profiles/${userId}`
+        `wunkathomeshomes/profiles`,
       );
-      
+
       // Append the new URL to our database payload
       updatePayload.profilePicture = profilePhotoUrl;
     }
@@ -57,9 +57,11 @@ export async function updateProfileAction(formData: FormData) {
     revalidatePath("/dashboard/settings"); // Adjust to your actual settings route
 
     return { success: true, message: "Profile updated successfully!" };
-
   } catch (error) {
     console.error("Profile Update Error:", error);
-    return { success: false, error: "An unexpected error occurred during the update." };
+    return {
+      success: false,
+      error: "An unexpected error occurred during the update.",
+    };
   }
 }

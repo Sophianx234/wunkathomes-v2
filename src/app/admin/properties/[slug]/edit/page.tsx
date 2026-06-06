@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { connectToDatabase } from "@/config/DbConnect";
 import Listing from "@/models/listing";
 import Property from "@/models/property"; // Required for Mongoose to populate
-import EditPropertyForm from "./edit-property-form"; // Adjust path if needed
+import EditPropertyForm from "@/components/edit-property-form";
 
 export const metadata = {
   title: "Edit Property | Portfolio Management",
@@ -12,12 +12,19 @@ export const metadata = {
 export default async function EditPropertyPage({
   params,
 }: {
-  params: { slug: string }; // <-- 1. Change id to slug
+  // 1. Awaitable params with 'slug' instead of 'id'
+  params: Promise<{ slug: string }>;
 }) {
   await connectToDatabase();
 
-  // 2. Use findOne by slug instead of findById
-  const rawListing = await Listing.findOne({ slug: params.slug })
+  // 2. Await the params object
+  const resolvedParams = await params;
+  
+  // 3. Decode just in case the browser adds %20 for spaces
+  const cleanSlug = decodeURIComponent(resolvedParams.slug);
+
+  // 4. Use findOne to query by the slug field
+  const rawListing = await Listing.findOne({ slug: cleanSlug })
     .populate("propertyId")
     .lean();
 

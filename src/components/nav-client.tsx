@@ -425,7 +425,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
               </>
             ) : (
               <LoginModal>
-                <Button className="bg-primary rounded-sm hover:bg-zinc-800 text-white py-3 px-4 font-medium">
+                <Button className="bg-black rounded-sm hover:bg-zinc-800 text-white py-3 px-4 font-medium">
                   <Link href="/login" className="flex items-center gap-2">
                     Sign In
                     <HugeiconsIcon icon={ArrowRight01Icon} />

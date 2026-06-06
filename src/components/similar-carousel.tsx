@@ -38,13 +38,13 @@ export default function SimilarCarousel({
         <div className="flex items-center gap-3">
           <button
             onClick={() => scroll("left")}
-            className="w-10 h-10 rounded-full border-2 border-black flex items-center justify-center text-black hover:bg-primary hover:text-white transition-colors"
+            className="w-10 h-10 rounded-full border-2 border-black flex items-center justify-center text-black hover:bg-black hover:text-white transition-colors"
           >
             <HugeiconsIcon icon={ArrowLeft01Icon} size={20} />
           </button>
           <button
             onClick={() => scroll("right")}
-            className="w-10 h-10 rounded-full border-2 border-black flex items-center justify-center text-black hover:bg-primary hover:text-white transition-colors"
+            className="w-10 h-10 rounded-full border-2 border-black flex items-center justify-center text-black hover:bg-black hover:text-white transition-colors"
           >
             <HugeiconsIcon icon={ArrowRight01Icon} size={20} />
           </button>

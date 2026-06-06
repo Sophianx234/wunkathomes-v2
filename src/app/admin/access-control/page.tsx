@@ -454,19 +454,19 @@ export default function AccessControlDashboard() {
                 <>
                   <button
                     onClick={() => setTenantPill("all")}
-                    className={`whitespace-nowrap px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-widest shadow-sm transition-all ${tenantPill === "all" ? "bg-primary text-white" : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"}`}
+                    className={`whitespace-nowrap px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-widest shadow-sm transition-all ${tenantPill === "all" ? "bg-black text-white" : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"}`}
                   >
                     All Tenants
                   </button>
                   <button
                     onClick={() => setTenantPill("revoked")}
-                    className={`whitespace-nowrap px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-widest shadow-sm transition-all ${tenantPill === "revoked" ? "bg-primary text-white" : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"}`}
+                    className={`whitespace-nowrap px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-widest shadow-sm transition-all ${tenantPill === "revoked" ? "bg-black text-white" : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"}`}
                   >
                     Locked Out
                   </button>
                   <button
                     onClick={() => setTenantPill("grace")}
-                    className={`whitespace-nowrap px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-widest shadow-sm transition-all ${tenantPill === "grace" ? "bg-primary text-white" : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"}`}
+                    className={`whitespace-nowrap px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-widest shadow-sm transition-all ${tenantPill === "grace" ? "bg-black text-white" : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"}`}
                   >
                     Grace Period
                   </button>
@@ -475,25 +475,25 @@ export default function AccessControlDashboard() {
                 <>
                   <button
                     onClick={() => setUnitPill("all")}
-                    className={`whitespace-nowrap px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-widest shadow-sm transition-all ${unitPill === "all" ? "bg-primary text-white" : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"}`}
+                    className={`whitespace-nowrap px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-widest shadow-sm transition-all ${unitPill === "all" ? "bg-black text-white" : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"}`}
                   >
                     All Units
                   </button>
                   <button
                     onClick={() => setUnitPill("vacant")}
-                    className={`whitespace-nowrap px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-widest shadow-sm transition-all ${unitPill === "vacant" ? "bg-primary text-white" : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"}`}
+                    className={`whitespace-nowrap px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-widest shadow-sm transition-all ${unitPill === "vacant" ? "bg-black text-white" : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"}`}
                   >
                     Vacant Units
                   </button>
                   <button
                     onClick={() => setUnitPill("low_battery")}
-                    className={`whitespace-nowrap px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-widest shadow-sm transition-all ${unitPill === "low_battery" ? "bg-primary text-white" : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"}`}
+                    className={`whitespace-nowrap px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-widest shadow-sm transition-all ${unitPill === "low_battery" ? "bg-black text-white" : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"}`}
                   >
                     Low Battery
                   </button>
                   <button
                     onClick={() => setUnitPill("offline")}
-                    className={`whitespace-nowrap px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-widest shadow-sm transition-all ${unitPill === "offline" ? "bg-primary text-white" : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"}`}
+                    className={`whitespace-nowrap px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-widest shadow-sm transition-all ${unitPill === "offline" ? "bg-black text-white" : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"}`}
                   >
                     Offline
                   </button>
@@ -704,7 +704,7 @@ export default function AccessControlDashboard() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="h-8 text-[11px] font-semibold border-zinc-200 text-zinc-700  rounded-lg group-hover:bg-primary group-hover:text-white group-hover:border-zinc-900 transition-all duration-200"
+                        className="h-8 text-[11px] font-semibold border-zinc-200 text-zinc-700  rounded-lg group-hover:bg-black group-hover:text-white group-hover:border-zinc-900 transition-all duration-200"
                       >
                         Configure Access
                       </Button>
@@ -861,7 +861,7 @@ export default function AccessControlDashboard() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="h-8 text-[11px] font-semibold border-zinc-200 text-zinc-700  rounded-lg group-hover:bg-primary group-hover:text-white group-hover:border-zinc-900 transition-all duration-200"
+                        className="h-8 text-[11px] font-semibold border-zinc-200 text-zinc-700  rounded-lg group-hover:bg-black group-hover:text-white group-hover:border-zinc-900 transition-all duration-200"
                       >
                         Manage Lock
                       </Button>
@@ -1109,7 +1109,7 @@ export default function AccessControlDashboard() {
 
               <div className="p-4 bg-white border-t border-zinc-200/80 shadow-[0_-8px_20px_rgba(0,0,0,0.02)] z-20">
                 <Button
-                  className="w-full h-10 bg-primary text-white hover:bg-zinc-800 text-[13px] font-semibold shadow-sm transition-all rounded-lg"
+                  className="w-full h-10 bg-black text-white hover:bg-zinc-800 text-[13px] font-semibold shadow-sm transition-all rounded-lg"
                   onClick={() => setSelectedTenantAccess(null)}
                 >
                   Apply Configuration Changes

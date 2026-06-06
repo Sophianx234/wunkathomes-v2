@@ -85,7 +85,7 @@ export default function TheVoices() {
         <div className="flex flex-wrap items-center justify-between gap-6 mb-12">
           {/* Header */}
           <div className="flex items-center gap-3">
-            <div className="h-[2px] w-8 bg-primary" />
+            <div className="h-[2px] w-8 bg-black" />
             <span className="uppercase tracking-[0.3em] text-[10px] font-bold text-slate-400">
               The Voices
             </span>
@@ -98,7 +98,7 @@ export default function TheVoices() {
               {testimonials.map((_, index) => (
                 <div
                   key={index}
-                  className={`h-1 transition-all duration-500 rounded-full ${index === currentIndex ? "w-8 bg-primary" : "w-3 bg-slate-200"}`}
+                  className={`h-1 transition-all duration-500 rounded-full ${index === currentIndex ? "w-8 bg-black" : "w-3 bg-slate-200"}`}
                 />
               ))}
             </div>
@@ -107,14 +107,14 @@ export default function TheVoices() {
             <div className="flex gap-2">
               <button
                 onClick={() => paginate(-1)}
-                className="w-10 h-10 flex items-center justify-center border-2 border-black bg-white hover:bg-primary hover:text-white transition-colors duration-300"
+                className="w-10 h-10 flex items-center justify-center border-2 border-black bg-white hover:bg-black hover:text-white transition-colors duration-300"
                 aria-label="Previous Testimonial"
               >
                 <HugeiconsIcon icon={ArrowLeft01Icon} size={18} />
               </button>
               <button
                 onClick={() => paginate(1)}
-                className="w-10 h-10 flex items-center justify-center border-2 border-black bg-white hover:bg-primary hover:text-white transition-colors duration-300"
+                className="w-10 h-10 flex items-center justify-center border-2 border-black bg-white hover:bg-black hover:text-white transition-colors duration-300"
                 aria-label="Next Testimonial"
               >
                 <HugeiconsIcon icon={ArrowRight01Icon} size={18} />

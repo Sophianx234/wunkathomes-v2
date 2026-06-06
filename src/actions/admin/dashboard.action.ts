@@ -8,13 +8,12 @@ import Review from "@/models/review";
 import Tour from "@/models/tour";
 import Transaction from "@/models/transaction";
 
-
 export async function getDashboardData() {
   await connectToDatabase();
 
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  const startOfToday = new Date(now.getFullYear(), now.getMonth(), 1);
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
   // 1. Metrics & Aggregations
   const [
@@ -152,27 +151,79 @@ export async function getDashboardData() {
     occupied: Math.floor(p.total * 0.8) // Mocking occupancy per type since it requires complex join logic
   }));
 
-  // Hardcoded chart data to preserve exactly the same visual output structure
+  // ---------------------------------------------------------
+  // 3. Dynamic Chart Data Generation
+  // ---------------------------------------------------------
+
+  // --- Asset Chart Data (Donut Chart) ---
+  const assetAggregations = await Listing.aggregate([
+    {
+      $group: {
+        _id: "$status",
+        count: { $sum: 1 }
+      }
+    }
+  ]);
+
   const assetChartData = [
-    { status: "Rented", count: metrics.rentedListings, fill: "var(--foreground)" }, 
-    { status: "Pending", count: 2, fill: "var(--muted-foreground)" }, 
-    { status: "Available", count: Math.max(0, metrics.totalListings - metrics.rentedListings - 2), fill: "#FDE047" }, 
+    { 
+      status: "Rented", 
+      count: assetAggregations.find(a => a._id === "Rented")?.count || 0, 
+      fill: "var(--foreground)" 
+    },
+    { 
+      status: "Pending", 
+      count: assetAggregations.find(a => a._id === "Pending")?.count || 0, 
+      fill: "var(--muted-foreground)" 
+    },
+    { 
+      status: "Available", 
+      count: assetAggregations.find(a => a._id === "Available")?.count || 0, 
+      fill: "#FDE047" 
+    },
   ];
 
-  const revenueChartData = [
-    { month: "Jan", Paystack: 15000, Bank_Transfer: 10000 },
-    { month: "Feb", Paystack: 22000, Bank_Transfer: 12000 },
-    { month: "Mar", Paystack: 18000, Bank_Transfer: 20000 },
-    { month: "Apr", Paystack: 31000, Bank_Transfer: 15000 },
-    { month: "May", Paystack: 28000, Bank_Transfer: 18000 },
-    { month: "Jun", Paystack: 42000, Bank_Transfer: 25000 },
-    { month: "Jul", Paystack: 39000, Bank_Transfer: 22000 },
-    { month: "Aug", Paystack: 12000, Bank_Transfer: 8000 },
-    { month: "Sep", Paystack: 45000, Bank_Transfer: 28000 },
-    { month: "Oct", Paystack: 52000, Bank_Transfer: 30000 },
-    { month: "Nov", Paystack: 48000, Bank_Transfer: 35000 },
-    { month: "Dec", Paystack: 61000, Bank_Transfer: 42000 },
-  ];
+  // --- Revenue Chart Data (Bar Chart) ---
+  const currentYear = new Date().getFullYear();
+  const startOfYear = new Date(currentYear, 0, 1);
+  const endOfYear = new Date(currentYear, 11, 31, 23, 59, 59);
+
+  const revenueStats = await Transaction.aggregate([
+    {
+      $match: {
+        status: "Success",
+        paidAt: { $gte: startOfYear, $lte: endOfYear }
+      }
+    },
+    {
+      $group: {
+        _id: {
+          month: { $month: "$paidAt" }, // Extracts month (1-12)
+          channel: "$channel"           // 'card', 'mobile_money', 'bank'
+        },
+        totalAmount: { $sum: "$amount" }
+      }
+    }
+  ]);
+
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const revenueChartData = monthNames.map(month => ({
+    month,
+    Paystack: 0,
+    Bank_Transfer: 0
+  }));
+
+  revenueStats.forEach(stat => {
+    const monthIndex = stat._id.month - 1; // Convert 1-12 to 0-11 index
+    const amount = stat.totalAmount;
+    const channel = stat._id.channel;
+
+    if (channel === 'bank') {
+      revenueChartData[monthIndex].Bank_Transfer += amount;
+    } else if (channel === 'card' || channel === 'mobile_money') {
+      revenueChartData[monthIndex].Paystack += amount;
+    }
+  });
 
   return {
     metrics,

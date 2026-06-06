@@ -173,7 +173,7 @@ export default async function PropertyDetailsPage({
 
           <div className="flex items-center justify-between py-6 border-y border-black/10 mb-8">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white">
+              <div className="w-12 h-12 bg-black rounded-full flex items-center justify-center text-white">
                 <HugeiconsIcon icon={Building04Icon} size={24} />
               </div>
               <div>
@@ -315,7 +315,7 @@ export default async function PropertyDetailsPage({
                 </div>
               ))}
             </div>
-            <button className="mt-8 px-6 py-3 border-2 border-black font-bold uppercase tracking-widest text-[10px] hover:bg-primary hover:text-white transition-colors">
+            <button className="mt-8 px-6 py-3 border-2 border-black font-bold uppercase tracking-widest text-[10px] hover:bg-black hover:text-white transition-colors">
               Show all 12 reviews
             </button>
           </div>
@@ -343,7 +343,7 @@ export default async function PropertyDetailsPage({
           </div>
         </div>
         <Link href={`/checkout/${listing.slug}?type=deposit`}>
-          <button className="px-6 py-3 bg-primary text-white font-black uppercase tracking-widest text-[10px] rounded hover:bg-slate-800 transition-colors">
+          <button className="px-6 py-3 bg-black text-white font-black uppercase tracking-widest text-[10px] rounded hover:bg-slate-800 transition-colors">
             {isRent ? "Reserve" : "Acquire"}
           </button>
         </Link>

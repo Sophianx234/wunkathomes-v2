@@ -3,11 +3,7 @@
 import { useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import {
-  Field,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { useFormState, useFormStatus } from "react-dom";
 import { acceptInviteAction } from "@/actions/admin/invitation.action";
@@ -59,7 +55,8 @@ export function AcceptInviteForm({
       <div className="text-center space-y-3">
         <h2 className="text-xl font-bold text-destructive">Invalid Link</h2>
         <p className="text-sm text-muted-foreground">
-          This invitation link is missing or malformed. Please request a new invitation from your administrator.
+          This invitation link is missing or malformed. Please request a new
+          invitation from your administrator.
         </p>
       </div>
     );
@@ -75,7 +72,8 @@ export function AcceptInviteForm({
         <div className="flex flex-col items-center gap-1 text-center">
           <h1 className="text-2xl font-bold">Accept Invitation</h1>
           <p className="text-sm text-balance text-muted-foreground">
-            You've been invited to join the WunkateHomes management team. Complete your profile below.
+            You've been invited to join the wunkathomesHomes management team.
+            Complete your profile below.
           </p>
         </div>
 
