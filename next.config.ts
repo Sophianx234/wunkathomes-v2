@@ -19,7 +19,7 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     serverActions: {
-      bodySizeLimit: "50mb", // Set this high enough to accommodate 10x 5MB images
+      bodySizeLimit: "100mb", // Set this high enough to accommodate 10x 5MB images
     },
   },
 };

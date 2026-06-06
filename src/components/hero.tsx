@@ -32,9 +32,9 @@ export default function Hero() {
         />
       </motion.div>
 
-      {/* === High-End Vignette Overlay === */}
-      <div className="absolute inset-0 z-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
-      <div className="absolute inset-0 z-0 bg-black/10" />
+       {/* FIXED: Dark radial/linear vignette stack handles clean readability on dark mode layouts */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
+              <div className="absolute inset-0 bg-black/20" />
 
       {/* === Content Container === */}
       <div className="relative  z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row justify-between items-end gap-8 md:gap-12">

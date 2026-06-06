@@ -1,37 +1,16 @@
-import { notFound } from "next/navigation";
-import { connectToDatabase } from "@/config/DbConnect";
-import Listing from "@/models/listing";
-import Property from "@/models/property"; // Required for Mongoose to populate
-import EditPropertyForm from "./edit-property-form"; // Adjust path if needed
+import CreatePropertyForm from "@/components/create-property-form";
 
 export const metadata = {
-  title: "Edit Property | Portfolio Management",
-  description: "Update the details of an existing real estate asset.",
+  title: "Create Property | Portfolio Management",
+  description: "Deploy a new real estate asset into the operational portfolio.",
 };
 
-export default async function EditPropertyPage({
-  params,
-}: {
-  params: { slug: string }; // <-- 1. Change id to slug
-}) {
-  await connectToDatabase();
-
-  // 2. Use findOne by slug instead of findById
-  const rawListing = await Listing.findOne({ slug: params.slug })
-    .populate("propertyId")
-    .lean();
-
-  if (!rawListing) {
-    notFound();
-  }
-
-  // Serialize the MongoDB document to pass safely to the Client Component
-  const initialData = JSON.parse(JSON.stringify(rawListing));
-
+export default function CreatePropertyPage() {
   return (
     <div className="flex flex-col flex-1 w-full min-h-screen bg-slate-50 font-sans">
       <div className="min-w-4xl w-full mx-auto p-6 md:p-8 space-y-6 pb-20">
-        <EditPropertyForm initialData={initialData} />
+        {/* Pass control to the Client Component */}
+        <CreatePropertyForm />
       </div>
     </div>
   );

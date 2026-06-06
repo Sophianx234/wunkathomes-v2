@@ -14,6 +14,7 @@ import ByTheNumbers from "@/components/by-the-numbers";
 import TheVoices from "@/components/the-voices";
 import TheArchitects from "@/components/the-architecture";
 import Cta from "@/components/cta";
+import History from "@/components/history";
 
 export default function AboutPage() {
   const values = [
@@ -46,14 +47,14 @@ export default function AboutPage() {
   return (
     <div className="">
         <Manifesto/>
-        <TheStandard/>
-        <ByTheNumbers/>
-        <TheVoices/>
+        <History/>
         <TheArchitects/>
+        {/* <TheStandard/> */}
+        <TheVoices/>
+        <ByTheNumbers/>
         <Cta/>
         
       
-      <Footer />
     </div>
   );
 }

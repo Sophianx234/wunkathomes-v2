@@ -72,7 +72,7 @@ export function AcceptInviteForm({
         <div className="flex flex-col items-center gap-1 text-center">
           <h1 className="text-2xl font-bold">Accept Invitation</h1>
           <p className="text-sm text-balance text-muted-foreground">
-            You've been invited to join the wunkathomesHomes management team.
+            You've been invited to join the wunkathomes management team.
             Complete your profile below.
           </p>
         </div>

@@ -78,7 +78,7 @@ export default function TheVoices() {
   };
 
   return (
-    <section className="bg-white text-black py-16 md:py-24 flex flex-col relative overflow-hidden border-t border-black/10">
+    <section className="bg-white border-b border-2 text-black py-16 md:py-24 flex flex-col relative overflow-hidden border-t border-black/10">
       <div className="w-full flex-1 flex flex-col max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* === Top Anchored Header & Controls (UX Fix) === */}
         {/* By placing controls here, they never move when text length changes */}

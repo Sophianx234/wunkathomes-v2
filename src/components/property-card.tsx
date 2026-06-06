@@ -111,7 +111,7 @@ export default function PropertyCard({
       opacity: 0,
     }),
   };
-
+console.log('prop',property)
   const paginate = (newDirection: number, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -156,7 +156,7 @@ export default function PropertyCard({
     });
   };
 
-  const formattedPrice = `$${property.price.toLocaleString()}`;
+  const formattedPrice = `₵${property.price.toLocaleString()}`;
   const priceSuffix = formatLeaseTerm(property.terms?.leaseTerm);
 
   let locationString = "Unknown Location";

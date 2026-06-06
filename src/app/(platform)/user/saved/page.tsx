@@ -59,9 +59,7 @@ export default async function SavedPropertiesPage() {
               {/* <HugeiconsIcon icon={FavouriteIcon} size={28} className="text-red-500 fill-red-500" /> */}
               My Saved Homes
             </h1>
-            <p className="text-slate-500 mt-2 text-sm md:text-base">
-              Keep track of the properties you love. Compare and review them before making a decision.
-            </p>
+           
           </div>
           <p className="text-sm font-medium text-slate-500 bg-slate-100 px-4 py-2 rounded-full w-fit">
             {savedProperties.length} {savedProperties.length === 1 ? "Property" : "Properties"} Saved

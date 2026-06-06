@@ -279,7 +279,7 @@ export function VerificationDashboard({
               Need help?
             </h3>
             <p className="text-xs text-slate-500 leading-relaxed mb-6">
-              Have questions or concerns regarding your wunkathomesHomes
+              Have questions or concerns regarding your wunkathomes
               verification? Our experts are here to help!
             </p>
             <button className="w-full py-3 bg-black hover:bg-black text-white text-xs font-bold uppercase tracking-widest rounded-lg transition-colors shadow-primary/20">

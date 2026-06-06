@@ -230,6 +230,7 @@ export async function createPropertyAction(prevState: ActionState, formData: For
     }
 
     // --- 9. Revalidate Cache (Performance/State) ---
+    revalidatePath("/");
     revalidatePath("/admin/properties");
 
     return { 

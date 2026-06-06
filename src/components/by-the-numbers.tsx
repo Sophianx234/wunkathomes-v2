@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion, useInView, useSpring, useTransform } from "framer-motion";
+import { motion, useInView, useSpring } from "framer-motion";
 
 // --- Helper Component: Animated Counter ---
-// This animates a number counting up from 0 to the target value when scrolled into view.
 function AnimatedNumber({
   value,
   suffix = "",
@@ -16,7 +15,6 @@ function AnimatedNumber({
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [displayValue, setDisplayValue] = useState("0");
 
-  // Spring animation for smooth deceleration
   const spring = useSpring(0, { mass: 1, stiffness: 50, damping: 20 });
 
   useEffect(() => {
@@ -44,42 +42,42 @@ const metrics = [
   {
     target: 0,
     suffix: "",
-    title: "Agent Fees",
+    title: "Hidden Fees",
     description:
-      "Or hidden brokerage costs. What you see is exactly what you pay.",
+      "We believe in total honesty. No surprise costs, no sneaky agent commissions, just the price you see.",
   },
   {
     target: 100,
     suffix: "%",
-    title: "Verified Portfolio",
+    title: "Verified Homes",
     description:
-      "We own or exclusively manage every single asset on our platform.",
+      "We personally manage every property we list, so you can move in with total peace of mind.",
   },
   {
     target: 60,
     suffix: "s", // seconds
-    title: "To Smart-Lock Access",
+    title: "Move-in Ready",
     description:
-      "Average time from ledger payment clearance to Tuya PIN generation.",
+      "From payment to digital key access in under a minute. Your new space is ready whenever you are.",
   },
 ];
 
 export default function ByTheNumbers() {
   return (
-    <section className="bg-black text-white py-24  relative overflow-hidden">
+    <section className="bg-white py-24 relative overflow-hidden">
       {/* Subtle Background Texture */}
       <div
-        className="absolute inset-0 opacity-[0.03] pointer-events-none"
+        className="absolute inset-0 opacity-[0.04] pointer-events-none"
         style={{
           backgroundImage:
-            "radial-gradient(circle at center, white 1px, transparent 1px)",
+            "radial-gradient(circle at center, #1a1a1a 1px, transparent 1px)",
           backgroundSize: "40px 40px",
         }}
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* === Metrics Grid === */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8 divide-y md:divide-y-0 md:divide-x divide-white/10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8 divide-y md:divide-y-0 md:divide-x divide-slate-200">
           {metrics.map((metric, index) => (
             <motion.div
               key={metric.title}
@@ -95,17 +93,17 @@ export default function ByTheNumbers() {
             >
               {/* Massive Number */}
               <div
-                className="text-7xl lg:text-5xl font-black mb-6 tracking-tighter text-transparent"
-                style={{ WebkitTextStroke: "2px white" }}
+                className="text-7xl lg:text-8xl font-black mb-6 tracking-tighter text-transparent"
+                style={{ WebkitTextStroke: "2px #1a1a1a" }}
               >
                 <AnimatedNumber value={metric.target} suffix={metric.suffix} />
               </div>
 
               {/* Text Content */}
-              <h3 className="text-xl md:text-xl font-bold uppercase tracking-tight mb-3">
+              <h3 className="text-xl md:text-xl font-black uppercase tracking-tight mb-3 text-[#1a1a1a]">
                 {metric.title}
               </h3>
-              <p className="text-white/50 font-medium leading-relaxed max-w-xs mx-auto">
+              <p className="text-slate-500 font-medium leading-relaxed max-w-xs mx-auto text-sm md:text-base">
                 {metric.description}
               </p>
             </motion.div>

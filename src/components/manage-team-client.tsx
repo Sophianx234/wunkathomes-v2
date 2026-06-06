@@ -240,7 +240,6 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
             <h1 className="text-2xl font-bold tracking-tight text-zinc-900">
               Team & Access Control
             </h1>
-          
           </div>
           <Button
             onClick={() => setIsInviteOpen(true)}
@@ -618,7 +617,7 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
                   <Input
                     type="email"
                     required
-                    placeholder="colleague@wunkathomeshomes.com"
+                    placeholder="colleague@wunkathomes.com"
                     value={inviteEmail}
                     onChange={(e) => setInviteEmail(e.target.value)}
                     className="pl-9 h-11 border-zinc-200 bg-zinc-50 focus-visible:ring-1 focus-visible:ring-zinc-900 focus-visible:bg-white transition-all shadow-none"

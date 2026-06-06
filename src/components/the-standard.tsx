@@ -9,38 +9,38 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 
-// --- Updated Pillars with Human-Centric Imagery ---
+// --- Warm, Human-Centric Pillars ---
 const pillars = [
   {
     number: "01",
-    title: "Absolute Ownership.",
+    title: "Exclusively Managed.",
     description:
-      "We are not a marketplace. We own, design, and manage 100% of our portfolio. This means zero third-party landlords, zero fake listings, and absolutely no broker fees.",
+      "Every home on our platform is exclusively managed by our team. That means no surprise landlords, no fake listings, and absolutely no hidden broker fees.",
     icon: Building04Icon,
-    image: "/a-5.jpg",
+    image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=2075&auto=format&fit=crop", 
   },
   {
     number: "02",
-    title: "Digital Leases.",
+    title: "Paperless Rentals.",
     description:
-      "The era of physical paperwork is over. Review transparent terms, verify your identity, and sign legally binding tenancy agreements entirely from your device in minutes.",
+      "Say goodbye to endless paperwork. Review clear terms, verify your identity, and sign your lease securely from your phone in a matter of minutes.",
     icon: File02Icon,
-    image: "/a-6.jpg", // A warm, inviting image of a WunkatHomes property exterior
+    image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=2070&auto=format&fit=crop", 
   },
   {
     number: "03",
-    title: "Smart Infrastructure.",
+    title: "Smart Security.",
     description:
-      "Physical keys are a security risk. The moment your hybrid payment clears our ledger, a unique, encrypted Tuya smart-lock PIN is generated on your dashboard.",
+      "Your safety and convenience come first. As soon as your booking is confirmed, a secure, unique smart-lock code is sent directly to your device for instant access.",
     icon: Key01Icon,
-    image: "/s-2.jpg", // A warm, inviting image of a WunkatHomes property exterior
+    image: "https://images.unsplash.com/photo-1558036117-15d82a90b9b1?q=80&w=2070&auto=format&fit=crop", 
   },
 ];
 
 export default function TheStandard() {
   return (
-    <section className="bg-white  border-y-2 border-black overflow-hidden">
-      <div className=" mx-auto flex flex-col">
+    <section className="bg-white border-y-2 border-black overflow-hidden">
+      <div className="mx-auto flex flex-col">
         {/* === Section Header === */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20 w-full">
           <motion.div
@@ -54,7 +54,7 @@ export default function TheStandard() {
               <div className="flex items-center gap-3 mb-4">
                 <div className="h-[2px] w-8 bg-black" />
                 <span className="uppercase tracking-[0.3em] text-[10px] md:text-xs font-bold text-slate-500">
-                  The Wunkat Standard
+                  The Wunkat Promise
                 </span>
               </div>
 
@@ -64,28 +64,27 @@ export default function TheStandard() {
                   className="text-transparent"
                   style={{ WebkitTextStroke: "2px black" }}
                 >
-                  Compromise.
+                  Compromises.
                 </span>
               </h2>
             </div>
 
             <p className="text-sm md:text-base text-slate-600 font-medium leading-relaxed max-w-sm md:text-right">
-              We don't rely on third parties to dictate your living experience.
-              We built the infrastructure from the ground up to guarantee peace
-              of mind.
+              We handle everything from the ground up so you can enjoy a seamless, 
+              worry-free living experience without relying on third parties.
             </p>
           </motion.div>
         </div>
 
         {/* === Editorial Z-Grid === */}
-        <div className="flex flex-col border  overflow-hidden border-black">
+        <div className="flex flex-col border overflow-hidden border-black">
           {pillars.map((pillar, index) => {
             const isEven = index % 2 === 0;
 
             return (
               <div
                 key={pillar.number}
-                className={`grid grid-cols-1 lg:grid-cols-2  ${isEven ? "" : "lg:bg-slate-50"}`}
+                className={`grid grid-cols-1 lg:grid-cols-2 ${isEven ? "" : "lg:bg-slate-50"}`}
               >
                 {/* --- Text Block --- */}
                 <motion.div
@@ -93,12 +92,10 @@ export default function TheStandard() {
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true, amount: 0.3 }}
                   transition={{ duration: 0.7, ease: "easeOut" }}
-                  // Changed to justify-between to anchor text to the top and icons to the bottom
                   className={`group relative p-8 sm:p-10 lg:p-16 xl:p-20 flex flex-col justify-between transition-colors duration-500 hover:bg-black
-                    ${isEven ? "order-1 " : "order-1 lg:order-2 "}
+                    ${isEven ? "order-1" : "order-1 lg:order-2"}
                   `}
                 >
-                  {/* Top Row: Content (Now easily readable at first glance) */}
                   <div>
                     <h3 className="text-2xl md:text-3xl lg:text-4xl font-black text-black uppercase tracking-tight mb-4 group-hover:text-white transition-colors duration-500 leading-none">
                       {pillar.title}
@@ -108,9 +105,12 @@ export default function TheStandard() {
                     </p>
                   </div>
 
-                  {/* Bottom Row: Icon and Number (Anchored to the bottom) */}
                   <div className="flex items-end justify-between mt-12 md:mt-16">
-                    <div></div>
+                    <HugeiconsIcon 
+                      icon={pillar.icon} 
+                      size={32} 
+                      className="text-slate-300 group-hover:text-white transition-colors duration-500" 
+                    />
                     <span className="text-xl lg:text-2xl font-black tracking-widest text-slate-300 group-hover:text-white/20 transition-colors duration-500 leading-none">
                       {pillar.number}
                     </span>
@@ -134,7 +134,8 @@ export default function TheStandard() {
                       src={pillar.image}
                       alt={pillar.title}
                       fill
-                      className="object-cover bg-left transition-transform duration-1000 ease-out"
+                      className="object-cover bg-left transition-transform duration-1000 ease-out group-hover:scale-105"
+                      unoptimized // Prevents timeout errors with Unsplash links
                     />
                     <div className="absolute inset-0 shadow-[inset_0_0_40px_rgba(0,0,0,0.1)] pointer-events-none" />
                   </motion.div>
