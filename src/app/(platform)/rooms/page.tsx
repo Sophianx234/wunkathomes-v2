@@ -43,7 +43,6 @@ export default function BrowsePage() {
         const data = await res.json();
 
         if (res.ok) {
-          console.log("Fetched rooms:", data);
           setRooms(data.data || []);
         } else {
           setError(data.message || "Failed to load rooms.");

@@ -113,7 +113,6 @@ async function getListingData(slug: string) {
   const rawListing = await Listing.findOne({ slug })
     .populate("propertyId")
     .lean();
-  console.log("Fetched listing data:", rawListing);
   if (!rawListing) return { listing: null, similar: [], reviews: [] };
 
   const rawSimilar = await Listing.find({

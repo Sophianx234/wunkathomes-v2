@@ -25,7 +25,6 @@ const importData = async () => {
     await Transaction.deleteMany();
     await Review.deleteMany();
 
-    console.log('Data Cleared!');
 
     // 2. Create Base Admin & Users
     const users = await User.insertMany([

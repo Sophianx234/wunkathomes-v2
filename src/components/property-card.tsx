@@ -111,7 +111,6 @@ export default function PropertyCard({
       opacity: 0,
     }),
   };
-console.log('prop',property)
   const paginate = (newDirection: number, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -138,7 +137,6 @@ console.log('prop',property)
 
     startTransition(async () => {
       try {
-        console.log("Attempting to delete property with ID:", targetId);
         const result = await deletePropertyAction(targetId); // Pass the safe targetId
         
         if (result.success) {
