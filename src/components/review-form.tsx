@@ -14,13 +14,15 @@ import {
 import { toast } from "sonner";
 import { useParams } from "next/navigation";
 
+// ADD THE hasReviewed PROP TO THE INTERFACE
 interface ReviewFormProps {
   listingId: string;
+  hasReviewed?: boolean;
 }
 
 const initialState: ReviewActionState = { success: false, message: "" };
 
-export default function ReviewForm({ listingId }: ReviewFormProps) {
+export default function ReviewForm({ listingId, hasReviewed }: ReviewFormProps) {
   const params = useParams();
   const slug = params.slug as string;
 
@@ -29,7 +31,6 @@ export default function ReviewForm({ listingId }: ReviewFormProps) {
     initialState,
   );
 
-  // New state to toggle form visibility
   const [isOpen, setIsOpen] = useState(false);
 
   const [hoveredStar, setHoveredStar] = useState<number>(0);
@@ -41,11 +42,16 @@ export default function ReviewForm({ listingId }: ReviewFormProps) {
       toast.success(state.message);
       setSelectedRating(0);
       setComment("");
-      setIsOpen(false); // Auto-close form on successful submission
+      setIsOpen(false);
     } else if (state.error) {
       toast.error(state.error);
     }
   }, [state]);
+
+  // IF THE USER HAS ALREADY REVIEWED, HIDE THE BUTTON/FORM ENTIRELY
+  if (hasReviewed) {
+    return null;
+  }
 
   // If the form is closed, show a clean, standard button that matches the page aesthetic
   if (!isOpen) {

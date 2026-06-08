@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import mongoose from "mongoose";
 import { connectToDatabase } from "@/config/DbConnect";
 import Review from "@/models/review";
+import { getSession, SessionPayload } from "@/lib/session";
 
 const reviewSchema = z.object({
   listingId: z.string().min(1, "Listing ID is required"),
@@ -24,8 +25,7 @@ export async function submitReviewAction(
   formData: FormData
 ): Promise<ReviewActionState> {
   try {
-    // Using a placeholder user ID for testing until your auth system is ready
-    const userId = "64c123456789012345678901"; 
+    const session = await getSession() as SessionPayload 
 
     // --- Data Extraction ---
     const rawData = {
@@ -50,9 +50,22 @@ export async function submitReviewAction(
     // --- Save to Database ---
     await connectToDatabase();
 
+    const isReviewed = await Review.findOne({
+      listingId: new mongoose.Types.ObjectId(listingId),
+      userId: new mongoose.Types.ObjectId(session.userId),
+    });
+
+    if (isReviewed) {
+      return {
+        success: false,
+        message: "",
+        error: "You have already submitted a review for this property.",
+      };
+    }
+
     await Review.create({
       listingId: new mongoose.Types.ObjectId(listingId),
-      userId: new mongoose.Types.ObjectId(userId),
+      userId: new mongoose.Types.ObjectId(session.userId),
       rating,
       comment: comment || undefined,
     });

@@ -5,6 +5,7 @@ import { connectToDatabase } from "@/config/DbConnect";
 import Tour from "@/models/tour";
 import mongoose from "mongoose";
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 
 export type TourActionState = {
   success: boolean;
@@ -44,8 +45,7 @@ export async function createTourAction(
 
     const { listingId, phoneNumber, scheduledDate, scheduledTime } = validation.data;
 
-    // 2. Combine the separate Date and Time strings into one valid ISO string
-    // e.g. "2026-05-24" + "T" + "14:30" + ":00"
+    // Combine the separate Date and Time strings into one valid ISO string
     const combinedDateTime = new Date(`${scheduledDate}T${scheduledTime}:00`);
 
     await connectToDatabase();
@@ -53,8 +53,19 @@ export async function createTourAction(
     await Tour.create({
       listingId: new mongoose.Types.ObjectId(listingId),
       phoneNumber,
-      scheduledDate: combinedDateTime, // Saves both Date & Time automatically
+      scheduledDate: combinedDateTime,
       status: 'Pending_Time'
+    });
+
+    // ==========================================
+    // SET THE COOKIE TO TRACK THE GUEST BOOKING
+    // ==========================================
+    cookies().set(`tour_booked_${listingId}`, combinedDateTime.toISOString(), {
+      maxAge: 60 * 60 * 24 * 7, // Expires in 7 days
+      path: "/",
+      httpOnly: true, // Prevents client-side JS from tampering with it
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
     });
 
     return { success: true, message: "Tour scheduled successfully!" };

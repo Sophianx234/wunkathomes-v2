@@ -65,7 +65,6 @@ export default function RoomCard({ room, type = "user" }: propertyCardProps) {
   };
 
   const handleDelete = async () => {
-    console.log('deleted')
     
     }
   
