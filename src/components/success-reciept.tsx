@@ -240,7 +240,7 @@ export default function SuccessReceipt({ transaction }: SuccessReceiptProps) {
             <HugeiconsIcon icon={PrinterIcon} size={18} /> Download Receipt
           </button>
           <Link
-            href="/user/leases?verified=true"
+            href="/user/sign-lease"
             className="flex-1 py-4 bg-black text-white font-bold uppercase tracking-widest text-sm rounded-xl hover:bg-zinc-800 transition-colors flex items-center justify-center gap-2"
           >
             Continue to Dashboard{" "}

@@ -1,15 +1,16 @@
-import { redirect } from "next/navigation"
-import { getSession, SessionPayload } from "@/lib/session"
-import User from "@/models/user"
-import Lease from "@/models/lease"
-import "@/models/listing" 
-import "@/models/property" // Ensure Property is loaded for deep population
+import { redirect } from "next/navigation";
+import { getSession, SessionPayload } from "@/lib/session";
+import User from "@/models/user";
+import Lease from "@/models/lease";
+import "@/models/listing";
+import "@/models/property"; // Ensure Property is loaded for deep population
 
-import { UserDashboard } from "@/components/user-dashboard" 
-import { connectToDatabase } from "@/config/DbConnect"
+import { UserDashboard } from "@/components/user-dashboard";
+import { connectToDatabase } from "@/config/DbConnect";
+import Link from "next/link";
 
 export default async function DashboardPage() {
-  const session = await getSession() as SessionPayload;
+  const session = (await getSession()) as SessionPayload;
   if (!session?.userId) redirect("/login");
 
   await connectToDatabase();
@@ -18,33 +19,41 @@ export default async function DashboardPage() {
   if (!dbUser) redirect("/login");
 
   // 1. KYC Check
-  if (dbUser.kycStatus === 'Unverified' || dbUser.kycStatus === 'Rejected') {
-    redirect("/user/kyc-verification"); 
+  if (dbUser.kycStatus === "Unverified" || dbUser.kycStatus === "Rejected") {
+    redirect("/user/leases");
   }
 
   // 2. Fetch the Lease with Deep Population (Lease -> Listing -> Property)
   const dbLease = await Lease.findOne({
     userId: session.userId,
-    status: { $in: ['Awaiting_Admin_Approval', 'Active'] }
+    status: { $in: ["Awaiting_Admin_Approval", "Active"] },
   })
-    .select('+smartLockPin')
+    .select("+smartLockPin")
     .populate({
-      path: 'listingId',
-      populate: { path: 'propertyId' } // Populates the parent property for amenities/location
+      path: "listingId",
+      populate: { path: "propertyId" }, // Populates the parent property for amenities/location
     })
     .lean();
 
   if (!dbLease) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-500 font-bold uppercase tracking-widest text-sm">
-        No active leases found. Please explore properties.
+        <div className="text-center space-y-4">
+          <p>No active leases found. Please explore properties.</p>
+          <Link
+            href="/"
+            className="bg-black hover:bg-zinc-900 text-white font-bold py-3 px-4 rounded"
+          >
+            Explore Properties
+          </Link>
+        </div>
       </div>
-    )
+    );
   }
 
   // 3. Signature Check (MUST happen after we confirm dbLease exists!)
-  if (dbUser.kycStatus === 'Verified' && !dbLease.signatureAudit?.isSigned) {
-    redirect("/user/sign-lease"); 
+  if (dbUser.kycStatus === "Verified" && !dbLease.signatureAudit?.isSigned) {
+    redirect("/user/sign-lease");
   }
 
   // 4. Calculate End Date (Default to 1 year if not explicitly set)
@@ -65,37 +74,43 @@ export default async function DashboardPage() {
     id: dbLease._id.toString(),
     status: dbLease.status,
     totalRentAmount: dbLease.totalRentAmount,
-    startDate: dbLease.startDate ? new Date(dbLease.startDate).toISOString() : new Date().toISOString(),
+    startDate: dbLease.startDate
+      ? new Date(dbLease.startDate).toISOString()
+      : new Date().toISOString(),
     endDate: endDate ? new Date(endDate).toISOString() : undefined,
     smartLockPin: dbLease.smartLockPin,
     signatureAudit: {
       isSigned: dbLease.signatureAudit?.isSigned || false,
-    }
+    },
   };
 
   const listingDoc = dbLease.listingId as any;
   const propertyDoc = listingDoc?.propertyId;
   const loc = propertyDoc?.location || listingDoc?.location;
-  const locationString = loc ? (typeof loc === 'string' ? loc : `${loc.area}, ${loc.city || loc.region}`) : "Accra, Ghana";
+  const locationString = loc
+    ? typeof loc === "string"
+      ? loc
+      : `${loc.area}, ${loc.city || loc.region}`
+    : "Accra, Ghana";
 
   const serializedListing = {
     title: listingDoc?.title || "WunkatHomes Property",
     images: listingDoc?.images || [],
     location: locationString,
-    propertyType: propertyDoc?.propertyType?.replace('_', ' ') || "Property",
+    propertyType: propertyDoc?.propertyType?.replace("_", " ") || "Property",
     bedrooms: listingDoc?.features?.bedrooms || 0,
     bathrooms: listingDoc?.features?.bathrooms || 0,
     sizeSqm: listingDoc?.features?.sizeSqm || 0,
     amenities: propertyDoc?.generalAmenities || [],
-    wifiNetwork: "Wunkat_5G", 
-    wifiPassword: "wunkat2026", 
+    wifiNetwork: "Wunkat_5G",
+    wifiPassword: "wunkat2026",
   };
 
   return (
-    <UserDashboard 
-      user={serializedUser} 
-      lease={serializedLease} 
-      listing={serializedListing} 
+    <UserDashboard
+      user={serializedUser}
+      lease={serializedLease}
+      listing={serializedListing}
     />
-  )
+  );
 }

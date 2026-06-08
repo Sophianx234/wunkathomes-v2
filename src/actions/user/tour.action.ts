@@ -47,9 +47,47 @@ export async function createTourAction(
 
     // Combine the separate Date and Time strings into one valid ISO string
     const combinedDateTime = new Date(`${scheduledDate}T${scheduledTime}:00`);
+    const now = new Date();
+
+    if (combinedDateTime < now) {
+      return { success: false, message: "", error: "Cannot schedule a tour in the past." };
+    }
 
     await connectToDatabase();
 
+    // ==========================================
+    // LAYER 1: DATABASE DOUBLE-BOOKING CHECK
+    // ==========================================
+    // Check if this phone number already has a future tour for this specific property
+    const existingTour = await Tour.findOne({
+      listingId: new mongoose.Types.ObjectId(listingId),
+      phoneNumber: phoneNumber,
+      scheduledDate: { $gt: now }, // Look for tours that haven't happened yet
+      status: { $nin: ['Completed', 'No_Show'] } // Ignore past completed/missed tours
+    }).lean();
+
+    if (existingTour) {
+      return { 
+        success: false, 
+        message: "", 
+        error: "This phone number already has a pending tour for this property." 
+      };
+    }
+
+    const cookieStore = await cookies();
+    
+    // ==========================================
+    // LAYER 2: BROWSER/COOKIE DOUBLE-BOOKING CHECK
+    // ==========================================
+    if (cookieStore.has(`tour_booked_${listingId}`)) {
+      return { 
+        success: false, 
+        message: "", 
+        error: "You already have a tour scheduled on this device." 
+      };
+    }
+
+    // All checks passed, create the tour
     await Tour.create({
       listingId: new mongoose.Types.ObjectId(listingId),
       phoneNumber,
@@ -58,12 +96,15 @@ export async function createTourAction(
     });
 
     // ==========================================
-    // SET THE COOKIE TO TRACK THE GUEST BOOKING
+    // DYNAMIC COOKIE EXPIRATION
     // ==========================================
-    cookies().set(`tour_booked_${listingId}`, combinedDateTime.toISOString(), {
-      maxAge: 60 * 60 * 24 * 7, // Expires in 7 days
+    // We want the cookie to expire 2 hours AFTER the scheduled tour time
+    const expireTime = new Date(combinedDateTime.getTime() + (2 * 60 * 60 * 1000));
+    
+    cookieStore.set(`tour_booked_${listingId}`, combinedDateTime.toISOString(), {
+      expires: expireTime, // <-- Using explicit expiration date instead of maxAge
       path: "/",
-      httpOnly: true, // Prevents client-side JS from tampering with it
+      httpOnly: true, 
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
     });

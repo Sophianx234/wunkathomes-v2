@@ -7,7 +7,17 @@ cloudinary.config({
 });
 
 // --- Internal single-file processor ---
-async function uploadSingleFile(file: File, folder: string): Promise<string> {
+async function uploadSingleFile(file: File | string, folder: string): Promise<string> {
+  // ✅ FIX: If the file is a Base64 string, upload it directly
+  if (typeof file === "string") {
+    const result = await cloudinary.uploader.upload(file, {
+      folder: folder,
+      resource_type: "auto",
+    });
+    return result.secure_url;
+  }
+
+  // 📁 Fallback: Process standard File objects as buffers
   const arrayBuffer = await file.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
 
@@ -27,12 +37,12 @@ async function uploadSingleFile(file: File, folder: string): Promise<string> {
 }
 
 // --- TypeScript Overloads (For perfect IDE intellisense) ---
-export async function uploadToCloudinary(file: File, folder?: string): Promise<string>;
-export async function uploadToCloudinary(files: File[], folder?: string): Promise<string[]>;
+export async function uploadToCloudinary(file: File | string, folder?: string): Promise<string>;
+export async function uploadToCloudinary(files: (File | string)[], folder?: string): Promise<string[]>;
 
 // --- Main Dynamic Function ---
 export async function uploadToCloudinary(
-  fileOrFiles: File | File[], 
+  fileOrFiles: File | string | (File | string)[], 
   folder: string = "wunkathomes/general"
 ): Promise<string | string[]> {
   

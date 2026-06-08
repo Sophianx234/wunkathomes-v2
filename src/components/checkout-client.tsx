@@ -53,6 +53,10 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
     publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY as string,
     currency: "GHS", 
     metadata: {
+      // ADD THESE TWO DIRECT VARIABLES FOR EASY ACCESS IN THE WEBHOOK
+      userId: currentUser?.id, // Ensure you pass the user's ID to this component
+      listingId: listing._id,
+      moveInDate: moveInDate,
       custom_fields: [
         {
           display_name: "Tenant Name",
@@ -68,11 +72,6 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
           display_name: "Property Slug",
           variable_name: "property_slug",
           value: listing.slug,
-        },
-        {
-          display_name: "Move-In Date",
-          variable_name: "move_in_date",
-          value: moveInDate,
         }
       ],
     },

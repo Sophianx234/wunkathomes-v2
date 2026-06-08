@@ -53,29 +53,48 @@ export function UserDashboard({ user, lease, listing }: DashboardProps) {
     "LOCKED" | "UNLOCKED" | "LOADING"
   >("LOCKED");
 
-  // --- Subscription / Lease Math ---
+  // --- PERFECTED SUBSCRIPTION MATH ---
+  // Normalize dates to midnight to avoid time-of-day math errors
   const startDate = new Date(lease.startDate);
-  // Fallback to 1 year if endDate is missing
+  startDate.setHours(0, 0, 0, 0);
+
   const endDate = lease.endDate
     ? new Date(lease.endDate)
     : new Date(startDate.getTime() + 365 * 24 * 60 * 60 * 1000);
+  endDate.setHours(0, 0, 0, 0);
+
   const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
-  // Calculate total duration and days passed
-  const totalDays = Math.ceil(
-    (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24),
-  );
-  const daysPassed = Math.ceil(
-    (today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24),
-  );
+  const msPerDay = 1000 * 60 * 60 * 24;
+  const totalDays = Math.max(1, Math.round((endDate.getTime() - startDate.getTime()) / msPerDay));
 
-  // Ensure we don't show negative days if lease expired, or >100% if hasn't started
-  const daysLeft = Math.max(0, totalDays - daysPassed);
-  const progressPercentage = Math.min(
-    100,
-    Math.max(0, (daysPassed / totalDays) * 100),
-  );
-  const isExpiringSoon = daysLeft <= 30;
+  let daysLeft = 0;
+  let progressPercentage = 0;
+  let statusText = "Days Left";
+  let isExpiringSoon = false;
+
+  // State 1: Pre-Move-in (Lease hasn't started yet)
+  if (today < startDate) {
+    const daysUntilMoveIn = Math.round((startDate.getTime() - today.getTime()) / msPerDay);
+    daysLeft = totalDays; // They still have their full lease term
+    progressPercentage = 0;
+    statusText = `Starts in ${daysUntilMoveIn} Days`;
+  } 
+  // State 2: Lease Expired
+  else if (today > endDate) {
+    daysLeft = 0;
+    progressPercentage = 100;
+    statusText = "Expired";
+  } 
+  // State 3: Active Lease
+  else {
+    const daysPassed = Math.round((today.getTime() - startDate.getTime()) / msPerDay);
+    daysLeft = Math.round((endDate.getTime() - today.getTime()) / msPerDay);
+    progressPercentage = (daysPassed / totalDays) * 100;
+    statusText = "Days Left";
+    isExpiringSoon = daysLeft <= 30;
+  }
 
   // --- Smart Lock Handler ---
   const toggleSmartLock = async () => {
@@ -150,7 +169,7 @@ export function UserDashboard({ user, lease, listing }: DashboardProps) {
               >
                 {daysLeft}{" "}
                 <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">
-                  Days Left
+                  {statusText}
                 </span>
               </p>
               {isExpiringSoon && (
@@ -170,7 +189,11 @@ export function UserDashboard({ user, lease, listing }: DashboardProps) {
           </div>
           <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-3">
             <span>Move-In</span>
-            <span>{Math.round(progressPercentage)}% Completed</span>
+            <span>
+              {today < startDate 
+                ? "Pending Move-In" 
+                : `${Math.round(progressPercentage)}% Completed`}
+            </span>
             <span>Expiration</span>
           </div>
         </div>
@@ -301,32 +324,42 @@ export function UserDashboard({ user, lease, listing }: DashboardProps) {
               {/* Remote Lock/Unlock Toggle */}
               <button
                 onClick={toggleSmartLock}
-                disabled={lockStatus === "LOADING"}
+                disabled={lockStatus === "LOADING" || today < startDate}
                 className={`w-full py-4 rounded-xl flex items-center justify-center gap-3 font-bold uppercase tracking-widest text-xs transition-all shadow-lg mt-auto ${
-                  lockStatus === "LOADING"
+                  today < startDate
+                    ? "bg-white/5 text-slate-600 cursor-not-allowed border border-white/10"
+                    : lockStatus === "LOADING"
                     ? "bg-white/10 text-slate-400 cursor-wait"
                     : lockStatus === "LOCKED"
                       ? "bg-white text-black hover:bg-slate-200"
                       : "bg-red-500 text-white hover:bg-red-600"
                 }`}
               >
-                {lockStatus === "LOADING" ? (
-                  <HugeiconsIcon
-                    icon={Loading03Icon}
-                    size={18}
-                    className="animate-spin"
-                  />
+                {today < startDate ? (
+                  <>
+                    <HugeiconsIcon icon={LockKeyIcon} size={18} />
+                    Active on Move-in
+                  </>
+                ) : lockStatus === "LOADING" ? (
+                  <>
+                    <HugeiconsIcon
+                      icon={Loading03Icon}
+                      size={18}
+                      className="animate-spin"
+                    />
+                    Connecting...
+                  </>
                 ) : lockStatus === "LOCKED" ? (
-                  <HugeiconsIcon icon={ViewIcon} size={18} />
+                  <>
+                    <HugeiconsIcon icon={ViewIcon} size={18} />
+                    Unlock Door Remotely
+                  </>
                 ) : (
-                  <HugeiconsIcon icon={LockKeyIcon} size={18} />
+                  <>
+                    <HugeiconsIcon icon={LockKeyIcon} size={18} />
+                    Lock Door Securely
+                  </>
                 )}
-
-                {lockStatus === "LOADING"
-                  ? "Connecting to Door..."
-                  : lockStatus === "LOCKED"
-                    ? "Unlock Door Remotely"
-                    : "Lock Door Securely"}
               </button>
             </div>
           </div>

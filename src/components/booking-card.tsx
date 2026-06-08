@@ -17,6 +17,8 @@ import { toast } from "sonner";
 
 interface BookingCardProps {
   listing: any;
+  hasBookedTour: boolean;
+  bookedTourDate?: string | null; // Added so the date shows correctly on reload
   isRent: boolean;
 }
 
@@ -24,15 +26,16 @@ type SchedulingStep = "IDLE" | "DATE" | "PHONE" | "SUCCESS";
 
 const initialState: TourActionState = { success: false, message: "" };
 
-export default function BookingCard({ listing, isRent }: BookingCardProps) {
+export default function BookingCard({ listing, isRent, hasBookedTour, bookedTourDate }: BookingCardProps) {
   const [state, formAction, isPending] = useActionState(
     createTourAction,
     initialState,
   );
 
-  const [step, setStep] = useState<SchedulingStep>("IDLE");
+  // Set initial state directly to SUCCESS if they already booked
+  const [step, setStep] = useState<SchedulingStep>(hasBookedTour ? "SUCCESS" : "IDLE");
   const [selectedDate, setSelectedDate] = useState("");
-  const [selectedTime, setSelectedTime] = useState(""); // NEW: Time State
+  const [selectedTime, setSelectedTime] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
 
   const handleNext = (nextStep: SchedulingStep) => setStep(nextStep);
@@ -54,7 +57,6 @@ export default function BookingCard({ listing, isRent }: BookingCardProps) {
     setPhoneNumber("");
   };
 
-  // Helper to format the combined Date + Time for the success screen
   const getFormattedDateTime = () => {
     if (!selectedDate || !selectedTime) return "";
     const dateObj = new Date(`${selectedDate}T${selectedTime}`);
@@ -69,6 +71,9 @@ export default function BookingCard({ listing, isRent }: BookingCardProps) {
     });
     return `${dateStr} at ${timeStr}`;
   };
+
+  // Use either the previously booked date or the newly selected date
+  const displayDate = bookedTourDate || selectedDate;
 
   return (
     <div className="lg:col-span-4 -translate-8 w-[300px] ml-auto relative hidden lg:block">
@@ -278,21 +283,27 @@ export default function BookingCard({ listing, isRent }: BookingCardProps) {
               </h3>
               <p className="text-xs font-medium text-slate-500 mb-6 leading-relaxed px-4">
                 One of our friendly team members will meet you on <br />
-                <strong className="text-black">
-                  {new Date(selectedDate).toLocaleDateString("en-US", {
-                    weekday: "long",
-                    month: "short",
-                    day: "numeric",
-                  })}
-                </strong>
+                {displayDate && (
+                  <strong className="text-black">
+                    {new Date(displayDate).toLocaleDateString("en-US", {
+                      weekday: "long",
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </strong>
+                )}
                 .
               </p>
-              <button
-                onClick={resetFlow}
-                className="w-full py-3 bg-white text-black font-black uppercase tracking-widest text-xs border-2 border-black rounded-lg hover:bg-slate-50 transition-colors"
-              >
-                Done
-              </button>
+              
+              {/* Hide the Done button if they are viewing a pre-booked tour */}
+              {!hasBookedTour && (
+                <button
+                  onClick={resetFlow}
+                  className="w-full py-3 bg-white text-black font-black uppercase tracking-widest text-xs border-2 border-black rounded-lg hover:bg-slate-50 transition-colors"
+                >
+                  Done
+                </button>
+              )}
             </div>
           )}
         </div>

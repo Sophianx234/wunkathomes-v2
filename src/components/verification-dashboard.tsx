@@ -15,6 +15,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import { AnimatePresence, motion } from "framer-motion";
 import React, { Suspense, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 
 // --- Define the expected user data shape ---
 export interface CurrentUser {
@@ -30,13 +31,12 @@ export interface CurrentUser {
 
 interface VerificationDashboardProps {
   currentUser?: CurrentUser | null;
+  leaseId: string; // ✅ 1. Add leaseId to the interface
 }
 
-// ============================================================================
-// MAIN DASHBOARD COMPONENT
-// ============================================================================
 export function VerificationDashboard({
   currentUser,
+  leaseId, // ✅ 2. Destructure leaseId from props
 }: VerificationDashboardProps) {
   // --- Calculate initial step based on KYC Status ---
   const initialStep =
@@ -160,36 +160,55 @@ export function VerificationDashboard({
   };
 
   // --- Submission Logic ---
-  const handleSubmit = async () => {
+ const handleSubmit = async () => {
     setIsSubmitting(true);
 
     try {
       const formData = new FormData();
 
+      // Note: Ensure you eventually replace these mock IDs with real ones!
+      // If "mockLeaseId_456" is sent to MongoDB, it will crash with a CastError.
       formData.append("userId", currentUser?.id || "mockUserId_123");
-      formData.append("leaseId", "mockLeaseId_456");
+      formData.append("leaseId", leaseId); // ✅ 3. Use the actual leaseId
       formData.append("fullName", fullName);
       formData.append("dob", dob);
       formData.append("idType", idType);
       formData.append("idNumber", idNumber);
+console.log('leaseId',leaseId)
+      // ✅ FIX 1: Send the Base64 string, NOT the raw File
+      if (profilePreview) {
+  if (profilePreview.startsWith('data:image')) {
+    formData.append("profilePhotoBase64", profilePreview);
+  } else {
+    // If it's a URL, send it to the server so it knows the user has a photo
+    formData.append("existingProfileUrl", profilePreview);
+  }
+}
 
-      if (profilePhoto) {
-        formData.append("profilePhoto", profilePhoto);
-      }
+if (photoData) {
+  formData.append("verificationPhotoBase64", photoData);
+}
 
-      if (photoData) {
-        formData.append("verificationPhotoBase64", photoData);
-      }
-
+      // Send to server
       const result = await submitIdentityVerification(formData);
 
-      setTimeout(() => {
-        // Move to pending review step after submission
-        setStep(3);
+      // ✅ FIX 2: Check if the server actually succeeded!
+      if (result.success) {
+        // Only move to step 3 if the database was actually updated
+        setTimeout(() => {
+          setStep(3);
+          setIsSubmitting(false);
+        }, 1000);
+      } else {
+        // If it failed, stop everything and show the error to the user
+        console.error("Server rejected submission:", result.error);
+        toast.error(result.error || "Submission failed. Please try again.");
         setIsSubmitting(false);
-      }, 2000);
+      }
+
     } catch (error) {
-      console.error("Submission failed", error);
+      console.error("Submission failed catastrophically", error);
+      toast.error("A network error occurred.");
       setIsSubmitting(false);
     }
   };
@@ -389,7 +408,6 @@ export function VerificationDashboard({
                     {/* Rejection Banner - Shown if they were rejected previously */}
                     {currentUser?.kycStatus === "Rejected" && (
                       <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-lg flex items-start gap-3">
-                        <div className="mt-0.5 w-2 h-2 rounded-full bg-red-500 shrink-0" />
                         <div>
                           <p className="text-xs font-bold uppercase tracking-widest text-red-800 mb-1">
                             Verification Rejected
@@ -562,7 +580,7 @@ export function VerificationDashboard({
                       properties.
                     </p>
                     <button
-                      onClick={() => (window.location.href = "/user/dashboard")}
+                      onClick={() => (window.location.href = "/user/sign-lease")}
                       className="px-8 py-3 bg-zinc-950 hover:bg-zinc-800 text-white text-xs font-bold uppercase tracking-widest rounded-lg transition-colors shadow-lg shadow-black/10"
                     >
                       Review & Sign Lease

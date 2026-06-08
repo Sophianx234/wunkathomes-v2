@@ -1,67 +1,68 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { v2 as cloudinary } from 'cloudinary'
-import { uploadToCloudinary } from "@/lib/cloudinary" // Your provided helper
+import { uploadToCloudinary } from "@/lib/cloudinary" 
 import { connectToDatabase } from "@/config/DbConnect"
 import User from "@/models/user"
 import Lease from "@/models/lease"
+import { getSession, SessionPayload } from "@/lib/session"
 
 export async function submitIdentityVerification(formData: FormData) {
   try {
-    // 1. Extract all data from the FormData object
-    const userId = formData.get("userId") as string;
-    const leaseId = formData.get("leaseId") as string;
+    const session = await getSession() as SessionPayload;
+    if(!session.userId) return { success: false, error: "Unauthorized. Please log in." };
+    
+    const userId = session.userId;
+    
+    // Notice: leaseId is completely removed from here
     const fullName = formData.get("fullName") as string;
     const dob = formData.get("dob") as string;
     const idType = formData.get("idType") as string;
     const idNumber = formData.get("idNumber") as string;
     
-    // Extract the image files/data
-    const profilePhotoFile = formData.get("profilePhoto") as File;
+    const profilePhotoBase64 = formData.get("profilePhotoBase64") as string | null;
+    const existingProfileUrl = formData.get("existingProfileUrl") as string | null;
     const verificationPhotoBase64 = formData.get("verificationPhotoBase64") as string;
 
-    if (!userId || !leaseId || !profilePhotoFile || !verificationPhotoBase64) {
+    // Strict validation without needing a leaseId
+    if (!userId || (!profilePhotoBase64 && !existingProfileUrl) || !verificationPhotoBase64) {
       return { success: false, error: "Missing required verification data or images." };
     }
 
-    // 2. Connect to the database
-    // await dbConnect();
     await connectToDatabase();
 
-    // 3. Upload Profile Photo using your custom helper
-    const profilePhotoUrl = await uploadToCloudinary(
-      profilePhotoFile, 
-      `wunkathomes/profiles/${userId}`
-    );
+    let profilePhotoUrl = existingProfileUrl;
 
-    // 4. Upload the Base64 Selfie Photo directly via Cloudinary SDK
-    // Cloudinary automatically detects and parses base64 data URIs
-    const selfieUploadResult = await cloudinary.uploader.upload(verificationPhotoBase64, {
-      folder: `wunkathomes/kyc/${userId}`,
-      resource_type: "image"
-    });
-    const verificationPhotoUrl = selfieUploadResult.secure_url;
+    if (profilePhotoBase64) {
+      profilePhotoUrl = await uploadToCloudinary(profilePhotoBase64, "wunkathomes/profiles");
+    }
 
-    // 5. Update the User Model
+    const verificationPhotoUrl = await uploadToCloudinary(verificationPhotoBase64, "wunkathomes/kyc");
+
+    // 1. Update the User's Global Identity Profile
     await User.findByIdAndUpdate(userId, {
       legalName: fullName,
       dateOfBirth: new Date(dob),
       idDocumentType: idType,
       idDocumentNumber: idNumber,
-      profilePicture: profilePhotoUrl, // Updated from the dropzone
-      idVerificationPhotoUrl: verificationPhotoUrl, // The selfie
+      profilePicture: profilePhotoUrl, 
+      idVerificationPhotoUrl: verificationPhotoUrl, 
       kycStatus: "Pending"
     });
 
-    // 6. Update the Lease Status
-    await Lease.findByIdAndUpdate(leaseId, {
-      status: "Awaiting_Admin_Approval"
-    });
+    // 2. Automatically advance any leases waiting on this verification
+    // This looks for leases owned by the user that are stuck at the KYC step
+    await Lease.updateMany(
+      { 
+        userId: userId, 
+        status: "Pending_Verification" 
+      },
+      { 
+        $set: { status: "Awaiting_Admin_Approval" } 
+      }
+    );
 
-    // 7. Revalidate the dashboard so the UI instantly updates to the "Reviewing" state
     revalidatePath("/dashboard/leases");
-
     return { success: true, message: "Verification submitted successfully." };
 
   } catch (error) {

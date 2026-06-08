@@ -14,7 +14,6 @@ export async function getListingData(slug: string) {
       .lean()
       .exec();
 
-    // If not found, safely return nulls so the page can trigger notFound()
     if (!rawListing) {
       return { listing: null, similar: [], reviews: [] };
     }
@@ -29,7 +28,7 @@ export async function getListingData(slug: string) {
       .lean()
       .exec();
 
-    // 3. Fetch reviews (Wrapped in a try/catch just in case the Review collection is empty)
+    // 3. Fetch reviews
     let reviews = [];
     try {
       const rawReviews = await Review.find({ listingId: rawListing._id })
@@ -49,26 +48,26 @@ export async function getListingData(slug: string) {
       console.warn("No reviews found or Review model missing.");
     }
 
-    // 4. Serialize Main Listing (Critical for Next.js Client Components)
+    // =================================================================
+    // 4. BULLETPROOF SERIALIZATION FOR NEXT.JS CLIENT COMPONENTS
+    // =================================================================
+    
+    // JSON parse/stringify completely sanitizes all nested ObjectIds and Dates
+    const sanitizedListing = JSON.parse(JSON.stringify(rawListing));
+    
     const listing = {
-      ...rawListing,
-      _id: rawListing._id.toString(),
-      id: rawListing._id.toString(), // Alias mapped for compatibility
-      property: {
-        ...rawListing.propertyId,
-        _id: rawListing.propertyId?._id?.toString(),
-      }
+      ...sanitizedListing,
+      id: sanitizedListing._id, // Map alias for compatibility
+      property: sanitizedListing.propertyId // Map populated object to 'property'
     };
 
-    // 5. Serialize Similar Listings
-    const similar = rawSimilar.map((sim: any) => ({
+    // 5. Serialize Similar Listings safely
+    const sanitizedSimilar = JSON.parse(JSON.stringify(rawSimilar));
+    
+    const similar = sanitizedSimilar.map((sim: any) => ({
       ...sim,
-      _id: sim._id.toString(),
-      id: sim._id.toString(),
-      property: {
-        ...sim.propertyId,
-        _id: sim.propertyId?._id?.toString(),
-      }
+      id: sim._id,
+      property: sim.propertyId
     }));
 
     return { listing, similar, reviews };

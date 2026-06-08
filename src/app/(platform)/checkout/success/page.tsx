@@ -24,7 +24,7 @@ export default async function CheckoutSuccessPage(props: SuccessPageProps) {
 
   if (!reference) {
     // If they navigate here without a reference, send them to their dashboard
-    redirect("/dashboard/leases")
+    redirect("/user/leases")
   }
 
   // 3. Fetch the exact transaction from the database

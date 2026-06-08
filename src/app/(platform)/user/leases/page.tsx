@@ -2,21 +2,22 @@ import { VerificationDashboard } from "@/components/verification-dashboard"
 import { connectToDatabase } from "@/config/DbConnect"
 import { getSession, SessionPayload } from "@/lib/session"
 import User from "@/models/user"
+import Lease from "@/models/lease" // ✅ Add this import
 
 export default async function LeasesPage() {
-  
-  const session = await getSession() as SessionPayload // <-- Replace with real session check
-  await connectToDatabase()
+  const session = await getSession() as SessionPayload;
+  await connectToDatabase();
 
+  // 1. DATA FETCHING: Get the real user
+  const dbUser = await User.findById(session.userId).select('+idDocumentNumber').lean();
 
-  // 2. DATA FETCHING: Get the real user from MongoDB
-  
-  
-  const dbUser = await User.findById(session.userId).select('+idDocumentNumber').lean()
+  // 2. DATA FETCHING: Get the user's active/pending lease
+  // Adjust the query field ('tenant', 'userId', etc.) based on your Lease schema
+  const dbLease = await Lease.findOne({ tenant: session.userId })
+    .sort({ createdAt: -1 })
+    .lean();
 
-  
-
-  // 3. SERIALIZATION: Next.js cannot pass MongoDB ObjectIds or Date objects directly to Client Components
+  // 3. SERIALIZATION
   const serializedUser = {
     id: dbUser._id.toString(),
     name: dbUser.name,
@@ -26,8 +27,12 @@ export default async function LeasesPage() {
     idDocumentNumber: dbUser.idDocumentNumber || "",
     profilePicture: dbUser.profilePicture || null,
     kycStatus: dbUser.kycStatus || "Unverified",
-  }
+  };
 
-  // 4. RENDER: Pass the real, serialized data to the interactive client component
-  return <VerificationDashboard currentUser={serializedUser} />
+  // Extract the real 24-character hex string
+  const actualLeaseId = dbLease ? dbLease._id.toString() : "";
+
+  // 4. RENDER
+  // ✅ Pass the real leaseId to the dashboard
+  return <VerificationDashboard currentUser={serializedUser} leaseId={actualLeaseId} />
 }

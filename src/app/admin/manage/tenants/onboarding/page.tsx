@@ -37,7 +37,13 @@ export default async function OnboardingPage() {
     .sort({ createdAt: -1 })
     .lean();
 
-  const activationsData = await Promise.all(rawLeases.map(async (lease: any) => {
+  // ✅ FILTER ADDED: Remove any leases where the user's KYC status is 'Rejected'
+  const filteredLeases = rawLeases.filter(
+    (lease: any) => lease.userId && lease.userId.kycStatus !== 'Rejected'
+  );
+
+  // Map over the filtered array instead of the raw one
+  const activationsData = await Promise.all(filteredLeases.map(async (lease: any) => {
     const txs = await Transaction.find({ leaseId: lease._id, status: 'Success' }).lean();
     const depositPaid = txs.some(tx => ['Upfront_Rent', 'Booking_Deposit'].includes(tx.paymentPurpose));
 
@@ -80,7 +86,6 @@ export default async function OnboardingPage() {
         startDate: lease.startDate ? new Date(lease.startDate).toISOString() : new Date().toISOString(),
         documentUrl: lease.documentUrl || undefined,
         totalRentAmount: lease.totalRentAmount || 0,
-        // ADDED: Map the signature audit trail directly from MongoDB
         signatureAudit: {
           isSigned: lease.signatureAudit?.isSigned || false,
           signedAt: signedAtFormatted,

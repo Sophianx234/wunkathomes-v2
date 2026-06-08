@@ -18,11 +18,9 @@ export default async function SignLeasePage() {
     .lean();
 
   // 1. Route Protection Checks
-  if (!dbLease) redirect("/explore");
+  if (!dbLease) redirect("/");
   
-  if (dbUser?.kycStatus !== 'Verified') {
-    redirect("/user/kyc-verification"); 
-  }
+ 
 
   if (dbLease.signatureAudit?.isSigned) {
     redirect("/user/dashboard"); 

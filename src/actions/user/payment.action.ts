@@ -46,13 +46,41 @@ export async function verifyPaystackPayment(reference: string, listingId: string
       return { success: true, message: "Payment was already verified!" };
     }
 
+    // ==========================================================
+    // NEW: FETCH LISTING AND CALCULATE LEASE END DATE
+    // ==========================================================
+    const listing = await Listing.findById(listingId).lean();
+    if (!listing) {
+      return { success: false, message: "Property not found." };
+    }
+
+    const startDate = new Date(selectedMoveInDate);
+    const endDate = new Date(startDate);
+    const term = listing.terms?.leaseTerm?.toLowerCase() || "";
+
+    // Parse the leaseTerm string (month, 1_Year, 2_Years, etc.)
+    if (term.includes("month")) {
+      endDate.setMonth(endDate.getMonth() + 1); // Add 1 Month
+    } else if (term.includes("year")) {
+      // Extract the number before "_year" (e.g., "1", "2")
+      const yearMatch = term.match(/(\d+)_year/);
+      const yearsToAdd = yearMatch ? parseInt(yearMatch[1], 10) : 1; // Default to 1 if no number found
+      endDate.setFullYear(endDate.getFullYear() + yearsToAdd);
+    } else {
+      // Safe fallback if the term is empty or unrecognized
+      endDate.setFullYear(endDate.getFullYear() + 1); 
+    }
+
+    // 4. Create the Lease
     const newLease = await Lease.create({
       listingId: listingId,
       userId: session.userId,
       totalRentAmount: amountPaidInGhs,
-      startDate: new Date(selectedMoveInDate),
+      startDate: startDate,
+      endDate: endDate, // <--- SAVING THE CALCULATED END DATE
       status: "Pending_Verification" 
     });
+
     // 4. Record the Transaction in the database using your updated Schema
   await Transaction.create({
       userId: session.userId,
@@ -62,6 +90,7 @@ export async function verifyPaystackPayment(reference: string, listingId: string
       currency: data.data.currency,
       paymentPurpose: "Upfront_Rent", 
       reference: reference,
+      transactionReference: reference,
       paystackTransactionId: data.data.id.toString(),
       channel: data.data.channel || "card",
       paystackFee: data.data.fees ? (data.data.fees / 100) : 0,
