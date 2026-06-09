@@ -114,3 +114,113 @@ export async function verifyPaystackPayment(reference: string, listingId: string
     return { success: false, message: "A server error occurred during verification." };
   }
 }
+
+export async function processLeaseRenewal(reference: string, leaseId: string, expectedAmountInGhs: number) {
+  try {
+    const session = await getSession();
+    if (!session || !session.userId) {
+      return { success: false, message: "Unauthorized: Please log in." };
+    }
+
+    await connectToDatabase();
+
+    // 1. Verify with Paystack API
+    const response = await fetch(`https://api.paystack.co/transaction/verify/${reference}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`, // MUST be the Secret Key
+      },
+    });
+
+    const data = await response.json();
+
+    if (!data.status || data.data.status !== "success") {
+      return { success: false, message: "Payment verification failed or is pending." };
+    }
+
+    // 2. Security Check: Did they pay the right amount? 
+    const amountPaidInGhs = data.data.amount / 100; 
+    
+    // We use a slight tolerance (e.g., 1 GHS) for rounding errors
+    if (amountPaidInGhs < (expectedAmountInGhs - 1)) {
+      return { success: false, message: "Partial payment detected. Please contact support." };
+    }
+
+    // 3. Prevent Duplicate Verifications (Idempotency)
+    const existingTx = await Transaction.findOne({ reference });
+    if (existingTx && existingTx.status === "Success") {
+      return { success: true, message: "Renewal payment was already verified!" };
+    }
+
+    // ==========================================================
+    // 4. FETCH LEASE & CALCULATE THE NEW EXTENDED END DATE
+    // ==========================================================
+    const existingLease = await Lease.findOne({ _id: leaseId, userId: session.userId })
+      .populate("listingId");
+      
+    if (!existingLease) {
+      return { success: false, message: "Lease not found or unauthorized." };
+    }
+
+    const now = new Date();
+    const currentEndDate = existingLease.endDate ? new Date(existingLease.endDate) : now;
+    
+    // THE MAGIC LOGIC: 
+    // If they have days left, we add time to their CURRENT end date so they don't lose days.
+    // If they are expired (in grace period), we start the new clock from TODAY.
+    const baseDateForExtension = currentEndDate > now ? currentEndDate : now;
+    const newEndDate = new Date(baseDateForExtension);
+
+    const term = existingLease.listingId?.terms?.leaseTerm?.toLowerCase() || "";
+
+    // Parse the leaseTerm string (month, 1_year, 2_years, etc.)
+    if (term.includes("month")) {
+      newEndDate.setMonth(newEndDate.getMonth() + 1); // Add 1 Month
+    } else if (term.includes("year")) {
+      const yearMatch = term.match(/(\d+)_year/);
+      const yearsToAdd = yearMatch ? parseInt(yearMatch[1], 10) : 1; 
+      newEndDate.setFullYear(newEndDate.getFullYear() + yearsToAdd);
+    } else {
+      // Safe fallback if the term is unrecognized
+      newEndDate.setFullYear(newEndDate.getFullYear() + 1); 
+    }
+
+    // 5. Update the existing Lease Document
+    existingLease.endDate = newEndDate;
+    
+    // If they were locked out or in restricted mode, ensure they are set back to Active
+    if (existingLease.status === "Expired") {
+      existingLease.status = "Active";
+    }
+    
+    await existingLease.save();
+
+    // 6. Record the Renewal Transaction in the database
+    await Transaction.create({
+      userId: session.userId,
+      listingId: existingLease.listingId._id,
+      leaseId: existingLease._id, 
+      amount: amountPaidInGhs,
+      currency: data.data.currency,
+      paymentPurpose: "Lease_Renewal", // Flagged specifically as a renewal
+      reference: reference,
+      transactionReference: reference,
+      paystackTransactionId: data.data.id.toString(),
+      channel: data.data.channel || "card",
+      paystackFee: data.data.fees ? (data.data.fees / 100) : 0,
+      status: "Success",
+      paidAt: new Date(data.data.paid_at)
+    });
+
+    // 7. Revalidate routes to instantly update the tenant dashboard UI
+    revalidatePath("/user/dashboard");
+    revalidatePath("/user/transactions");
+    revalidatePath("/admin/transactions");
+
+    return { success: true, message: "Lease successfully renewed!" };
+
+  } catch (error) {
+    console.error("Renewal Verification Error:", error);
+    return { success: false, message: "A server error occurred during renewal verification." };
+  }
+}

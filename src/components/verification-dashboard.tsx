@@ -10,14 +10,15 @@ import {
   Loading03Icon,
   UserCircleIcon,
   Shield02Icon,
-  AlarmClock,
+  SignatureIcon,
+  Time01Icon, // Added for pending approval state
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { AnimatePresence, motion } from "framer-motion";
-import React, { Suspense, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation"; 
 
-// --- Define the expected user data shape ---
 export interface CurrentUser {
   id: string;
   name: string;
@@ -31,13 +32,17 @@ export interface CurrentUser {
 
 interface VerificationDashboardProps {
   currentUser?: CurrentUser | null;
-  leaseId: string; // ✅ 1. Add leaseId to the interface
+  leaseId: string; 
+  isLeaseSigned: boolean; // Added Prop
 }
 
 export function VerificationDashboard({
   currentUser,
-  leaseId, // ✅ 2. Destructure leaseId from props
+  leaseId,
+  isLeaseSigned,
 }: VerificationDashboardProps) {
+  const router = useRouter();
+
   // --- Calculate initial step based on KYC Status ---
   const initialStep =
     currentUser?.kycStatus === "Verified"
@@ -48,19 +53,18 @@ export function VerificationDashboard({
 
   const [step, setStep] = useState(initialStep);
 
-  // Form State - Pre-populated with user data if it exists
+  // Form State 
   const [fullName, setFullName] = useState(
     currentUser?.legalName || currentUser?.name || "",
   );
 
-  // Format Date to YYYY-MM-DD for the input[type="date"]
   const initialDob = currentUser?.dateOfBirth
     ? new Date(currentUser.dateOfBirth).toISOString().split("T")[0]
     : "";
   const [dob, setDob] = useState(initialDob);
 
   // ID State
-  const [idType, setIdType] = useState(currentUser?.idDocumentType || "GHA"); // 'GHA' or 'VOTER'
+  const [idType, setIdType] = useState(currentUser?.idDocumentType || "GHA"); 
   const [idNumber, setIdNumber] = useState(currentUser?.idDocumentNumber || "");
 
   // Camera & Image State
@@ -160,54 +164,42 @@ export function VerificationDashboard({
   };
 
   // --- Submission Logic ---
- const handleSubmit = async () => {
+  const handleSubmit = async () => {
     setIsSubmitting(true);
 
     try {
       const formData = new FormData();
-
-      // Note: Ensure you eventually replace these mock IDs with real ones!
-      // If "mockLeaseId_456" is sent to MongoDB, it will crash with a CastError.
-      formData.append("userId", currentUser?.id || "mockUserId_123");
-      formData.append("leaseId", leaseId); // ✅ 3. Use the actual leaseId
+      formData.append("userId", currentUser?.id || "");
+      formData.append("leaseId", leaseId); 
       formData.append("fullName", fullName);
       formData.append("dob", dob);
       formData.append("idType", idType);
       formData.append("idNumber", idNumber);
-console.log('leaseId',leaseId)
-      // ✅ FIX 1: Send the Base64 string, NOT the raw File
+
       if (profilePreview) {
-  if (profilePreview.startsWith('data:image')) {
-    formData.append("profilePhotoBase64", profilePreview);
-  } else {
-    // If it's a URL, send it to the server so it knows the user has a photo
-    formData.append("existingProfileUrl", profilePreview);
-  }
-}
+        if (profilePreview.startsWith('data:image')) {
+          formData.append("profilePhotoBase64", profilePreview);
+        } else {
+          formData.append("existingProfileUrl", profilePreview);
+        }
+      }
 
-if (photoData) {
-  formData.append("verificationPhotoBase64", photoData);
-}
+      if (photoData) {
+        formData.append("verificationPhotoBase64", photoData);
+      }
 
-      // Send to server
       const result = await submitIdentityVerification(formData);
 
-      // ✅ FIX 2: Check if the server actually succeeded!
       if (result.success) {
-        // Only move to step 3 if the database was actually updated
         setTimeout(() => {
-          setStep(3);
+          setStep(3); // Moves to Handoff/Approval screen
           setIsSubmitting(false);
         }, 1000);
       } else {
-        // If it failed, stop everything and show the error to the user
-        console.error("Server rejected submission:", result.error);
         toast.error(result.error || "Submission failed. Please try again.");
         setIsSubmitting(false);
       }
-
     } catch (error) {
-      console.error("Submission failed catastrophically", error);
       toast.error("A network error occurred.");
       setIsSubmitting(false);
     }
@@ -218,6 +210,7 @@ if (photoData) {
   return (
     <div className="min-h-screen bg-[#F4F7F9] p-4 md:p-8 font-sans text-slate-800">
       <div className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-6">
+        
         {/* ========================================================= */}
         {/* LEFT SIDEBAR */}
         {/* ========================================================= */}
@@ -244,8 +237,7 @@ if (photoData) {
                 )}
               </div>
 
-              {/* Hide the upload button if they are already verified */}
-              {step !== 4 && (
+              {step !== 4 && step !== 3 && (
                 <>
                   <input
                     type="file"
@@ -298,10 +290,9 @@ if (photoData) {
               Need help?
             </h3>
             <p className="text-xs text-slate-500 leading-relaxed mb-6">
-              Have questions or concerns regarding your wunkathomes
-              verification? Our experts are here to help!
+              Have questions or concerns regarding your verification? Our experts are here to help!
             </p>
-            <button className="w-full py-3 bg-black hover:bg-black text-white text-xs font-bold uppercase tracking-widest rounded-lg transition-colors shadow-primary/20">
+            <button className="w-full py-3 bg-black hover:bg-zinc-800 text-white text-xs font-bold uppercase tracking-widest rounded-lg transition-colors shadow-primary/20">
               Chat With Us
             </button>
           </div>
@@ -311,7 +302,6 @@ if (photoData) {
         {/* MAIN CONTENT AREA */}
         {/* ========================================================= */}
         <div className="flex-1 flex flex-col gap-6">
-          {/* Progress / Status Header */}
           <div className="bg-white rounded-xl shadow-sm p-8">
             <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
               <div>
@@ -338,7 +328,7 @@ if (photoData) {
               )}
             </div>
 
-            {/* Stepper Logic - Expanded to 4 Steps */}
+            {/* Stepper Grid */}
             <div className="flex items-center w-full max-w-3xl">
               {[1, 2, 3, 4].map((s, index) => (
                 <React.Fragment key={s}>
@@ -369,21 +359,15 @@ if (photoData) {
                 </React.Fragment>
               ))}
             </div>
+            
+            {/* Dynamic Stepper Labels */}
             <div className="flex justify-between w-full max-w-3xl mt-3 text-xs font-bold text-slate-400 uppercase tracking-widest">
               <span className={step >= 1 ? "text-primary" : ""}>Details</span>
-              <span
-                className={`text-center pl-4 ${step >= 2 ? "text-primary" : ""}`}
-              >
-                Selfie ID
+              <span className={`text-center pl-4 ${step >= 2 ? "text-primary" : ""}`}>Selfie ID</span>
+              <span className={`text-center pl-8 ${step >= 3 ? "text-primary" : ""}`}>
+                {isLeaseSigned ? "Approval" : "Sign Lease"}
               </span>
-              <span
-                className={`text-center pl-8 ${step >= 3 ? "text-primary" : ""}`}
-              >
-                Review
-              </span>
-              <span className={`text-right ${step >= 4 ? "text-primary" : ""}`}>
-                Verified
-              </span>
+              <span className={`text-right ${step >= 4 ? "text-primary" : ""}`}>Verified</span>
             </div>
           </div>
 
@@ -397,6 +381,7 @@ if (photoData) {
 
             <div className="p-8 flex-1">
               <AnimatePresence mode="wait">
+                
                 {/* --- STEP 1: Personal Details --- */}
                 {step === 1 && (
                   <motion.div
@@ -405,7 +390,6 @@ if (photoData) {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 10 }}
                   >
-                    {/* Rejection Banner - Shown if they were rejected previously */}
                     {currentUser?.kycStatus === "Rejected" && (
                       <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-lg flex items-start gap-3">
                         <div>
@@ -539,7 +523,7 @@ if (photoData) {
                   </motion.div>
                 )}
 
-                {/* --- STEP 3: Pending Review --- */}
+                {/* --- STEP 3: The Handoff / Awaiting Approval --- */}
                 {step === 3 && (
                   <motion.div
                     key="step3"
@@ -547,16 +531,48 @@ if (photoData) {
                     animate={{ opacity: 1, scale: 1 }}
                     className="flex flex-col items-center justify-center text-center py-10"
                   >
-                    <div className="w-20 h-20 bg-blue-50 text-primary rounded-full flex items-center justify-center mb-6">
-                      <HugeiconsIcon icon={AlarmClock} size={40} className="" />
-                    </div>
-                    <h3 className="text-2xl font-bold text-slate-900 mb-2">
-                      Verification Submitted
-                    </h3>
-                    <p className="text-sm text-slate-500 max-w-sm">
-                      Your identity documents are securely being reviewed by our
-                      Admin team. This usually takes less than 24 hours.
-                    </p>
+                    {isLeaseSigned ? (
+                      // Path A: Everything Submitted, waiting on Admin
+                      <>
+                        <div className="w-20 h-20 bg-amber-50 text-amber-500 rounded-full flex items-center justify-center mb-6">
+                          <HugeiconsIcon icon={Time01Icon} size={40} />
+                        </div>
+                        <h3 className="text-2xl font-bold text-slate-900 mb-2">
+                          Awaiting Admin Approval
+                        </h3>
+                        <p className="text-sm text-slate-500 max-w-sm mb-8">
+                          Your identity documents and tenancy agreement have been successfully submitted. Our team is reviewing them to securely generate your Smart Lock PIN.
+                        </p>
+
+                        <button
+                          onClick={() => router.push("/user/dashboard")}
+                          className="px-8 py-3 bg-zinc-950 hover:bg-zinc-800 text-white text-xs font-bold uppercase tracking-widest rounded-lg transition-colors shadow-lg shadow-black/10 flex items-center gap-2"
+                        >
+                          Go to Dashboard <HugeiconsIcon icon={ArrowRight01Icon} size={16} />
+                        </button>
+                      </>
+                    ) : (
+                      // Path B: KYC submitted, but Lease is unsigned
+                      <>
+                        <div className="w-20 h-20 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mb-6">
+                          <HugeiconsIcon icon={SignatureIcon} size={40} />
+                        </div>
+                        <h3 className="text-2xl font-bold text-slate-900 mb-2">
+                          Verification Submitted
+                        </h3>
+                        <p className="text-sm text-slate-500 max-w-sm mb-8">
+                          Your identity documents have been securely transmitted. 
+                          You can now review and legally bind your Tenancy Agreement to finalize your booking.
+                        </p>
+
+                        <button
+                          onClick={() => router.push(`/user/sign-lease?leaseId=${leaseId}`)}
+                          className="px-8 py-3 bg-zinc-950 hover:bg-zinc-800 text-white text-xs font-bold uppercase tracking-widest rounded-lg transition-colors shadow-lg shadow-black/10 flex items-center gap-2"
+                        >
+                          Sign Tenancy Agreement <HugeiconsIcon icon={ArrowRight01Icon} size={16} />
+                        </button>
+                      </>
+                    )}
                   </motion.div>
                 )}
 
@@ -580,10 +596,10 @@ if (photoData) {
                       properties.
                     </p>
                     <button
-                      onClick={() => (window.location.href = "/user/sign-lease")}
+                      onClick={() => router.push("/user/dashboard")}
                       className="px-8 py-3 bg-zinc-950 hover:bg-zinc-800 text-white text-xs font-bold uppercase tracking-widest rounded-lg transition-colors shadow-lg shadow-black/10"
                     >
-                      Review & Sign Lease
+                      Return to Dashboard
                     </button>
                   </motion.div>
                 )}
@@ -610,16 +626,13 @@ if (photoData) {
                     disabled={!idNumber || !fullName || !dob}
                     className="px-8 py-3 bg-black text-white text-xs font-bold uppercase tracking-widest rounded-lg hover:bg-black transition-colors disabled:opacity-50 disabled:bg-slate-300 flex items-center gap-2 "
                   >
-                    Next Step{" "}
-                    <HugeiconsIcon icon={ArrowRight01Icon} size={16} />
+                    Next Step <HugeiconsIcon icon={ArrowRight01Icon} size={16} />
                   </button>
                 ) : (
                   <div className="flex flex-col items-end">
                     <button
                       onClick={handleSubmit}
-                      disabled={
-                        !photoData || !hasProfilePicture || isSubmitting
-                      }
+                      disabled={!photoData || !hasProfilePicture || isSubmitting}
                       className="px-8 py-3 bg-black text-white text-xs font-bold uppercase tracking-widest rounded-lg hover:bg-black transition-colors disabled:opacity-50 disabled:bg-slate-300 flex items-center gap-2 "
                     >
                       {isSubmitting && (

@@ -3,7 +3,7 @@ import { getSession, SessionPayload } from "@/lib/session";
 import User from "@/models/user";
 import Lease from "@/models/lease";
 import "@/models/listing";
-import "@/models/property"; // Ensure Property is loaded for deep population
+import "@/models/property"; 
 
 import { UserDashboard } from "@/components/user-dashboard";
 import { connectToDatabase } from "@/config/DbConnect";
@@ -18,24 +18,25 @@ export default async function DashboardPage() {
   const dbUser = await User.findById(session.userId).lean();
   if (!dbUser) redirect("/login");
 
-  // 1. KYC Check
+  // 1. KYC Check (Allow "Pending" through to the waiting room)
   if (dbUser.kycStatus === "Unverified" || dbUser.kycStatus === "Rejected") {
     redirect("/user/leases");
   }
 
-  // 2. Fetch the Lease with Deep Population (Lease -> Listing -> Property)
-  const dbLease = await Lease.findOne({
+  // 2. Fetch ALL Leases for this user
+  const dbLeases = await Lease.find({
     userId: session.userId,
-    status: { $in: ["Awaiting_Admin_Approval", "Active"] },
+    status: { $in: ["Pending_Verification", "Awaiting_Admin_Approval", "Active"] },
   })
     .select("+smartLockPin")
     .populate({
       path: "listingId",
-      populate: { path: "propertyId" }, // Populates the parent property for amenities/location
+      populate: { path: "propertyId" }, 
     })
+    .sort({ createdAt: -1 }) 
     .lean();
 
-  if (!dbLease) {
+  if (!dbLeases || dbLeases.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-500 font-bold uppercase tracking-widest text-sm">
         <div className="text-center space-y-4">
@@ -51,66 +52,67 @@ export default async function DashboardPage() {
     );
   }
 
-  // 3. Signature Check (MUST happen after we confirm dbLease exists!)
-  if (dbUser.kycStatus === "Verified" && !dbLease.signatureAudit?.isSigned) {
+  // 3. Signature Check: If ANY active lease needs a signature, route them to sign
+  const needsSignature = dbLeases.some((l: any) => !l.signatureAudit?.isSigned);
+  if (dbUser.kycStatus === "Verified" && needsSignature) {
     redirect("/user/sign-lease");
   }
 
-  // 4. Calculate End Date (Default to 1 year if not explicitly set)
-  let endDate = dbLease.endDate;
-  if (!endDate && dbLease.startDate) {
-    const end = new Date(dbLease.startDate);
-    end.setFullYear(end.getFullYear() + 1); // Add 12 months
-    endDate = end;
-  }
-
-  // 5. Serialize the Data
+  // 4. Serialize User
   const serializedUser = {
     name: dbUser.name,
     kycStatus: dbUser.kycStatus || "Unverified",
   };
 
-  const serializedLease = {
-    id: dbLease._id.toString(),
-    status: dbLease.status,
-    totalRentAmount: dbLease.totalRentAmount,
-    startDate: dbLease.startDate
-      ? new Date(dbLease.startDate).toISOString()
-      : new Date().toISOString(),
-    endDate: endDate ? new Date(endDate).toISOString() : undefined,
-    smartLockPin: dbLease.smartLockPin,
-    signatureAudit: {
-      isSigned: dbLease.signatureAudit?.isSigned || false,
-    },
-  };
+  // 5. Serialize the Array of Leases
+  const serializedActiveLeases = dbLeases.map((dbLease: any) => {
+    let endDate = dbLease.endDate;
+    if (!endDate && dbLease.startDate) {
+      const end = new Date(dbLease.startDate);
+      end.setFullYear(end.getFullYear() + 1); 
+      endDate = end;
+    }
 
-  const listingDoc = dbLease.listingId as any;
-  const propertyDoc = listingDoc?.propertyId;
-  const loc = propertyDoc?.location || listingDoc?.location;
-  const locationString = loc
-    ? typeof loc === "string"
-      ? loc
-      : `${loc.area}, ${loc.city || loc.region}`
-    : "Accra, Ghana";
+    const listingDoc = dbLease.listingId as any;
+    const propertyDoc = listingDoc?.propertyId;
+    const loc = propertyDoc?.location || listingDoc?.location;
+    const locationString = loc
+      ? typeof loc === "string"
+        ? loc
+        : `${loc.area}, ${loc.city || loc.region}`
+      : "Accra, Ghana";
 
-  const serializedListing = {
-    title: listingDoc?.title || "WunkatHomes Property",
-    images: listingDoc?.images || [],
-    location: locationString,
-    propertyType: propertyDoc?.propertyType?.replace("_", " ") || "Property",
-    bedrooms: listingDoc?.features?.bedrooms || 0,
-    bathrooms: listingDoc?.features?.bathrooms || 0,
-    sizeSqm: listingDoc?.features?.sizeSqm || 0,
-    amenities: propertyDoc?.generalAmenities || [],
-    wifiNetwork: "Wunkat_5G",
-    wifiPassword: "wunkat2026",
-  };
+    return {
+      lease: {
+        id: dbLease._id.toString(),
+        status: dbLease.status,
+        totalRentAmount: dbLease.totalRentAmount,
+        startDate: dbLease.startDate
+          ? new Date(dbLease.startDate).toISOString()
+          : new Date().toISOString(),
+        endDate: endDate ? new Date(endDate).toISOString() : undefined,
+        smartLockPin: dbLease.smartLockPin,
+        signatureAudit: {
+          isSigned: dbLease.signatureAudit?.isSigned || false,
+        },
+      },
+      listing: {
+        title: listingDoc?.title || "WunkatHomes Property",
+        images: listingDoc?.images || [],
+        location: locationString,
+        propertyType: propertyDoc?.propertyType?.replace("_", " ") || "Property",
+        bedrooms: listingDoc?.features?.bedrooms || 0,
+        bathrooms: listingDoc?.features?.bathrooms || 0,
+        sizeSqm: listingDoc?.features?.sizeSqm || 0,
+        amenities: propertyDoc?.generalAmenities || [],
+      },
+    };
+  });
 
   return (
     <UserDashboard
       user={serializedUser}
-      lease={serializedLease}
-      listing={serializedListing}
+      activeLeases={serializedActiveLeases}
     />
   );
 }

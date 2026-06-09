@@ -7,30 +7,31 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-// Checkbox is imported but not used in the layout you provided, I left it just in case
-import { Checkbox } from "@/components/ui/checkbox"; 
 import { MediaUpload } from "@/components/media-upload";
 import { Button } from "@/components/ui/button";
 import { SubmitButton } from "@/components/submit-button";
 
-// 1. IMPORT THE REAL ACTION
 import { submitMaintenanceRequest, ActionState } from "@/actions/user/maintenance.action";
 
-// 2. DEFINE INITIAL STATE
 const initialState: ActionState = { success: false, message: "" };
 
-export default function MaintenanceRequestForm() {
+interface MaintenanceFormProps {
+  properties: { id: string; title: string }[];
+}
+
+export default function MaintenanceRequestForm({ properties }: MaintenanceFormProps) {
   const router = useRouter();
   
-  // 3. USE THE REAL ACTION HERE (Replaced mockAction with submitMaintenanceRequest)
   const [state, formAction] = useActionState(submitMaintenanceRequest, initialState);
-  
   const [isPending, startTransition] = useTransition();
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
 
+  // Default to the first property in the array
+  const [selectedLeaseId, setSelectedLeaseId] = useState<string>(properties[0]?.id || "");
+
   useEffect(() => {
     if (state.success) {
-      toast.success(state.message); // Use the real message from the server (e.g. "Ticket MNT-12345 submitted")
+      toast.success(state.message);
       setTimeout(() => {
         router.push("/user/dashboard");
       }, 1500); 
@@ -43,7 +44,9 @@ export default function MaintenanceRequestForm() {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     
-    // Append the files from React state into the FormData object
+    // Explicitly append the selected property ID to the payload
+    formData.append("leaseId", selectedLeaseId);
+    
     uploadedFiles.forEach((file) => {
       formData.append("media", file);
     });
@@ -56,6 +59,37 @@ export default function MaintenanceRequestForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-4xl mx-auto">
       
+      {/* --- SECTION: PROPERTY SELECTION --- */}
+      <div className="bg-white rounded-lg border border-slate-200 p-8">
+        <h2 className="text-[18px] font-medium text-slate-900 mb-6 pb-3 border-b border-slate-200">
+          Property Details
+        </h2>
+        <div className="space-y-2 max-w-md">
+          <Label className="text-[13px] font-medium text-slate-700">Affected Property *</Label>
+          
+          {properties.length === 1 ? (
+            // SINGLE PROPERTY: Locked read-only text
+            <div className="h-10 bg-slate-50 border border-slate-200 rounded-md px-3 flex items-center text-sm text-slate-700 font-medium">
+              {properties[0].title}
+            </div>
+          ) : (
+            // MULTIPLE PROPERTIES: Select Dropdown
+            <Select value={selectedLeaseId} onValueChange={setSelectedLeaseId} required>
+              <SelectTrigger className="h-10 bg-slate-50 focus:ring-zinc-950 border-slate-200">
+                <SelectValue placeholder="Select a property" />
+              </SelectTrigger>
+              <SelectContent>
+                {properties.map((property) => (
+                  <SelectItem key={property.id} value={property.id}>
+                    {property.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        </div>
+      </div>
+
       {/* --- SECTION: ISSUE CLASSIFICATION --- */}
       <div className="bg-white rounded-lg border border-slate-200 p-8">
         <h2 className="text-[18px] font-medium text-slate-900 mb-6 pb-3 border-b border-slate-200">
@@ -66,7 +100,7 @@ export default function MaintenanceRequestForm() {
           <div className="space-y-2">
             <Label className="text-[13px] font-medium text-slate-700">Service Category *</Label>
             <Select name="category" required>
-              <SelectTrigger className="h-10 bg-slate-50 focus:ring-zinc-950">
+              <SelectTrigger className="h-10 bg-slate-50 focus:ring-zinc-950 border-slate-200">
                 <SelectValue placeholder="Select the affected area" />
               </SelectTrigger>
               <SelectContent>
@@ -84,7 +118,7 @@ export default function MaintenanceRequestForm() {
           <div className="space-y-2">
             <Label className="text-[13px] font-medium text-slate-700">Priority Level *</Label>
             <Select name="priority" defaultValue="Routine">
-              <SelectTrigger className="h-10 bg-slate-50 focus:ring-zinc-950">
+              <SelectTrigger className="h-10 bg-slate-50 focus:ring-zinc-950 border-slate-200">
                 <SelectValue placeholder="Assess the urgency" />
               </SelectTrigger>
               <SelectContent>
@@ -111,7 +145,7 @@ export default function MaintenanceRequestForm() {
               id="title" 
               name="title" 
               placeholder="e.g. Master bathroom sink is draining slowly" 
-              className="h-10 bg-slate-50 focus:ring-zinc-950" 
+              className="h-10 bg-slate-50 focus:ring-zinc-950 border-slate-200" 
               required 
             />
           </div>
@@ -122,7 +156,7 @@ export default function MaintenanceRequestForm() {
               id="description" 
               name="description" 
               placeholder="Please describe the issue in detail. When did it start? Are there any specific error codes?" 
-              className="min-h-[120px] bg-slate-50 focus:ring-zinc-950 resize-y" 
+              className="min-h-[120px] bg-slate-50 focus:ring-zinc-950 border-slate-200 resize-y" 
               required 
             />
           </div>
@@ -141,7 +175,7 @@ export default function MaintenanceRequestForm() {
           <Button 
             type="button" 
             variant="outline" 
-            className="h-11 px-6 rounded-md text-[14px] w-full sm:w-auto" 
+            className="h-11 px-6 rounded-md text-[14px] w-full sm:w-auto border-slate-200 hover:bg-slate-50" 
             onClick={() => router.back()}
           >
             Cancel

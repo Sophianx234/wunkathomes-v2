@@ -49,7 +49,7 @@ export default function SignLeaseClient({ data }: SignLeaseClientProps) {
       if (result.success) {
         toast.success("Tenancy Agreement officially signed.");
         // Redirecting instantly transfers them to the Active Dashboard
-        router.push("/user/sign-lease");
+        router.push("/user/leases");
       } else {
         toast.error(result.error || "Failed to sign document.");
         setIsSigning(false);
@@ -69,11 +69,9 @@ export default function SignLeaseClient({ data }: SignLeaseClientProps) {
         <div className="flex items-center gap-3 mb-6 shrink-0">
           <div>
             <h1 className="text-lg font-black tracking-tight text-zinc-900 uppercase">
-              WunkatHomes Digital Lease
+              WunkatHomes Tenancy Agreement Document
             </h1>
-            <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest">
-              Document ID: {data.leaseId.slice(-8).toUpperCase()}
-            </p>
+            
           </div>
         </div>
 

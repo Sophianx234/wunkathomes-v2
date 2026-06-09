@@ -27,7 +27,8 @@ const transactionSchema = new mongoose.Schema({
   },
   paymentPurpose: {
     type: String,
-    enum: ['Upfront_Rent', 'Rent_Balance', 'Monthly_Renewal', 'Purchase'],
+    // Add 'Lease_Renewal' right here 👇
+    enum: ['Upfront_Rent', 'Rent_Balance', 'Monthly_Renewal', 'Lease_Renewal', 'Purchase'],
     required: true,
   },
   // --- PAYSTACK SPECIFIC FIELDS ---

@@ -34,7 +34,7 @@ export default async function CheckoutPage({ params }: CheckoutPageProps) {
     }).lean().exec();
 
     // If an active lease is found, they shouldn't be on the checkout page
-    if (activeLease) {
+    if (activeLease?.signatureAudit?.isSigned) {
       // Redirect them to their leases dashboard (update this route to match your app's structure if needed)
       redirect("/user/dashboard"); 
     }

@@ -6,23 +6,47 @@ import User from "@/models/user"
 import "@/models/listing" 
 import SignLeaseClient from "@/components/sign-lease-client"
 
-export default async function SignLeasePage() {
+interface SignLeasePageProps {
+  searchParams: Promise<{ leaseId?: string }>;
+}
+
+export default async function SignLeasePage({ searchParams }: SignLeasePageProps) {
   const session = await getSession() as SessionPayload;
   if (!session?.userId) redirect("/login");
 
   await connectToDatabase();
 
+  // Resolve searchParams (Required in Next.js 15+)
+  const params = await searchParams;
+  const targetLeaseId = params?.leaseId;
+
   const dbUser = await User.findById(session.userId).lean();
-  const dbLease = await Lease.findOne({ userId: session.userId })
+
+  // --- THE FIX: Dynamic Multi-Property Query ---
+  const query: any = { userId: session.userId };
+
+  if (targetLeaseId) {
+    // 1. If a specific lease is requested via URL (?leaseId=xyz)
+    query._id = targetLeaseId;
+  } else {
+    // 2. Otherwise, automatically find leases that are NOT signed yet
+    query["signatureAudit.isSigned"] = { $ne: true };
+  }
+
+  // Fetch the lease, sorting by newest first in case there are multiple unsigned
+  const dbLease = await Lease.findOne(query)
     .populate('listingId')
+    .sort({ createdAt: -1 }) 
     .lean();
 
   // 1. Route Protection Checks
-  if (!dbLease) redirect("/");
+  if (!dbLease) {
+    // No lease found matching the criteria
+    redirect("/");
+  }
   
- 
-
   if (dbLease.signatureAudit?.isSigned) {
+    // If they hit this page but the specific fetched lease is already signed
     redirect("/user/dashboard"); 
   }
 

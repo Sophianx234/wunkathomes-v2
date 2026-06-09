@@ -7,9 +7,9 @@ import {
   CheckmarkBadge01Icon,
   PrinterIcon,
   ArrowRight01Icon,
-  Home09Icon,
-  UserCircleIcon,
   CreditCardPosIcon,
+  Shield02Icon,
+  Home09Icon // Added this icon for the dashboard return
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import PrintReceipt from "./print-reciept";
@@ -23,7 +23,6 @@ export default function SuccessReceipt({ transaction }: SuccessReceiptProps) {
     window.print();
   };
 
-  // --- Formatting for Web View ---
   const formattedDateTimeFull = new Date(
     transaction.paidAt || transaction.createdAt,
   ).toLocaleDateString("en-US", {
@@ -34,7 +33,6 @@ export default function SuccessReceipt({ transaction }: SuccessReceiptProps) {
     minute: "2-digit",
   });
 
-  // Location string logic
   const loc = transaction.listingId?.propertyId?.location;
   const locationString = loc
     ? typeof loc === "string"
@@ -42,13 +40,37 @@ export default function SuccessReceipt({ transaction }: SuccessReceiptProps) {
       : `${loc.area}, ${loc.city || loc.region}`
     : "Accra, Ghana";
 
+  // =================================================================
+  // THE PERFECTED ROUTING FIX (Handles Renewals + KYC)
+  // =================================================================
+  const isRenewal = transaction.paymentPurpose === "Lease_Renewal";
+  const isVerified = transaction.userId?.kycStatus === "Verified";
+  const targetLeaseId = transaction.leaseId || "";
+
+  let continueUrl = "";
+  let buttonText = "";
+  let ButtonIcon = ArrowRight01Icon;
+
+  if (isRenewal) {
+    // SCENARIO 1: It's a renewal (Skip KYC and Signing)
+    continueUrl = "/user/dashboard";
+    buttonText = "Return to Dashboard";
+    ButtonIcon = Home09Icon;
+  } else if (isVerified) {
+    // SCENARIO 2: New Booking, but user is already KYC Verified
+    continueUrl = `/user/sign-lease?leaseId=${targetLeaseId}`;
+    buttonText = "Sign Tenancy Agreement";
+    ButtonIcon = ArrowRight01Icon;
+  } else {
+    // SCENARIO 3: Brand New User (Needs KYC Verification)
+    continueUrl = `/user/leases`;
+    buttonText = "Verify Identity to Continue";
+    ButtonIcon = Shield02Icon;
+  }
+
   return (
     <>
-      {/* ================================================================= */}
-      {/* WEB VIEW: Your detailed, comprehensive UI (Hidden during printing) */}
-      {/* ================================================================= */}
       <div className="max-w-3xl mx-auto w-full print:hidden">
-        {/* --- HEADER: Animated Success State --- */}
         <div className="flex flex-col items-center text-center mb-10">
           <motion.div
             initial={{ scale: 0, opacity: 0 }}
@@ -78,12 +100,11 @@ export default function SuccessReceipt({ transaction }: SuccessReceiptProps) {
             transition={{ delay: 0.2 }}
             className="text-slate-500 text-base font-medium max-w-md"
           >
-            Your reservation is confirmed. A copy of this receipt has been
+            Your transaction is confirmed. A copy of this receipt has been
             securely logged to your account ledger.
           </motion.p>
         </div>
 
-        {/* --- MAIN RECEIPT CARD --- */}
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -145,12 +166,7 @@ export default function SuccessReceipt({ transaction }: SuccessReceiptProps) {
             {/* Section 2: Property & Financials */}
             <div className="mb-10">
               <h2 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
-                <HugeiconsIcon
-                  icon={Home09Icon}
-                  size={24}
-                  className="text-slate-400"
-                />
-                Property Details
+                {isRenewal ? "Renewal Details" : "Property Details"}
               </h2>
 
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
@@ -164,10 +180,10 @@ export default function SuccessReceipt({ transaction }: SuccessReceiptProps) {
                 </div>
                 <div className="text-right">
                   <p className="text-slate-500 text-sm font-medium mb-1">
-                    Upfront Rent
+                    {isRenewal ? "Lease Extension" : "Upfront Rent"}
                   </p>
                   <p className="font-black text-xl text-slate-900">
-                    ${transaction.amount?.toLocaleString()}
+                    GHS {transaction.amount?.toLocaleString()}
                   </p>
                 </div>
               </div>
@@ -175,7 +191,7 @@ export default function SuccessReceipt({ transaction }: SuccessReceiptProps) {
               <div className="bg-slate-50 rounded-xl p-5 border border-slate-100">
                 <div className="flex justify-between items-center mb-3 text-sm font-medium text-slate-600">
                   <span>Subtotal</span>
-                  <span>${transaction.amount?.toLocaleString()}</span>
+                  <span>GHS {transaction.amount?.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between items-center mb-4 text-sm font-medium text-slate-600">
                   <span>Agency Fees / Taxes</span>
@@ -186,7 +202,7 @@ export default function SuccessReceipt({ transaction }: SuccessReceiptProps) {
                     Total Paid
                   </span>
                   <span className="font-black text-2xl text-slate-900">
-                    ${transaction.amount?.toLocaleString()}
+                    GHS {transaction.amount?.toLocaleString()}
                   </span>
                 </div>
               </div>
@@ -197,11 +213,6 @@ export default function SuccessReceipt({ transaction }: SuccessReceiptProps) {
             {/* Section 3: Tenant Details */}
             <div>
               <h2 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
-                <HugeiconsIcon
-                  icon={UserCircleIcon}
-                  size={24}
-                  className="text-slate-400"
-                />
                 Tenant Details
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm">
@@ -239,17 +250,16 @@ export default function SuccessReceipt({ transaction }: SuccessReceiptProps) {
           >
             <HugeiconsIcon icon={PrinterIcon} size={18} /> Download Receipt
           </button>
+          
           <Link
-            href="/user/sign-lease"
+            href={continueUrl}
             className="flex-1 py-4 bg-black text-white font-bold uppercase tracking-widest text-sm rounded-xl hover:bg-zinc-800 transition-colors flex items-center justify-center gap-2"
           >
-            Continue to Dashboard{" "}
-            <HugeiconsIcon icon={ArrowRight01Icon} size={18} />
+            {buttonText}
           </Link>
         </motion.div>
       </div>
 
-      {/* Render the isolated print component here */}
       <PrintReceipt transaction={transaction} />
     </>
   );

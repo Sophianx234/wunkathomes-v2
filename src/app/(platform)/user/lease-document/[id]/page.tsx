@@ -7,17 +7,31 @@ import "@/models/listing"
 import "@/models/property"
 import DocumentVaultClient from "@/components/document-valut-client"
 
-export default async function LeaseDocumentPage() {
+// 1. Update the type to explicitly declare params as a Promise
+type PageProps = {
+  params: Promise<{ id: string }>
+}
+
+export default async function LeaseDocumentPage({ params }: PageProps) {
+  // 2. Await the params before accessing the ID
+  const { id } = await params;
+
   const session = await getSession() as SessionPayload
   if (!session?.userId) redirect("/login")
+  
+  // 3. Use the unwrapped 'id' variable
+  if (!id) redirect("/user/dashboard")
 
   await connectToDatabase()
 
   // Fetch User for legal name
   const dbUser = await User.findById(session.userId).lean()
   
-  // Fetch Lease and deeply populate the property details
-  const lease = await Lease.findOne({ userId: session.userId, status: "Active" })
+  // 4. Use the unwrapped 'id' variable in your MongoDB query
+  const lease = await Lease.findOne({ 
+    _id: id, 
+    userId: session.userId 
+  })
     .populate({
       path: 'listingId',
       populate: { path: 'propertyId' }

@@ -21,7 +21,7 @@ import { verifyPaystackPayment } from "@/actions/user/payment.action"
 
 interface CheckoutClientProps {
   listing: IProperty | any;
-  currentUser?: { name: string; email: string; phone: string } | null;
+  currentUser?: {id:string; name: string; email: string; phone: string } | null;
 }
 
 export default function CheckoutClient({ listing, currentUser }: CheckoutClientProps) {
@@ -42,8 +42,7 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
   const [moveInDate, setMoveInDate] = useState(defaultDate)
   const [isProcessing, setIsProcessing] = useState(false)
 
-  const USD_TO_GHS_RATE = 15.00; 
-  const priceInGhs = listing.price * USD_TO_GHS_RATE;
+  const priceInGhs = listing.price ;
 
   // Paystack Configuration
   const paystackConfig = {

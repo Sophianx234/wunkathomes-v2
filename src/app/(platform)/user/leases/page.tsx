@@ -2,18 +2,24 @@ import { VerificationDashboard } from "@/components/verification-dashboard"
 import { connectToDatabase } from "@/config/DbConnect"
 import { getSession, SessionPayload } from "@/lib/session"
 import User from "@/models/user"
-import Lease from "@/models/lease" // ✅ Add this import
+import Lease from "@/models/lease"
+import { redirect } from "next/navigation"
 
 export default async function LeasesPage() {
   const session = await getSession() as SessionPayload;
+  if (!session?.userId) redirect("/login");
+
   await connectToDatabase();
 
   // 1. DATA FETCHING: Get the real user
   const dbUser = await User.findById(session.userId).select('+idDocumentNumber').lean();
+  if (!dbUser) redirect("/login");
 
   // 2. DATA FETCHING: Get the user's active/pending lease
-  // Adjust the query field ('tenant', 'userId', etc.) based on your Lease schema
-  const dbLease = await Lease.findOne({ tenant: session.userId })
+  const dbLease = await Lease.findOne({ 
+    userId: session.userId,
+    status: { $in: ["Awaiting_Payment", "Pending_Verification", "Awaiting_Admin_Approval", "Active"] } 
+  })
     .sort({ createdAt: -1 })
     .lean();
 
@@ -29,10 +35,15 @@ export default async function LeasesPage() {
     kycStatus: dbUser.kycStatus || "Unverified",
   };
 
-  // Extract the real 24-character hex string
   const actualLeaseId = dbLease ? dbLease._id.toString() : "";
+  const isLeaseSigned = dbLease?.signatureAudit?.isSigned || false;
 
   // 4. RENDER
-  // ✅ Pass the real leaseId to the dashboard
-  return <VerificationDashboard currentUser={serializedUser} leaseId={actualLeaseId} />
+  return (
+    <VerificationDashboard 
+      currentUser={serializedUser} 
+      leaseId={actualLeaseId} 
+      isLeaseSigned={isLeaseSigned} 
+    />
+  );
 }

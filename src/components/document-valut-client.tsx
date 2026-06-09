@@ -77,8 +77,7 @@ export default function DocumentVaultClient({ data }: DocumentVaultClientProps) 
                 <HugeiconsIcon icon={ArrowLeft01Icon} size={14} /> Back to Dashboard
               </Link>
               <h1 className="text-2xl font-black uppercase tracking-tight flex items-center gap-2">
-                <HugeiconsIcon icon={SignatureIcon} size={24} className="text-zinc-700" />
-                Lease Agreement
+                Tenancy Agreement
               </h1>
             </div>
             

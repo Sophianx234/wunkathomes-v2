@@ -37,12 +37,11 @@ export default async function OnboardingPage() {
     .sort({ createdAt: -1 })
     .lean();
 
-  // ✅ FILTER ADDED: Remove any leases where the user's KYC status is 'Rejected'
+  // Remove any leases where the user's KYC status is 'Rejected'
   const filteredLeases = rawLeases.filter(
     (lease: any) => lease.userId && lease.userId.kycStatus !== 'Rejected'
   );
 
-  // Map over the filtered array instead of the raw one
   const activationsData = await Promise.all(filteredLeases.map(async (lease: any) => {
     const txs = await Transaction.find({ leaseId: lease._id, status: 'Success' }).lean();
     const depositPaid = txs.some(tx => ['Upfront_Rent', 'Booking_Deposit'].includes(tx.paymentPurpose));
@@ -53,14 +52,9 @@ export default async function OnboardingPage() {
       
     const leaseSigned = lease.signatureAudit?.isSigned ? "Signed" : "Pending";
 
-    let pipelineStage: "awaiting_paperwork" | "ready_for_access" | "recent" = "awaiting_paperwork";
-    if (lease.status === "Active") {
-      pipelineStage = "recent";
-    } else if (ghanaCardVerified === "Verified" && leaseSigned === "Signed") {
-      pipelineStage = "ready_for_access";
-    }
+    // STRICT 2-TAB LOGIC: If it's not active, it stays in Pending.
+    const pipelineStage = lease.status === "Active" ? "active" : "pending";
 
-    // Safely format the signature date if it exists
     const signedAtFormatted = lease.signatureAudit?.signedAt 
       ? new Date(lease.signatureAudit.signedAt).toLocaleString('en-GB', { 
           day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' 
@@ -69,21 +63,24 @@ export default async function OnboardingPage() {
 
     return {
       id: lease._id.toString(),
-      pipelineStage,
+      pipelineStage, // "pending" | "active"
+      status: lease.status || "Pending_Verification", 
       user: {
         id: lease.userId._id.toString(),
         name: lease.userId.name || "Unknown Tenant",
         email: lease.userId.email || "",
         phone: lease.userId.phone || "N/A",
-        profilePicture: lease.userId.profilePicture || null,
+        profilePicture: lease.userId.profilePicture || "", 
         ghanaCardNumber: lease.userId.idDocumentNumber || "Not Provided",
-        ghanaCardUrl: lease.userId.idVerificationPhotoUrl || null,
+        ghanaCardUrl: lease.userId.idVerificationPhotoUrl || "", 
       },
       lease: {
         id: lease._id.toString(),
         propertyName: lease.listingId?.title || "Unknown Property",
+        propertyLocation: lease.listingId?.propertyId?.location?.area || "", 
         unitNumber: lease.listingId?.features?.sizeSqm ? `${lease.listingId.features.sizeSqm} sqm` : "N/A",
         startDate: lease.startDate ? new Date(lease.startDate).toISOString() : new Date().toISOString(),
+        endDate: lease.endDate ? new Date(lease.endDate).toISOString() : undefined,
         documentUrl: lease.documentUrl || undefined,
         totalRentAmount: lease.totalRentAmount || 0,
         signatureAudit: {

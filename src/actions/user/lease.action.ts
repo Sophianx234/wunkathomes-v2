@@ -32,7 +32,7 @@ export async function signLeaseAgreement(leaseId: string, typedSignature: string
         "signatureAudit.isSigned": false // Prevent double-signing
       },
       {
-        status: 'Active',
+        status: 'Awaiting_Admin_Approval', // Move to next step immediately
         signatureAudit: {
           isSigned: true,
           signedAt: timestamp,

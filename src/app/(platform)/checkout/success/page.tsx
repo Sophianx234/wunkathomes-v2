@@ -2,9 +2,9 @@ import { notFound, redirect } from "next/navigation"
 import { getSession } from "@/lib/session"
 import { connectToDatabase } from "@/config/DbConnect"
 import Transaction from "@/models/transaction"
-import "@/models/listing" // Register schema
-import "@/models/user"    // Register schema
-import "@/models/property" // Register schema for nested location populating
+import "@/models/listing" 
+import "@/models/user"    
+import "@/models/property" 
 import SuccessReceipt from "@/components/success-reciept"
 
 interface SuccessPageProps {
@@ -12,48 +12,46 @@ interface SuccessPageProps {
 }
 
 export default async function CheckoutSuccessPage(props: SuccessPageProps) {
-  // 1. Check Authorization
   const session = await getSession()
   if (!session || !session.userId) {
     redirect("/login")
   }
 
-  // 2. Extract Reference from URL
   const searchParams = await props.searchParams
   const reference = searchParams.reference
 
   if (!reference) {
-    // If they navigate here without a reference, send them to their dashboard
-    redirect("/user/leases")
+    redirect("/user/dashboard")
   }
 
-  // 3. Fetch the exact transaction from the database
   await connectToDatabase()
   
   const rawTransaction = await Transaction.findOne({ 
     reference: reference,
-    userId: session.userId // Security: Ensure this user actually owns this receipt!
+    userId: session.userId 
   })
     .populate({
       path: "listingId",
-      populate: { path: "propertyId" } // Deep populate to get the location details
+      populate: { path: "propertyId" } 
     })
-    .populate("userId", "name email")
+    // FIX: Make sure to fetch the kycStatus here!
+    .populate("userId", "name email kycStatus") 
     .lean()
     .exec()
 
   if (!rawTransaction) {
-    // If the reference is invalid or doesn't belong to them
     notFound()
   }
 
-  // 4. Serialize data for the Client Component (Convert ObjectIds to strings)
   const serializedTransaction = {
     ...rawTransaction,
     _id: rawTransaction._id.toString(),
+    leaseId: rawTransaction.leaseId?.toString(), 
     userId: {
       ...rawTransaction.userId,
-      _id: rawTransaction.userId?._id?.toString()
+      _id: rawTransaction.userId?._id?.toString(),
+      // Explicitly attach the status
+      kycStatus: (rawTransaction.userId as any)?.kycStatus 
     },
     listingId: {
       ...rawTransaction.listingId,
