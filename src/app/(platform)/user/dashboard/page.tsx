@@ -18,12 +18,7 @@ export default async function DashboardPage() {
   const dbUser = await User.findById(session.userId).lean();
   if (!dbUser) redirect("/login");
 
-  // 1. KYC Check (Allow "Pending" through to the waiting room)
-  if (dbUser.kycStatus === "Unverified" || dbUser.kycStatus === "Rejected") {
-    redirect("/user/leases");
-  }
-
-  // 2. Fetch ALL Leases for this user
+  // Fetch ALL Leases for this user (Including ones waiting on KYC/Signatures)
   const dbLeases = await Lease.find({
     userId: session.userId,
     status: { $in: ["Pending_Verification", "Awaiting_Admin_Approval", "Active"] },
@@ -52,19 +47,13 @@ export default async function DashboardPage() {
     );
   }
 
-  // 3. Signature Check: If ANY active lease needs a signature, route them to sign
-  const needsSignature = dbLeases.some((l: any) => !l.signatureAudit?.isSigned);
-  if (dbUser.kycStatus === "Verified" && needsSignature) {
-    redirect("/user/sign-lease");
-  }
-
-  // 4. Serialize User
+  // Serialize User Data
   const serializedUser = {
     name: dbUser.name,
     kycStatus: dbUser.kycStatus || "Unverified",
   };
 
-  // 5. Serialize the Array of Leases
+  // Serialize the Array of Leases
   const serializedActiveLeases = dbLeases.map((dbLease: any) => {
     let endDate = dbLease.endDate;
     if (!endDate && dbLease.startDate) {

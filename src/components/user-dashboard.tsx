@@ -14,19 +14,20 @@ import {
   ViewOffIcon,
   Wrench01Icon,
   Key01Icon,
+  Building04Icon,
   House03Icon,
   Time01Icon,
   Alert01Icon,
-  ArrowRight01Icon, // Imported for the Renewal Button
+  ArrowRight01Icon,
+  Shield02Icon, // Imported for KYC Banner
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation"; // Imported for routing
+import { useRouter } from "next/navigation"; 
 
-// --- BULLETPROOF DATE HELPER ---
 const getDaysDifference = (start: Date, end: Date) => {
   const utc1 = Date.UTC(start.getFullYear(), start.getMonth(), start.getDate());
   const utc2 = Date.UTC(end.getFullYear(), end.getMonth(), end.getDate());
@@ -68,14 +69,22 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
   const [lockStatus, setLockStatus] = useState<"LOCKED" | "UNLOCKED" | "LOADING">("LOCKED");
   const [isRenewing, setIsRenewing] = useState(false);
 
-  const isPendingApproval = lease.status === "Awaiting_Admin_Approval" || lease.status === "Pending_Verification";
+  // =================================================================
+  // ACTION REQUIRED & RESTRICTION LOGIC
+  // =================================================================
+  const needsKyc = user.kycStatus === "Unverified" || user.kycStatus === "Rejected";
+  const needsSignature = user.kycStatus === "Verified" && !lease.signatureAudit.isSigned;
+  const isPendingAdmin = lease.status === "Awaiting_Admin_Approval" || user.kycStatus === "Pending";
+  
+  // If any of the above are true, the user is restricted from full access
+  const isRestricted = needsKyc || needsSignature || isPendingAdmin;
 
   useEffect(() => {
     setShowPin(false);
     setLockStatus("LOCKED");
   }, [selectedIndex]);
 
-  // --- PERFECTED SUBSCRIPTION MATH ---
+  // --- SUBSCRIPTION MATH ---
   const startDate = new Date(lease.startDate);
   const endDate = lease.endDate
     ? new Date(lease.endDate)
@@ -92,12 +101,12 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
   let progressPercentage = 0;
   let statusText = "Days Left";
   let isExpiringSoon = false;
-  let isExpired = false; // Phase 2 Tracker
+  let isExpired = false; 
 
-  if (isPendingApproval) {
+  if (isRestricted) {
     daysLeft = "--";
     progressPercentage = 0;
-    statusText = "Pending Review";
+    statusText = "Action Required";
   } else if (today < startDate) {
     const daysUntilMoveIn = getDaysDifference(today, startDate);
     daysLeft = totalDays; 
@@ -112,16 +121,13 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
   } else {
     const daysPassed = getDaysDifference(startDate, today);
     daysLeft = getDaysDifference(today, endDate);
-    
     progressPercentage = Math.min(100, Math.max(0, (daysPassed / totalDays) * 100));
     statusText = "Days Left";
     isExpiringSoon = daysLeft <= 30;
   }
 
-  // --- Smart Lock Handler ---
   const toggleSmartLock = async () => {
-    if (lockStatus === "LOADING" || isPendingApproval) return;
-
+    if (lockStatus === "LOADING" || isRestricted) return;
     const action = lockStatus === "LOCKED" ? "unlocking" : "locking";
     setLockStatus("LOADING");
 
@@ -136,10 +142,8 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
     }
   };
 
-  // --- Renewal Handler (1-Click) ---
   const handleRenewal = () => {
     setIsRenewing(true);
-    // Route them to a specialized checkout page where they do NOT have to do KYC or re-sign the lease.
     router.push(`/checkout/renew?leaseId=${lease.id}`);
   };
 
@@ -159,15 +163,14 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
 
           <div className="hidden md:flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full border border-white/10 shrink-0">
             <span
-              className={`w-2 h-2 rounded-full ${isPendingApproval ? "bg-amber-500" : lockStatus === "LOCKED" ? "bg-green-500" : "bg-red-500"} ${!isPendingApproval && "animate-pulse"}`}
+              className={`w-2 h-2 rounded-full ${isRestricted ? "bg-amber-500" : lockStatus === "LOCKED" ? "bg-green-500" : "bg-red-500"} ${!isRestricted && "animate-pulse"}`}
             />
             <span className="text-xs font-bold uppercase tracking-widest text-white">
-              {isPendingApproval ? "System Pending" : `Door ${lockStatus}`}
+              {isRestricted ? "System Restricted" : `Door ${lockStatus}`}
             </span>
           </div>
         </div>
 
-        {/* MULTI-PROPERTY SELECTOR */}
         {activeLeases.length > 1 && (
           <div className="max-w-6xl mx-auto mt-8 flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
             {activeLeases.map((item, idx) => (
@@ -190,25 +193,64 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 relative z-10 space-y-8">
         
-        {/* THE WAITING ROOM BANNER */}
-        {isPendingApproval && (
-          <div className="bg-amber-50 border border-amber-200 p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center shrink-0">
-              <HugeiconsIcon icon={Time01Icon} className="text-amber-600" size={20} />
+        {/* ========================================================= */}
+        {/* HIJACK BANNERS (RESUME ONBOARDING STATES) */}
+        {/* ========================================================= */}
+        
+        {needsKyc && (
+          <div className="bg-blue-50 border border-blue-200 p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500 shadow-sm">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
+                <HugeiconsIcon icon={Shield02Icon} className="text-blue-600" size={20} />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-blue-900 mb-1 tracking-tight">Action Required: Verify Identity</h4>
+                <p className="text-xs text-blue-800 font-medium leading-relaxed">
+                  Your payment was successful, but we need to verify your identity before generating your Smart Lock PIN.
+                </p>
+              </div>
+            </div>
+            <Link href="/user/leases" className="shrink-0 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold uppercase tracking-widest rounded-lg transition-colors shadow-md flex items-center justify-center">
+              Verify Now
+            </Link>
+          </div>
+        )}
+
+        {!needsKyc && needsSignature && (
+          <div className="bg-amber-50 border border-amber-200 p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500 shadow-sm">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center shrink-0">
+                <HugeiconsIcon icon={SignatureIcon} className="text-amber-600" size={20} />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-amber-900 mb-1 tracking-tight">Action Required: Sign Lease</h4>
+                <p className="text-xs text-amber-800 font-medium leading-relaxed">
+                  Your identity is verified. Please review and sign your digital Tenancy Agreement to finalize your property access.
+                </p>
+              </div>
+            </div>
+            <Link href={`/user/sign-lease?leaseId=${lease.id}`} className="shrink-0 px-6 py-3 bg-black hover:bg-amber-700 text-white text-xs font-bold uppercase tracking-widest rounded-lg transition-colors shadow-md flex items-center justify-center">
+              Sign Document
+            </Link>
+          </div>
+        )}
+
+        {!needsKyc && !needsSignature && isPendingAdmin && (
+          <div className="bg-zinc-100 border border-zinc-200 p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500 shadow-sm">
+            <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shrink-0">
+              <HugeiconsIcon icon={Time01Icon} className="text-zinc-600" size={20} />
             </div>
             <div>
-              <h4 className="text-sm font-bold text-amber-900 mb-1 tracking-tight">Application Under Review</h4>
-              <p className="text-xs text-amber-800 font-medium leading-relaxed">
+              <h4 className="text-sm font-bold text-zinc-900 mb-1 tracking-tight">Application Under Review</h4>
+              <p className="text-xs text-zinc-600 font-medium leading-relaxed">
                 Your payment and tenancy agreement have been successfully submitted. Our team is finalizing your verification. You will receive an SMS with your access PIN once approved.
               </p>
             </div>
           </div>
         )}
 
-        {/* ========================================================= */}
-        {/* PHASE 2: GRACE PERIOD OVERDUE WARNING */}
-        {/* ========================================================= */}
-        {isExpired && !isPendingApproval && (
+        {/* OVERDUE WARNING */}
+        {isExpired && !isRestricted && (
           <div className="bg-red-50 border border-red-200 p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center gap-4 shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center shrink-0">
               <HugeiconsIcon icon={Alert01Icon} className="text-red-600" size={20} />
@@ -245,23 +287,20 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
             </div>
           </div>
 
-          {/* Progress Bar */}
           <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden border border-slate-200">
             <div
-              className={`h-full rounded-full transition-all duration-1000 ${isExpiringSoon ? "bg-red-500" : "bg-zinc-950"} ${isPendingApproval && "opacity-20"}`}
+              className={`h-full rounded-full transition-all duration-1000 ${isExpiringSoon ? "bg-red-500" : "bg-zinc-950"} ${isRestricted && "opacity-20"}`}
               style={{ width: `${progressPercentage}%` }}
             />
           </div>
           <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-3">
             <span>Move-In</span>
-            <span>{isPendingApproval ? "Awaiting Approval" : today < startDate ? "Pending Move-In" : `${Math.round(progressPercentage)}% Completed`}</span>
+            <span>{isRestricted ? "Action Required" : today < startDate ? "Pending Move-In" : `${Math.round(progressPercentage)}% Completed`}</span>
             <span>Expiration</span>
           </div>
 
-          {/* ========================================================= */}
-          {/* PHASE 1 & 2: RENEWAL BUTTON (Shows during last 30 days or Grace Period) */}
-          {/* ========================================================= */}
-          {isExpiringSoon && !isPendingApproval && (
+          {/* RENEWAL BUTTON */}
+          {isExpiringSoon && !isRestricted && (
             <div className="mt-8 border-t border-slate-100 pt-6">
               <button
                 onClick={handleRenewal}
@@ -280,7 +319,6 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
 
         {/* HERO: Property & Smart Lock Controls */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Property Card */}
           <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col sm:flex-row">
             <div className="w-full sm:w-2/5 h-48 sm:h-auto relative bg-slate-100">
               <Image src={listing.images[0] || "/placeholder.jpg"} alt="Property" fill className="object-cover" />
@@ -291,9 +329,9 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
                   {listing.propertyType}
                 </span>
                 
-                {isPendingApproval ? (
+                {isRestricted ? (
                   <span className="text-[10px] font-bold uppercase tracking-widest text-amber-600 bg-amber-50 px-2 py-1 rounded flex items-center gap-1 border border-amber-100">
-                    <HugeiconsIcon icon={Time01Icon} size={10} /> Reviewing
+                    <HugeiconsIcon icon={Time01Icon} size={10} /> Action Required
                   </span>
                 ) : isExpired ? (
                   <span className="text-[10px] font-bold uppercase tracking-widest text-red-600 bg-red-50 px-2 py-1 rounded flex items-center gap-1 border border-red-100">
@@ -313,7 +351,6 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
                 <HugeiconsIcon icon={MapPinIcon} size={16} /> {listing.location}
               </p>
 
-              {/* Property Details Grid */}
               <div className="grid grid-cols-3 gap-4 border-t border-slate-100 pt-6">
                 <div className="flex flex-col items-start gap-1 text-slate-700">
                   <HugeiconsIcon icon={BedDoubleIcon} size={18} className="text-slate-400" />
@@ -334,7 +371,7 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
           {/* DIGITAL KEYS BLOCK */}
           <div
             className={`rounded-2xl shadow-xl p-8 flex flex-col justify-center relative overflow-hidden transition-colors duration-500 ${
-              isPendingApproval 
+              isRestricted 
                 ? "bg-zinc-900 border border-zinc-800" 
                 : lockStatus === "UNLOCKED" 
                   ? "bg-zinc-800 border border-zinc-700" 
@@ -348,9 +385,9 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
             <div className="relative z-10 h-full flex flex-col">
               <div className="flex justify-between items-start mb-6">
                 <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center border border-white/20">
-                  <HugeiconsIcon icon={isPendingApproval ? Time01Icon : Key01Icon} size={24} className={isPendingApproval ? "text-slate-400" : "text-white"} />
+                  <HugeiconsIcon icon={isRestricted ? Time01Icon : Key01Icon} size={24} className={isRestricted ? "text-slate-400" : "text-white"} />
                 </div>
-                {!isPendingApproval && (
+                {!isRestricted && (
                   <span
                     className={`text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full border ${
                       lockStatus === "LOCKED"
@@ -369,9 +406,8 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
                 Smart Lock Access
               </h3>
 
-              {/* PIN Revealer */}
               <div className="flex items-center justify-between gap-4 mb-6 pb-6 border-b border-white/10">
-                {isPendingApproval ? (
+                {isRestricted ? (
                   <div className="font-mono text-xl font-bold text-slate-500 uppercase tracking-[0.1em]">
                     Pending
                   </div>
@@ -391,12 +427,11 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
                 )}
               </div>
 
-              {/* Remote Lock/Unlock Toggle */}
               <button
                 onClick={toggleSmartLock}
-                disabled={lockStatus === "LOADING" || today < startDate || isPendingApproval}
+                disabled={lockStatus === "LOADING" || today < startDate || isRestricted}
                 className={`w-full py-4 rounded-xl flex items-center justify-center gap-3 font-bold uppercase tracking-widest text-xs transition-all shadow-lg mt-auto ${
-                  isPendingApproval 
+                  isRestricted 
                     ? "bg-white/5 text-slate-500 cursor-not-allowed border border-white/5"
                     : today < startDate
                     ? "bg-white/5 text-slate-600 cursor-not-allowed border border-white/10"
@@ -407,7 +442,11 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
                       : "bg-red-500 text-white hover:bg-red-600"
                 }`}
               >
-                {isPendingApproval ? (
+                {needsKyc ? (
+                  <><HugeiconsIcon icon={Shield02Icon} size={18} /> Complete KYC</>
+                ) : needsSignature ? (
+                  <><HugeiconsIcon icon={SignatureIcon} size={18} /> Sign Lease</>
+                ) : isPendingAdmin ? (
                   <><HugeiconsIcon icon={Alert01Icon} size={18} /> Provisioning...</>
                 ) : today < startDate ? (
                   <><HugeiconsIcon icon={LockKeyIcon} size={18} /> Active on Move-in</>
@@ -426,8 +465,8 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
         {/* SECTION: UTILITIES & ACTIONS */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           
-          {/* Hide Maintenance if Pending */}
-          {!isPendingApproval && (
+          {/* Hide Maintenance if fully restricted */}
+          {!isRestricted && (
             <Link
               href={`/user/maintenance`}
               className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:border-primary hover:shadow-md transition-all text-left flex flex-col gap-4 group"
@@ -459,20 +498,23 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
             </div>
           </Link>
 
-          <Link
-            href={`/user/lease-document/${lease.id}`}
-            className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:border-primary hover:shadow-md transition-all text-left flex flex-col gap-4 group"
-          >
-            <div className="w-10 h-10 bg-slate-50 text-slate-600 rounded-full flex items-center justify-center group-hover:bg-black/10 group-hover:text-primary transition-colors">
-              <HugeiconsIcon icon={SignatureIcon} size={20} />
-            </div>
-            <div>
-              <h4 className="font-bold text-slate-900 mb-1">Lease Document</h4>
-              <p className="text-xs text-slate-500 leading-relaxed font-medium">
-                Download a PDF copy of your signed tenancy agreement document.
-              </p>
-            </div>
-          </Link>
+          {/* Only show Lease Document if they have actually signed it */}
+          {!needsSignature && (
+            <Link
+              href={`/user/lease-document/${lease.id}`}
+              className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:border-primary hover:shadow-md transition-all text-left flex flex-col gap-4 group"
+            >
+              <div className="w-10 h-10 bg-slate-50 text-slate-600 rounded-full flex items-center justify-center group-hover:bg-black/10 group-hover:text-primary transition-colors">
+                <HugeiconsIcon icon={SignatureIcon} size={20} />
+              </div>
+              <div>
+                <h4 className="font-bold text-slate-900 mb-1">Lease Document</h4>
+                <p className="text-xs text-slate-500 leading-relaxed font-medium">
+                  Download a PDF copy of your signed tenancy agreement document.
+                </p>
+              </div>
+            </Link>
+          )}
         </div>
       </div>
     </main>

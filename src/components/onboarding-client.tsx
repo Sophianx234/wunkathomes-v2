@@ -651,218 +651,195 @@ export default function OnboardingClient({
         open={!!selectedActivation && !isViewingDocument}
         onOpenChange={(open) => !open && setSelectedActivationId(null)}
       >
-        <SheetContent className="w-full sm:max-w-[440px] p-0 bg-[#FAFAFA] border-l border-zinc-200/60 flex flex-col font-sans shadow-2xl">
+        <SheetContent className="w-full sm:max-w-md p-0 bg-white border-l border-zinc-200 flex flex-col font-sans shadow-2xl">
           {selectedActivation && (
             <>
-              {/* Header Section */}
-              <div className="px-6 pt-10 pb-6 border-b border-zinc-200/60 bg-white">
-                <div className="flex items-center justify-between mb-5">
-                  <Badge
-                    variant="outline"
-                    className={`px-2.5 py-0.5 border-0 rounded-sm text-[10px] uppercase tracking-wider font-bold ${selectedActivation.status === "Active" ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/60" : "bg-amber-50 text-amber-700 ring-1 ring-amber-300/60"}`}
-                  >
-                    {selectedActivation.status.replace(/_/g, " ")}
-                  </Badge>
-                </div>
-
+              {/* --- 1. CLEAN HEADER --- */}
+              <div className="px-6 py-6 border-b border-zinc-100 bg-zinc-50/30 flex items-start justify-between">
                 <div className="flex items-center gap-4">
-                  <Avatar className="h-14 w-14 border border-zinc-200/80 shadow-sm">
+                  <Avatar className="h-12 w-12 border border-zinc-200 shadow-sm">
                     <AvatarImage src={selectedActivation.user.profilePicture} />
-                    <AvatarFallback className="bg-zinc-100 text-zinc-600 text-lg">
+                    <AvatarFallback className="bg-zinc-100 text-zinc-600 font-medium">
                       {selectedActivation.user.name.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <h2 className="text-lg font-semibold tracking-tight text-zinc-900 leading-tight">
+                    <h2 className="text-base font-semibold text-zinc-900 tracking-tight">
                       {selectedActivation.user.name}
                     </h2>
-                    <p className="text-[12px] text-zinc-500 mt-0.5 flex items-center gap-1.5">
+                    <p className="text-[13px] text-zinc-500 mt-0.5">
                       {selectedActivation.user.email}
                     </p>
                   </div>
                 </div>
+                <Badge
+                  variant="outline"
+                  className={`px-2.5 py-0.5 border-0 rounded-full text-[10px] uppercase tracking-widest font-bold ${
+                    selectedActivation.status === "Active"
+                      ? "bg-green-50 text-green-700"
+                      : "bg-zinc-100 text-zinc-600"
+                  }`}
+                >
+                  {selectedActivation.status.replace(/_/g, " ")}
+                </Badge>
               </div>
 
-              {/* Scrollable Content */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                {/* 1. Legal & Paperwork Block */}
-                <section className="bg-white border border-zinc-200/60 rounded-xl p-5 shadow-[0_1px_4px_rgba(0,0,0,0.01)] space-y-5">
-                  <div className="border border-zinc-200/80 rounded-lg overflow-hidden group">
-                    <div
-                      className="h-24 w-full bg-zinc-100 relative cursor-pointer flex items-center justify-center"
-                      onClick={() =>
-                        selectedActivation.user.ghanaCardUrl &&
-                        setExpandedImage(selectedActivation.user.ghanaCardUrl)
-                      }
-                    >
-                      {selectedActivation.user.ghanaCardUrl ? (
-                        <>
-                          <img
-                            src={selectedActivation.user.ghanaCardUrl}
-                            alt="Ghana Card"
-                            className="w-full h-full object-cover mix-blend-multiply opacity-80 group-hover:scale-105 transition-transform duration-500"
-                          />
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/10 transition-colors">
-                            <span className="opacity-0 group-hover:opacity-100 bg-white/90 backdrop-blur-sm text-zinc-900 text-[10px] uppercase font-bold tracking-wider px-3 py-1.5 rounded-full shadow-sm transition-opacity">
-                              View Full Size
-                            </span>
-                          </div>
-                        </>
-                      ) : (
-                        <span className="text-xs text-zinc-400 font-medium">
-                          No ID Photo Uploaded
-                        </span>
-                      )}
-                    </div>
-                    <div className="p-2.5 bg-zinc-50/50 flex justify-between items-center border-t border-zinc-200/60">
-                      <span className="text-[12px] font-mono font-medium text-zinc-700 tracking-tight">
-                        {selectedActivation.user.ghanaCardNumber}
-                      </span>
-                      <HugeiconsIcon
-                        icon={TickDouble01Icon}
-                        size={14}
-                        className={
-                          isLegalApproved ? "text-emerald-500" : "text-zinc-300"
-                        }
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between p-3 rounded-lg border border-zinc-200/60 bg-zinc-50/30">
-                    <span className="text-[12px] font-medium text-zinc-700">
-                      Tenancy Agreement
-                    </span>
-                    {selectedActivation.checklist.leaseSigned === "Signed" ? (
-                      <Badge
-                        variant="outline"
-                        className="bg-emerald-50/50 text-emerald-700 border-emerald-200/60 text-[10px]"
-                      >
-                        Signed
-                      </Badge>
-                    ) : (
-                      <Badge
-                        variant="outline"
-                        className="bg-amber-50/50 text-amber-700 border-amber-300/60 text-[10px]"
-                      >
-                        Awaiting Signature
-                      </Badge>
-                    )}
-                  </div>
-
-                  {/* Trigger Confirmation Actions for Verification */}
-                  {!isLegalApproved &&
-                    selectedActivation.status !== "Active" && (
-                      <div className="flex gap-3">
-                        <Button
-                          className="flex-1 h-9 bg-black text-white rounded-lg hover:bg-zinc-800 text-[12px] font-semibold"
-                          onClick={() => setConfirmAction("approve")}
+              {/* --- 2. SCROLLABLE BODY --- */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-10">
+                
+                {/* A. Document Verification Section */}
+                <section>
+                  <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-4">
+                    Identity & Documents
+                  </h3>
+                  
+                  <div className="space-y-3">
+                    {/* Ghana Card Row */}
+                    <div className="flex items-center justify-between p-3.5 rounded-xl border border-zinc-200 bg-white shadow-sm">
+                      <div className="flex items-center gap-4">
+                        {/* Professional Thumbnail Viewer */}
+                        <button
+                          onClick={() => selectedActivation.user.ghanaCardUrl && setExpandedImage(selectedActivation.user.ghanaCardUrl)}
+                          disabled={!selectedActivation.user.ghanaCardUrl}
+                          className="relative h-12 w-16 bg-zinc-50 rounded-md border border-zinc-200 overflow-hidden group transition-all hover:border-zinc-300 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:ring-offset-2"
                         >
-                          Verify Tenant
-                        </Button>
-                        <Button
-                          variant="outline"
-                          className="flex-1 h-9 border-rose-200 text-rose-700 bg-rose-50 hover:bg-rose-100 hover:text-rose-800 rounded-lg text-[12px] font-semibold"
-                          onClick={() => setConfirmAction("reject")}
-                        >
-                          Reject
-                        </Button>
+                          {selectedActivation.user.ghanaCardUrl ? (
+                            <>
+                              <img
+                                src={selectedActivation.user.ghanaCardUrl}
+                                alt="ID Document"
+                                className="w-full h-full object-cover"
+                              />
+                              <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <HugeiconsIcon icon={Search01Icon} size={14} className="text-white" />
+                              </div>
+                            </>
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <HugeiconsIcon icon={Cancel01Icon} size={14} className="text-zinc-300" />
+                            </div>
+                          )}
+                        </button>
+
+                        <div>
+                          <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest mb-0.5">
+                            National ID
+                          </p>
+                          <p className="font-mono text-[13px] font-medium text-zinc-900 tracking-tight">
+                            {selectedActivation.user.ghanaCardNumber || "Not Provided"}
+                          </p>
+                        </div>
                       </div>
-                    )}
-                </section>
 
-                {/* 2. Physical Access Block */}
-                <section
-                  className={`bg-white border border-zinc-200/60 rounded-xl p-5 shadow-[0_1px_4px_rgba(0,0,0,0.01)] space-y-4 transition-all duration-300 ${!isLegalApproved ? "opacity-50 grayscale pointer-events-none" : ""}`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <HugeiconsIcon
-                        icon={SmartPhone01Icon}
-                        size={18}
-                        className="text-zinc-400"
-                      />
-                      <h3 className="text-[13px] font-semibold text-zinc-900 tracking-tight">
-                        Physical Access
-                      </h3>
+                      <div>
+                        {selectedActivation.checklist.ghanaCardVerified === "Verified" ? (
+                          <HugeiconsIcon icon={CheckmarkCircle01Icon} size={18} className="text-green-500" />
+                        ) : (
+                          <HugeiconsIcon icon={Time01Icon} size={18} className="text-amber-500" />
+                        )}
+                      </div>
                     </div>
-                    {!isLegalApproved && (
-                      <HugeiconsIcon
-                        icon={Key01Icon}
-                        size={14}
-                        className="text-zinc-300"
-                      />
-                    )}
+
+                    {/* Lease Agreement Row */}
+                    <div className="flex items-center justify-between p-3.5 rounded-xl border border-zinc-200 bg-white shadow-sm">
+                      <div className="flex items-center gap-4">
+                        <div className="h-12 w-12 bg-zinc-50 rounded-md border border-zinc-200 flex items-center justify-center">
+                          <HugeiconsIcon icon={FileDownloadIcon} size={18} className="text-zinc-400" />
+                        </div>
+                        <div>
+                          <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest mb-0.5">
+                            Tenancy Agreement
+                          </p>
+                          <button 
+                            onClick={() => setIsViewingDocument(true)}
+                            disabled={selectedActivation.checklist.leaseSigned !== "Signed"}
+                            className="text-[13px] font-medium text-zinc-900 hover:underline underline-offset-4 disabled:no-underline disabled:text-zinc-400 text-left"
+                          >
+                            {selectedActivation.checklist.leaseSigned === "Signed" ? "View Signed Document" : "Awaiting Tenant Signature"}
+                          </button>
+                        </div>
+                      </div>
+                      <div>
+                        {selectedActivation.checklist.leaseSigned === "Signed" ? (
+                          <HugeiconsIcon icon={CheckmarkCircle01Icon} size={18} className="text-green-500" />
+                        ) : (
+                          <HugeiconsIcon icon={Time01Icon} size={18} className="text-amber-500" />
+                        )}
+                      </div>
+                    </div>
                   </div>
 
-                  <p className="text-[12px] text-zinc-500 leading-relaxed">
-                    Provision the smart lock at{" "}
-                    <span className="font-medium text-zinc-700">
-                      {selectedActivation.lease.propertyName} (
-                      {selectedActivation.lease.unitNumber})
-                    </span>
-                    . The tenant will receive their PIN via SMS instantly.
-                  </p>
-
-                  {selectedActivation.smartLockPin ? (
-                    <div className="mt-4 p-4 rounded-xl border border-emerald-200/60 bg-emerald-50/30 flex flex-col items-center justify-center space-y-2 animate-in fade-in zoom-in-95 duration-300">
-                      <p className="text-[11px] font-bold text-emerald-600 uppercase tracking-widest">
-                        Active PIN Code
-                      </p>
-                      <p className="text-3xl font-mono font-semibold tracking-[0.2em] text-zinc-900">
-                        {selectedActivation.smartLockPin}
-                      </p>
-                      <p className="text-[11px] text-emerald-700/80 font-medium">
-                        Successfully synced to hardware.
-                      </p>
+                  {/* Admin Decision Actions */}
+                  {!isLegalApproved && selectedActivation.status !== "Active" && (
+                    <div className="mt-4 flex gap-3">
+                      <Button
+                        className="flex-1 h-9 bg-zinc-900 text-white hover:bg-zinc-800 text-[12px] font-medium rounded-lg"
+                        onClick={() => setConfirmAction("approve")}
+                      >
+                        Approve Documents
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="flex-1 h-9 border-zinc-200 text-zinc-700 hover:bg-zinc-50 text-[12px] font-medium rounded-lg"
+                        onClick={() => setConfirmAction("reject")}
+                      >
+                        Request Resubmission
+                      </Button>
                     </div>
-                  ) : (
-                    <Button
-                      className="w-full h-10 mt-2 rounded-lg bg-black text-white hover:bg-zinc-800 text-[13px] font-semibold shadow-sm"
-                      onClick={() => setConfirmAction("pin")}
-                    >
-                      <HugeiconsIcon
-                        icon={Key01Icon}
-                        size={14}
-                        className="mr-2"
-                      />{" "}
-                      Generate & Sync Smart Lock PIN
-                    </Button>
                   )}
                 </section>
 
-                {!isLegalApproved && (
-                  <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 border border-amber-200/50">
-                    <HugeiconsIcon
-                      icon={Alert01Icon}
-                      size={14}
-                      className="text-amber-600 mt-0.5 shrink-0"
-                    />
-                    <p className="text-[11px] font-medium text-amber-800 leading-tight">
-                      Smart lock provisioning is locked until all identity
-                      documents and Tenancy Agreements are verified and
-                      approved.
-                    </p>
-                  </div>
-                )}
-              </div>
+                <div className="h-px w-full bg-zinc-100" />
 
-              {/* Fixed Footer */}
-              <div className="w-full p-4 border-t border-zinc-200/60 bg-white shadow-[0_-4px_12px_rgba(0,0,0,0.02)]">
-                <Button
-                  variant="outline"
-                  className="w-full rounded-lg h-10 border-zinc-200 hover:bg-zinc-50 text-zinc-900 font-medium disabled:bg-zinc-50 disabled:text-zinc-400"
-                  onClick={() => setIsViewingDocument(true)}
-                  disabled={
-                    selectedActivation.checklist.leaseSigned !== "Signed"
-                  }
-                >
-                  <HugeiconsIcon
-                    icon={FileDownloadIcon}
-                    size={16}
-                    className={`mr-2 ${selectedActivation.checklist.leaseSigned !== "Signed" ? "text-zinc-300" : "text-zinc-500"}`}
-                  />{" "}
-                  View Tenancy Agreement
-                </Button>
+                {/* B. Property Access Section */}
+                <section className={`transition-opacity duration-300 ${!isLegalApproved ? "opacity-40 pointer-events-none" : ""}`}>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
+                      Property Access
+                    </h3>
+                    {!isLegalApproved && <HugeiconsIcon icon={Key01Icon} size={14} className="text-zinc-300" />}
+                  </div>
+
+                  <div className="p-5 rounded-xl border border-zinc-200 bg-zinc-50/50">
+                    <p className="text-[13px] text-zinc-600 leading-relaxed mb-5">
+                      Provision digital access for <span className="font-semibold text-zinc-900">{selectedActivation.lease.propertyName} ({selectedActivation.lease.unitNumber})</span>. The tenant will receive their entry PIN securely via SMS.
+                    </p>
+
+                    {selectedActivation.smartLockPin ? (
+                      <div className="flex items-center justify-between p-4 bg-white border border-zinc-200 rounded-lg shadow-sm">
+                        <div>
+                          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">
+                            Active PIN Code
+                          </p>
+                          <p className="text-xl font-mono font-semibold tracking-[0.2em] text-zinc-900">
+                            {selectedActivation.smartLockPin}
+                          </p>
+                        </div>
+                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-[10px]">
+                          Synced
+                        </Badge>
+                      </div>
+                    ) : (
+                      <Button
+                        className="w-full h-10 bg-zinc-900 text-white hover:bg-zinc-800 text-[13px] font-medium rounded-lg shadow-sm"
+                        onClick={() => setConfirmAction("pin")}
+                      >
+                        <HugeiconsIcon icon={Key01Icon} size={14} className="mr-2" />
+                        Generate Smart Lock PIN
+                      </Button>
+                    )}
+                  </div>
+
+                  {!isLegalApproved && (
+                    <div className="mt-3 flex items-start gap-2 text-zinc-500">
+                      <HugeiconsIcon icon={Alert01Icon} size={14} className="mt-0.5 shrink-0" />
+                      <p className="text-[12px] leading-tight">
+                        Access provisioning is disabled until all tenant documents are approved.
+                      </p>
+                    </div>
+                  )}
+                </section>
+
               </div>
             </>
           )}

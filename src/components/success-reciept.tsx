@@ -7,9 +7,8 @@ import {
   CheckmarkBadge01Icon,
   PrinterIcon,
   ArrowRight01Icon,
-  CreditCardPosIcon,
   Shield02Icon,
-  Home09Icon // Added this icon for the dashboard return
+  Home09Icon 
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import PrintReceipt from "./print-reciept";
@@ -41,7 +40,7 @@ export default function SuccessReceipt({ transaction }: SuccessReceiptProps) {
     : "Accra, Ghana";
 
   // =================================================================
-  // THE PERFECTED ROUTING FIX (Handles Renewals + KYC)
+  // ROUTING LOGIC (Maintained exactly as is)
   // =================================================================
   const isRenewal = transaction.paymentPurpose === "Lease_Renewal";
   const isVerified = transaction.userId?.kycStatus === "Verified";
@@ -52,17 +51,14 @@ export default function SuccessReceipt({ transaction }: SuccessReceiptProps) {
   let ButtonIcon = ArrowRight01Icon;
 
   if (isRenewal) {
-    // SCENARIO 1: It's a renewal (Skip KYC and Signing)
     continueUrl = "/user/dashboard";
     buttonText = "Return to Dashboard";
     ButtonIcon = Home09Icon;
   } else if (isVerified) {
-    // SCENARIO 2: New Booking, but user is already KYC Verified
     continueUrl = `/user/sign-lease?leaseId=${targetLeaseId}`;
     buttonText = "Sign Tenancy Agreement";
     ButtonIcon = ArrowRight01Icon;
   } else {
-    // SCENARIO 3: Brand New User (Needs KYC Verification)
     continueUrl = `/user/leases`;
     buttonText = "Verify Identity to Continue";
     ButtonIcon = Shield02Icon;
@@ -70,18 +66,20 @@ export default function SuccessReceipt({ transaction }: SuccessReceiptProps) {
 
   return (
     <>
-      <div className="max-w-3xl mx-auto w-full print:hidden">
-        <div className="flex flex-col items-center text-center mb-10">
+      <div className="max-w-2xl mx-auto w-full print:hidden font-sans">
+        
+        {/* --- 1. MINIMALIST HEADER --- */}
+        <div className="flex flex-col items-center text-center mb-10 mt-4">
           <motion.div
-            initial={{ scale: 0, opacity: 0 }}
+            initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: "spring", stiffness: 200, damping: 20 }}
-            className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mb-6 border border-green-100"
+            className="w-12 h-12 bg-zinc-900 rounded-full flex items-center justify-center mb-6 shadow-sm"
           >
             <HugeiconsIcon
               icon={CheckmarkBadge01Icon}
-              size={40}
-              className="text-white fill-green-500"
+              size={24}
+              className="text-white"
             />
           </motion.div>
 
@@ -89,7 +87,7 @@ export default function SuccessReceipt({ transaction }: SuccessReceiptProps) {
             initial={{ y: 10, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.1 }}
-            className="text-3xl md:text-4xl font-black uppercase tracking-tight text-slate-900 mb-3"
+            className="text-2xl font-semibold tracking-tight text-zinc-900 mb-2"
           >
             Payment Successful
           </motion.h1>
@@ -98,169 +96,123 @@ export default function SuccessReceipt({ transaction }: SuccessReceiptProps) {
             initial={{ y: 10, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="text-slate-500 text-base font-medium max-w-md"
+            className="text-[13px] text-zinc-500 font-medium"
           >
-            Your transaction is confirmed. A copy of this receipt has been
-            securely logged to your account ledger.
+            Your payment is confirmed. You can view your receipt anytime in your dashboard.
           </motion.p>
         </div>
 
+        {/* --- 2. THE LEDGER RECEIPT --- */}
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.3 }}
-          className="bg-white border border-slate-200 rounded-2xl overflow-hidden"
+          className="bg-white border border-zinc-200/80 rounded-2xl "
         >
-          <div className="h-2 w-full bg-zinc-950" />
+          {/* Top Amount Banner */}
+          <div className="p-8 md:p-10 border-b border-zinc-100 flex flex-col items-center justify-center">
+            <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-3">
+              Total Amount Paid
+            </p>
+            <h2 className="text-4xl font-light tracking-tighter text-zinc-900">
+              GHS {transaction.amount?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+            </h2>
+            <div className="mt-4 flex items-center gap-1.5 px-3 py-1 bg-green-50 rounded-full border border-green-100/50">
+              <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+              <span className="text-[10px] font-bold uppercase tracking-widest text-green-700">Verified</span>
+            </div>
+          </div>
 
-          <div className="p-6 md:p-10">
-            {/* Section 1: Transaction Details */}
-            <div className="mb-10">
-              <h2 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
-                <HugeiconsIcon
-                  icon={CreditCardPosIcon}
-                  size={24}
-                  className="text-slate-400"
-                />
-                Transaction Details
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 text-sm">
-                <div className="flex flex-col">
-                  <span className="text-slate-500 mb-1 font-medium">
-                    Reference Number:
-                  </span>
-                  <span className="font-mono font-bold text-slate-900 bg-slate-100 px-2 py-1 rounded w-fit">
-                    {transaction.reference}
-                  </span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-slate-500 mb-1 font-medium">
-                    Date & Time:
-                  </span>
-                  <span className="font-bold text-slate-900">
-                    {formattedDateTimeFull}
-                  </span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-slate-500 mb-1 font-medium">
-                    Payment Method:
-                  </span>
-                  <span className="font-bold text-slate-900 capitalize">
-                    Paystack ({transaction.channel || "Secure Gateway"})
-                  </span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-slate-500 mb-1 font-medium">
-                    Status:
-                  </span>
-                  <span className="font-bold text-green-600 flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />{" "}
-                    Verified
-                  </span>
-                </div>
-              </div>
+          <div className="p-8 md:p-10 space-y-8">
+            
+            {/* Section: Transaction Specs */}
+            <div className="space-y-4">
+              <ReceiptRow label="Reference ID" value={transaction.reference} isMono />
+              <ReceiptRow label="Date & Time" value={formattedDateTimeFull} />
+              <ReceiptRow label="Payment Method" value={`Paystack (${transaction.channel || "Secure Gateway"})`} />
+              <ReceiptRow label="Transaction Type" value={isRenewal ? "Lease Extension" : "Upfront Rent"} />
             </div>
 
-            <hr className="border-dashed border-slate-200 mb-10" />
+            <div className="w-full h-px bg-zinc-100" />
 
-            {/* Section 2: Property & Financials */}
-            <div className="mb-10">
-              <h2 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
-                {isRenewal ? "Renewal Details" : "Property Details"}
-              </h2>
-
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-                <div>
-                  <h3 className="font-bold text-lg text-slate-900">
-                    {transaction.listingId?.title || "WunkatHomes Property"}
-                  </h3>
-                  <p className="text-slate-500 text-sm font-medium">
-                    {locationString}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-slate-500 text-sm font-medium mb-1">
-                    {isRenewal ? "Lease Extension" : "Upfront Rent"}
-                  </p>
-                  <p className="font-black text-xl text-slate-900">
-                    GHS {transaction.amount?.toLocaleString()}
-                  </p>
-                </div>
-              </div>
-
-              <div className="bg-slate-50 rounded-xl p-5 border border-slate-100">
-                <div className="flex justify-between items-center mb-3 text-sm font-medium text-slate-600">
-                  <span>Subtotal</span>
-                  <span>GHS {transaction.amount?.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between items-center mb-4 text-sm font-medium text-slate-600">
-                  <span>Agency Fees / Taxes</span>
-                  <span className="text-green-600 font-bold">Free</span>
-                </div>
-                <div className="flex justify-between items-center pt-4 border-t border-slate-200">
-                  <span className="font-bold text-slate-900 uppercase tracking-widest text-xs">
-                    Total Paid
-                  </span>
-                  <span className="font-black text-2xl text-slate-900">
-                    GHS {transaction.amount?.toLocaleString()}
-                  </span>
-                </div>
-              </div>
+            {/* Section: Property & User Specs */}
+            <div className="space-y-4">
+              <ReceiptRow 
+                label={isRenewal ? "Renewal Property" : "Reserved Property"} 
+                value={transaction.listingId?.title || "WunkatHomes Property"} 
+                subValue={locationString} 
+              />
+              <ReceiptRow label="Tenant Name" value={transaction.userId?.name || "Verified User"} />
+              <ReceiptRow label="Contact Email" value={transaction.userId?.email || "N/A"} />
             </div>
 
-            <hr className="border-dashed border-slate-200 mb-10" />
+            <div className="w-full h-px bg-zinc-100" />
 
-            {/* Section 3: Tenant Details */}
-            <div>
-              <h2 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
-                Tenant Details
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm">
-                <div className="flex flex-col">
-                  <span className="text-slate-500 mb-1 font-medium">
-                    Registered Name
-                  </span>
-                  <span className="font-bold text-slate-900">
-                    {transaction.userId?.name || "Verified User"}
-                  </span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-slate-500 mb-1 font-medium">
-                    Contact Email
-                  </span>
-                  <span className="font-bold text-slate-900">
-                    {transaction.userId?.email || "N/A"}
-                  </span>
-                </div>
-              </div>
+            {/* Section: Breakdown */}
+            <div className="space-y-4">
+              <ReceiptRow label="Subtotal" value={`GHS ${transaction.amount?.toLocaleString()}`} />
+              <ReceiptRow label="Platform & Agency Fees" value="Free" valueClass="text-zinc-400" />
             </div>
+
           </div>
         </motion.div>
 
-        {/* --- ACTIONS --- */}
+        {/* --- 3. ACTIONS --- */}
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.4 }}
-          className="flex flex-col sm:flex-row gap-4 mt-8"
+          className="flex flex-col sm:flex-row gap-3 mt-8"
         >
           <button
             onClick={handlePrint}
-            className="flex-1 py-4 bg-white border border-slate-200 text-slate-700 font-bold uppercase tracking-widest text-sm rounded-xl hover:bg-slate-50 transition-colors flex items-center justify-center gap-2"
+            className="flex-1 h-12 bg-white border border-zinc-200 text-zinc-700 text-[13px] font-semibold rounded-xl hover:bg-zinc-50 transition-colors flex items-center justify-center gap-2"
           >
-            <HugeiconsIcon icon={PrinterIcon} size={18} /> Download Receipt
+            <HugeiconsIcon icon={PrinterIcon} size={16} /> Download Receipt
           </button>
           
           <Link
             href={continueUrl}
-            className="flex-1 py-4 bg-black text-white font-bold uppercase tracking-widest text-sm rounded-xl hover:bg-zinc-800 transition-colors flex items-center justify-center gap-2"
+            className="flex-1 h-12 bg-zinc-900 text-white text-[13px] font-semibold rounded-xl hover:bg-zinc-800 transition-colors flex items-center justify-center gap-2 shadow-sm"
           >
             {buttonText}
+            <HugeiconsIcon icon={ButtonIcon} size={16} />
           </Link>
         </motion.div>
       </div>
 
       <PrintReceipt transaction={transaction} />
     </>
+  );
+}
+
+// --- HELPER COMPONENT FOR CLEAN LEDGER ROWS ---
+function ReceiptRow({ 
+  label, 
+  value, 
+  subValue, 
+  isMono = false,
+  valueClass = "text-zinc-900"
+}: { 
+  label: string; 
+  value: string; 
+  subValue?: string; 
+  isMono?: boolean;
+  valueClass?: string;
+}) {
+  return (
+    <div className="flex items-start justify-between gap-4">
+      <span className="text-[12px] font-medium text-zinc-500 mt-0.5">{label}</span>
+      <div className="text-right">
+        <span className={`block text-[13px] ${isMono ? 'font-mono font-medium tracking-tight' : 'font-semibold'} ${valueClass}`}>
+          {value}
+        </span>
+        {subValue && (
+          <span className="block text-[11px] text-zinc-400 mt-0.5 font-medium">
+            {subValue}
+          </span>
+        )}
+      </div>
+    </div>
   );
 }
