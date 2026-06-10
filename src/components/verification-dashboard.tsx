@@ -534,7 +534,7 @@ export function VerificationDashboard({
                     {isLeaseSigned ? (
                       // Path A: Everything Submitted, waiting on Admin
                       <>
-                        <div className="w-20 h-20 bg-amber-50 text-amber-500 rounded-full flex items-center justify-center mb-6">
+                        <div className="w-20 h-20 bg-black text-white rounded-full flex items-center justify-center mb-6">
                           <HugeiconsIcon icon={Time01Icon} size={40} />
                         </div>
                         <h3 className="text-2xl font-bold text-slate-900 mb-2">
@@ -554,7 +554,7 @@ export function VerificationDashboard({
                     ) : (
                       // Path B: KYC submitted, but Lease is unsigned
                       <>
-                        <div className="w-20 h-20 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mb-6">
+                        <div className="w-20 h-20 bg-blue-50  rounded-full flex items-center justify-center mb-6">
                           <HugeiconsIcon icon={SignatureIcon} size={40} />
                         </div>
                         <h3 className="text-2xl font-bold text-slate-900 mb-2">

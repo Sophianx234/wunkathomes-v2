@@ -52,7 +52,7 @@ export async function submitIdentityVerification(formData: FormData) {
 
     // 2. Automatically advance any leases waiting on this verification
     // This looks for leases owned by the user that are stuck at the KYC step
-    await Lease.updateMany(
+   /*  await Lease.updateMany(
       { 
         userId: userId, 
         status: "Pending_Verification" 
@@ -60,7 +60,7 @@ export async function submitIdentityVerification(formData: FormData) {
       { 
         $set: { status: "Awaiting_Admin_Approval" } 
       }
-    );
+    ); */
 
     revalidatePath("/dashboard/leases");
     return { success: true, message: "Verification submitted successfully." };

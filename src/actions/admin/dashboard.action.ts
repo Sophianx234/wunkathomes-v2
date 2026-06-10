@@ -7,6 +7,9 @@ import Property from "@/models/property";
 import Review from "@/models/review";
 import Tour from "@/models/tour";
 import Transaction from "@/models/transaction";
+// 1. Import the missing models needed for the dynamic alerts
+import User from "@/models/user"; 
+import Maintenance from "@/models/maintenance"; 
 
 export async function getDashboardData() {
   await connectToDatabase();
@@ -15,7 +18,7 @@ export async function getDashboardData() {
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-  // 1. Metrics & Aggregations
+  // 1. Metrics & Aggregations (Running all queries in parallel for max performance)
   const [
     monthlyRevenueRes,
     outstandingRentRes,
@@ -23,20 +26,23 @@ export async function getDashboardData() {
     listingStats,
     tourStats,
     pendingBankTransfers,
+    pendingKYC,            // NEW: Added for Alerts
+    pendingLeases,         // NEW: Added for Alerts
+    urgentMaintenance      // NEW: Added for Alerts
   ] = await Promise.all([
-    // Monthly Revenue (Successful transactions this month)
+    // Monthly Revenue
     Transaction.aggregate([
       { $match: { status: "Success", paidAt: { $gte: startOfMonth } } },
       { $group: { _id: null, total: { $sum: "$amount" } } }
     ]),
     
-    // Outstanding Rent (Active leases with missing payments)
+    // Outstanding Rent
     Lease.aggregate([
       { $match: { status: { $in: ["Awaiting_Payment", "Active"] } } },
-      { $group: { _id: null, total: { $sum: "$totalRentAmount" } } } // Simplification for demo
+      { $group: { _id: null, total: { $sum: "$totalRentAmount" } } } 
     ]),
 
-    // Unverified Funds (Pending transactions)
+    // Unverified Funds
     Transaction.aggregate([
       { $match: { status: "Pending" } },
       { $group: { _id: null, total: { $sum: "$amount" } } }
@@ -54,48 +60,54 @@ export async function getDashboardData() {
 
     // Tours scheduled today
     Tour.countDocuments({ 
-      scheduledDate: { $gte: startOfToday, $lt: new Date(startOfToday.getTime() + 86400000) } 
+      scheduledDate: { $gte: startOfToday, $lt: new Date(startOfToday.getTime() + 86400000) },
+      status: "Pending_Time"
     }),
 
-    // Pending bank transfers (assumed channel 'bank' + status 'Pending')
-    Transaction.countDocuments({ channel: "bank", status: "Pending" })
+    // Pending bank transfers 
+    Transaction.countDocuments({ channel: "bank", status: "Pending" }),
+
+    // NEW: Count users waiting for KYC approval
+    User.countDocuments({ kycStatus: "Pending" }),
+
+    // NEW: Count leases waiting for Admin approval or verification
+    Lease.countDocuments({ status: { $in: ["Pending_Verification", "Awaiting_Admin_Approval"] } }),
+
+    // NEW: Count high-priority maintenance requests
+    Maintenance.countDocuments({ priority: { $in: ["Emergency", "High"] }, status: "Pending" })
   ]);
 
   const metrics = {
     monthlyRevenue: monthlyRevenueRes[0]?.total || 0,
-    revenueTrend: 8.2, // This would normally compare against last month's aggregate
+    revenueTrend: 8.2, 
     outstandingRent: outstandingRentRes[0]?.total || 0,
     unverifiedFunds: unverifiedFundsRes[0]?.total || 0,
     unverifiedTrend: -1.2,
     totalListings: listingStats[0]?.total || 0,
     rentedListings: listingStats[0]?.rented || 0,
-    onlineLocks: listingStats[0]?.smartLocks || 0, // Simplified: assuming all with locks are online
+    onlineLocks: listingStats[0]?.smartLocks || 0, 
     totalLocks: listingStats[0]?.smartLocks || 0,
     activeTours: await Tour.countDocuments({ status: { $in: ["Pending_Time", "Confirmed"] } }),
+    
+    // THE 5 DYNAMIC ALERT TRIGGERS
     toursToday: tourStats,
+    pendingToursToday: tourStats, 
     pendingBankTransfers: pendingBankTransfers,
-    pendingToursToday: tourStats,
+    pendingKYC: pendingKYC,
+    pendingLeases: pendingLeases,
+    urgentMaintenance: urgentMaintenance,
   };
 
   // 2. Recent Data Lists (Populating relations)
   const [recentTransactions, dueRentsData, recentListingsData, recentReviewsData, propertyData] = await Promise.all([
-    // Transactions
     Transaction.find().sort({ createdAt: -1 }).limit(4).populate('userId', 'name').populate('listingId', 'title'),
-    
-    // Leases for "Due Rents"
     Lease.find({ status: { $in: ["Awaiting_Payment", "Pending_Verification"] } })
       .sort({ createdAt: -1 })
       .limit(4)
       .populate('userId', 'name')
       .populate('listingId', 'title'),
-      
-    // Recent Listings
     Listing.find().sort({ createdAt: -1 }).limit(4).populate('propertyId', 'location'),
-
-    // Reviews
     Review.find().sort({ createdAt: -1 }).limit(3).populate('userId', 'name email profilePicture').populate('listingId', 'title'),
-
-    // Property Type Stats
     Property.aggregate([
       { $group: { _id: "$propertyType", total: { $sum: 1 } } }
     ])
@@ -109,7 +121,7 @@ export async function getDashboardData() {
     amount: t.amount,
     method: t.channel === "card" || t.channel === "mobile_money" ? "Paystack" : "Bank_Transfer",
     status: t.status === "Pending" ? "Pending_Verification" : "Completed",
-    time: new Date(t.createdAt).toLocaleDateString(), // Simplification
+    time: new Date(t.createdAt).toLocaleDateString(), 
   }));
 
   const dueRents = dueRentsData.map(l => ({
@@ -117,7 +129,7 @@ export async function getDashboardData() {
     tenant: l.userId?.name || "Unknown User",
     target: l.listingId?.title || "Property",
     amountDue: l.totalRentAmount,
-    dueDate: "Action Required", // Needs actual due date logic if added to schema
+    dueDate: "Action Required", 
     status: l.status === "Awaiting_Payment" ? "Overdue" : "Upcoming"
   }));
 
@@ -142,13 +154,13 @@ export async function getDashboardData() {
     rating: r.rating,
     comment: r.comment || "No comment provided.",
     date: new Date(r.createdAt).toLocaleDateString(),
-    status: "Published" // Hardcoded as reviewSchema lacks status
+    status: "Published" 
   }));
 
   const propertyTypeStats = propertyData.map(p => ({
     type: p._id.replace('_', ' '),
     total: p.total,
-    occupied: Math.floor(p.total * 0.8) // Mocking occupancy per type since it requires complex join logic
+    occupied: Math.floor(p.total * 0.8) 
   }));
 
   // ---------------------------------------------------------
@@ -198,8 +210,8 @@ export async function getDashboardData() {
     {
       $group: {
         _id: {
-          month: { $month: "$paidAt" }, // Extracts month (1-12)
-          channel: "$channel"           // 'card', 'mobile_money', 'bank'
+          month: { $month: "$paidAt" }, 
+          channel: "$channel"          
         },
         totalAmount: { $sum: "$amount" }
       }
@@ -214,7 +226,7 @@ export async function getDashboardData() {
   }));
 
   revenueStats.forEach(stat => {
-    const monthIndex = stat._id.month - 1; // Convert 1-12 to 0-11 index
+    const monthIndex = stat._id.month - 1; 
     const amount = stat.totalAmount;
     const channel = stat._id.channel;
 

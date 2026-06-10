@@ -18,7 +18,10 @@ import {
   OfficeChairIcon,
   SmartPhone01Icon,
   StarIcon,
-  Wallet02Icon
+  Wallet02Icon,
+  Wrench01Icon, // For maintenance alerts
+  Shield02Icon,
+  UserIdVerificationIcon, // For KYC alerts
 } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import Link from "next/link"
@@ -35,7 +38,6 @@ import {
   YAxis
 } from "recharts"
 
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -115,10 +117,27 @@ const renderStars = (rating: number) => {
 }
 
 // --- COMPONENT TYPES ---
-// Extracted from the server action return signature
 type DashboardProps = {
   data: {
-    metrics: any;
+    metrics: {
+      monthlyRevenue: number;
+      revenueTrend: number;
+      rentedListings: number;
+      totalListings: number;
+      unverifiedFunds: number;
+      unverifiedTrend: number;
+      outstandingRent: number;
+      totalLocks: number;
+      onlineLocks: number;
+      activeTours: number;
+      toursToday: number;
+      // DYNAMIC ALERT METRICS (Ensure these are passed from server)
+      pendingBankTransfers: number;
+      pendingToursToday: number;
+      pendingKYC: number;
+      pendingLeases: number;
+      urgentMaintenance: number;
+    };
     recentPayments: any[];
     dueRents: any[];
     recentListings: any[];
@@ -129,8 +148,6 @@ type DashboardProps = {
   }
 }
 
-// --- COMPONENT ---
-// Changed to accept data as props. The fetching should happen in the page.tsx wrapper.
 export default function PortfolioDashboardClient({ data }: DashboardProps) {
   const [isMounted, setIsMounted] = React.useState(false)
 
@@ -153,26 +170,100 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
 
   const totalAssets = assetChartData.reduce((acc, curr) => acc + curr.count, 0)
 
+// ============================================================================
+  // DYNAMIC ALERTS ENGINE
+  // ============================================================================
+  const activeAlerts = [];
+
+  // 1. Critical Operational Blockers (Maintenance)
+  if (metrics.urgentMaintenance > 0) {
+    activeAlerts.push({
+      id: 'maintenance',
+      icon: Wrench01Icon,
+      title: "Urgent Maintenance",
+      message: `There are ${metrics.urgentMaintenance} urgent maintenance request${metrics.urgentMaintenance>1&&'s'} waiting to be resolved.`,
+      link: "/admin/maintenance",
+      containerClass: "bg-rose-50 border-rose-200 text-rose-900",
+      iconClass: "bg-rose-100 text-rose-600",
+      btnClass: "bg-zinc-950 hover:bg-zinc-800 text-white border-transparent shadow-sm",
+    });
+  }
+
+  // 2. Onboarding Bottlenecks (KYC & Leases)
+  if (metrics.pendingKYC > 0 || metrics.pendingLeases > 0) {
+    activeAlerts.push({
+      id: 'onboarding',
+      icon: UserIdVerificationIcon,
+      title: "New Tenant Approvals",
+      message: `${metrics.pendingKYC} ID verification${metrics.pendingKYC>1?'s':''} and ${metrics.pendingLeases} lease${metrics.pendingLeases>1?'s':''} need your approval before the tenants can move in.`,
+      link: "/admin/manage/tenants/onboarding",
+      containerClass: "bg-amber-50 border-amber-200 text-amber-900",
+      iconClass: "bg-amber-100 text-amber-600",
+      btnClass: "bg-zinc-950 hover:bg-zinc-800 text-white border-transparent shadow-sm",
+    });
+  }
+
+  // 3. Financial Reconciliations (Bank Transfers)
+  if (metrics.pendingBankTransfers > 0) {
+    activeAlerts.push({
+      id: 'finance',
+      icon: BankIcon,
+      title: "Pending Bank Transfers",
+      message: `${metrics.pendingBankTransfers} bank transfer${metrics.pendingBankTransfers>1?'s':''} need to be reviewed and confirmed.`,
+      link: "/admin/manage/transactions",
+      containerClass: "bg-blue-50 border-blue-200 text-blue-900",
+      iconClass: "bg-blue-100 text-blue-600",
+      btnClass: "bg-zinc-950 hover:bg-zinc-800 text-white border-transparent shadow-sm",
+    });
+  }
+
+  // 4. Daily Operations (Tours)
+  if (metrics.pendingToursToday > 0) {
+    activeAlerts.push({
+      id: 'tours',
+      icon: Calendar01Icon,
+      title: "Today's Tours",
+      message: `You have ${metrics.pendingToursToday} property tour${metrics.pendingToursToday>1?'s':''} happening today.`,
+      link: "/admin/manage/tours",
+      containerClass: "bg-zinc-100 border-zinc-200 text-zinc-900",
+      iconClass: "bg-white text-zinc-600",
+      btnClass: "bg-zinc-950 hover:bg-zinc-800 text-white border-transparent shadow-sm",
+    });
+  }
+
   return (
-    <div className="min-h-screen bg-[#FDFDFD] p-4 lg:p-8 lg:pt-0 font-sans">
+    <div className="min-h-screen bg-[#FDFDFD] p-4 lg:p-8 lg:pt-0 font-sans selection:bg-zinc-200">
       <div className="mx-auto max-w-[1500px] space-y-6">
         
-        {/* HEADER & ALERTS */}
-        <div className="flex flex-col gap-4">
-          {(metrics.pendingBankTransfers > 0 || metrics.pendingToursToday > 0) && (
-            <Alert className="flex items-center justify-between rounded-lg border-transparent  bg-amber-50/50 pb-3 text-amber-800 ">
-              <div className="flex items-center gap-3">
-                <AlertDescription className="text-[13px] font-medium mt-0">
-                  <span className="mr-2 font-bold tracking-tight">Requires Attention:</span>
-                  {metrics.pendingBankTransfers} bank transfers await verification, and {metrics.pendingToursToday} site tours are scheduled for today.
-                </AlertDescription>
+        {/* ========================================================= */}
+        {/* DYNAMIC ALERT STACK */}
+        {/* ========================================================= */}
+        {activeAlerts.length > 0 && (
+          <div className="flex flex-col gap-3">
+            {activeAlerts.map((alert) => (
+              <div 
+                key={alert.id} 
+                className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl border transition-all ${alert.containerClass}`}
+              >
+                <div className="flex items-center gap-4">
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${alert.iconClass}`}>
+                    <HugeiconsIcon icon={alert.icon} size={20} />
+                  </div>
+                  <div>
+                    <h4 className="text-[13px] font-bold tracking-tight mb-0.5">{alert.title}</h4>
+                    <p className="text-[12px] font-medium opacity-90 leading-relaxed">{alert.message}</p>
+                  </div>
+                </div>
+                <Link 
+                  href={alert.link} 
+                  className={`shrink-0 px-5 py-2.5 border text-[11px] font-bold uppercase tracking-widest rounded-lg transition-colors flex items-center justify-center ${alert.btnClass}`}
+                >
+                  Review Action <HugeiconsIcon icon={ArrowRight01Icon} size={14} className="ml-1.5" />
+                </Link>
               </div>
-              <Link href="/admin/transactions" className="flex items-center text-[12px] font-semibold transition-opacity hover:opacity-70">
-                Review Queue <HugeiconsIcon icon={ArrowRight01Icon} strokeWidth={2} className="ml-1 size-3.5" />
-              </Link>
-            </Alert>
-          )}
-        </div>
+            ))}
+          </div>
+        )}
 
         {/* --- GRID LAYOUT --- */}
         <div className="flex flex-col gap-5">
@@ -183,12 +274,12 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
             {/* Left Col (4 Cards - 2x2 Grid) */}
             <div className="grid grid-cols-2 gap-5 lg:col-span-8">
               {/* Card 1: Revenue */}
-              <Card className="rounded-lg border-transparent border shadow-none bg-white">
+              <Card className="rounded-lg border-transparent border shadow-none bg-white border-zinc-200/50">
                 <div className="flex flex-col p-6 h-full justify-center">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-foreground">Total Revenue</span>
                     <div className="flex  items-center justify-center   ">
-                      <HugeiconsIcon icon={Wallet02Icon} strokeWidth={1} className="size-10" />
+                      <HugeiconsIcon icon={Wallet02Icon} strokeWidth={1} className="size-10 text-zinc-400" />
                     </div>
                   </div>
                   <div className="mt-4 flex flex-col">
@@ -207,12 +298,12 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
               </Card>
 
               {/* Card 2: Occupancy */}
-              <Card className="rounded-lg shadow-none bg-white">
+              <Card className="rounded-lg shadow-none bg-white border border-zinc-200/50">
                 <div className="flex flex-col p-6 h-full justify-center">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-foreground">Occupied Units</span>
                     <div className="flex  items-center justify-center rounded-lg  ">
-                      <HugeiconsIcon icon={House03Icon} strokeWidth={1} className="size-10" />
+                      <HugeiconsIcon icon={House03Icon} strokeWidth={1} className="size-10 text-zinc-400" />
                     </div>
                   </div>
                   <div className="mt-4 flex flex-col">
@@ -231,12 +322,12 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
               </Card>
 
               {/* Card 3: Unverified Funds */}
-              <Card className="rounded-lg shadow-none bg-white">
+              <Card className="rounded-lg shadow-none bg-white border border-zinc-200/50">
                 <div className="flex flex-col p-6 h-full justify-center">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-foreground">Pending Verifications</span>
                     <div className="flex  items-center justify-center rounded-lg  ">
-                      <HugeiconsIcon icon={BankIcon} strokeWidth={1} className="size-10" />
+                      <HugeiconsIcon icon={BankIcon} strokeWidth={1} className="size-10 text-zinc-400" />
                     </div>
                   </div>
                   <div className="mt-4 flex flex-col">
@@ -255,12 +346,12 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
               </Card>
 
               {/* Card 4: Due & Arrears */}
-              <Card className="rounded-lg shadow-none bg-white">
+              <Card className="rounded-lg shadow-none bg-white border border-zinc-200/50">
                 <div className="flex flex-col p-6 h-full justify-center">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-foreground">Outstanding Rent</span>
                     <div className="flex  items-center justify-center rounded-lg  ">
-                      <HugeiconsIcon icon={Clock01Icon} strokeWidth={1} className="size-10" />
+                      <HugeiconsIcon icon={Clock01Icon} strokeWidth={1} className="size-10 text-zinc-400" />
                     </div>
                   </div>
                   <div className="mt-4 flex flex-col">
@@ -277,7 +368,7 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
 
             {/* Middle Col: Asset Status Donut */}
             <div className="lg:col-span-4 h-full">
-              <Card className="flex flex-col h-full rounded-lg shadow-none bg-white">
+              <Card className="flex flex-col h-full rounded-lg shadow-none bg-white border border-zinc-200/50">
                 <div className="p-6 pb-0">
                   <span className="text-sm font-medium text-foreground">Subscriptions & Assets</span>
                 </div>
@@ -339,7 +430,7 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
             
             {/* Left 2/3: Revenue Chart */}
             <div className="lg:col-span-8 h-full">
-              <Card className="flex flex-col h-full rounded-lg shadow-none bg-white">
+              <Card className="flex flex-col h-full rounded-lg shadow-none bg-white border border-zinc-200/50">
                 <div className="flex items-center justify-between p-6 pb-2">
                   <span className="text-sm font-medium text-foreground">Sales dynamics</span>
                   <Select defaultValue="2026">
@@ -384,10 +475,10 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
             <div className="lg:col-span-4 flex flex-col gap-5">
               <div className="grid grid-cols-2 gap-5">
                 {/* Card 5: Smart Locks */}
-                <Card className="rounded-lg shadow-none bg-white">
+                <Card className="rounded-lg shadow-none bg-white border border-zinc-200/50">
                   <div className="flex flex-col p-5">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-foreground">Hardware Connectivity</span>
+                      <span className="text-sm font-medium text-foreground">Hardware</span>
                       <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-border/60 text-muted-foreground">
                         <HugeiconsIcon icon={SmartPhone01Icon} strokeWidth={2} className="size-4" />
                       </div>
@@ -396,18 +487,18 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
                       <span className="text-2xl font-bold tracking-tight text-foreground font-tabular-nums">
                         {metrics.onlineLocks} <span className="text-lg font-semibold text-muted-foreground">/ {metrics.totalLocks}</span>
                       </span>
-                      <div className="mt-1 flex items-center text-xs text-muted-foreground">
-                        Smart lock nodes online
+                      <div className="mt-1 flex items-center text-[11px] font-medium text-muted-foreground">
+                        Locks online
                       </div>
                     </div>
                   </div>
                 </Card>
 
                 {/* Card 6: Site Schedules */}
-                <Card className="rounded-lg shadow-none bg-white">
+                <Card className="rounded-lg shadow-none bg-white border border-zinc-200/50">
                   <div className="flex flex-col p-5">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-foreground">Active Schedules</span>
+                      <span className="text-sm font-medium text-foreground">Tours</span>
                       <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-border/60 text-muted-foreground">
                         <HugeiconsIcon icon={Calendar01Icon} strokeWidth={2} className="size-4" />
                       </div>
@@ -416,8 +507,8 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
                       <span className="text-2xl font-bold tracking-tight text-foreground font-tabular-nums">
                         {metrics.activeTours}
                       </span>
-                      <div className="mt-1 flex items-center text-xs text-muted-foreground">
-                        <span className="mr-1 font-medium text-foreground">{metrics.toursToday}</span> tours scheduled for today
+                      <div className="mt-1 flex items-center text-[11px] font-medium text-muted-foreground">
+                        <span className="mr-1 font-bold text-foreground">{metrics.toursToday}</span> today
                       </div>
                     </div>
                   </div>
@@ -425,7 +516,7 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
               </div>
 
               {/* Table 1: Recent Transactions */}
-              <div className="overflow-hidden rounded-lg border border-border/60 bg-white flex-1">
+              <div className="overflow-hidden rounded-lg border border-border/60 bg-white flex-1 shadow-sm">
                 <div className="flex items-center justify-between p-5 border-b border-border/40">
                   <span className="text-sm font-medium text-foreground">Recent Transactions</span>
                   <Link href="/admin/transactions">
@@ -455,8 +546,8 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
                           <span className="text-[13px] font-semibold text-foreground font-tabular-nums">{formatCurrency(payment.amount)}</span>
                         </TableCell>
                         <TableCell className="py-3 px-5 text-right">
-                          <Badge variant="secondary" className={`rounded-md px-2 py-0.5 text-[10px] font-medium hover:bg-transparent ${
-                            payment.status === "Pending_Verification" ? "bg-amber-50 text-amber-700 hover:bg-amber-50" : "bg-emerald-50 text-emerald-700 hover:bg-emerald-50"
+                          <Badge variant="secondary" className={`rounded-md px-2 py-0.5 text-[10px] font-medium hover:bg-transparent border-none ${
+                            payment.status === "Pending_Verification" ? "bg-amber-50 text-amber-700" : "bg-emerald-50 text-emerald-700"
                           }`}>
                             {payment.status === "Pending_Verification" ? "Pending" : "Processed"}
                           </Badge>
@@ -479,7 +570,7 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
             
             {/* Left 2/3: Table 3 - Recent Listings */}
             <div className="lg:col-span-8">
-              <div className="h-full overflow-hidden rounded-lg border border-border/60 bg-white">
+              <div className="h-full overflow-hidden rounded-lg border border-border/60 bg-white shadow-sm">
                 <div className="flex items-center justify-between p-5 border-b border-border/40">
                   <span className="text-sm font-medium text-foreground">Recently Published</span>
                 </div>
@@ -512,10 +603,10 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
                           <span className="text-[13px] font-semibold text-foreground font-tabular-nums">{formatCurrency(listing.price)}</span>
                         </TableCell>
                         <TableCell className="py-3 ">
-                          <Badge variant="secondary" className={`rounded-md px-2 py-0.5 text-[10px] font-medium hover:bg-transparent ${
-                            listing.status === "Available" ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-50" :
-                            listing.status === "Pending" ? "bg-[#FEF08A]/50 text-amber-700 hover:bg-[#FEF08A]/50" :
-                            "bg-zinc-100 text-zinc-600 hover:bg-zinc-100"
+                          <Badge variant="secondary" className={`rounded-md px-2 py-0.5 text-[10px] font-medium hover:bg-transparent border-none ${
+                            listing.status === "Available" ? "bg-emerald-50 text-emerald-700" :
+                            listing.status === "Pending" ? "bg-amber-50 text-amber-700" :
+                            "bg-zinc-100 text-zinc-600"
                           }`}>
                             {listing.status}
                           </Badge>
@@ -540,7 +631,7 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
 
             {/* Right 1/3: Table 2 - Due Rents */}
             <div className="lg:col-span-4">
-              <div className="h-full overflow-hidden rounded-lg border border-border/60 bg-white">
+              <div className="h-full overflow-hidden rounded-lg border border-border/60 bg-white shadow-sm">
                 <div className="flex items-center justify-between p-5 border-b border-border/40">
                   <span className="text-sm font-medium text-foreground">Outstanding Rentals</span>
                   <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground">
@@ -570,10 +661,10 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
                           <span className="text-[13px] font-semibold text-foreground font-tabular-nums">{formatCurrency(rent.amountDue)}</span>
                         </TableCell>
                         <TableCell className="py-3 px-5 text-right">
-                          <Badge variant="secondary" className={`rounded-md px-2 py-0.5 text-[10px] font-medium hover:bg-transparent ${
-                            rent.status === "Overdue" ? "bg-rose-50 text-rose-700 hover:bg-rose-50" :
-                            rent.status === "Due_Today" ? "bg-amber-50 text-amber-700 hover:bg-amber-50" :
-                            "bg-zinc-100 text-zinc-600 hover:bg-zinc-100"
+                          <Badge variant="secondary" className={`rounded-md px-2 py-0.5 text-[10px] font-medium hover:bg-transparent border-none ${
+                            rent.status === "Overdue" ? "bg-rose-50 text-rose-700" :
+                            rent.status === "Due_Today" ? "bg-amber-50 text-amber-700" :
+                            "bg-zinc-100 text-zinc-600"
                           }`}>
                             {rent.dueDate}
                           </Badge>
@@ -591,7 +682,7 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
             
             {/* Right Col: Table 4 - Occupancy by Property Type */}
             <div className="lg:col-span-12 h-full">
-              <div className="h-full flex flex-col overflow-hidden rounded-lg border border-border/60 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+              <div className="h-full flex flex-col overflow-hidden rounded-lg border border-border/60 bg-white shadow-sm">
                 <div className="flex items-center justify-between p-5 border-b border-border/40">
                   <span className="text-sm font-medium text-foreground">Occupancy by Type</span>
                   <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground">
@@ -647,7 +738,7 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
             </div>
 
             {/* Table 4: Tenant Reviews */}
-            <div className="overflow-hidden rounded-[1.25rem] lg:col-span-12 border border-border/60 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.02)] lg:col-span-2">
+            <div className="overflow-hidden rounded-lg lg:col-span-12 border border-border/60 bg-white shadow-sm lg:col-span-2">
               <div className="flex items-center justify-between p-5 border-b border-border/40">
                 <span className="text-sm font-medium text-foreground">Tenant Feedback & Reviews</span>
                 <Button variant="ghost" size="sm" className="h-7 text-[11px] px-3 font-medium text-muted-foreground border border-border/50">

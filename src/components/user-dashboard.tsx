@@ -73,8 +73,8 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
   // ACTION REQUIRED & RESTRICTION LOGIC
   // =================================================================
   const needsKyc = user.kycStatus === "Unverified" || user.kycStatus === "Rejected";
-  const needsSignature = user.kycStatus === "Verified" && !lease.signatureAudit.isSigned;
-  const isPendingAdmin = lease.status === "Awaiting_Admin_Approval" || user.kycStatus === "Pending";
+  const needsSignature =  !lease.signatureAudit.isSigned;
+  const isPendingAdmin = lease.status === "Awaiting_Admin_Approval" ;
   
   // If any of the above are true, the user is restricted from full access
   const isRestricted = needsKyc || needsSignature || isPendingAdmin;
@@ -196,7 +196,11 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
         {/* ========================================================= */}
         {/* HIJACK BANNERS (RESUME ONBOARDING STATES) */}
         {/* ========================================================= */}
+        {/* ========================================================= */}
+        {/* HIJACK BANNERS (RESUME ONBOARDING STATES) */}
+        {/* ========================================================= */}
         
+        {/* 1. KYC BANNER */}
         {needsKyc && (
           <div className="bg-blue-50 border border-blue-200 p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500 shadow-sm">
             <div className="flex items-center gap-4">
@@ -210,13 +214,14 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
                 </p>
               </div>
             </div>
-            <Link href="/user/leases" className="shrink-0 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold uppercase tracking-widest rounded-lg transition-colors shadow-md flex items-center justify-center">
+            <Link href="/user/leases" className="shrink-0 px-6 py-3 bg-black hover:bg-zinc-900 text-white text-xs font-bold uppercase tracking-widest rounded-lg transition-colors shadow-md flex items-center justify-center">
               Verify Now
             </Link>
           </div>
         )}
 
-        {!needsKyc && needsSignature && (
+        {/* 2. SIGNATURE BANNER */}
+        {needsSignature && (
           <div className="bg-amber-50 border border-amber-200 p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500 shadow-sm">
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center shrink-0">
@@ -225,17 +230,18 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
               <div>
                 <h4 className="text-sm font-bold text-amber-900 mb-1 tracking-tight">Action Required: Sign Lease</h4>
                 <p className="text-xs text-amber-800 font-medium leading-relaxed">
-                  Your identity is verified. Please review and sign your digital Tenancy Agreement to finalize your property access.
+                  Your identity documents are submitted. Please review and sign your digital Tenancy Agreement to finalize your application.
                 </p>
               </div>
             </div>
-            <Link href={`/user/sign-lease?leaseId=${lease.id}`} className="shrink-0 px-6 py-3 bg-black hover:bg-amber-700 text-white text-xs font-bold uppercase tracking-widest rounded-lg transition-colors shadow-md flex items-center justify-center">
+            <Link href={`/user/sign-lease?leaseId=${lease.id}`} className="shrink-0 px-6 py-3 bg-black hover:bg-zinc-900 text-white text-xs font-bold uppercase tracking-widest rounded-lg transition-colors shadow-md flex items-center justify-center">
               Sign Document
             </Link>
           </div>
         )}
 
-        {!needsKyc && !needsSignature && isPendingAdmin && (
+        {/* 3. ADMIN REVIEW BANNER */}
+        {isPendingAdmin && (
           <div className="bg-zinc-100 border border-zinc-200 p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500 shadow-sm">
             <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shrink-0">
               <HugeiconsIcon icon={Time01Icon} className="text-zinc-600" size={20} />
@@ -248,7 +254,6 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
             </div>
           </div>
         )}
-
         {/* OVERDUE WARNING */}
         {isExpired && !isRestricted && (
           <div className="bg-red-50 border border-red-200 p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center gap-4 shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-500">

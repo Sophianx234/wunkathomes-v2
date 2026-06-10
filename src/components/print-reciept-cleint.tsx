@@ -28,7 +28,7 @@ export interface UserTransaction {
 
 interface PrintReceiptProps {
   transaction: UserTransaction;
-  isPrintView?: boolean; // NEW PROP: Determines if this is the isolated print version
+  isPrintView?: boolean;
 }
 
 export default function PrintReceipt({
@@ -37,40 +37,21 @@ export default function PrintReceipt({
 }: PrintReceiptProps) {
   const dateToUse = transaction.paidAt || transaction.createdAt;
 
-  const formattedDateShort = new Date(dateToUse)
-    .toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    })
-    .toUpperCase();
-
-  const formattedTimeShort = new Date(dateToUse).toLocaleTimeString("en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
+  const formattedDate = new Date(dateToUse).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   });
 
-  const generateBarcodeLines = () => {
-    const lines = [];
-    const seed = transaction.reference || "WUNKAT123456";
-    for (let i = 0; i < 40; i++) {
-      const width = (seed.charCodeAt(i % seed.length) % 4) + 1;
-      lines.push(
-        <div
-          key={i}
-          className="bg-black h-12"
-          style={{ width: `${width}px`, marginRight: "2px" }}
-        />,
-      );
-    }
-    return lines;
-  };
+  const formattedTime = new Date(dateToUse).toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 
   // Determine the outermost classes based on where it's being rendered
   const wrapperClasses = isPrintView
-    ? "hidden print:flex" // Hides on screen, flex on paper
-    : "flex print:hidden"; // Shows on screen, hides on paper
+    ? "hidden print:block" 
+    : "block print:hidden"; 
 
   return (
     <>
@@ -79,23 +60,17 @@ export default function PrintReceipt({
           dangerouslySetInnerHTML={{
             __html: `
             @media print {
-              @page { margin: 0 !important; size: auto; }
+              @page { size: auto; margin: 15mm; }
               html, body {
-                height: 100vh !important;
-                overflow: hidden !important;
-                margin: 0 !important;
-                padding: 0 !important;
+                height: auto !important;
                 background-color: white !important;
               }
               header, nav, footer { display: none !important; }
               #isolated-print-receipt {
-                position: fixed !important;
-                top: 0 !important; left: 0 !important;
-                width: 100vw !important; height: 100vh !important;
-                background: white !important; z-index: 999999 !important;
-                margin: 0 !important; padding-top: 3rem !important; 
-                display: flex !important; justify-content: center !important; 
-                align-items: flex-start !important; overflow: hidden !important;
+                display: block !important;
+                width: 100% !important;
+                max-width: 800px !important;
+                margin: 0 auto !important;
               }
             }
           `,
@@ -106,161 +81,111 @@ export default function PrintReceipt({
       {/* Outer Wrapper */}
       <div
         id={isPrintView ? "isolated-print-receipt" : undefined}
-        className={`${wrapperClasses} justify-center w-full`}
-        style={
-          isPrintView
-            ? { WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" }
-            : undefined
-        }
+        className={`${wrapperClasses} w-full max-w-2xl mx-auto font-sans text-zinc-900 bg-white`}
       >
-        <div className="w-full max-w-md px-0 sm:px-4">
-          <div
-            className={`w-full bg-white border-2 border-slate-200 rounded-t-3xl relative overflow-hidden ${isPrintView ? "print:break-inside-avoid shadow-none" : "shadow-sm"}`}
-          >
-            {/* Top Section */}
-            <div className="pt-8 pb-6 px-8 text-center flex flex-col items-center">
-              <div
-                className={`w-14 h-14 rounded-full flex items-center justify-center mb-4 ${transaction.status === "Success" ? "bg-green-50 text-green-500" : "bg-amber-50 text-amber-500"}`}
-              >
+        <div className={`p-8 md:p-12 ${!isPrintView ? "border border-zinc-200 rounded-xl shadow-sm" : ""}`}>
+          
+          {/* HEADER: Logo & Status */}
+          <div className="flex justify-between items-start mb-16">
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight mb-1">WunkatHomes Ltd.</h1>
+              <p className="text-[13px] text-zinc-500 font-medium">Official Payment Receipt</p>
+            </div>
+            
+            <div className="text-right">
+              <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border ${transaction.status === 'Success' ? 'bg-green-50 border-green-200 text-green-700' : 'bg-amber-50 border-amber-200 text-amber-700'}`}>
                 <HugeiconsIcon
-                  icon={
-                    transaction.status === "Success"
-                      ? TickDouble02Icon
-                      : UniversityIcon
-                  }
-                  size={28}
+                  icon={transaction.status === "Success" ? TickDouble02Icon : UniversityIcon}
+                  size={14}
                 />
+                <span className="text-[11px] font-bold uppercase tracking-widest">
+                  {transaction.status}
+                </span>
               </div>
-              <h1 className="text-2xl font-black text-slate-900 mb-2">
-                {transaction.status === "Success" ? "Thank you" : "Pending"}
-              </h1>
-              <p className="text-sm font-medium text-slate-500">
-                {transaction.status === "Success"
-                  ? "Your payment has been processed successfully."
-                  : "We are currently verifying this transaction."}
-              </p>
             </div>
+          </div>
 
-            {/* The Tear Line & Side Notches */}
-            <div className="relative w-full h-8 flex items-center justify-center my-1">
-              <div
-                className={`absolute left-0 -ml-4 w-8 h-8 ${isPrintView ? "bg-white" : "bg-zinc-100"} border-r-2 border-slate-200 rounded-full`}
-              />
-              <div
-                className={`absolute right-0 -mr-4 w-8 h-8 ${isPrintView ? "bg-white" : "bg-zinc-100"} border-l-2 border-slate-200 rounded-full`}
-              />
-              <div className="w-[85%] border-b-2 border-dashed border-slate-200" />
-            </div>
+          {/* TOTAL AMOUNT BANNED */}
+          <div className="mb-12">
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-zinc-400 mb-2">Amount Paid</p>
+            <h2 className="text-5xl font-light tracking-tighter text-zinc-900">
+              {new Intl.NumberFormat("en-GH", {
+                style: "currency",
+                currency: transaction.currency,
+              }).format(transaction.amount)}
+            </h2>
+          </div>
 
-            {/* Details Section */}
-            <div className="pt-4 pb-8 px-6 sm:px-8">
-              <div className="flex justify-between items-start mb-5">
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">
-                    Ticket ID
-                  </p>
-                  <p className="font-mono font-bold text-sm text-slate-900">
-                    {transaction.reference}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">
-                    Amount
-                  </p>
-                  <p className="font-black text-lg text-slate-900">
-                    {new Intl.NumberFormat("en-GH", {
-                      style: "currency",
-                      currency: transaction.currency,
-                    }).format(transaction.amount)}
-                  </p>
-                </div>
-              </div>
-
-              <div className="mb-5">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">
-                  Date & Time
-                </p>
-                <p className="font-bold text-sm text-slate-900">
-                  {formattedDateShort} | {formattedTimeShort}
-                </p>
-              </div>
-
-              <div className="mb-5">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">
-                  Property
-                </p>
-                <p className="font-bold text-sm text-slate-900 flex items-center gap-2">
-                  {transaction.propertyTitle}
-                </p>
-                <p className="text-xs font-medium text-slate-500 mt-1">
-                  {transaction.propertyLocation}
-                </p>
-              </div>
-
-              <div className="mb-6">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">
-                  Tenant
-                </p>
-                <p className="font-bold text-sm text-slate-900 flex items-center gap-2">
-                  {transaction.userName}
-                </p>
-                <p className="text-xs font-medium text-slate-500 mt-1">
-                  {transaction.userEmail}
-                </p>
-              </div>
-
-              {/* Payment Method Badge */}
-              <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 flex items-center gap-3 mb-6">
-                <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center shrink-0 border border-slate-100">
+          {/* TWO COLUMN GRID FOR DETAILS */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-y-8 gap-x-12 mb-12">
+            
+            <div className="space-y-6">
+              <ReceiptRow label="Date Paid" value={`${formattedDate} at ${formattedTime}`} />
+              <ReceiptRow label="Payment Method" value={`Paystack (${transaction.channel || "Gateway"})`} />
+              
+              <div className="flex items-start justify-between gap-4 border-b border-zinc-100 pb-3">
+                <span className="text-[12px] font-semibold text-zinc-500 mt-0.5 uppercase tracking-wider">Channel</span>
+                <div className="flex items-center gap-2">
                   {transaction.channel === "mobile_money" ? (
-                    <HugeiconsIcon
-                      icon={SmartPhone01Icon}
-                      size={16}
-                      className="text-yellow-600"
-                    />
+                    <HugeiconsIcon icon={SmartPhone01Icon} size={16} className="text-zinc-400" />
                   ) : (
-                    <HugeiconsIcon
-                      icon={CreditCardIcon}
-                      size={16}
-                      className="text-blue-600"
-                    />
+                    <HugeiconsIcon icon={CreditCardIcon} size={16} className="text-zinc-400" />
                   )}
+                  <span className="block text-[13px] font-medium text-zinc-900 capitalize">
+                    {transaction.channel?.replace("_", " ") || "Secure Web"}
+                  </span>
                 </div>
-                <div>
-                  <p className="text-sm font-bold text-slate-900 capitalize">
-                    {transaction.channel?.replace("_", " ") || "Secure Gateway"}
-                  </p>
-                  <p className="text-[10px] font-medium text-slate-500 uppercase tracking-widest">
-                    Paid via paystack
-                  </p>
-                </div>
-              </div>
-
-              {/* Simulated Barcode */}
-              <div className="w-full flex flex-col items-center border-t border-dashed border-slate-200 pt-6">
-                <div className="flex items-center justify-center w-full overflow-hidden opacity-80">
-                  {generateBarcodeLines()}
-                </div>
-                <p className="text-[9px] font-mono text-slate-400 tracking-[0.2em] mt-2">
-                  {transaction.id}
-                </p>
               </div>
             </div>
+
+            <div className="space-y-6">
+              <ReceiptRow label="Receipt Number" value={transaction.reference} isMono />
+              <ReceiptRow label="Transaction ID" value={transaction.id} isMono />
+              <ReceiptRow label="Payment Purpose" value={transaction.paymentPurpose?.replace("_", " ")} />
+            </div>
+
           </div>
 
-          {/* Ticket Bottom Teeth */}
-          <div
-            className={`flex justify-between w-full px-2 -mt-3 z-10 ${isPrintView ? "print:break-inside-avoid" : ""}`}
-          >
-            {[...Array(6)].map((_, i) => (
-              <div
-                key={i}
-                className={`w-8 h-8 ${isPrintView ? "bg-white" : "bg-zinc-100"} border-t-2 border-slate-200 rounded-full`}
-              />
-            ))}
+          <div className="w-full h-px bg-zinc-200 mb-12" />
+
+          {/* BILLED TO / FOR SECTION */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+            
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-400 mb-4">Billed To</p>
+              <p className="text-[14px] font-semibold text-zinc-900 mb-1">{transaction.userName}</p>
+              <p className="text-[13px] text-zinc-500">{transaction.userEmail}</p>
+            </div>
+
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-400 mb-4">For Property</p>
+              <p className="text-[14px] font-semibold text-zinc-900 mb-1">{transaction.propertyTitle}</p>
+              <p className="text-[13px] text-zinc-500">{transaction.propertyLocation}</p>
+            </div>
+
           </div>
+
+          {/* FOOTER */}
+          <div className="mt-16 pt-8 border-t border-zinc-100 text-center">
+            <p className="text-[10px] uppercase tracking-widest text-zinc-400 font-medium">
+              This receipt is computer generated and serves as official proof of payment.
+            </p>
+          </div>
+
         </div>
       </div>
     </>
+  );
+}
+
+// Internal Helper Component for clean, aligned rows
+function ReceiptRow({ label, value, isMono = false }: { label: string; value: string; isMono?: boolean }) {
+  return (
+    <div className="flex items-start justify-between gap-4 border-b border-zinc-100 pb-3">
+      <span className="text-[12px] font-semibold text-zinc-500 mt-0.5 uppercase tracking-wider">{label}</span>
+      <span className={`text-[13px] font-medium text-zinc-900 text-right ${isMono ? 'font-mono tracking-tight text-[12px]' : ''}`}>
+        {value}
+      </span>
+    </div>
   );
 }
