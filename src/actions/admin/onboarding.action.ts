@@ -5,6 +5,10 @@ import { connectToDatabase } from "@/config/DbConnect";
 import User from "@/models/user";
 import Lease from "@/models/lease";
 import { revalidatePath } from "next/cache";
+import { sendEmail } from "@/lib/resend";
+import React from "react";
+import ApplicationStatusEmail from "@/components/email/application-status-mail";
+import LeaseActivationEmail from "@/components/email/lease-activation-mail";
 
 export async function approveTenantPaperwork(leaseId: string, userId: string) {
   try {
@@ -16,13 +20,19 @@ export async function approveTenantPaperwork(leaseId: string, userId: string) {
     await connectToDatabase();
 
     // 1. Verify User KYC
-    await User.findByIdAndUpdate(userId, { kycStatus: 'Verified' });
+    const user = await User.findByIdAndUpdate(userId, { kycStatus: 'Verified' });
     
     // 2. Mark Lease as Signed and update status
-    await Lease.findByIdAndUpdate(leaseId, { 
+   const lease = await Lease.findByIdAndUpdate(leaseId, { 
       'signatureAudit.isSigned': true,
       status: 'Awaiting_Admin_Approval' // Moving it to the final step
     });
+
+    await sendEmail({
+    to: user.email,
+    subject: `Application Approved: ${lease.listingId.title}`,
+    react: React.createElement(ApplicationStatusEmail, { userName: user.name, propertyTitle: lease.listingId.title, isApproved: true })
+  });
 
     revalidatePath("/admin/activations");
     return { success: true, message: "Legal paperwork approved successfully." };
@@ -53,6 +63,12 @@ export async function activateLeaseAndGeneratePin(leaseId: string) {
     if (!updatedLease) {
       return { success: false, error: "Lease not found." };
     }
+
+    await sendEmail({
+    to: updatedLease.userId.email,
+    subject: `Lease Active: ${updatedLease.listingId.title}`,
+    react: React.createElement(LeaseActivationEmail, { pin: generatedPin, propertyTitle: updatedLease.listingId.title })
+  });
 
     revalidatePath("/admin/activations");
     return { success: true, pin: generatedPin, message: "PIN synced and lease activated." };

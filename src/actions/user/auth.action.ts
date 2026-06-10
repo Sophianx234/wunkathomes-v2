@@ -7,6 +7,11 @@ import { z } from "zod"
 import crypto from "crypto"
 import { createSession, deleteSession, getSession } from "@/lib/session" // Import the helper
 import { redirect } from "next/navigation"
+import { sendEmail } from "@/lib/resend"
+import React from "react"
+import WelcomeEmail from "@/components/email/welcome-mail"
+import PasswordResetEmail from "@/components/email/password-reset-mail"
+import PasswordChangedEmail from "@/components/email/password-changed-mail"
 
 const passwordSchema = z.object({
   currentPassword: z.string().min(1, "Current password is required"),
@@ -80,6 +85,11 @@ export async function signupAction(prevState: any, formData: FormData) {
       email: newUser.email,
       role: newUser.role,
     })
+    await sendEmail({
+    to: email,
+    subject: "Welcome to WunkatHomes",
+    react: React.createElement(WelcomeEmail, { userName: name, exploreUrl: "https://wunkathomes.com/explore" }),
+  });
 
     // 8. Return success payload
     return { 
@@ -196,12 +206,16 @@ export async function changePasswordAction(prevState: any, formData: FormData) {
       confirmPassword: formData.get("confirmPassword"),
     })
 
-    if (!validatedFields.success) {
-      return {
-        success: false,
-        error: validatedFields.error.errors[0].message,
-      }
-    }
+   if (!validatedFields.success) {
+  // Safely get the first error message, or fallback to a default
+  const errorMessage = validatedFields.error?.errors?.[0]?.message 
+    ?? "Invalid form data. Please check your inputs.";
+
+  return {
+    success: false,
+    error: errorMessage,
+  }
+}
 
     const { currentPassword, newPassword } = validatedFields.data
 
@@ -223,6 +237,12 @@ export async function changePasswordAction(prevState: any, formData: FormData) {
     const hashedNewPassword = await bcrypt.hash(newPassword, 12)
     user.password = hashedNewPassword
     await user.save()
+
+    await sendEmail({
+      to: user.email,
+      subject: "Security Alert: Your password was changed",
+      react: React.createElement(PasswordChangedEmail, { userName: user.name })
+    });
 
     return { 
       success: true, 
@@ -271,14 +291,13 @@ export async function forgotPasswordAction(prevState: any, formData: FormData) {
     // The raw token goes in the URL, the hashed token is in the DB
     const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${resetToken}`;
 
-    // TODO: Send Email using your provider (Resend, Nodemailer, etc.)
-    // await sendEmail({
-    //   to: user.email,
-    //   subject: "Password Reset Request",
-    //   html: `<p>Click <a href="${resetUrl}">here</a> to reset your password.</p>`
-    // });
     
-    console.log("Reset URL (for testing):", resetUrl);
+    await sendEmail({
+  to: user.email,
+  subject: "Reset your WunkatHomes password",
+  react: React.createElement(PasswordResetEmail, { userName: user.name, resetUrl: resetUrl })
+});
+    
 
     return { 
       success: true, 
@@ -327,6 +346,11 @@ export async function resetPasswordAction(prevState: any, formData: FormData) {
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
     await user.save();
+    await sendEmail({
+  to: user.email,
+  subject: "Security Alert: Password Changed",
+  react: React.createElement(PasswordChangedEmail, { userName: user.name })
+});
 
     return { 
       success: true, 

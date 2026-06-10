@@ -1,8 +1,11 @@
 "use server";
 
+import MaintenanceUpdateEmail from "@/components/email/maintenance-update-mail";
 import { connectToDatabase } from "@/config/DbConnect";
+import { sendEmail } from "@/lib/resend";
 import Maintenance from "@/models/maintenance";
 import { revalidatePath } from "next/cache";
+import React from "react";
 
 // --- TYPES ---
 export type MaintenanceStatus = "Pending" | "In_Progress" | "Resolved" | "Cancelled";
@@ -42,7 +45,16 @@ export async function updateMaintenanceStatusAction(
     if (!updatedTicket) {
       return { success: false, error: "Maintenance ticket not found." };
     }
-
+await sendEmail({
+          to: updatedTicket.userId.email,
+          subject: `Status Update: Maintenance Request #${updatedTicket.ticketNumber.slice(-8)}`,
+          react: React.createElement(MaintenanceUpdateEmail, {
+            userName: updatedTicket.userId.name,
+            ticketNumber: updatedTicket.ticketNumber,
+            ticketTitle: updatedTicket.title,
+            newStatus: newStatus
+          })
+        });
     // 4. Revalidate the cache so the dashboard immediately shows the new status
     revalidatePath("/admin/maintenance");
 

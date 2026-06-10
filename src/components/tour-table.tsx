@@ -10,14 +10,16 @@ import {
   BedSingle01Icon,
   Bathtub01Icon,
   Maximize01Icon,
-  Copy01Icon,
   Search01Icon,
   FilterIcon,
+  Loading03Icon,
+  Building03Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Select,
   SelectContent,
@@ -36,6 +38,16 @@ import {
 } from "@/components/ui/table";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { updateTourAction } from "@/actions/user/tour.action";
 
@@ -93,13 +105,14 @@ const formatTime = (dateString: string) => {
 
 const formatCurrency = (amount: number) => `GHS ${amount.toLocaleString()}`;
 
+// REFINED INDUSTRY-STANDARD MONOCHROMATIC BADGES
 const getStatusBadge = (status: TourStatus) => {
   const styles = {
-    Pending_Time: "bg-amber-50 text-amber-700 ring-1 ring-amber-300/60",
-    Confirmed: "bg-blue-50 text-blue-700 ring-1 ring-blue-300/60",
-    Completed: "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/60",
-    No_Show: "bg-rose-50 text-rose-700 ring-1 ring-rose-200/60",
-    Converted: "bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200/60",
+    Pending_Time: "bg-zinc-100 text-zinc-600 ring-1 ring-zinc-200",
+    Confirmed: "bg-zinc-900 text-zinc-50 ring-1 ring-zinc-950",
+    Completed: "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/50",
+    No_Show: "bg-rose-50 text-rose-700 ring-1 ring-rose-200/50",
+    Converted: "bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200/50",
   };
   return styles[status] || "bg-zinc-100 text-zinc-600";
 };
@@ -131,13 +144,13 @@ function AdminNotesEditor({
         onChange={(e) => setNotes(e.target.value)}
         className="text-[13px] min-h-[120px] resize-none focus-visible:ring-zinc-500/20 focus-visible:border-zinc-500 bg-white shadow-sm"
       />
-      <div className="flex justify-end mt-2">
+      <div className="flex justify-end mt-3">
         <Button
           size="sm"
           variant="ghost"
           disabled={isPending}
           onClick={() => onSave(notes)}
-          className="h-7 text-[11px] bg-black text-white rounded-sm hover:text-zinc-900 border transition-all hover:border-zinc-900"
+          className="h-8 text-[11px] bg-black text-white rounded-md hover:bg-zinc-800 transition-all shadow-sm"
         >
           {isPending ? "Saving..." : "Save Notes"}
         </Button>
@@ -152,10 +165,8 @@ export default function TourTable({
 }: {
   initialTours: TourRecord[];
 }) {
-  // Local state to instantly reflect status changes without refreshing
   const [tours, setTours] = useState<TourRecord[]>(initialTours);
 
-  // Sync state if server re-renders
   useEffect(() => {
     setTours(initialTours);
   }, [initialTours]);
@@ -165,10 +176,11 @@ export default function TourTable({
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | TourStatus>("all");
 
-  // Sheet States
+  // Sheet & Dialog States
   const [selectedTour, setSelectedTour] = useState<TourRecord | null>(null);
   const [sheetStatus, setSheetStatus] = useState<TourStatus>("Pending_Time");
   const [isPending, startTransition] = useTransition();
+  const [pendingStatusChange, setPendingStatusChange] = useState<TourStatus | null>(null);
 
   // Reset filters when switching tabs
   useEffect(() => {
@@ -176,15 +188,22 @@ export default function TourTable({
     setStatusFilter("all");
   }, [activeTab]);
 
-  // Handle Sheet interactions
   const handleOpenSheet = (tour: TourRecord) => {
     setSelectedTour(tour);
     setSheetStatus(tour.status);
   };
 
-  const handleStatusChange = (newStatus: TourStatus) => {
-    if (!selectedTour) return;
+  // Triggers the Shadcn Confirmation Dialog
+  const requestStatusChange = (newStatus: TourStatus) => {
+    if (!selectedTour || newStatus === sheetStatus) return;
+    setPendingStatusChange(newStatus);
+  };
 
+  // Executes the confirmed change
+  const confirmStatusChange = () => {
+    if (!selectedTour || !pendingStatusChange) return;
+
+    const newStatus = pendingStatusChange;
     setSheetStatus(newStatus);
 
     startTransition(async () => {
@@ -193,8 +212,6 @@ export default function TourTable({
       });
       if (res.success) {
         toast.success("Status updated successfully!");
-
-        // Update local dataset to instantly move it across tabs
         setTours((prev) =>
           prev.map((t) =>
             t.id === selectedTour.id ? { ...t, status: newStatus } : t,
@@ -203,8 +220,9 @@ export default function TourTable({
         setSelectedTour({ ...selectedTour, status: newStatus });
       } else {
         toast.error("Failed to update status.");
-        setSheetStatus(selectedTour.status); // Revert UI
+        setSheetStatus(selectedTour.status); // Revert UI on failure
       }
+      setPendingStatusChange(null);
     });
   };
 
@@ -226,7 +244,6 @@ export default function TourTable({
     });
   };
 
-  // 1. Separate data based on Tabs
   const tabData = useMemo(() => {
     return tours.filter((tour) => {
       if (activeTab === "active") {
@@ -237,14 +254,12 @@ export default function TourTable({
     });
   }, [tours, activeTab]);
 
-  // 2. Extract dynamic statuses for the filter dropdown based ONLY on what exists in the current tab
   const availableStatuses = useMemo(() => {
     const statuses = new Set<TourStatus>();
     tabData.forEach((tour) => statuses.add(tour.status));
     return Array.from(statuses);
   }, [tabData]);
 
-  // 3. Apply Search and Status Filters
   const filteredData = useMemo(() => {
     return tabData.filter((tour) => {
       const matchesStatus =
@@ -472,115 +487,125 @@ export default function TourTable({
         </Table>
       </div>
 
-      {/* LEAD CRM PANEL (Sheet) */}
+      {/* INDUSTRY STANDARD CRM SHEET */}
       <Sheet
         open={!!selectedTour}
         onOpenChange={(open) => !open && setSelectedTour(null)}
       >
-        <SheetContent className="w-full sm:max-w-[440px] p-0 bg-[#FAFAFA] border-l border-zinc-200/60 flex flex-col font-sans shadow-2xl">
+        <SheetContent className="w-full sm:max-w-[480px] p-0 bg-white border-l border-zinc-200/60 flex flex-col font-sans shadow-2xl">
           {selectedTour && (
             <>
-              {/* Header Section */}
-              <div className="px-6 pt-10 pb-6 border-b border-zinc-200/60 bg-white">
+              {/* Header Profile Section */}
+              <div className="px-6 py-8 border-b border-zinc-100 bg-zinc-50/30">
                 <div className="flex items-start justify-between">
-                  <div className="space-y-1">
-                    <h2 className="text-xl font-semibold tracking-tight text-zinc-900 font-mono">
-                      {selectedTour.phoneNumber}
-                    </h2>
-                    <p className="text-[12px] text-zinc-500 flex items-center gap-1.5 font-medium">
-                      <HugeiconsIcon icon={Calendar01Icon} size={12} />
-                      {formatRelativeDate(selectedTour.scheduledDate)} at{" "}
-                      {selectedTour.confirmedTime ||
-                        formatTime(selectedTour.scheduledDate)}
-                    </p>
+                  <div className="flex items-start gap-4">
+                    
+                    <div className="flex flex-col pt-1">
+                      <h2 className="text-lg font-semibold tracking-tight text-zinc-900 font-mono leading-none">
+                        {selectedTour.phoneNumber}
+                      </h2>
+                      <div className="flex items-center gap-2 mt-3">
+                        <span className="text-[13px] text-zinc-500 flex items-center gap-1.5 font-medium">
+                          <HugeiconsIcon icon={Calendar01Icon} size={13} />
+                          {formatRelativeDate(selectedTour.scheduledDate)}
+                        </span>
+                        <span className="text-zinc-300">•</span>
+                        <span className="text-[13px] text-zinc-500 flex items-center gap-1.5 font-mono">
+                          <HugeiconsIcon icon={Clock01Icon} size={13} />
+                          {selectedTour.confirmedTime || formatTime(selectedTour.scheduledDate)}
+                        </span>
+                      </div>
+                    </div>
                   </div>
+                  
                   <a
                     href={`https://wa.me/${selectedTour.phoneNumber.replace(/[^0-9]/g, "")}`}
                     target="_blank"
                     rel="noreferrer"
+                    className="-translate-x-8"
                   >
                     <Button
                       size="icon"
-                      className="h-10 w-10 rounded-full bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20 transition-colors shrink-0"
+                      className="h-10 w-10 shadow-none  rounded-full bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20 transition-colors shrink-0 "
                     >
-                      <HugeiconsIcon
-                        icon={WhatsappIcon}
-                        size={20}
-                        strokeWidth={2}
-                      />
+                      <HugeiconsIcon icon={WhatsappIcon} size={20} strokeWidth={2} />
                     </Button>
                   </a>
                 </div>
               </div>
 
-              {/* Scrollable Content */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                {/* Section 1: Property Context Card */}
+              {/* Scrollable Data Body */}
+              <div className="flex-1 overflow-y-auto px-6 py-8 space-y-10">
+                
+                {/* 1. Scheduled Property Context Card */}
                 <section>
-                  <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-3">
-                    Viewing Target
-                  </h3>
-                  <div className="bg-white border border-zinc-200/80 rounded-xl overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.01)] group relative">
-                    <Link
-                      href={`/admin/properties/${selectedTour.listing.slug}`}
-                      target="_blank"
-                      className="absolute top-3 right-3 z-10 bg-white/90 backdrop-blur-sm p-1.5 rounded-md text-zinc-500 hover:text-zinc-900 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <HugeiconsIcon icon={LinkSquare01Icon} size={14} />
-                    </Link>
-
-                    {/* Image Header */}
-                    <div className="h-32 w-full bg-zinc-100 relative">
-                      <img
-                        src={selectedTour.listing.image || "/placeholder.jpg"}
-                        alt={selectedTour.listing.title}
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                      <div className="absolute bottom-3 left-3 text-white">
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-white/80">
-                          {selectedTour.listing.property.propertyType.replace(
-                            "_",
-                            " ",
-                          )}
-                        </p>
-                        <p className="text-[15px] font-semibold leading-tight">
-                          {selectedTour.listing.title}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Meta Specs */}
-                    <div className="p-3 bg-zinc-50/50 flex items-center justify-between border-t border-zinc-200/60 text-[11px] font-medium text-zinc-600">
-                      <div className="flex items-center gap-3">
-                        <span className="flex items-center gap-1">
-                          <HugeiconsIcon icon={BedSingle01Icon} size={12} />{" "}
-                          {selectedTour.listing.features.bedrooms} Bed
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <HugeiconsIcon icon={Bathtub01Icon} size={12} />{" "}
-                          {selectedTour.listing.features.bathrooms} Bath
-                        </span>
-                        {selectedTour.listing.features.sizeSqm > 0 && (
-                          <span className="flex items-center gap-1">
-                            <HugeiconsIcon icon={Maximize01Icon} size={12} />{" "}
-                            {selectedTour.listing.features.sizeSqm} sqm
-                          </span>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
+                      Target Property
+                    </h3>
+                    <Badge variant="outline" className={`px-2 py-0 border-0 rounded text-[9px] uppercase tracking-wider font-bold h-5 ${getStatusBadge(selectedTour.status)}`}>
+                      {selectedTour.status.replace(/_/g, " ")}
+                    </Badge>
+                  </div>
+                  
+                  <div className="rounded-xl border border-zinc-200/60 overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.01)]">
+                    <div className="p-4 bg-zinc-50/50 flex gap-4 border-b border-zinc-100">
+                      <div className="h-12 w-12 shrink-0 bg-white rounded-md overflow-hidden border border-zinc-200/60 shadow-sm">
+                        {selectedTour.listing.image ? (
+                          <img src={selectedTour.listing.image} alt="Property" className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <HugeiconsIcon icon={Building03Icon} size={16} className="text-zinc-300"/>
+                          </div>
                         )}
                       </div>
-                      <span className="text-[13px] font-bold text-zinc-900 font-tabular-nums">
-                        {formatCurrency(selectedTour.listing.price)}
-                      </span>
+                      <div className="flex flex-col justify-center">
+                        <h4 className="text-sm font-semibold tracking-tight text-zinc-900 truncate">
+                          {selectedTour.listing.title}
+                        </h4>
+                        <p className="text-[12px] text-zinc-500 mt-0.5 truncate">
+                          {selectedTour.listing.property.propertyName || selectedTour.listing.property.location}
+                        </p>
+                      </div>
                     </div>
+                    <dl className="grid grid-cols-2 gap-x-4 gap-y-4 p-4 text-[13px]">
+                      <div>
+                        <dt className="text-zinc-500 mb-1">Pricing</dt>
+                        <dd className="font-medium text-zinc-900 font-tabular-nums">{formatCurrency(selectedTour.listing.price)}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-zinc-500 mb-1">Asset Type</dt>
+                        <dd className="font-medium text-zinc-900 capitalize">{selectedTour.listing.property.propertyType.replace("_", " ")}</dd>
+                      </div>
+                      <div className="col-span-2">
+                        <dt className="text-zinc-500 mb-1.5">Configurations</dt>
+                        <dd className="flex items-center gap-4 text-zinc-700 font-medium">
+                          <span className="flex items-center gap-1.5">
+                            <HugeiconsIcon icon={BedSingle01Icon} size={14} className="text-zinc-400" />
+                            {selectedTour.listing.features.bedrooms} Bed
+                          </span>
+                          <span className="flex items-center gap-1.5">
+                            <HugeiconsIcon icon={Bathtub01Icon} size={14} className="text-zinc-400" />
+                            {selectedTour.listing.features.bathrooms} Bath
+                          </span>
+                          {selectedTour.listing.features.sizeSqm > 0 && (
+                            <span className="flex items-center gap-1.5">
+                              <HugeiconsIcon icon={Maximize01Icon} size={14} className="text-zinc-400" />
+                              {selectedTour.listing.features.sizeSqm} sqm
+                            </span>
+                          )}
+                        </dd>
+                      </div>
+                    </dl>
                   </div>
                 </section>
 
-                {/* Section 2: Status CRM Toggle */}
+                {/* 2. Status Pipeline */}
                 <section>
-                  <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-3">
+                  <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-4">
                     Tour Status
                   </h3>
-                  <div className="bg-zinc-100/80 border border-zinc-200/60 p-1 rounded-xl flex flex-wrap gap-1">
+                  <div className="bg-zinc-100/60 border border-zinc-200/60 p-1 rounded-xl flex flex-wrap gap-1">
                     {(
                       [
                         "Pending_Time",
@@ -593,7 +618,7 @@ export default function TourTable({
                       <button
                         key={status}
                         disabled={isPending}
-                        onClick={() => handleStatusChange(status)}
+                        onClick={() => requestStatusChange(status)}
                         className={`flex-1 min-w-[30%] py-2 text-[11px] font-bold uppercase tracking-wider rounded-lg transition-all duration-200 ${
                           sheetStatus === status
                             ? "bg-white text-zinc-900 shadow-sm ring-1 ring-zinc-200/80"
@@ -606,7 +631,7 @@ export default function TourTable({
                   </div>
                 </section>
 
-                {/* Section 3: Isolated Admin Notes */}
+                {/* 3. Notes Section */}
                 <AdminNotesEditor
                   initialNotes={selectedTour.notes}
                   onSave={handleSaveNotes}
@@ -614,28 +639,69 @@ export default function TourTable({
                 />
               </div>
 
-              {/* Pinned Conversion Footer */}
-              <div className="p-4 bg-white border-t border-zinc-200/80 shadow-[0_-8px_20px_rgba(0,0,0,0.03)] z-20">
-                <Button
-                  className="w-full h-11 rounded-md bg-black text-white hover:bg-zinc-800 text-[13px] font-semibold shadow-sm transition-all"
-                  onClick={() => {
-                    navigator.clipboard.writeText(
-                      `${window.location.origin}/checkout/${selectedTour.listing.slug}?type=deposit`,
-                    );
-                    toast.success("Checkout link copied to clipboard!");
-                  }}
-                >
-                  <HugeiconsIcon icon={Copy01Icon} size={16} className="mr-2" />
-                  Copy Checkout Link
-                </Button>
-                <p className="text-center text-[10px] text-zinc-400 mt-3 font-medium">
-                  Send this secure link via WhatsApp to collect the deposit.
-                </p>
+              {/* Fixed Bottom Action Bar */}
+              <div className="p-4 border-t border-zinc-200/60 bg-white">
+                <Link href={`/admin/properties/${selectedTour.listing.slug}`} target="_blank">
+                  <Button
+                    variant="outline"
+                    className="h-10 w-full text-[12px] font-medium border-zinc-200 hover:bg-zinc-50 rounded-lg flex items-center justify-center gap-2"
+                  >
+                    View Property Details
+                    <HugeiconsIcon icon={LinkSquare01Icon} size={14} />
+                  </Button>
+                </Link>
               </div>
             </>
           )}
         </SheetContent>
       </Sheet>
+
+      {/* SHADCN CONFIRMATION DIALOG FOR STATUS CHANGES */}
+      <AlertDialog
+        open={!!pendingStatusChange}
+        onOpenChange={(open) => !open && setPendingStatusChange(null)}
+      >
+        <AlertDialogContent className="font-sans max-w-[400px] rounded-2xl p-6">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-lg font-semibold tracking-tight text-zinc-900">
+              Confirm Status Update
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-[13px] text-zinc-500 leading-relaxed mt-2">
+              Are you sure you want to transition this tour to{" "}
+              <span className="font-bold text-zinc-900">
+                {pendingStatusChange?.replace("_", " ")}
+              </span>
+              ? This action updates the system immediately.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-6 gap-2 sm:gap-0">
+            <AlertDialogCancel
+              disabled={isPending}
+              className="h-9 px-4 text-[12px] font-medium border-zinc-200 hover:bg-zinc-50 rounded-lg m-0"
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmStatusChange}
+              disabled={isPending}
+              className="h-9 px-4 text-[12px] font-medium rounded-lg m-0 bg-black text-white hover:bg-zinc-800"
+            >
+              {isPending ? (
+                <>
+                  <HugeiconsIcon
+                    icon={Loading03Icon}
+                    className="animate-spin mr-2"
+                    size={14}
+                  />{" "}
+                  Saving...
+                </>
+              ) : (
+                "Confirm Transition"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

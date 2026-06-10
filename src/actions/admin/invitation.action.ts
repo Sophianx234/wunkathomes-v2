@@ -7,6 +7,10 @@ import { getSession, createSession } from "@/lib/session";
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
+import InvitationEmail from "@/components/email/invitation-email";
+import { sendEmail } from "@/lib/resend";
+import React from "react";
+import TeamUpdateEmail from "@/components/email/team-update-mail";
 
 // --- 1. INVITE TEAM MEMBER ---
 export async function inviteTeamMemberAction(email: string, role: "Admin" | "Manager") {
@@ -41,10 +45,12 @@ export async function inviteTeamMemberAction(email: string, role: "Admin" | "Man
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
     const inviteLink = `${baseUrl}/accept-invite?token=${token}`;
-
-    console.log(`\n[EMAIL MOCK] Sending invite to ${email}...`);
-    console.log(`[EMAIL MOCK] Link: ${inviteLink}\n`);
-
+await sendEmail({
+      to: email,
+      subject: "Join the WunkatHomes Team",
+      react: React.createElement(InvitationEmail, { role, inviteLink })
+    });
+    
     revalidatePath("/admin/manage/team"); 
 
     return { success: true, message: `Invitation sent to ${email}` };
@@ -69,7 +75,16 @@ export async function updateTeamMemberRole(userId: string, newRole: "Admin" | "M
       return { success: false, error: "You cannot demote your own account." };
     }
 
-    await User.findByIdAndUpdate(userId, { role: newRole });
+    const user =await User.findByIdAndUpdate(userId, { role: newRole });
+    await sendEmail({
+      to: user.email,
+      subject: "Account Permission Update",
+      react: React.createElement(TeamUpdateEmail, {
+        userName: user.name,
+        title: "Account permissions updated",
+        message: `Your account role has been updated to ${newRole}. You may need to log out and log back in for changes to take effect.`
+      })
+    });
     revalidatePath("/admin/manage/team");
     
     return { success: true, message: `Role updated successfully.` };
@@ -89,7 +104,20 @@ export async function toggleTeamAccountStatus(userId: string, currentStatus: str
     await connectToDatabase();
     const newStatus = currentStatus === "Active" ? "Suspended" : "Active";
     
-    await User.findByIdAndUpdate(userId, { accountStatus: newStatus });
+    const user = await User.findByIdAndUpdate(userId, { accountStatus: newStatus });
+
+    const isSuspended = newStatus === "Suspended";
+    await sendEmail({
+      to: user.email,
+      subject: isSuspended ? "Account Suspended" : "Account Reactivated",
+      react: React.createElement(TeamUpdateEmail, {
+        userName: user.name,
+        title: isSuspended ? "Account Access Restricted" : "Account Access Restored",
+        message: isSuspended
+          ? "Your WunkatHomes account has been suspended. Please contact administration for further details."
+          : "Your WunkatHomes account has been reactivated. You may now log in normally."
+      })
+    });
     revalidatePath("/admin/manage/team");
     
     return { success: true, message: `Account has been ${newStatus.toLowerCase()}.` };

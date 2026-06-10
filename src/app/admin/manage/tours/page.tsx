@@ -2,15 +2,15 @@ import { connectToDatabase } from "@/config/DbConnect";
 import Tour from "@/models/tour";
 import Listing from "@/models/listing";
 import Property from "@/models/property";
-import TourTable from "@/components/tour-table";
+// Import the clean type structure from the client file to enforce strict type compliance
+import TourTable, { TourRecord } from "@/components/tour-table"; 
 import { Toaster } from "@/components/ui/sonner";
 
-export const dynamic = "force-dynamic"; // Ensures fresh data for the admin panel
+export const dynamic = "force-dynamic";
 
-async function getTours() {
+async function getTours(): Promise<TourRecord[]> {
   await connectToDatabase();
   
-  // Fetch tours and deeply populate the relations
   const rawTours = await Tour.find()
     .populate({
       path: "listingId",
@@ -20,22 +20,24 @@ async function getTours() {
     .sort({ createdAt: -1 })
     .lean();
 
-  // Serialize Mongoose docs into safe, plain objects for the Client Component
+  // Explicitly map into the TourRecord shape to fulfill full type compliance
   return rawTours.map((tour: any) => ({
     id: tour._id.toString(),
     phoneNumber: tour.phoneNumber,
-    scheduledDate: tour.scheduledDate.toISOString(),
-    status: tour.status,
+    // Safe Fallback: Prevents crashing if a date document field is corrupted or empty
+    scheduledDate: tour.scheduledDate ? new Date(tour.scheduledDate).toISOString() : new Date().toISOString(),
+    // Strict Type Casting: Safely anchors string properties to the TourStatus union type literal
+    status: (tour.status || "Pending_Time") as any, 
     notes: tour.notes || "",
     listing: {
-      id: tour.listingId?._id.toString() || "",
+      id: tour.listingId?._id?.toString() || "",
       slug: tour.listingId?.slug || "",
       title: tour.listingId?.title || "Unknown Listing",
       price: tour.listingId?.price || 0,
       property: {
         propertyType: tour.listingId?.propertyId?.propertyType || "Unknown",
         location: tour.listingId?.propertyId?.location 
-          ? `${tour.listingId.propertyId.location.area}, ${tour.listingId.propertyId.location.region}`
+          ? `${tour.listingId.propertyId.location.area || ""}, ${tour.listingId.propertyId.location.region || ""}`
           : "Unknown Location",
       },
       features: {
@@ -54,9 +56,6 @@ export default async function TourManagementPage() {
   return (
     <div className="min-h-screen bg-[#FAFAFA] p-6 lg:pb-10 font-sans">
       <div className="max-w-[1400px] mx-auto">
-      
-        
-        {/* Pass the real server data to the interactive client component */}
         <TourTable initialTours={tours} />
       </div>
     </div>

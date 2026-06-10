@@ -6,14 +6,10 @@ import {
   FilterIcon,
   Key01Icon,
   Search01Icon,
-  SmartPhone01Icon,
-  TickDouble01Icon,
   Time01Icon,
   Loading03Icon,
   Cancel01Icon,
   FileDownloadIcon,
-  PrinterIcon,
-  ArrowLeft01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useMemo, useState, useTransition } from "react";
@@ -56,6 +52,9 @@ import {
   approveTenantPaperwork,
   rejectTenantPaperwork,
 } from "@/actions/admin/onboarding.action";
+import { TenancyDocument } from "./lease-document viewer";
+
+// IMPORT YOUR NEW ISOLATED COMPONENT HERE
 
 // --- TYPES ---
 type TabStage = "pending" | "active";
@@ -218,153 +217,15 @@ export default function OnboardingClient({
     },
   };
 
+  // =====================================================================
+  // INVOCATION OF THE ISOLATED DOCUMENT COMPONENT
+  // =====================================================================
   if (isViewingDocument && selectedActivation) {
     return (
-      <div className="min-h-screen bg-zinc-100 font-sans print:bg-white">
-        <style
-          dangerouslySetInnerHTML={{
-            __html: `@media print { body { background-color: white !important; } .print-hide { display: none !important; } @page { margin: 1.5cm; } }`,
-          }}
-        />
-        <div className="print-hide sticky top-0 z-10 flex items-center justify-between p-4 bg-white border-b border-zinc-200 shadow-sm">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              onClick={() => setIsViewingDocument(false)}
-              className="text-zinc-600 hover:text-zinc-900"
-            >
-              <HugeiconsIcon
-                icon={ArrowLeft01Icon}
-                size={18}
-                className="mr-2"
-              />{" "}
-              Back to Onboarding
-            </Button>
-            <div className="h-4 w-px bg-zinc-200" />
-            <h3 className="font-bold text-zinc-800 flex items-center gap-2">
-              Tenancy Agreement
-            </h3>
-          </div>
-          <Button
-            onClick={() => window.print()}
-            className="bg-zinc-900 text-white hover:bg-zinc-800 h-9 px-6 text-xs font-bold uppercase tracking-wider rounded-lg shadow-sm"
-          >
-            <HugeiconsIcon icon={PrinterIcon} size={16} className="mr-2" />{" "}
-            Print Document
-          </Button>
-        </div>
-        <div className="max-w-4xl mx-auto p-8 print:p-0">
-          <div className="p-8 md:p-12 font-serif text-zinc-900 leading-relaxed text-sm text-justify bg-white border border-zinc-200 rounded-2xl flex flex-col print:border-none print:shadow-none print:w-full print:block print:p-0 print:text-black print:text-sm">
-            <div className="text-center mb-10">
-              <h2 className="text-2xl font-bold uppercase tracking-widest border-b-2 border-zinc-900 pb-4 inline-block mx-auto">
-                Standard Tenancy Agreement
-              </h2>
-              <p className="mt-4 font-sans text-[10px] uppercase tracking-widest text-zinc-500 font-bold">
-                Reference ID:{" "}
-                {selectedActivation.lease.id.slice(-12).toUpperCase()}
-              </p>
-            </div>
-            <div className="space-y-6">
-              <p>
-                This Tenancy Agreement is formally established between{" "}
-                <strong>WunkatHomes Ltd.</strong> (referred to as the
-                "Landlord") and <strong>{selectedActivation.user.name}</strong>{" "}
-                (referred to as the "Tenant").
-              </p>
-              <p>
-                <strong>1. The Property:</strong> The Landlord agrees to rent,
-                and the Tenant agrees to occupy the property known as{" "}
-                <strong>{selectedActivation.lease.propertyName}</strong> located
-                at{" "}
-                <strong>
-                  {selectedActivation.lease.propertyLocation ||
-                    `Unit ${selectedActivation.lease.unitNumber}`}
-                </strong>
-                .
-              </p>
-              <p>
-                <strong>2. Lease Duration:</strong> This agreement begins on{" "}
-                <strong>
-                  {formatDate(selectedActivation.lease.startDate)}
-                </strong>{" "}
-                and will remain active until{" "}
-                <strong>
-                  {selectedActivation.lease.endDate
-                    ? formatDate(selectedActivation.lease.endDate)
-                    : "the end of the agreed term"}
-                </strong>
-                , unless ended earlier under the terms of this agreement.
-              </p>
-              <p>
-                <strong>3. Rent & Payment:</strong> The total rent payment of{" "}
-                <strong>
-                  GHS{" "}
-                  {selectedActivation.lease.totalRentAmount?.toLocaleString(
-                    undefined,
-                    { minimumFractionDigits: 2 },
-                  )}
-                </strong>{" "}
-                has been successfully processed and verified.
-              </p>
-              <p>
-                <strong>4. Smart Lock & Property Access:</strong> Access to the
-                property is managed securely via a Tuya Smart Lock system. The
-                Tenant agrees to keep their personal access PIN confidential and
-                not share it with unauthorized individuals.
-              </p>
-              <p>
-                <strong>5. Tenant Responsibilities:</strong> The Tenant agrees
-                to maintain the interior of the property in good condition, use
-                the property only for residential living, and allow the Landlord
-                or maintenance teams to enter for repairs with fair prior
-                notice.
-              </p>
-            </div>
-            <div className="mt-16 pt-8 border-t border-zinc-200 print:break-inside-avoid">
-              <h4 className="font-sans text-xs font-bold uppercase tracking-widest mb-6 text-zinc-800">
-                Digital Signature Verification
-              </h4>
-              <div className="grid grid-cols-2 gap-8 font-sans text-xs">
-                <div>
-                  <p className="text-zinc-500 uppercase tracking-widest text-[10px] font-bold mb-1">
-                    Landlord Signature
-                  </p>
-                  <p className="font-signature text-2xl font-bold">
-                    WunkatHomes Ltd.
-                  </p>
-                  <p className="text-zinc-500 mt-2">
-                    Verified System Counter-Signature
-                  </p>
-                </div>
-                <div>
-                  <p className="text-zinc-500 uppercase tracking-widest text-[10px] font-bold mb-1">
-                    Tenant E-Signature
-                  </p>
-                  <p className="font-signature text-2xl font-bold">
-                    {selectedActivation.lease.signatureAudit?.typedName ||
-                      selectedActivation.user.name}
-                  </p>
-                  <p className="text-zinc-500 mt-2">
-                    IP Address:{" "}
-                    {selectedActivation.lease.signatureAudit?.ipAddress ||
-                      "N/A"}
-                  </p>
-                  <p className="text-zinc-500">
-                    Date:{" "}
-                    {selectedActivation.lease.signatureAudit?.signedAt ||
-                      "Pending"}
-                  </p>
-                </div>
-              </div>
-              <div className="mt-8 bg-zinc-50 p-4 rounded font-mono text-[10px] text-zinc-500 break-all border border-zinc-100 print:border-none print:bg-white print:p-0 print:text-black">
-                <strong>Security ID:</strong>{" "}
-                {selectedActivation.lease.signatureAudit?.documentHash ||
-                  "Pending Generation"}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <TenancyDocument 
+        selectedActivation={selectedActivation} 
+        onBack={() => setIsViewingDocument(false)} 
+      />
     );
   }
 
@@ -695,7 +556,7 @@ export default function OnboardingClient({
                   
                   <div className="space-y-3">
                     {/* Ghana Card Row */}
-                    <div className="flex items-center justify-between p-3.5 rounded-xl border border-zinc-200 bg-white shadow-sm">
+                    <div className="flex items-center justify-between p-3.5 rounded-xl border border-zinc-200 bg-white ">
                       <div className="flex items-center gap-4">
                         {/* Professional Thumbnail Viewer */}
                         <button
@@ -741,7 +602,7 @@ export default function OnboardingClient({
                     </div>
 
                     {/* Lease Agreement Row */}
-                    <div className="flex items-center justify-between p-3.5 rounded-xl border border-zinc-200 bg-white shadow-sm">
+                    <div className="flex items-center justify-between p-3.5 rounded-xl border border-zinc-200 bg-white ">
                       <div className="flex items-center gap-4">
                         <div className="h-12 w-12 bg-zinc-50 rounded-md border border-zinc-200 flex items-center justify-center">
                           <HugeiconsIcon icon={FileDownloadIcon} size={18} className="text-zinc-400" />

@@ -14,6 +14,7 @@ import {
   Maximize01Icon,
   CreditCardIcon,
   Time01Icon,
+  Building03Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 
@@ -38,6 +39,9 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { TransactionReceipt } from "./transaction-reciept";
+
+// IMPORT YOUR RECEIPT COMPONENT HERE
 
 // --- TYPES ---
 export interface TransactionRecord {
@@ -76,30 +80,31 @@ const formatDate = (dateString: string) => {
   return `${d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}, ${d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}`;
 };
 
+// REFINED INDUSTRY-STANDARD MONOCHROMATIC BADGES
 const getPurposeBadge = (purpose: string) => {
   const styles: Record<string, string> = {
-    Booking_Deposit: "text-blue-700 bg-blue-50/50 ring-1 ring-blue-200/50",
-    Upfront_Rent: "text-indigo-700 bg-indigo-50/50 ring-1 ring-indigo-200/50",
-    Rent_Balance: "text-purple-700 bg-purple-50/50 ring-1 ring-purple-200/50",
-    Monthly_Renewal: "text-zinc-700 bg-zinc-100/50 ring-1 ring-zinc-200/60",
-    Purchase: "text-emerald-700 bg-emerald-50/50 ring-1 ring-emerald-200/50",
+    Booking_Deposit: "text-zinc-700 bg-zinc-100 ring-1 ring-zinc-200/80",
+    Upfront_Rent: "text-zinc-900 bg-zinc-100 ring-1 ring-zinc-300/80",
+    Rent_Balance: "text-zinc-700 bg-zinc-100 ring-1 ring-zinc-200/80",
+    Monthly_Renewal: "text-zinc-600 bg-zinc-50 ring-1 ring-zinc-200/60",
+    Purchase: "text-zinc-900 bg-zinc-100 ring-1 ring-zinc-300/80",
   };
-  return styles[purpose] || "text-zinc-700 bg-zinc-100/50 ring-1 ring-zinc-200/60";
+  return styles[purpose] || "text-zinc-600 bg-zinc-50 ring-1 ring-zinc-200/60";
 };
 
 const getStatusBadge = (status: string) => {
   switch (status) {
     case "Success":
-      return "text-emerald-700 ring-1 ring-emerald-200/60 bg-emerald-50/30";
+      return "text-emerald-700 ring-1 ring-emerald-200/50 bg-emerald-50";
     case "Pending":
-      return "text-amber-700 ring-1 ring-amber-300/60 bg-amber-50/50";
+      return "text-amber-700 ring-1 ring-amber-300/50 bg-amber-50";
     case "Failed":
     case "Abandoned":
-      return "text-zinc-500 ring-1 ring-zinc-200/60 bg-zinc-50/50 line-through decoration-zinc-300";
+      return "text-zinc-500 ring-1 ring-zinc-200/60 bg-zinc-50 line-through decoration-zinc-300";
     case "Refunded":
-      return "text-rose-700 ring-1 ring-rose-200/60 bg-rose-50/50";
+      return "text-rose-700 ring-1 ring-rose-200/50 bg-rose-50";
     default:
-      return "text-zinc-500 ring-1 ring-zinc-200/60 bg-zinc-50/50";
+      return "text-zinc-600 ring-1 ring-zinc-200/60 bg-zinc-50";
   }
 };
 
@@ -128,6 +133,7 @@ export default function TransactionsClient({
   const [purposeFilter, setPurposeFilter] = useState("all");
   
   const [selectedTx, setSelectedTx] = useState<TransactionRecord | null>(null);
+  const [isViewingReceipt, setIsViewingReceipt] = useState(false); // NEW STATE FOR RECEIPT VIEWER
 
   // Derived Data based on filters
   const filteredData = useMemo(() => {
@@ -159,6 +165,18 @@ export default function TransactionsClient({
   const uniqueChannels = Array.from(new Set(initialTransactions.map((t) => t.channel)));
   const uniquePurposes = Array.from(new Set(initialTransactions.map((t) => t.paymentPurpose)));
 
+  // =====================================================================
+  // INVOCATION OF THE ISOLATED RECEIPT COMPONENT
+  // =====================================================================
+  if (isViewingReceipt && selectedTx) {
+    return (
+      <TransactionReceipt 
+        transaction={selectedTx} 
+        onBack={() => setIsViewingReceipt(false)} 
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#FAFAFA] p-6 lg:pb-10 font-sans">
       <div className="max-w-[1400px] mx-auto space-y-6">
@@ -186,7 +204,7 @@ export default function TransactionsClient({
               <TabsTrigger value="pending" className="text-[13px] font-medium data-[state=active]:bg-white  rounded-md px-4">
                 Pending
                 {pendingCount > 0 && (
-                  <span className="ml-2 inline-flex items-center justify-center bg-zinc-200/80 text-[10px] font-bold h-4 w-4 rounded-full">
+                  <span className="ml-2 inline-flex items-center justify-center bg-zinc-200/80 text-[10px] font-bold h-4 w-4 rounded-full text-zinc-700">
                     {pendingCount}
                   </span>
                 )}
@@ -301,7 +319,7 @@ export default function TransactionsClient({
                     <div className="flex items-center gap-2.5">
                       <Avatar className="h-7 w-7 border border-zinc-200/60 shadow-sm">
                         <AvatarImage src={tx.user.profilePicture} />
-                        <AvatarFallback className="bg-zinc-100 text-zinc-600 text-[10px]">
+                        <AvatarFallback className="bg-zinc-100 text-zinc-600 text-[10px] font-medium">
                           {tx.user.name.charAt(0)}
                         </AvatarFallback>
                       </Avatar>
@@ -357,149 +375,179 @@ export default function TransactionsClient({
         </div>
       </div>
 
-      {/* COMPONENT B: READ-ONLY TRANSACTION DESK (Sheet) */}
-      <Sheet open={!!selectedTx} onOpenChange={(open) => !open && setSelectedTx(null)}>
-        <SheetContent className="w-full sm:max-w-[420px] p-0 bg-[#FAFAFA] border-l border-zinc-200/60 flex flex-col font-sans shadow-2xl">
+      {/* INDUSTRY STANDARD TRANSACTION DESK (Sheet) */}
+      <Sheet open={!!selectedTx && !isViewingReceipt} onOpenChange={(open) => !open && setSelectedTx(null)}>
+        <SheetContent className="w-full sm:max-w-[480px] p-0 bg-[#FAFAFA] border-l border-zinc-200/60 flex flex-col font-sans shadow-2xl">
           {selectedTx && (
-            <div className="flex-1 overflow-y-auto">
-              
-              {/* Header Profile Card */}
-              <div className="px-6 pt-10 pb-6 border-b border-zinc-200/60 bg-white">
-                <Badge
-                  variant="outline"
-                  className={`mb-4 px-2 py-0 border-0 rounded-full text-[10px] uppercase tracking-wider font-bold h-5 ${getStatusBadge(selectedTx.status)}`}
-                >
-                  {selectedTx.status}
-                </Badge>
+            <>
+              {/* Header Context Section */}
+              <div className="px-6 py-8 border-b border-zinc-100 bg-zinc-50/30">
+                <div className="flex items-center justify-between mb-6">
+                  <Badge
+                    variant="outline"
+                    className={`px-2 py-0 border-0 rounded text-[9px] uppercase tracking-wider font-bold h-5 ${getStatusBadge(selectedTx.status)}`}
+                  >
+                    {selectedTx.status}
+                  </Badge>
+                  <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${getPurposeBadge(selectedTx.paymentPurpose)}`}>
+                    {selectedTx.paymentPurpose.replace(/_/g, " ")}
+                  </span>
+                </div>
 
-                <h2 className="text-3xl font-semibold tracking-tighter text-zinc-900 font-tabular-nums mb-6">
+                <h2 className="text-3xl font-semibold tracking-tighter text-zinc-900 font-tabular-nums mb-6 leading-none">
                   {formatCurrency(selectedTx.amount, selectedTx.currency)}
                 </h2>
 
-                <div className="bg-white border border-zinc-200/60 rounded-lg p-3 flex items-center gap-3">
-                  <Avatar className="h-10 w-10 border border-zinc-200/60">
+                <div className="flex items-center gap-4">
+                  <Avatar className="h-12 w-12 border border-zinc-200/60 shadow-sm">
                     <AvatarImage src={selectedTx.user.profilePicture} />
-                    <AvatarFallback className="bg-zinc-100 text-zinc-600 text-xs">
+                    <AvatarFallback className="bg-zinc-100 text-zinc-600 font-medium text-sm">
                       {selectedTx.user.name.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
-                  <div>
-                    <p className="text-[13px] font-medium text-zinc-900 leading-tight">
+                  <div className="flex flex-col pt-0.5">
+                    <h3 className="text-base font-semibold tracking-tight text-zinc-900 leading-none">
                       {selectedTx.user.name}
-                    </p>
-                    <p className="text-[11px] text-zinc-500 mt-0.5">
+                    </h3>
+                    <p className="text-[13px] text-zinc-500 mt-1.5 leading-none">
                       {selectedTx.user.email}
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="p-6 space-y-6">
+              {/* Scrollable Data Body */}
+              <div className="flex-1 overflow-y-auto px-6 py-8 space-y-10">
                 
-                {/* 1. Property Context Card (Mapped exactly like Tours) */}
+                {/* 1. Property Context Card */}
                 <section>
-                  <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-3">
-                    Associated Property
-                  </h3>
-                  <div className="bg-white border border-zinc-200/80 rounded-xl overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.01)] group relative">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
+                      Associated Asset
+                    </h3>
                     <Link
                       href={`/admin/properties/${selectedTx.listing.slug}`}
                       target="_blank"
-                      className="absolute top-3 right-3 z-10 bg-white/90 backdrop-blur-sm p-1.5 rounded-md text-zinc-500 hover:text-zinc-900 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="inline-flex items-center gap-1 text-[11px] font-medium text-zinc-500 hover:text-zinc-900 tracking-wide transition-colors"
                     >
-                      <HugeiconsIcon icon={LinkSquare01Icon} size={14} />
+                      View Asset <HugeiconsIcon icon={LinkSquare01Icon} size={12} />
                     </Link>
+                  </div>
 
-                    {/* Image Header */}
-                    <div className="h-32 w-full bg-zinc-100 relative">
-                      <img
-                        src={selectedTx.listing.image}
-                        alt={selectedTx.listing.title}
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                      <div className="absolute bottom-3 left-3 text-white">
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-white/80">
-                          {selectedTx.listing.property.propertyType.replace("_", " ")}
-                        </p>
-                        <p className="text-[15px] font-semibold leading-tight">
-                          {selectedTx.listing.title}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Meta Specs */}
-                    <div className="p-3 bg-zinc-50/50 flex items-center justify-between border-t border-zinc-200/60 text-[11px] font-medium text-zinc-600">
-                      <div className="flex items-center gap-3">
-                        <span className="flex items-center gap-1">
-                          <HugeiconsIcon icon={BedSingle01Icon} size={12} /> {selectedTx.listing.features.bedrooms} Bed
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <HugeiconsIcon icon={Bathtub01Icon} size={12} /> {selectedTx.listing.features.bathrooms} Bath
-                        </span>
-                        {selectedTx.listing.features.sizeSqm > 0 && (
-                          <span className="flex items-center gap-1">
-                            <HugeiconsIcon icon={Maximize01Icon} size={12} /> {selectedTx.listing.features.sizeSqm} sqm
-                          </span>
+                  <div className="rounded-xl border border-zinc-200/60 overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.01)]">
+                    <div className="p-4 bg-zinc-50/50 flex gap-4 border-b border-zinc-100">
+                      <div className="h-12 w-12 shrink-0 bg-white rounded-md overflow-hidden border border-zinc-200/60 shadow-sm">
+                        {selectedTx.listing.image ? (
+                          <img src={selectedTx.listing.image} alt="Property" className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <HugeiconsIcon icon={Building03Icon} size={16} className="text-zinc-300"/>
+                          </div>
                         )}
                       </div>
+                      <div className="flex flex-col justify-center">
+                        <h4 className="text-sm font-semibold tracking-tight text-zinc-900 truncate">
+                          {selectedTx.listing.title}
+                        </h4>
+                        <p className="text-[12px] text-zinc-500 mt-0.5 truncate">
+                          {selectedTx.listing.property.propertyName || selectedTx.listing.property.location}
+                        </p>
+                      </div>
                     </div>
+                    <dl className="grid grid-cols-2 gap-x-4 gap-y-4 p-4 text-[13px] bg-white">
+                      <div>
+                        <dt className="text-zinc-500 mb-1">Pricing</dt>
+                        <dd className="font-medium text-zinc-900 font-tabular-nums">{formatCurrency(selectedTx.listing.price)}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-zinc-500 mb-1">Asset Type</dt>
+                        <dd className="font-medium text-zinc-900 capitalize">{selectedTx.listing.property.propertyType.replace("_", " ")}</dd>
+                      </div>
+                      <div className="col-span-2">
+                        <dt className="text-zinc-500 mb-1.5">Configurations</dt>
+                        <dd className="flex items-center gap-4 text-zinc-700 font-medium">
+                          <span className="flex items-center gap-1.5">
+                            <HugeiconsIcon icon={BedSingle01Icon} size={14} className="text-zinc-400" />
+                            {selectedTx.listing.features.bedrooms} Bed
+                          </span>
+                          <span className="flex items-center gap-1.5">
+                            <HugeiconsIcon icon={Bathtub01Icon} size={14} className="text-zinc-400" />
+                            {selectedTx.listing.features.bathrooms} Bath
+                          </span>
+                          {selectedTx.listing.features.sizeSqm > 0 && (
+                            <span className="flex items-center gap-1.5">
+                              <HugeiconsIcon icon={Maximize01Icon} size={14} className="text-zinc-400" />
+                              {selectedTx.listing.features.sizeSqm} sqm
+                            </span>
+                          )}
+                        </dd>
+                      </div>
+                    </dl>
                   </div>
                 </section>
 
                 {/* 2. Audit Details Block */}
                 <section>
-                  <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-3">
+                  <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-4">
                     Audit Log
                   </h3>
-                  <div className="bg-white border border-zinc-200/60 rounded-xl overflow-hidden text-[13px] shadow-[0_1px_4px_rgba(0,0,0,0.01)]">
-                    <div className="flex justify-between py-2.5 px-4 border-b border-zinc-100">
-                      <span className="text-zinc-500 font-medium">Reference ID</span>
-                      <span className="text-zinc-900 font-mono tracking-tight break-all text-right ml-4">
-                        {selectedTx.reference}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between py-2.5 px-4 border-b border-zinc-100">
-                      <span className="text-zinc-500 font-medium">Created At</span>
-                      <span className="text-zinc-900 font-tabular-nums text-right">
-                        {formatDate(selectedTx.createdAt)}
-                      </span>
-                    </div>
-
-                    {selectedTx.paidAt && (
-                      <div className="flex justify-between py-2.5 px-4 border-b border-zinc-100">
-                        <span className="text-zinc-500 font-medium">Cleared At</span>
-                        <span className="text-emerald-700 font-tabular-nums text-right font-medium">
-                          {formatDate(selectedTx.paidAt)}
-                        </span>
+                  <div className="bg-white border border-zinc-200/60 rounded-xl overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.01)]">
+                    <dl className="divide-y divide-zinc-100 text-[13px]">
+                      <div className="flex justify-between py-3 px-4">
+                        <dt className="text-zinc-500 font-medium">Reference ID</dt>
+                        <dd className="text-zinc-900 font-mono tracking-tight text-right font-medium">
+                          {selectedTx.reference}
+                        </dd>
                       </div>
-                    )}
-
-                    <div className="flex justify-between py-2.5 px-4 border-b border-zinc-100">
-                      <span className="text-zinc-500 font-medium">Payment Channel</span>
-                      <span className="text-zinc-900 capitalize text-right flex items-center gap-1.5">
-                        {getChannelIcon(selectedTx.channel)}
-                        {selectedTx.channel.replace("_", " ")}
-                      </span>
-                    </div>
-
-                    {selectedTx.leaseId && (
-                      <div className="flex justify-between py-2.5 px-4 bg-zinc-50/50">
-                        <span className="text-zinc-500 font-medium">Lease ID</span>
-                        <div className="flex items-center gap-1 text-zinc-900 text-right">
-                          <HugeiconsIcon icon={ArrowUpRight01Icon} size={14} className="text-indigo-500" />
-                          <span className="font-mono tracking-tight text-[11px]">
-                            {selectedTx.leaseId.slice(-8).toUpperCase()}
-                          </span>
+                      <div className="flex justify-between py-3 px-4">
+                        <dt className="text-zinc-500 font-medium">Created At</dt>
+                        <dd className="text-zinc-900 font-tabular-nums text-right font-medium">
+                          {formatDate(selectedTx.createdAt)}
+                        </dd>
+                      </div>
+                      {selectedTx.paidAt && (
+                        <div className="flex justify-between py-3 px-4">
+                          <dt className="text-zinc-500 font-medium">Cleared At</dt>
+                          <dd className="text-emerald-700 font-tabular-nums text-right font-medium">
+                            {formatDate(selectedTx.paidAt)}
+                          </dd>
                         </div>
+                      )}
+                      <div className="flex justify-between py-3 px-4">
+                        <dt className="text-zinc-500 font-medium">Channel</dt>
+                        <dd className="text-zinc-900 capitalize text-right flex items-center gap-1.5 font-medium">
+                          {getChannelIcon(selectedTx.channel)}
+                          {selectedTx.channel.replace("_", " ")}
+                        </dd>
                       </div>
-                    )}
+                      {selectedTx.leaseId && (
+                        <div className="flex justify-between py-3 px-4 bg-zinc-50/50">
+                          <dt className="text-zinc-500 font-medium">Lease Link</dt>
+                          <dd className="flex items-center gap-1 text-zinc-900 text-right font-medium">
+                            <HugeiconsIcon icon={ArrowUpRight01Icon} size={14} className="text-zinc-400" />
+                            <span className="font-mono tracking-tight text-[12px] uppercase">
+                              {selectedTx.leaseId.slice(-8)}
+                            </span>
+                          </dd>
+                        </div>
+                      )}
+                    </dl>
                   </div>
                 </section>
-
               </div>
-            </div>
+
+              {/* Fixed Bottom Action Bar */}
+              <div className="p-4 border-t border-zinc-200/60 bg-white">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsViewingReceipt(true)}
+                  className="h-10 w-full text-[12px] font-medium border-zinc-200 hover:bg-zinc-50 rounded-lg flex items-center justify-center gap-2 shadow-none text-zinc-700"
+                >
+                  View Official Receipt
+                  <HugeiconsIcon icon={ArrowUpRight01Icon} size={14} className="text-zinc-400" />
+                </Button>
+              </div>
+            </>
           )}
         </SheetContent>
       </Sheet>

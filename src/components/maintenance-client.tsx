@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useTransition, useEffect } from "react";
+import Link from "next/link";
 import {
   Search01Icon,
   FilterIcon,
@@ -12,12 +13,17 @@ import {
   Cancel01Icon,
   Clock01Icon,
   TimeQuarterIcon,
+  LinkSquare01Icon,
+  Building03Icon,
+  SmartPhone01Icon,
+  Mail01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { toast } from "sonner";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Select,
@@ -27,6 +33,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { updateMaintenanceStatusAction } from "@/actions/admin/maintenance.action";
 
 // --- TYPES ---
@@ -81,10 +97,10 @@ const formatRelativeTime = (dateString: string) => {
 
 const getStatusConfig = (status: MaintenanceStatus) => {
   const configs = {
-    Pending: { icon: Alert01Icon, label: "Awaiting", color: "text-amber-700" },
-    In_Progress: { icon: Wrench01Icon, label: "In Progress", color: "text-blue-700" },
-    Resolved: { icon: CheckmarkCircle01Icon, label: "Resolved", color: "text-emerald-700" },
-    Cancelled: { icon: Cancel01Icon, label: "Cancelled", color: "text-zinc-500" },
+    Pending: { icon: Alert01Icon, label: "Awaiting", color: "", badge: "bg-black text-white " },
+    In_Progress: { icon: Wrench01Icon, label: "In Progress", color: "", badge: "bg-black text-white" },
+    Resolved: { icon: CheckmarkCircle01Icon, label: "Resolved", color: "", badge: "bg-black text-white" },
+    Cancelled: { icon: Cancel01Icon, label: "Cancelled", color: "", badge: "bg-black text-white" },
   };
   return configs[status];
 };
@@ -94,7 +110,7 @@ const getPriorityDot = (priority: MaintenancePriority) => {
     Low: "bg-emerald-400",
     Routine: "bg-blue-400",
     High: "bg-amber-400",
-    Emergency: "bg-rose-500 animate-pulse",
+    Emergency: "bg-rose-500 animate-pulse ring-2 ring-rose-500/20",
   };
   return colors[priority];
 };
@@ -109,9 +125,10 @@ export default function MaintenanceClient({ initialTickets }: MaintenanceClientP
   const [priorityFilter, setPriorityFilter] = useState<"all" | MaintenancePriority>("all");
   const [categoryFilter, setCategoryFilter] = useState<"all" | string>("all");
 
-  // Sheet & Image Viewer State
+  // Sheet, Image Viewer & Confirmation State
   const [selectedTicket, setSelectedTicket] = useState<MaintenanceTicket | null>(null);
   const [expandedImage, setExpandedImage] = useState<string | null>(null);
+  const [pendingStatusChange, setPendingStatusChange] = useState<MaintenanceStatus | null>(null);
   const [isPending, startTransition] = useTransition();
 
   // Sync state if server data refreshes
@@ -153,28 +170,36 @@ export default function MaintenanceClient({ initialTickets }: MaintenanceClientP
   const uniqueCategories = Array.from(new Set(tickets.map(t => t.category)));
   const uniquePriorities = Array.from(new Set(tickets.map(t => t.priority)));
 
-  // Handle Status Update (Optimistic UI)
-  // Handle Status Update (Optimistic UI)
-  const handleStatusChange = (ticketId: string, newStatus: MaintenanceStatus) => {
-    
-    startTransition(async () => {
-      // 1. Optimistically update the UI immediately
-      setTickets(prev => prev.map(t => t.id === ticketId ? { ...t, status: newStatus, updatedAt: new Date().toISOString() } : t));
-      if (selectedTicket?.id === ticketId) {
-        setSelectedTicket({ ...selectedTicket, status: newStatus, updatedAt: new Date().toISOString() });
-      }
+  // Handle Status Update Flow (Shadcn Confirmation)
+  const requestStatusChange = (newStatus: MaintenanceStatus) => {
+    if (!selectedTicket || newStatus === selectedTicket.status) return;
+    setPendingStatusChange(newStatus);
+  };
 
-      // 2. Fire the server action in the background
+  const confirmStatusChange = () => {
+    if (!selectedTicket || !pendingStatusChange) return;
+    const newStatus = pendingStatusChange;
+    const ticketId = selectedTicket.id;
+
+    startTransition(async () => {
+      // Optimistic UI Update
+      setTickets(prev => prev.map(t => t.id === ticketId ? { ...t, status: newStatus, updatedAt: new Date().toISOString() } : t));
+      setSelectedTicket({ ...selectedTicket, status: newStatus, updatedAt: new Date().toISOString() });
+
+      // Server Action
       const result = await updateMaintenanceStatusAction(ticketId, newStatus);
       
-      // 3. Handle the Server Response
       if (result.success) {
-        toast.success(result.message);
+        toast.success(result.message || "Status updated successfully.");
       } else {
-        // If it fails, revert the state back to the original initialTickets (or fetch fresh)
-        toast.error(result.error);
-        setTickets(initialTickets); 
+        toast.error(result.error || "Failed to update status.");
+        setTickets(initialTickets); // Revert on failure
+        if (selectedTicket) {
+          const original = initialTickets.find(t => t.id === ticketId);
+          if (original) setSelectedTicket(original);
+        }
       }
+      setPendingStatusChange(null);
     });
   };
 
@@ -189,46 +214,42 @@ export default function MaintenanceClient({ initialTickets }: MaintenanceClientP
           </h1>
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-white p-5 rounded-xl border border-zinc-200 flex flex-col justify-between">
-              <span className="text-[12px] font-medium text-zinc-500">Open tickets</span>
-              <span className="text-3xl font-bold tracking-tighter text-zinc-900 mt-2">{metrics.open.toString().padStart(2, '0')}</span>
+            <div className="bg-white p-5 rounded-xl border border-zinc-200/60 shadow-[0_1px_4px_rgba(0,0,0,0.01)] flex flex-col justify-between">
+              <span className="text-[12px] font-medium text-zinc-500 uppercase tracking-widest">Open tickets</span>
+              <span className="text-3xl font-bold tracking-tighter text-zinc-900 mt-2 font-tabular-nums">{metrics.open.toString().padStart(2, '0')}</span>
             </div>
-            <div className="bg-white p-5 rounded-xl border border-zinc-200 flex flex-col justify-between">
-              <span className="text-[12px] font-medium text-zinc-500">Active tickets</span>
-              <span className="text-3xl font-bold tracking-tighter text-zinc-900 mt-2">{metrics.active.toString().padStart(2, '0')}</span>
+            <div className="bg-white p-5 rounded-xl border border-zinc-200/60 shadow-[0_1px_4px_rgba(0,0,0,0.01)] flex flex-col justify-between">
+              <span className="text-[12px] font-medium text-zinc-500 uppercase tracking-widest">Active tickets</span>
+              <span className="text-3xl font-bold tracking-tighter text-zinc-900 mt-2 font-tabular-nums">{metrics.active.toString().padStart(2, '0')}</span>
             </div>
-            <div className="bg-white p-5 rounded-xl border border-zinc-200 flex flex-col justify-between">
-              <span className="text-[12px] font-medium text-zinc-500">Resolved tickets</span>
-              <span className="text-3xl font-bold tracking-tighter text-zinc-900 mt-2">{metrics.resolved.toString().padStart(2, '0')}</span>
+            <div className="bg-white p-5 rounded-xl border border-zinc-200/60 shadow-[0_1px_4px_rgba(0,0,0,0.01)] flex flex-col justify-between">
+              <span className="text-[12px] font-medium text-zinc-500 uppercase tracking-widest">Resolved</span>
+              <span className="text-3xl font-bold tracking-tighter text-zinc-900 mt-2 font-tabular-nums">{metrics.resolved.toString().padStart(2, '0')}</span>
             </div>
-            <div className="bg-white p-5 rounded-xl border border-zinc-200 flex flex-col justify-between">
-              <span className="text-[12px] font-medium text-zinc-500">Total volume</span>
-              <span className="text-3xl font-bold tracking-tighter text-zinc-900 mt-2">{metrics.total.toString().padStart(2, '0')}</span>
+            <div className="bg-white p-5 rounded-xl border border-zinc-200/60 shadow-[0_1px_4px_rgba(0,0,0,0.01)] flex flex-col justify-between">
+              <span className="text-[12px] font-medium text-zinc-500 uppercase tracking-widest">Total volume</span>
+              <span className="text-3xl font-bold tracking-tighter text-zinc-900 mt-2 font-tabular-nums">{metrics.total.toString().padStart(2, '0')}</span>
             </div>
           </div>
         </div>
 
         {/* FILTER BAR */}
-        {/* FILTER BAR */}
-        <section className="flex flex-col md:flex-row items-center gap-3 bg-white p-2 border border-zinc-200 rounded-xl w-full ">
-          {/* Search Input (Expands to fill available space) */}
+        <section className="flex flex-col md:flex-row items-center gap-3 bg-white p-1.5 border border-zinc-200/60 shadow-[0_1px_4px_rgba(0,0,0,0.01)] rounded-xl w-full ">
           <div className="relative w-full md:flex-1">
             <HugeiconsIcon icon={Search01Icon} size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
             <Input
               placeholder="Search issues, tenants, or #ID..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 h-9 border-zinc-200 focus-visible:ring-0 focus-visible:border-zinc-400 text-[13px] bg-white placeholder:text-zinc-400 rounded-lg "
+              className="w-full pl-9 h-9 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-[13px] bg-transparent shadow-none placeholder:text-zinc-400 rounded-lg"
             />
           </div>
 
-          {/* Divider (Desktop Only) */}
-          <div className="h-6 w-px bg-zinc-200 hidden md:block mx-1" />
+          <div className="h-4 w-px bg-zinc-200 hidden md:block mx-1" />
 
-          {/* Dropdown Filters & Reset Button */}
-          <div className="flex flex-wrap md:flex-nowrap items-center gap-2 w-full md:w-auto">
+          <div className="flex flex-wrap md:flex-nowrap items-center gap-2 w-full md:w-auto px-2 pb-1 md:pb-0">
             <Select value={statusFilter} onValueChange={(val) => setStatusFilter(val as any)}>
-              <SelectTrigger className="w-full md:w-[130px] h-9 border-zinc-200 bg-white hover:bg-zinc-50 text-[12px] font-medium text-zinc-700  focus:ring-0 rounded-lg">
+              <SelectTrigger className="w-full md:w-[130px] h-8 border-0 bg-zinc-50/50 hover:bg-zinc-100 text-[12px] font-medium text-zinc-700 shadow-none focus:ring-0 rounded-md">
                 <SelectValue placeholder="All Statuses" />
               </SelectTrigger>
               <SelectContent>
@@ -241,7 +262,7 @@ export default function MaintenanceClient({ initialTickets }: MaintenanceClientP
             </Select>
 
             <Select value={priorityFilter} onValueChange={(val) => setPriorityFilter(val as any)}>
-              <SelectTrigger className="w-full md:w-[130px] h-9 border-zinc-200 bg-white hover:bg-zinc-50 text-[12px] font-medium text-zinc-700  focus:ring-0 rounded-lg">
+              <SelectTrigger className="w-full md:w-[130px] h-8 border-0 bg-zinc-50/50 hover:bg-zinc-100 text-[12px] font-medium text-zinc-700 shadow-none focus:ring-0 rounded-md">
                 <SelectValue placeholder="All Priorities" />
               </SelectTrigger>
               <SelectContent>
@@ -253,7 +274,7 @@ export default function MaintenanceClient({ initialTickets }: MaintenanceClientP
             </Select>
 
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger className="w-full md:w-[140px] h-9 border-zinc-200 bg-white hover:bg-zinc-50 text-[12px] font-medium text-zinc-700  focus:ring-0 rounded-lg">
+              <SelectTrigger className="w-full md:w-[140px] h-8 border-0 bg-zinc-50/50 hover:bg-zinc-100 text-[12px] font-medium text-zinc-700 shadow-none focus:ring-0 rounded-md">
                 <SelectValue placeholder="All Categories" />
               </SelectTrigger>
               <SelectContent>
@@ -264,90 +285,88 @@ export default function MaintenanceClient({ initialTickets }: MaintenanceClientP
               </SelectContent>
             </Select>
 
+            <div className="h-4 w-px bg-zinc-200 hidden md:block mx-1" />
+
             <Button
-              variant="default"
+              variant="ghost"
+              size="icon"
               onClick={() => {
                 setSearchQuery("");
                 setStatusFilter("all");
                 setPriorityFilter("all");
                 setCategoryFilter("all");
               }}
-              className="h-9 px-4 text-[12px] font-semibold bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg  shrink-0 w-full md:w-auto"
+              className="h-8 w-8 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 shrink-0 ml-auto md:ml-0 rounded-md"
             >
-              Reset Filters
+              <HugeiconsIcon icon={FilterIcon} size={14} />
             </Button>
           </div>
         </section>
 
         {/* TICKET LIST */}
-        <div className="bg-white border border-zinc-200 rounded-xl overflow-hidden">
-          <div className="grid grid-cols-12 gap-4 px-6 py-4 border-b border-zinc-200 bg-white text-[12px] font-medium text-zinc-500">
-            <div className="col-span-12 md:col-span-5 flex items-center gap-3">
-              <input type="checkbox" className="h-4 w-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900" />
-              Title
-            </div>
+        <div className="bg-white border border-zinc-200/60 shadow-[0_1px_4px_rgba(0,0,0,0.01)] rounded-xl overflow-hidden">
+          <div className="grid grid-cols-12 gap-4 px-6 py-4 border-b border-zinc-200/60 bg-zinc-50/30 text-[12px] font-medium text-zinc-500">
+            <div className="col-span-12 md:col-span-5">Ticket Title & Details</div>
             <div className="hidden md:block col-span-2">Status</div>
             <div className="hidden md:block col-span-1">Priority</div>
             <div className="hidden md:block col-span-2">Updated</div>
             <div className="hidden md:block col-span-2">Created at</div>
           </div>
 
-          <div className="divide-y divide-zinc-200">
+          <div className="divide-y divide-zinc-100">
             {filteredData.map((ticket) => {
               const statusCfg = getStatusConfig(ticket.status);
               
               return (
                 <div 
                   key={ticket.id} 
-                  className="grid grid-cols-12 gap-4 px-6 py-4 items-center hover:bg-zinc-50 transition-colors group bg-white"
+                  className="grid grid-cols-12 gap-4 px-6 py-4 items-center hover:bg-zinc-50/50 transition-colors group bg-white cursor-pointer"
+                  onClick={() => setSelectedTicket(ticket)}
                 >
                   {/* Issue Info */}
-                  <div 
-                    className="col-span-12 md:col-span-5 flex items-start gap-3 cursor-pointer"
-                    onClick={() => setSelectedTicket(ticket)}
-                  >
-                    <div className="mt-2.5">
-                       <input type="checkbox" onClick={(e) => e.stopPropagation()} className="h-4 w-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900" />
-                    </div>
-                    <Avatar className="h-10 w-10 mt-0.5 shrink-0 border border-zinc-200">
+                  <div className="col-span-12 md:col-span-5 flex items-start gap-3">
+                    <Avatar className="h-10 w-10 mt-0.5 shrink-0 border border-zinc-200/60 shadow-sm">
                       <AvatarImage src={ticket.user.profilePicture} />
-                      <AvatarFallback className="bg-zinc-100 text-zinc-600 text-xs">
+                      <AvatarFallback className="bg-zinc-100 text-zinc-600 text-xs font-medium">
                         {ticket.user.name.charAt(0)}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col min-w-0 flex-1">
                       <div className="flex items-center gap-1.5 mb-0.5">
-                        <span className="text-[14px] font-semibold text-zinc-900 truncate">
+                        <span className="text-[13px] font-semibold tracking-tight text-zinc-900 truncate">
                           {ticket.title}
                         </span>
-                        <span className="text-[13px] text-zinc-400 font-mono tracking-tighter shrink-0">
-                          #{ticket.ticketNumber.slice(-3)}
+                        <span className="text-[11px] text-zinc-400 font-mono tracking-tighter shrink-0">
+                          #{ticket.ticketNumber.slice(-4)}
                         </span>
                       </div>
-                      <span className="text-[13px] text-zinc-500 truncate mb-1.5 pr-4">
+                      <span className="text-[12px] text-zinc-500 truncate mb-1.5 pr-4">
                         {ticket.description}
                       </span>
                       <div className="flex items-center gap-2">
-                        <span className="text-[11px] font-medium text-zinc-900">
+                        <span className="text-[11px] font-medium text-zinc-700">
                           {ticket.user.name}
                         </span>
-                        <span className="text-[11px] font-medium text-zinc-500 bg-zinc-100 px-2 py-0.5 rounded-sm">
+                        <span className="text-[10px] font-medium text-zinc-500 bg-zinc-100 px-1.5 py-0.5 rounded uppercase tracking-wider">
                           {ticket.listing.title}
                         </span>
                       </div>
                     </div>
                   </div>
 
-                  {/* Inline Status Dropdown */}
-                  <div className="hidden md:flex col-span-2 items-center">
+                  {/* Status Dropdown (intercepted click) */}
+                  <div className="hidden md:flex col-span-2 items-center" onClick={(e) => e.stopPropagation()}>
                     <Select 
                       value={ticket.status} 
-                      onValueChange={(val) => handleStatusChange(ticket.id, val as MaintenanceStatus)}
+                      onValueChange={(val) => {
+                        setSelectedTicket(ticket);
+                        requestStatusChange(val as MaintenanceStatus);
+                      }}
                     >
-                      <SelectTrigger className="h-8 border-0 bg-transparent hover:bg-zinc-100 focus:ring-0 p-0 px-2 w-auto gap-2">
+                      <SelectTrigger className="h-8 border-0 bg-transparent hover:bg-zinc-100 focus:ring-0 p-0 px-2 w-auto gap-2 rounded-md">
                         <div className="flex items-center gap-1.5">
                           <HugeiconsIcon icon={statusCfg.icon} size={14} className={statusCfg.color} />
-                          <span className="text-[13px] font-medium text-zinc-700">{statusCfg.label}</span>
+                          <span className="text-[12px] font-medium text-zinc-700">{statusCfg.label}</span>
                         </div>
                       </SelectTrigger>
                       <SelectContent>
@@ -361,8 +380,8 @@ export default function MaintenanceClient({ initialTickets }: MaintenanceClientP
 
                   {/* Priority */}
                   <div className="hidden md:flex col-span-1 items-center gap-2">
-                    <div className={`h-2.5 w-2.5 rounded-sm ${getPriorityDot(ticket.priority)}`} />
-                    <span className="text-[13px] font-medium text-zinc-700">
+                    <div className={`h-2.5 w-2.5 rounded-full ${getPriorityDot(ticket.priority)}`} />
+                    <span className="text-[12px] font-medium text-zinc-700">
                       {ticket.priority}
                     </span>
                   </div>
@@ -378,8 +397,8 @@ export default function MaintenanceClient({ initialTickets }: MaintenanceClientP
                   {/* Created At */}
                   <div className="hidden md:flex col-span-2 items-center gap-1.5 text-zinc-500">
                     <HugeiconsIcon icon={Clock01Icon} size={14} />
-                    <span className="text-[12px] font-medium">
-                      {formatRelativeTime(ticket.createdAt)}
+                    <span className="text-[12px] font-medium font-tabular-nums">
+                      {new Date(ticket.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
                     </span>
                   </div>
                 </div>
@@ -405,7 +424,7 @@ export default function MaintenanceClient({ initialTickets }: MaintenanceClientP
         >
           <div className="relative max-w-5xl w-full h-full max-h-[90vh] flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
             <button 
-              className="absolute top-4 right-4 text-white bg-white/10 hover:bg-white/20 rounded-full p-2 transition-colors z-10"
+              className="absolute -top-3 right-4 text-white bg-white/10 hover:bg-white/20 rounded-full p-2 transition-colors z-10"
               onClick={() => setExpandedImage(null)}
             >
               <HugeiconsIcon icon={Cancel01Icon} size={24} />
@@ -413,149 +432,189 @@ export default function MaintenanceClient({ initialTickets }: MaintenanceClientP
             <img 
               src={expandedImage} 
               alt="Issue attachment" 
-              className="max-w-full max-h-full object-contain rounded-lg" 
+              className="max-w-full max-h-full object-contain rounded-lg shadow-2xl" 
             />
           </div>
         </div>
       )}
 
-      {/* TICKET DETAILS SHEET */}
+      {/* INDUSTRY STANDARD TICKET CRM SHEET */}
       <Sheet open={!!selectedTicket} onOpenChange={(open) => !open && setSelectedTicket(null)}>
-        <SheetContent className="w-full sm:max-w-[480px] p-0 bg-[#FAFAFA] border-l border-zinc-200 flex flex-col font-sans">
+        <SheetContent className="w-full sm:max-w-[480px] p-0 bg-[#FAFAFA] border-l border-zinc-200/60 flex flex-col font-sans shadow-2xl">
           {selectedTicket && (() => {
+            const currentStatusCfg = getStatusConfig(selectedTicket.status);
             return (
               <>
-                <div className="flex-1 overflow-y-auto">
-                  {/* Sheet Header */}
-                  <div className="px-6 pt-10 pb-6 border-b border-zinc-200 bg-white sticky top-0 z-10">
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="font-mono text-xs font-bold text-zinc-400 tracking-widest uppercase">
-                        Ticket {selectedTicket.ticketNumber}
+                {/* Header Context Section */}
+                <div className="px-6 py-8 border-b border-zinc-100 bg-zinc-50/30">
+                  <div className="flex items-center justify-between mb-6">
+                    <Badge
+                      variant="outline"
+                      className={`px-2 py-0 border-0 rounded text-[9px] uppercase tracking-wider font-bold h-5 ${currentStatusCfg.badge}`}
+                    >
+                      {currentStatusCfg.label}
+                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <div className={`h-2.5 w-2.5 rounded-full ${getPriorityDot(selectedTicket.priority)}`} />
+                      <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">
+                        {selectedTicket.priority} Priority
                       </span>
-                      <div className="flex items-center gap-2">
-                        <div className={`h-2.5 w-2.5 rounded-sm ${getPriorityDot(selectedTicket.priority)}`} />
-                        <span className="text-[11px] font-bold text-zinc-600 uppercase tracking-wider">
-                          {selectedTicket.priority}
-                        </span>
-                      </div>
                     </div>
-                    
-                    <h2 className="text-xl font-semibold tracking-tight text-zinc-900 leading-tight mb-2">
-                      {selectedTicket.title}
-                    </h2>
-                    <p className="text-[12px] font-medium text-zinc-500">
-                      Reported {formatRelativeTime(selectedTicket.createdAt)}
-                    </p>
                   </div>
 
-                  <div className="p-6 space-y-8">
-                    
-                    {/* Description */}
-                    <section>
-                      <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-                        <HugeiconsIcon icon={Alert01Icon} size={14} /> Issue Description
-                      </h3>
-                      <div className="bg-white border border-zinc-200 p-4 rounded-xl text-[13px] text-zinc-700 leading-relaxed whitespace-pre-wrap">
-                        {selectedTicket.description}
-                      </div>
-                    </section>
-
-                    {/* Image Gallery */}
-                    {selectedTicket.images && selectedTicket.images.length > 0 && (
-                      <section>
-                        <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-                          <HugeiconsIcon icon={Image01Icon} size={14} /> Attached Evidence
-                        </h3>
-                        <div className="grid grid-cols-3 gap-2">
-                          {selectedTicket.images.map((imgUrl, idx) => (
-                            <div 
-                              key={idx} 
-                              onClick={() => setExpandedImage(imgUrl)}
-                              className="aspect-square rounded-lg border border-zinc-200 overflow-hidden cursor-pointer group relative bg-zinc-100"
-                            >
-                              <img src={imgUrl} alt={`Evidence ${idx + 1}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-                                <span className="opacity-0 group-hover:opacity-100 text-white text-[10px] font-bold uppercase tracking-wider">View</span>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </section>
-                    )}
-
-                    {/* Full Reporter & Property Context */}
-                    <section className="space-y-4">
-                      {/* User Context Block */}
-                      <div className="bg-white border border-zinc-200 p-4 rounded-xl flex flex-col gap-3">
-                        <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Reporter Info</span>
-                        <div className="flex items-center gap-3">
-                          <Avatar className="h-10 w-10 border border-zinc-200 shrink-0">
-                            <AvatarImage src={selectedTicket.user.profilePicture || undefined} />
-                            <AvatarFallback className="bg-zinc-100 text-zinc-600 text-[10px]">
-                              {selectedTicket.user.name.charAt(0)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="min-w-0">
-                            <p className="text-[13px] font-bold text-zinc-900 truncate">{selectedTicket.user.name}</p>
-                            <p className="text-[12px] text-zinc-500 truncate">{selectedTicket.user.email}</p>
-                            <p className="text-[12px] text-zinc-500 truncate">{selectedTicket.user.phone}</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Property Context Block */}
-                      <div className="bg-white border border-zinc-200 p-4 rounded-xl flex flex-col gap-3">
-                        <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Property Assignment</span>
-                        <div className="flex items-center gap-3">
-                          <div className="h-12 w-12 rounded-lg border border-zinc-200 overflow-hidden shrink-0 bg-zinc-100">
-                            <img src={selectedTicket.listing.image} alt={selectedTicket.listing.title} className="h-full w-full object-cover" />
-                          </div>
-                          <div className="min-w-0">
-                            <p className="text-[13px] font-bold text-zinc-900 truncate">{selectedTicket.listing.title}</p>
-                            <p className="text-[12px] text-zinc-500 truncate">{selectedTicket.listing.location}</p>
-                          </div>
-                        </div>
-                      </div>
-                    </section>
-
-                    {/* Status Management */}
-                    <section className="pb-8">
-                      <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-3">
-                        Update Status
-                      </h3>
-                      <div className="bg-zinc-100 border border-zinc-200 p-1.5 rounded-xl flex flex-wrap gap-1.5">
-                        {(["Pending", "In_Progress", "Resolved", "Cancelled"] as MaintenanceStatus[]).map((status) => {
-                          const isActive = selectedTicket.status === status;
-                          return (
-                            <button
-                              key={status}
-                              disabled={isPending}
-                              onClick={() => handleStatusChange(selectedTicket.id, status)}
-                              className={`flex-1 min-w-[45%] py-2.5 text-[11px] font-bold uppercase tracking-wider rounded-lg transition-all duration-200 ${
-                                isActive
-                                  ? "bg-white text-zinc-900 border border-zinc-200"
-                                  : "text-zinc-500 hover:bg-zinc-200 hover:text-zinc-700 disabled:opacity-50"
-                              }`}
-                            >
-                              {status.replace("_", " ")}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </section>
-
-                  </div>
+                  <h2 className="text-xl font-semibold tracking-tight text-zinc-900 leading-tight mb-2">
+                    {selectedTicket.title}
+                  </h2>
+                  <p className="text-[12px] text-zinc-500 font-mono tracking-widest uppercase">
+                    TICKET #{selectedTicket.ticketNumber.slice(-8)}
+                  </p>
                 </div>
 
-                {/* Dual Footer Actions: Call or Email */}
-                <div className="p-4 bg-white border-t border-zinc-200 z-20 flex gap-3">
+                {/* Scrollable Data Body */}
+                <div className="flex-1 overflow-y-auto px-6 py-8 space-y-10">
+                  
+                  {/* 1. Issue Description */}
+                  <section>
+                    <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                       Description Context
+                    </h3>
+                    <div className="bg-white border border-zinc-200/60 p-4 rounded-xl text-[13px] text-zinc-700 leading-relaxed whitespace-pre-wrap shadow-[0_1px_4px_rgba(0,0,0,0.01)]">
+                      {selectedTicket.description}
+                    </div>
+                  </section>
+
+                  {/* 2. Reporter Context Card */}
+                  <section>
+                    <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-3">
+                      Reporter Info
+                    </h3>
+                    <div className="rounded-xl border border-zinc-200/60 overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.01)]">
+                      <div className="p-4 bg-zinc-50/50 flex gap-4 border-b border-zinc-100">
+                        <Avatar className="h-12 w-12 border border-zinc-200/60 shadow-sm shrink-0">
+                          <AvatarImage src={selectedTicket.user.profilePicture} />
+                          <AvatarFallback className="bg-zinc-100 text-zinc-600 font-medium text-sm">
+                            {selectedTicket.user.name.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex flex-col justify-center min-w-0">
+                          <h4 className="text-sm font-semibold tracking-tight text-zinc-900 truncate">
+                            {selectedTicket.user.name}
+                          </h4>
+                          <p className="text-[12px] text-zinc-500 mt-0.5 truncate">
+                            {selectedTicket.user.email}
+                          </p>
+                        </div>
+                      </div>
+                      <dl className="grid grid-cols-1 gap-y-3 p-4 text-[13px] bg-white">
+                        <div className="flex items-center gap-3">
+                          <HugeiconsIcon icon={SmartPhone01Icon} size={14} className="text-zinc-400" />
+                          <dd className="font-medium text-zinc-900 font-mono tracking-tight">{selectedTicket.user.phone}</dd>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <HugeiconsIcon icon={Mail01Icon} size={14} className="text-zinc-400" />
+                          <dd className="font-medium text-zinc-900 truncate">{selectedTicket.user.email}</dd>
+                        </div>
+                      </dl>
+                    </div>
+                  </section>
+
+                  {/* 3. Associated Asset Context Card */}
+                  <section>
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
+                        Associated Asset
+                      </h3>
+                      <Link
+                        href={`/admin/properties/${selectedTicket.listing.slug}`}
+                        target="_blank"
+                        className="inline-flex items-center gap-1 text-[11px] font-medium text-zinc-500 hover:text-zinc-900 tracking-wide transition-colors"
+                      >
+                        View Asset <HugeiconsIcon icon={LinkSquare01Icon} size={12} />
+                      </Link>
+                    </div>
+                    <div className="rounded-xl border border-zinc-200/60 overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.01)] bg-white">
+                      <div className="p-4 flex gap-4">
+                        <div className="h-12 w-12 shrink-0 bg-zinc-100 rounded-md overflow-hidden border border-zinc-200/60 shadow-sm">
+                          {selectedTicket.listing.image ? (
+                            <img src={selectedTicket.listing.image} alt="Property" className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <HugeiconsIcon icon={Building03Icon} size={16} className="text-zinc-300"/>
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex flex-col justify-center min-w-0">
+                          <h4 className="text-sm font-semibold tracking-tight text-zinc-900 truncate">
+                            {selectedTicket.listing.title}
+                          </h4>
+                          <p className="text-[12px] text-zinc-500 mt-0.5 truncate">
+                            {selectedTicket.listing.location}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </section>
+
+                  {/* 4. Attached Evidence */}
+                  {selectedTicket.images && selectedTicket.images.length > 0 && (
+                    <section>
+                      <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-3">
+                        Attached Evidence
+                      </h3>
+                      <div className="grid grid-cols-3 gap-3">
+                        {selectedTicket.images.map((imgUrl, idx) => (
+                          <button 
+                            key={idx} 
+                            onClick={() => setExpandedImage(imgUrl)}
+                            className="aspect-square rounded-xl border border-zinc-200/80 overflow-hidden group relative bg-zinc-100 shadow-[0_1px_4px_rgba(0,0,0,0.01)] focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:ring-offset-2"
+                          >
+                            <img src={imgUrl} alt={`Evidence ${idx + 1}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                              <span className="opacity-0 group-hover:opacity-100 text-white text-[10px] font-bold uppercase tracking-wider bg-black/40 px-2 py-1 rounded backdrop-blur-sm transition-opacity duration-300">View</span>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </section>
+                  )}
+
+                  {/* 5. Status Pipeline Management */}
+                  <section>
+                    <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-3">
+                      Maintenance Status
+                    </h3>
+                    <div className="bg-zinc-100/60 border border-zinc-200/60 p-1 rounded-xl flex flex-wrap gap-1">
+                      {(["Pending", "In_Progress", "Resolved", "Cancelled"] as MaintenanceStatus[]).map((status) => {
+                        const isActive = selectedTicket.status === status;
+                        return (
+                          <button
+                            key={status}
+                            disabled={isPending}
+                            onClick={() => requestStatusChange(status)}
+                            className={`flex-1 min-w-[45%] py-2.5 text-[11px] font-bold uppercase tracking-wider rounded-lg transition-all duration-200 ${
+                              isActive
+                                ? "bg-white text-zinc-900 border border-zinc-200 shadow-sm"
+                                : "text-zinc-500 hover:bg-zinc-200/50 hover:text-zinc-700 disabled:opacity-50"
+                            }`}
+                          >
+                            {status.replace("_", " ")}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </section>
+
+                </div>
+
+                {/* Fixed Bottom Action Bar */}
+                <div className="p-4 border-t border-zinc-200/60 bg-white flex gap-3">
                   <a href={`tel:${selectedTicket.user.phone}`} className="flex-1">
-                    <Button variant="outline" className="w-full h-11 rounded-lg border-zinc-200 text-zinc-900 hover:bg-zinc-100 font-semibold transition-all">
+                    <Button variant="outline" className="w-full h-10 rounded-lg border-zinc-200 text-zinc-900 hover:bg-zinc-50 font-medium transition-all shadow-none">
                       Call Tenant
                     </Button>
                   </a>
                   <a href={`mailto:${selectedTicket.user.email}?subject=Regarding Ticket #${selectedTicket.ticketNumber}`} className="flex-1">
-                    <Button className="w-full h-11 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white font-semibold transition-all">
+                    <Button className="w-full h-10 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white font-medium transition-all shadow-none">
                       Email Tenant
                     </Button>
                   </a>
@@ -565,6 +624,54 @@ export default function MaintenanceClient({ initialTickets }: MaintenanceClientP
           })()}
         </SheetContent>
       </Sheet>
+
+      {/* SHADCN CONFIRMATION DIALOG FOR STATUS CHANGES */}
+      <AlertDialog
+        open={!!pendingStatusChange}
+        onOpenChange={(open) => !open && setPendingStatusChange(null)}
+      >
+        <AlertDialogContent className="font-sans max-w-[400px] rounded-2xl p-6">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-lg font-semibold tracking-tight text-zinc-900">
+              Confirm Status Update
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-[13px] text-zinc-500 leading-relaxed mt-2">
+              Are you sure you want to transition this ticket to{" "}
+              <span className="font-bold text-zinc-900">
+                {pendingStatusChange?.replace("_", " ")}
+              </span>
+              ? This action will update the system immediately.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-6 gap-2 sm:gap-0">
+            <AlertDialogCancel
+              disabled={isPending}
+              className="h-9 px-4 text-[12px] font-medium border-zinc-200 hover:bg-zinc-50 rounded-lg m-0"
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmStatusChange}
+              disabled={isPending}
+              className="h-9 px-4 text-[12px] font-medium rounded-lg m-0 bg-black text-white hover:bg-zinc-800 focus:ring-zinc-900"
+            >
+              {isPending ? (
+                <>
+                  <HugeiconsIcon
+                    icon={Loading03Icon}
+                    className="animate-spin mr-2"
+                    size={14}
+                  />{" "}
+                  Saving...
+                </>
+              ) : (
+                "Confirm Transition"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
     </div>
   );
 }
