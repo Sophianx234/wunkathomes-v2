@@ -5,9 +5,13 @@ import { connectToDatabase } from "@/config/DbConnect";
 import Maintenance from "@/models/maintenance";
 import Lease from "@/models/lease";
 import { revalidatePath } from "next/cache";
-
-// Adjust this import path to exactly where you saved your Cloudinary utility file
 import { uploadToCloudinary } from "@/lib/cloudinary"; 
+import { z } from "zod";
+import crypto from "crypto";
+import { headers } from "next/headers";
+
+// NOTE: In a production environment, implement Redis-based rate limiting
+// import { ratelimit } from "@/lib/redis";
 
 export type ActionState = {
   success: boolean;
@@ -15,19 +19,54 @@ export type ActionState = {
   error?: string;
 };
 
+// ============================================================================
+// 1. STRICT INPUT VALIDATION SCHEMAS (ZOD)
+// ============================================================================
+const maintenanceSchema = z.object({
+  category: z.string().min(2).max(50).trim(),
+  priority: z.enum(["Low", "Medium", "High", "Emergency"], { message: "Invalid priority level" }),
+  title: z.string().min(5, "Title is too short").max(100, "Title is too long").trim(),
+  description: z.string().min(10, "Please provide more details").max(2000, "Description is too long").trim(),
+});
+
+// Security Constraints for File Uploads
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB per file
+const MAX_FILE_COUNT = 3; // Max 3 images per request
+const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
+// ============================================================================
+// 2. SERVER ACTION
+// ============================================================================
 export async function submitMaintenanceRequest(prevState: ActionState, formData: FormData): Promise<ActionState> {
+  let session;
+  let ip = "unknown";
+
   try {
-    // 1. Secure the Action
-    const session = await getSession();
+    // 1. Capture Identity & Digital Footprint
+    const headersList = await headers();
+    ip = headersList.get("x-forwarded-for")?.split(',')[0] || "Unknown IP";
+    
+    session = await getSession();
     if (!session?.userId) {
-      return { success: false, message: "", error: "Unauthorized. Please log in." };
+      throw new Error("UNAUTHORIZED");
     }
+
+    // 2. Rate Limiting (Crucial for endpoints handling heavy file uploads)
+    // const { success } = await ratelimit.limit(`maintenance_${session.userId}`);
+    // if (!success) throw new Error("RATE_LIMIT_EXCEEDED");
+
+    // 3. Strict Zod Validation (Prevent Mass Assignment via Object.fromEntries)
+    const validatedFields = maintenanceSchema.safeParse(Object.fromEntries(formData));
+    if (!validatedFields.success) {
+      return { success: false, message: "", error: validatedFields.error.errors[0].message };
+    }
+
+    const { category, priority, title, description } = validatedFields.data;
 
     await connectToDatabase();
 
-    // 2. Contextualize the Request
+    // 4. Contextual Authorization (IDOR Prevention)
     const activeLease = await Lease.findOne({ userId: session.userId, status: "Active" }).lean();
-    
     if (!activeLease) {
       return { 
         success: false, 
@@ -36,37 +75,38 @@ export async function submitMaintenanceRequest(prevState: ActionState, formData:
       };
     }
 
-    // 3. Extract Form Data
-    const category = formData.get("category") as string;
-    const priority = formData.get("priority") as string;
-    const title = formData.get("title") as string;
-    const description = formData.get("description") as string;
+    // 5. Secure Media Validation (Defense-in-Depth)
+    const rawMediaFiles = formData.getAll("media") as File[];
+    const validMediaFiles: File[] = [];
 
-    if (!category || !priority || !title || !description) {
-      return { success: false, message: "", error: "Please complete all required fields." };
+    for (const file of rawMediaFiles) {
+      if (!file || file.size === 0) continue; // Skip empty nodes
+      
+      if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+        return { success: false, message: "", error: "Invalid file format. Only JPG, PNG, and WEBP are allowed." };
+      }
+      if (file.size > MAX_FILE_SIZE) {
+        return { success: false, message: "", error: `File ${file.name} exceeds the 5MB limit.` };
+      }
+      validMediaFiles.push(file);
     }
 
-    // 4. Handle Media Uploads (Optimized for Concurrent Upload)
-    const rawMediaFiles = formData.getAll("media") as File[];
-    
-    // Filter out any empty files or accidental empty form submissions
-    const validMediaFiles = rawMediaFiles.filter(file => file && file.size > 0);
-    
+    if (validMediaFiles.length > MAX_FILE_COUNT) {
+      return { success: false, message: "", error: `You can only upload a maximum of ${MAX_FILE_COUNT} images.` };
+    }
+
+    // 6. External API Upload (Cloudinary)
     let imageUrls: string[] = [];
-    
     if (validMediaFiles.length > 0) {
-      // Pass the entire array to your utility function. 
-      // It will automatically trigger the Promise.all array overload.
       const uploadResult = await uploadToCloudinary(validMediaFiles, "wunkathomes/maintenance");
-      
-      // Ensure the result is formatted as an array for MongoDB
       imageUrls = Array.isArray(uploadResult) ? uploadResult : [uploadResult];
     }
 
-    // 5. Generate a Professional Ticket Number
-    const ticketNumber = `MNT-${Math.floor(100000 + Math.random() * 900000)}`;
+    // 7. Cryptographically Secure Ticket Generation
+    const secureHex = crypto.randomBytes(3).toString("hex").toUpperCase();
+    const ticketNumber = `MNT-${Date.now().toString().slice(-4)}-${secureHex}`;
 
-    // 6. Save to Database
+    // 8. Save to Database
     await Maintenance.create({
       userId: session.userId,
       leaseId: activeLease._id,
@@ -80,7 +120,7 @@ export async function submitMaintenanceRequest(prevState: ActionState, formData:
       status: "Pending"
     });
 
-    // 7. Refresh the cache
+    // 9. Cache Invalidation
     revalidatePath("/user/dashboard");
     revalidatePath("/user/maintenance/history");
     
@@ -90,7 +130,12 @@ export async function submitMaintenanceRequest(prevState: ActionState, formData:
     };
 
   } catch (error: any) {
-    console.error("Maintenance Submission Error:", error);
+    // 10. Fail Securely & Contextual Logging
+    if (error.message === "UNAUTHORIZED") return { success: false, message: "", error: "Unauthorized access." };
+    if (error.message === "RATE_LIMIT_EXCEEDED") return { success: false, message: "", error: "You are submitting tickets too quickly. Please wait." };
+
+    console.error(`[SECURITY LOG] Maintenance Submission Error (User: ${session?.userId}, IP: ${ip}):`, error.message);
+    
     return { 
       success: false, 
       message: "", 

@@ -1,226 +1,292 @@
-"use server"
+"use server";
 
-import { connectToDatabase } from "@/config/DbConnect"
-import { getSession } from "@/lib/session"
-import Transaction from "@/models/transaction"
-import Listing from "@/models/listing"
-import { revalidatePath } from "next/cache"
-import Lease from "@/models/lease"
+import { connectToDatabase } from "@/config/DbConnect";
+import { getSession, SessionPayload } from "@/lib/session";
+import Transaction from "@/models/transaction";
+import Listing from "@/models/listing";
+import Lease from "@/models/lease";
+import User from "@/models/user";
+import { revalidatePath } from "next/cache";
+import { sendEmail } from "@/lib/resend";
+import PaymentReceiptEmail from "@/components/email/payment-reciept-mail";
+import RenewalConfirmationEmail from "@/components/email/renewal-confirmation-mail";
+import React from "react";
+import { z } from "zod";
+import mongoose from "mongoose";
+import { headers } from "next/headers";
 
-export async function verifyPaystackPayment(reference: string, listingId: string, expectedAmountInGhs: number,selectedMoveInDate: string) {
+// NOTE: In production, implement Redis rate-limiting to prevent webhook/verification spam
+// import { ratelimit } from "@/lib/redis";
+
+// ============================================================================
+// 1. STRICT INPUT VALIDATION SCHEMAS (ZOD)
+// ============================================================================
+// Notice we removed expectedAmount. The server dictates the price.
+const verifyPaymentSchema = z.object({
+  reference: z.string().min(5, "Invalid reference length").trim(),
+  listingId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid Listing ID"),
+  selectedMoveInDate: z.string().refine((val) => !isNaN(Date.parse(val)), { message: "Invalid date format" }),
+});
+
+const renewalSchema = z.object({
+  reference: z.string().min(5, "Invalid reference length").trim(),
+  leaseId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid Lease ID"),
+});
+
+// ============================================================================
+// 2. SERVER ACTIONS
+// ============================================================================
+
+export async function verifyPaystackPayment(rawReference: string, rawListingId: string, rawMoveInDate: string) {
+  let session;
+  let ip = "unknown";
+
   try {
-    const session = await getSession();
-    if (!session || !session.userId) {
-      return { success: false, message: "Unauthorized: Please log in." };
-    }
+    const headersList = await headers();
+    ip = headersList.get("x-forwarded-for")?.split(',')[0] || "Unknown IP";
+
+    session = await getSession() as SessionPayload;
+    if (!session || !session.userId) throw new Error("UNAUTHORIZED");
+
+    // 1. Strict Validation
+    const { reference, listingId, selectedMoveInDate } = verifyPaymentSchema.parse({
+      reference: rawReference,
+      listingId: rawListingId,
+      selectedMoveInDate: rawMoveInDate
+    });
 
     await connectToDatabase();
 
-    // 1. Verify with Paystack API
+    // 2. Fetch the Source of Truth (Database Pricing) FIRST
+    const listing = await Listing.findById(listingId);
+    if (!listing) return { success: false, message: "Property not found." };
+    if (listing.status === "Rented") return { success: false, message: "Property is already rented." };
+
+    const serverExpectedPrice = listing.price; // THE ONLY PRICE WE TRUST
+
+    // 3. Verify with Paystack
     const response = await fetch(`https://api.paystack.co/transaction/verify/${reference}`, {
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`, // MUST be the Secret Key
-      },
+      headers: { Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}` },
     });
 
+    if (!response.ok) throw new Error("PAYSTACK_NETWORK_ERROR");
+    
     const data = await response.json();
-
     if (!data.status || data.data.status !== "success") {
       return { success: false, message: "Payment verification failed or is pending." };
     }
 
-    // 2. Security Check: Did they pay the right amount? 
-    // Paystack returns amount in pesewas. We divide by 100 to get GHS.
+    // 4. Server-Side Financial Validation
     const amountPaidInGhs = data.data.amount / 100; 
-    
-    // We use a slight tolerance (e.g., 1 GHS) for rounding errors during math conversion
-    if (amountPaidInGhs < (expectedAmountInGhs - 1)) {
+    if (amountPaidInGhs < (serverExpectedPrice - 1)) {
+      console.error(`[SECURITY] Underpayment attempt detected! User ${session.userId} paid ${amountPaidInGhs} but owed ${serverExpectedPrice}`);
       return { success: false, message: "Partial payment detected. Please contact support." };
     }
 
-    // 3. Prevent Duplicate Verifications (Idempotency)
-    // If a user clicks verify twice, or if a webhook fires at the same time
-    const existingTx = await Transaction.findOne({ reference });
-    if (existingTx && existingTx.status === "Success") {
-      return { success: true, message: "Payment was already verified!" };
-    }
-
-    // ==========================================================
-    // NEW: FETCH LISTING AND CALCULATE LEASE END DATE
-    // ==========================================================
-    const listing = await Listing.findById(listingId).lean();
-    if (!listing) {
-      return { success: false, message: "Property not found." };
-    }
-
+    // 5. Calculate Dates
     const startDate = new Date(selectedMoveInDate);
     const endDate = new Date(startDate);
     const term = listing.terms?.leaseTerm?.toLowerCase() || "";
 
-    // Parse the leaseTerm string (month, 1_Year, 2_Years, etc.)
     if (term.includes("month")) {
-      endDate.setMonth(endDate.getMonth() + 1); // Add 1 Month
+      endDate.setMonth(endDate.getMonth() + 1);
     } else if (term.includes("year")) {
-      // Extract the number before "_year" (e.g., "1", "2")
       const yearMatch = term.match(/(\d+)_year/);
-      const yearsToAdd = yearMatch ? parseInt(yearMatch[1], 10) : 1; // Default to 1 if no number found
+      const yearsToAdd = yearMatch ? parseInt(yearMatch[1], 10) : 1; 
       endDate.setFullYear(endDate.getFullYear() + yearsToAdd);
     } else {
-      // Safe fallback if the term is empty or unrecognized
       endDate.setFullYear(endDate.getFullYear() + 1); 
     }
 
-    // 4. Create the Lease
-    const newLease = await Lease.create({
-      listingId: listingId,
-      userId: session.userId,
-      totalRentAmount: amountPaidInGhs,
-      startDate: startDate,
-      endDate: endDate, // <--- SAVING THE CALCULATED END DATE
-      status: "Pending_Verification" 
+    // 6. DATABASE INTEGRITY: Atomic Transaction
+    const dbSession = await mongoose.startSession();
+    const result = await dbSession.withTransaction(async () => {
+      
+      // Idempotency check inside the locked transaction
+      const existingTx = await Transaction.findOne({ reference }).session(dbSession);
+      if (existingTx && existingTx.status === "Success") {
+        throw new Error("ALREADY_VERIFIED");
+      }
+
+      const newLease = await Lease.create([{
+        listingId,
+        userId: session.userId,
+        totalRentAmount: amountPaidInGhs,
+        startDate,
+        endDate, 
+        status: "Pending_Verification" 
+      }], { session: dbSession });
+
+      await Transaction.create([{
+        userId: session.userId,
+        listingId,
+        leaseId: newLease[0]._id, 
+        amount: amountPaidInGhs,
+        currency: data.data.currency,
+        paymentPurpose: "Upfront_Rent", 
+        reference,
+        transactionReference: reference,
+        paystackTransactionId: data.data.id.toString(),
+        channel: data.data.channel || "card",
+        paystackFee: data.data.fees ? (data.data.fees / 100) : 0,
+        status: "Success",
+        paidAt: new Date(data.data.paid_at)
+      }], { session: dbSession });
+
+      await Listing.findByIdAndUpdate(listingId, { status: "Rented" }, { session: dbSession });
+
+      return "SUCCESS";
     });
+    await dbSession.endSession();
 
-    // 4. Record the Transaction in the database using your updated Schema
-  await Transaction.create({
-      userId: session.userId,
-      listingId: listingId,
-      leaseId: newLease._id, // LINK THE TRANSACTION TO THE NEW LEASE
-      amount: amountPaidInGhs,
-      currency: data.data.currency,
-      paymentPurpose: "Upfront_Rent", 
-      reference: reference,
-      transactionReference: reference,
-      paystackTransactionId: data.data.id.toString(),
-      channel: data.data.channel || "card",
-      paystackFee: data.data.fees ? (data.data.fees / 100) : 0,
-      status: "Success",
-      paidAt: new Date(data.data.paid_at)
-    });
+    if (result === "SUCCESS") {
+      // 7. Fire and Forget Email
+      const user = await User.findById(session.userId).select("email");
+      if (user?.email) {
+        sendEmail({
+          to: user.email,
+          subject: `Payment Confirmed: ${listing.title}`,
+          react: React.createElement(PaymentReceiptEmail, { propertyTitle: listing.title, amount: amountPaidInGhs, reference })
+        }).catch(err => console.error("[NON-FATAL] Failed to send receipt:", err));
+      }
 
-    // 5. Update the Listing Status so no one else can rent it
-    await Listing.findByIdAndUpdate(listingId, { status: "Rented" });
+      revalidatePath("/admin/transactions");
+      revalidatePath("/explore");
+      revalidatePath("/user/leases");
+      revalidatePath(`/properties/${listingId}`); 
 
-    // 6. Revalidate routes to clear cached UI
-    revalidatePath("/admin/transactions");
-    revalidatePath("/explore");
-    revalidatePath("/user/leases");
-    revalidatePath(`/properties/${listingId}`); // If you use listingId in the URL
+      return { success: true, message: "Payment secured successfully!" };
+    }
 
-    return { success: true, message: "Payment secured successfully!" };
-
-  } catch (error) {
-    console.error("Verification Error:", error);
+  } catch (error: any) {
+    if (error.message === "UNAUTHORIZED") return { success: false, message: "Unauthorized: Please log in." };
+    if (error.message === "ALREADY_VERIFIED") return { success: true, message: "Payment was already verified!" };
+    
+    console.error(`[SECURITY LOG] Payment Verification Error (IP: ${ip}):`, error.message);
     return { success: false, message: "A server error occurred during verification." };
   }
 }
 
-export async function processLeaseRenewal(reference: string, leaseId: string, expectedAmountInGhs: number) {
+export async function processLeaseRenewal(rawReference: string, rawLeaseId: string) {
+  let session:SessionPayload;
+  let ip = "unknown";
+
   try {
-    const session = await getSession();
-    if (!session || !session.userId) {
-      return { success: false, message: "Unauthorized: Please log in." };
-    }
+    const headersList = await headers();
+    ip = headersList.get("x-forwarded-for")?.split(',')[0] || "Unknown IP";
+
+    session = await getSession() as SessionPayload;
+    if (!session || !session.userId) throw new Error("UNAUTHORIZED");
+
+    const { reference, leaseId } = renewalSchema.parse({
+      reference: rawReference,
+      leaseId: rawLeaseId
+    });
 
     await connectToDatabase();
 
-    // 1. Verify with Paystack API
+    // 1. Fetch Source of Truth First (IDOR protection built-in by checking userId)
+    const existingLease = await Lease.findOne({ _id: leaseId, userId: session.userId }).populate("listingId");
+    if (!existingLease || !existingLease.listingId) {
+      return { success: false, message: "Lease not found or unauthorized." };
+    }
+
+    const serverExpectedPrice = existingLease.listingId.price; // SERVER DICTATES RENEWAL PRICE
+
+    // 2. Verify with Paystack
     const response = await fetch(`https://api.paystack.co/transaction/verify/${reference}`, {
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`, // MUST be the Secret Key
-      },
+      headers: { Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}` },
     });
 
-    const data = await response.json();
+    if (!response.ok) throw new Error("PAYSTACK_NETWORK_ERROR");
 
+    const data = await response.json();
     if (!data.status || data.data.status !== "success") {
       return { success: false, message: "Payment verification failed or is pending." };
     }
 
-    // 2. Security Check: Did they pay the right amount? 
+    // 3. Server-Side Financial Validation
     const amountPaidInGhs = data.data.amount / 100; 
-    
-    // We use a slight tolerance (e.g., 1 GHS) for rounding errors
-    if (amountPaidInGhs < (expectedAmountInGhs - 1)) {
-      return { success: false, message: "Partial payment detected. Please contact support." };
+    if (amountPaidInGhs < (serverExpectedPrice - 1)) {
+       console.error(`[SECURITY] Renewal Underpayment! User ${session.userId} paid ${amountPaidInGhs} but owed ${serverExpectedPrice}`);
+       return { success: false, message: "Partial payment detected. Please contact support." };
     }
 
-    // 3. Prevent Duplicate Verifications (Idempotency)
-    const existingTx = await Transaction.findOne({ reference });
-    if (existingTx && existingTx.status === "Success") {
-      return { success: true, message: "Renewal payment was already verified!" };
-    }
-
-    // ==========================================================
-    // 4. FETCH LEASE & CALCULATE THE NEW EXTENDED END DATE
-    // ==========================================================
-    const existingLease = await Lease.findOne({ _id: leaseId, userId: session.userId })
-      .populate("listingId");
-      
-    if (!existingLease) {
-      return { success: false, message: "Lease not found or unauthorized." };
-    }
-
+    // 4. Calculate New End Date
     const now = new Date();
     const currentEndDate = existingLease.endDate ? new Date(existingLease.endDate) : now;
-    
-    // THE MAGIC LOGIC: 
-    // If they have days left, we add time to their CURRENT end date so they don't lose days.
-    // If they are expired (in grace period), we start the new clock from TODAY.
     const baseDateForExtension = currentEndDate > now ? currentEndDate : now;
     const newEndDate = new Date(baseDateForExtension);
-
     const term = existingLease.listingId?.terms?.leaseTerm?.toLowerCase() || "";
 
-    // Parse the leaseTerm string (month, 1_year, 2_years, etc.)
-    if (term.includes("month")) {
-      newEndDate.setMonth(newEndDate.getMonth() + 1); // Add 1 Month
-    } else if (term.includes("year")) {
+    if (term.includes("month")) newEndDate.setMonth(newEndDate.getMonth() + 1);
+    else if (term.includes("year")) {
       const yearMatch = term.match(/(\d+)_year/);
       const yearsToAdd = yearMatch ? parseInt(yearMatch[1], 10) : 1; 
       newEndDate.setFullYear(newEndDate.getFullYear() + yearsToAdd);
-    } else {
-      // Safe fallback if the term is unrecognized
-      newEndDate.setFullYear(newEndDate.getFullYear() + 1); 
-    }
+    } else newEndDate.setFullYear(newEndDate.getFullYear() + 1);
 
-    // 5. Update the existing Lease Document
-    existingLease.endDate = newEndDate;
-    
-    // If they were locked out or in restricted mode, ensure they are set back to Active
-    if (existingLease.status === "Expired") {
-      existingLease.status = "Active";
-    }
-    
-    await existingLease.save();
+    // 5. DATABASE INTEGRITY: Atomic Transaction
+    const dbSession = await mongoose.startSession();
+    const result = await dbSession.withTransaction(async () => {
+      
+      const existingTx = await Transaction.findOne({ reference }).session(dbSession);
+      if (existingTx && existingTx.status === "Success") throw new Error("ALREADY_VERIFIED");
 
-    // 6. Record the Renewal Transaction in the database
-    await Transaction.create({
-      userId: session.userId,
-      listingId: existingLease.listingId._id,
-      leaseId: existingLease._id, 
-      amount: amountPaidInGhs,
-      currency: data.data.currency,
-      paymentPurpose: "Lease_Renewal", // Flagged specifically as a renewal
-      reference: reference,
-      transactionReference: reference,
-      paystackTransactionId: data.data.id.toString(),
-      channel: data.data.channel || "card",
-      paystackFee: data.data.fees ? (data.data.fees / 100) : 0,
-      status: "Success",
-      paidAt: new Date(data.data.paid_at)
+      existingLease.endDate = newEndDate;
+      if (existingLease.status === "Expired") existingLease.status = "Active";
+      
+      // Save passing the session to maintain atomicity
+      await existingLease.save({ session: dbSession });
+
+      await Transaction.create([{
+        userId: session.userId,
+        listingId: existingLease.listingId._id,
+        leaseId: existingLease._id, 
+        amount: amountPaidInGhs,
+        currency: data.data.currency,
+        paymentPurpose: "Lease_Renewal", 
+        reference,
+        transactionReference: reference,
+        paystackTransactionId: data.data.id.toString(),
+        channel: data.data.channel || "card",
+        paystackFee: data.data.fees ? (data.data.fees / 100) : 0,
+        status: "Success",
+        paidAt: new Date(data.data.paid_at)
+      }], { session: dbSession });
+
+      return "SUCCESS";
     });
+    await dbSession.endSession();
 
-    // 7. Revalidate routes to instantly update the tenant dashboard UI
-    revalidatePath("/user/dashboard");
-    revalidatePath("/user/transactions");
-    revalidatePath("/admin/transactions");
+    if (result === "SUCCESS") {
+      // 6. Fire and Forget Email
+      const user = await User.findById(session.userId).select("email");
+      if (user?.email) {
+        sendEmail({
+          to: user.email,
+          subject: `Lease Renewal Confirmed: ${existingLease.listingId.title}`,
+          react: React.createElement(RenewalConfirmationEmail, {
+            propertyTitle: existingLease.listingId.title,
+            newEndDate: newEndDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+          })
+        }).catch(err => console.error("[NON-FATAL] Failed to send renewal email:", err));
+      }
 
-    return { success: true, message: "Lease successfully renewed!" };
+      revalidatePath("/user/dashboard");
+      revalidatePath("/user/transactions");
+      revalidatePath("/admin/transactions");
 
-  } catch (error) {
-    console.error("Renewal Verification Error:", error);
+      return { success: true, message: "Lease successfully renewed!" };
+    }
+
+  } catch (error: any) {
+    if (error.message === "UNAUTHORIZED") return { success: false, message: "Unauthorized: Please log in." };
+    if (error.message === "ALREADY_VERIFIED") return { success: true, message: "Renewal payment was already verified!" };
+
+    console.error(`[SECURITY LOG] Renewal Error (IP: ${ip}):`, error.message);
     return { success: false, message: "A server error occurred during renewal verification." };
   }
 }

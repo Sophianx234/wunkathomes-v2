@@ -55,3 +55,29 @@ export async function uploadToCloudinary(
     return await uploadSingleFile(fileOrFiles, folder);
   }
 }
+
+// ==========================================
+// NEW: DELETION UTILITY
+// ==========================================
+
+/**
+ * Deletes a file from Cloudinary using its Public ID.
+ * @param publicId The Cloudinary public ID (e.g., "wunkathomes/properties/abc123xyz")
+ * @returns boolean indicating success or failure
+ */
+export async function deleteFromCloudinary(publicId: string): Promise<boolean> {
+  try {
+    const result = await cloudinary.uploader.destroy(publicId);
+    
+    // Cloudinary responds with { result: 'ok' } if successful, or { result: 'not found' }
+    if (result.result === 'ok') {
+      return true;
+    } else {
+      console.warn(`Cloudinary deletion warning: ${publicId} returned status '${result.result}'`);
+      return false;
+    }
+  } catch (error) {
+    console.error(`[CRITICAL] Failed to delete Cloudinary asset (${publicId}):`, error);
+    return false;
+  }
+}

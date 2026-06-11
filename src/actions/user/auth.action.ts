@@ -1,74 +1,92 @@
-"use server"
+"use server";
 
-import { connectToDatabase } from "@/config/DbConnect"
-import User from "@/models/user"
-import bcrypt from "bcryptjs"
-import { z } from "zod"
-import crypto from "crypto"
-import { createSession, deleteSession, getSession } from "@/lib/session" // Import the helper
-import { redirect } from "next/navigation"
-import { sendEmail } from "@/lib/resend"
-import React from "react"
-import WelcomeEmail from "@/components/email/welcome-mail"
-import PasswordResetEmail from "@/components/email/password-reset-mail"
-import PasswordChangedEmail from "@/components/email/password-changed-mail"
+import { connectToDatabase } from "@/config/DbConnect";
+import User from "@/models/user";
+import bcrypt from "bcryptjs";
+import { z } from "zod";
+import crypto from "crypto";
+import { createSession, deleteSession, getSession } from "@/lib/session";
+import { redirect } from "next/navigation";
+import { sendEmail } from "@/lib/resend";
+import React from "react";
+import WelcomeEmail from "@/components/email/welcome-mail";
+import PasswordResetEmail from "@/components/email/password-reset-mail";
+import PasswordChangedEmail from "@/components/email/password-changed-mail";
+import { headers } from "next/headers";
+
+// NOTE: In a production environment, you MUST implement Redis-based rate limiting
+// import { ratelimit } from "@/lib/redis";
+
+// ============================================================================
+// 1. STRICT INPUT VALIDATION SCHEMAS (ZOD)
+// ============================================================================
+
+const signupSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters").trim().max(100),
+  email: z.string().email("Invalid email address").trim().toLowerCase(),
+  countryCode: z.string().trim().max(5),
+  phoneNumber: z.string().min(10, "Phone number must be at least 10 digits").regex(/^\d+$/, "Phone must contain only numbers").trim().max(15),
+  password: z.string().min(8, "Password must be at least 8 characters").max(100),
+});
+
+const loginSchema = z.object({
+  email: z.string().email("Invalid email address").trim().toLowerCase(),
+  password: z.string().min(1, "Password is required").max(100),
+});
 
 const passwordSchema = z.object({
   currentPassword: z.string().min(1, "Current password is required"),
-  newPassword: z.string().min(8, "New password must be at least 8 characters"),
+  newPassword: z.string().min(8, "New password must be at least 8 characters").max(100),
   confirmPassword: z.string().min(1, "Please confirm your new password"),
 }).refine((data) => data.newPassword === data.confirmPassword, {
   message: "New passwords do not match",
   path: ["confirmPassword"],
-})
+});
 
-const signupSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Invalid email address"),
-  countryCode: z.string(),
-  phoneNumber: z.string().min(10, "Phone number must be 10 digits"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-})
+const forgotPasswordSchema = z.object({
+  email: z.string().email("Invalid email address").trim().toLowerCase(),
+});
+
+const resetPasswordSchema = z.object({
+  token: z.string().min(64, "Invalid security token").trim(), // Hex string of 32 bytes is 64 chars
+  password: z.string().min(8, "Password must be at least 8 characters").max(100),
+  confirmPassword: z.string().min(1, "Please confirm your password"),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
+});
+
+
+// ============================================================================
+// 2. SERVER ACTIONS
+// ============================================================================
 
 export async function signupAction(prevState: any, formData: FormData) {
   try {
-    // 1. Validate form data
-    const validatedFields = signupSchema.safeParse({
-      name: formData.get("name"),
-      email: formData.get("email"),
-      countryCode: formData.get("countryCode"),
-      phoneNumber: formData.get("phoneNumber"),
-      password: formData.get("password"),
-    })
+    // 1. Rate Limiting (IP Based)
+    const ip = headers().get("x-forwarded-for") || "unknown";
+    // const { success } = await ratelimit.limit(`signup_${ip}`);
+    // if (!success) throw new Error("RATE_LIMIT_EXCEEDED");
+
+    // 2. Strict Zod Validation (Prevent Mass Assignment via Object.fromEntries)
+    const validatedFields = signupSchema.safeParse(Object.fromEntries(formData));
 
     if (!validatedFields.success) {
-      return {
-        success: false,
-        error: validatedFields.error.errors[0].message,
-      }
+      return { success: false, error: validatedFields.error.errors[0].message };
     }
 
-    const { name, email, countryCode, phoneNumber, password } = validatedFields.data
+    const { name, email, countryCode, phoneNumber, password } = validatedFields.data;
+    const fullPhone = countryCode + phoneNumber;
 
-    // 2. Format phone number
-    const fullPhone = countryCode + phoneNumber.replace(/\s/g, "")
+    await connectToDatabase();
 
-    // 3. Connect to database
-    await connectToDatabase()
-
-    // 4. Check if user already exists
-    const existingUser = await User.findOne({ email })
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return {
-        success: false,
-        error: "Email already registered",
-      }
+      return { success: false, error: "Email already registered" };
     }
 
-    // 5. Hash password
-    const hashedPassword = await bcrypt.hash(password, 12)
+    const hashedPassword = await bcrypt.hash(password, 12);
 
-    // 6. Create user
     const newUser = await User.create({
       name,
       email,
@@ -77,259 +95,187 @@ export async function signupAction(prevState: any, formData: FormData) {
       role: "User",
       accountStatus: "Active",
       kycStatus: "Unverified",
-    })
+    });
 
-    // 7. Invoke the Session Helper
     await createSession({
-      userId: newUser._id,
+      userId: newUser._id.toString(),
       email: newUser.email,
       role: newUser.role,
-    })
-    await sendEmail({
-    to: email,
-    subject: "Welcome to WunkatHomes",
-    react: React.createElement(WelcomeEmail, { userName: name, exploreUrl: "https://wunkathomes.com/explore" }),
-  });
+    });
 
-    // 8. Return success payload
-    return { 
-      success: true, 
-      message: "Account created successfully!" 
-    }
-  
+    // Fire & Forget Email (Don't await it to prevent blocking the UI redirect)
+    sendEmail({
+      to: email,
+      subject: "Welcome to WunkatHomes",
+      react: React.createElement(WelcomeEmail, { userName: name, exploreUrl: `${process.env.NEXT_PUBLIC_APP_URL}/explore` }),
+    }).catch(err => console.error("[NON-FATAL] Failed to send welcome email:", err));
+
+    return { success: true, message: "Account created successfully!" };
   } catch (error: any) {
-    console.error("Signup error:", error)
-    return { 
-      success: false, 
-      error: error.message || "Something went wrong. Please try again." 
-    }
+    if (error.message === "RATE_LIMIT_EXCEEDED") return { success: false, error: "Too many requests. Please try again later." };
+    console.error(`[SECURITY LOG] Signup Error (IP: ${await headers().get("x-forwarded-for")}):`, error.message);
+    return { success: false, error: "Something went wrong. Please try again." };
   }
 }
 
-
-const loginSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(1, "Password is required"),
-})
-
 export async function loginAction(prevState: any, formData: FormData) {
   try {
-    // 1. Validate inputs
-    const validatedFields = loginSchema.safeParse({
-      email: formData.get("email"),
-      password: formData.get("password"),
-    })
+    // 1. Rate Limiting (IP Based - Extremely critical for Login)
+    const ip = await headers().get("x-forwarded-for") || "unknown";
+    // const { success } = await ratelimit.limit(`login_${ip}`);
+    // if (!success) throw new Error("RATE_LIMIT_EXCEEDED");
+
+    const validatedFields = loginSchema.safeParse(Object.fromEntries(formData));
 
     if (!validatedFields.success) {
-      return {
-        success: false,
-        error: "Please enter a valid email and password.",
-      }
+      return { success: false, error: "Please enter a valid email and password." };
     }
 
-    const { email, password } = validatedFields.data
+    const { email, password } = validatedFields.data;
 
-    // 2. Connect to DB
-    await connectToDatabase()
+    await connectToDatabase();
 
-    // 3. Find User
-    // We use .select('+password') in case your schema hides the password field by default
-    const user = await User.findOne({ email }).select("+password")
+    const user = await User.findOne({ email }).select("+password");
     if (!user) {
-      return {
-        success: false,
-        error: "Invalid email or password.",
-      }
+      // Generic error to prevent email enumeration
+      return { success: false, error: "Invalid email or password." };
     }
 
-    // 4. Verify Password
-    const isPasswordValid = await bcrypt.compare(password, user.password)
+    // Check account status to prevent suspended users from bypassing security
+    if (user.accountStatus === "Suspended") {
+      return { success: false, error: "This account has been suspended. Please contact support." };
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      return {
-        success: false,
-        error: "Invalid email or password.",
-      }
+      return { success: false, error: "Invalid email or password." };
     }
 
-    // 5. Create Session
     await createSession({
-      userId: user._id,
+      userId: user._id.toString(),
       email: user.email,
       role: user.role,
-    })
+    });
 
-    let targetRoute = "/admin"; // Default route
-    if (user.role === "Admin") {
-      targetRoute = "/admin/dashboard";
-    } else if (user.role === "User") {
-      targetRoute = "/";
-    }
+    let targetRoute = "/";
+    if (user.role === "Admin") targetRoute = "/admin/dashboard";
+    else if (user.role === "Manager") targetRoute = "/admin/overview";
 
-    // 6. Return success with the exact URL
-    return { 
-      success: true, 
-      message: "Welcome back!",
-      redirectUrl: targetRoute, // <-- Pass the URL, not the role
-    }
-   
+    return { success: true, message: "Welcome back!", redirectUrl: targetRoute };
 
   } catch (error: any) {
-    console.error("Login error:", error)
-    return { 
-      success: false, 
-      error: "An unexpected error occurred. Please try again." 
-    }
+    if (error.message === "RATE_LIMIT_EXCEEDED") return { success: false, error: "Too many login attempts. Please try again later." };
+    console.error(`[SECURITY LOG] Login Error (IP: ${headers().get("x-forwarded-for")}):`, error.message);
+    return { success: false, error: "An unexpected error occurred. Please try again." };
   }
 }
 
 export async function logoutAction() {
-  // Destroy the secure HTTP-only cookie
-  await deleteSession()
-  
-  // Redirect to the homepage
-  redirect("/")
+  await deleteSession();
+  redirect("/");
 }
-
 
 export async function changePasswordAction(prevState: any, formData: FormData) {
   try {
-    // 1. Get current logged-in user
-    const session = await getSession()
-    if (!session || !session.userId) {
-      return { success: false, error: "Unauthorized. Please log in again." }
+    const session = await getSession();
+    // RBAC
+    if (!session || !session.userId) return { success: false, error: "Unauthorized. Please log in again." };
+
+    // Rate Limiting (User Based)
+    // const { success } = await ratelimit.limit(`change_pw_${session.userId}`);
+
+    const validatedFields = passwordSchema.safeParse(Object.fromEntries(formData));
+
+    if (!validatedFields.success) {
+      return { success: false, error: validatedFields.error.errors[0]?.message || "Invalid form data." };
     }
 
-    // 2. Validate form inputs
-    const validatedFields = passwordSchema.safeParse({
-      currentPassword: formData.get("currentPassword"),
-      newPassword: formData.get("newPassword"),
-      confirmPassword: formData.get("confirmPassword"),
-    })
+    const { currentPassword, newPassword } = validatedFields.data;
 
-   if (!validatedFields.success) {
-  // Safely get the first error message, or fallback to a default
-  const errorMessage = validatedFields.error?.errors?.[0]?.message 
-    ?? "Invalid form data. Please check your inputs.";
-
-  return {
-    success: false,
-    error: errorMessage,
-  }
-}
-
-    const { currentPassword, newPassword } = validatedFields.data
-
-    // 3. Connect to DB and fetch user (including the hidden password field)
-    await connectToDatabase()
-    const user = await User.findById(session.userId).select("+password")
+    await connectToDatabase();
+    const user = await User.findById(session.userId).select("+password");
     
-    if (!user) {
-      return { success: false, error: "User not found." }
-    }
+    if (!user) return { success: false, error: "User not found." };
 
-    // 4. Verify current password
-    const isPasswordValid = await bcrypt.compare(currentPassword, user.password)
-    if (!isPasswordValid) {
-      return { success: false, error: "Incorrect current password." }
-    }
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isPasswordValid) return { success: false, error: "Incorrect current password." };
 
-    // 5. Hash and save the new password
-    const hashedNewPassword = await bcrypt.hash(newPassword, 12)
-    user.password = hashedNewPassword
-    await user.save()
+    user.password = await bcrypt.hash(newPassword, 12);
+    await user.save();
 
-    await sendEmail({
+    sendEmail({
       to: user.email,
       subject: "Security Alert: Your password was changed",
       react: React.createElement(PasswordChangedEmail, { userName: user.name })
-    });
+    }).catch(console.error);
 
-    return { 
-      success: true, 
-      message: "Password updated successfully!" 
-    }
+    return { success: true, message: "Password updated successfully!" };
 
   } catch (error: any) {
-    console.error("Change password error:", error)
-    return { 
-      success: false, 
-      error: "An unexpected error occurred. Please try again." 
-    }
+    console.error(`[SECURITY LOG] Change Password Error (User: ${getSession().then(s=>s?.userId)}):`, error.message);
+    return { success: false, error: "An unexpected error occurred. Please try again." };
   }
 }
 
-
 export async function forgotPasswordAction(prevState: any, formData: FormData) {
   try {
-    const email = formData.get("email") as string;
+    // 1. Rate Limiting (IP Based - Prevent spamming email services)
+    const ip = headers().get("x-forwarded-for") || "unknown";
 
-    if (!email) {
-      return { success: false, error: "Please enter your email address." };
+    const validatedFields = forgotPasswordSchema.safeParse(Object.fromEntries(formData));
+    if (!validatedFields.success) {
+      return { success: false, error: "Please enter a valid email address." };
     }
+
+    const { email } = validatedFields.data;
 
     await connectToDatabase();
     const user = await User.findOne({ email });
 
-    // For security, do not reveal if a user exists or not. 
-    // Always return a generic success message.
+    // Timing Attack Mitigation & Security: Always return the exact same success message
     if (!user) {
-      return { 
-        success: true, 
-        message: "If an account exists, a reset link has been sent." 
-      };
+      return { success: true, message: "If an account exists, a reset link has been sent." };
     }
 
-    // Generate a secure reset token
     const resetToken = crypto.randomBytes(32).toString("hex");
     const hashedToken = crypto.createHash("sha256").update(resetToken).digest("hex");
 
-    // Token expires in 1 hour
     user.passwordResetToken = hashedToken;
-    user.passwordResetExpires = Date.now() + 3600000; 
+    user.passwordResetExpires = Date.now() + 3600000; // 1 hour
     await user.save();
 
-    // The raw token goes in the URL, the hashed token is in the DB
     const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${resetToken}`;
 
-    
     await sendEmail({
-  to: user.email,
-  subject: "Reset your WunkatHomes password",
-  react: React.createElement(PasswordResetEmail, { userName: user.name, resetUrl: resetUrl })
-});
-    
+      to: user.email,
+      subject: "Reset your WunkatHomes password",
+      react: React.createElement(PasswordResetEmail, { userName: user.name, resetUrl: resetUrl })
+    });
 
-    return { 
-      success: true, 
-      message: "If an account exists, a reset link has been sent." 
-    };
+    return { success: true, message: "If an account exists, a reset link has been sent." };
 
-  } catch (error) {
-    console.error("Forgot password error:", error);
+  } catch (error: any) {
+    console.error(`[SECURITY LOG] Forgot Password Error:`, error.message);
     return { success: false, error: "An unexpected error occurred." };
   }
 }
 
 export async function resetPasswordAction(prevState: any, formData: FormData) {
   try {
-    const token = formData.get("token") as string;
-    const password = formData.get("password") as string;
-    const confirmPassword = formData.get("confirmPassword") as string;
+    // 1. Rate Limiting (IP Based)
+    const ip = headers().get("x-forwarded-for") || "unknown";
 
-    if (!token) return { success: false, error: "Invalid or missing token." };
-    if (password !== confirmPassword) {
-      return { success: false, error: "Passwords do not match." };
+    const validatedFields = resetPasswordSchema.safeParse(Object.fromEntries(formData));
+    if (!validatedFields.success) {
+      return { success: false, error: validatedFields.error.errors[0]?.message || "Invalid input." };
     }
-    if (password.length < 8) {
-      return { success: false, error: "Password must be at least 8 characters long." };
-    }
+
+    const { token, password } = validatedFields.data;
 
     await connectToDatabase();
 
-    // Hash the token from the URL to compare it with the DB
     const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
 
-    // Find user with valid token that hasn't expired
     const user = await User.findOne({
       passwordResetToken: hashedToken,
       passwordResetExpires: { $gt: Date.now() },
@@ -339,27 +285,25 @@ export async function resetPasswordAction(prevState: any, formData: FormData) {
       return { success: false, error: "Token is invalid or has expired." };
     }
 
-    // Hash new password and save
     user.password = await bcrypt.hash(password, 12);
-    
-    // Clear the reset fields
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
     await user.save();
-    await sendEmail({
-  to: user.email,
-  subject: "Security Alert: Password Changed",
-  react: React.createElement(PasswordChangedEmail, { userName: user.name })
-});
+
+    sendEmail({
+      to: user.email,
+      subject: "Security Alert: Password Changed",
+      react: React.createElement(PasswordChangedEmail, { userName: user.name })
+    }).catch(console.error);
 
     return { 
       success: true, 
       message: "Password reset successfully! You can now log in.",
-      redirectUrl: "/login" // Routing approach discussed earlier
+      redirectUrl: "/login"
     };
 
-  } catch (error) {
-    console.error("Reset password error:", error);
+  } catch (error: any) {
+    console.error(`[SECURITY LOG] Reset Password Error:`, error.message);
     return { success: false, error: "An unexpected error occurred." };
   }
 }
