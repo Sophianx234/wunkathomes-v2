@@ -62,13 +62,16 @@ const resetPasswordSchema = z.object({
 // ============================================================================
 
 export async function signupAction(prevState: any, formData: FormData) {
+  let ip = "unknown";
+  
   try {
-    // 1. Rate Limiting (IP Based)
-    const ip = headers().get("x-forwarded-for") || "unknown";
+    // 1. Capture Identity Footprint safely
+    const headersList = await headers();
+    ip = headersList.get("x-forwarded-for") || "unknown";
+
     // const { success } = await ratelimit.limit(`signup_${ip}`);
     // if (!success) throw new Error("RATE_LIMIT_EXCEEDED");
 
-    // 2. Strict Zod Validation (Prevent Mass Assignment via Object.fromEntries)
     const validatedFields = signupSchema.safeParse(Object.fromEntries(formData));
 
     if (!validatedFields.success) {
@@ -103,7 +106,6 @@ export async function signupAction(prevState: any, formData: FormData) {
       role: newUser.role,
     });
 
-    // Fire & Forget Email (Don't await it to prevent blocking the UI redirect)
     sendEmail({
       to: email,
       subject: "Welcome to WunkatHomes",
@@ -113,15 +115,18 @@ export async function signupAction(prevState: any, formData: FormData) {
     return { success: true, message: "Account created successfully!" };
   } catch (error: any) {
     if (error.message === "RATE_LIMIT_EXCEEDED") return { success: false, error: "Too many requests. Please try again later." };
-    console.error(`[SECURITY LOG] Signup Error (IP: ${await headers().get("x-forwarded-for")}):`, error.message);
+    console.error(`[SECURITY LOG] Signup Error (IP: ${ip}):`, error.message);
     return { success: false, error: "Something went wrong. Please try again." };
   }
 }
 
 export async function loginAction(prevState: any, formData: FormData) {
+  let ip = "unknown";
+  
   try {
-    // 1. Rate Limiting (IP Based - Extremely critical for Login)
-    const ip = await headers().get("x-forwarded-for") || "unknown";
+    const headersList = await headers();
+    ip = headersList.get("x-forwarded-for") || "unknown";
+
     // const { success } = await ratelimit.limit(`login_${ip}`);
     // if (!success) throw new Error("RATE_LIMIT_EXCEEDED");
 
@@ -137,11 +142,9 @@ export async function loginAction(prevState: any, formData: FormData) {
 
     const user = await User.findOne({ email }).select("+password");
     if (!user) {
-      // Generic error to prevent email enumeration
       return { success: false, error: "Invalid email or password." };
     }
 
-    // Check account status to prevent suspended users from bypassing security
     if (user.accountStatus === "Suspended") {
       return { success: false, error: "This account has been suspended. Please contact support." };
     }
@@ -165,7 +168,7 @@ export async function loginAction(prevState: any, formData: FormData) {
 
   } catch (error: any) {
     if (error.message === "RATE_LIMIT_EXCEEDED") return { success: false, error: "Too many login attempts. Please try again later." };
-    console.error(`[SECURITY LOG] Login Error (IP: ${headers().get("x-forwarded-for")}):`, error.message);
+    console.error(`[SECURITY LOG] Login Error (IP: ${ip}):`, error.message);
     return { success: false, error: "An unexpected error occurred. Please try again." };
   }
 }
@@ -176,13 +179,14 @@ export async function logoutAction() {
 }
 
 export async function changePasswordAction(prevState: any, formData: FormData) {
+  let userId = "unknown";
+  
   try {
     const session = await getSession();
-    // RBAC
     if (!session || !session.userId) return { success: false, error: "Unauthorized. Please log in again." };
+    userId = session.userId; // Save securely for logs
 
-    // Rate Limiting (User Based)
-    // const { success } = await ratelimit.limit(`change_pw_${session.userId}`);
+    // const { success } = await ratelimit.limit(`change_pw_${userId}`);
 
     const validatedFields = passwordSchema.safeParse(Object.fromEntries(formData));
 
@@ -193,7 +197,7 @@ export async function changePasswordAction(prevState: any, formData: FormData) {
     const { currentPassword, newPassword } = validatedFields.data;
 
     await connectToDatabase();
-    const user = await User.findById(session.userId).select("+password");
+    const user = await User.findById(userId).select("+password");
     
     if (!user) return { success: false, error: "User not found." };
 
@@ -212,15 +216,17 @@ export async function changePasswordAction(prevState: any, formData: FormData) {
     return { success: true, message: "Password updated successfully!" };
 
   } catch (error: any) {
-    console.error(`[SECURITY LOG] Change Password Error (User: ${getSession().then(s=>s?.userId)}):`, error.message);
+    console.error(`[SECURITY LOG] Change Password Error (User: ${userId}):`, error.message);
     return { success: false, error: "An unexpected error occurred. Please try again." };
   }
 }
 
 export async function forgotPasswordAction(prevState: any, formData: FormData) {
+  let ip = "unknown";
+  
   try {
-    // 1. Rate Limiting (IP Based - Prevent spamming email services)
-    const ip = headers().get("x-forwarded-for") || "unknown";
+    const headersList = await headers();
+    ip = headersList.get("x-forwarded-for") || "unknown";
 
     const validatedFields = forgotPasswordSchema.safeParse(Object.fromEntries(formData));
     if (!validatedFields.success) {
@@ -232,7 +238,6 @@ export async function forgotPasswordAction(prevState: any, formData: FormData) {
     await connectToDatabase();
     const user = await User.findOne({ email });
 
-    // Timing Attack Mitigation & Security: Always return the exact same success message
     if (!user) {
       return { success: true, message: "If an account exists, a reset link has been sent." };
     }
@@ -255,15 +260,17 @@ export async function forgotPasswordAction(prevState: any, formData: FormData) {
     return { success: true, message: "If an account exists, a reset link has been sent." };
 
   } catch (error: any) {
-    console.error(`[SECURITY LOG] Forgot Password Error:`, error.message);
+    console.error(`[SECURITY LOG] Forgot Password Error (IP: ${ip}):`, error.message);
     return { success: false, error: "An unexpected error occurred." };
   }
 }
 
 export async function resetPasswordAction(prevState: any, formData: FormData) {
+  let ip = "unknown";
+  
   try {
-    // 1. Rate Limiting (IP Based)
-    const ip = headers().get("x-forwarded-for") || "unknown";
+    const headersList = await headers();
+    ip = headersList.get("x-forwarded-for") || "unknown";
 
     const validatedFields = resetPasswordSchema.safeParse(Object.fromEntries(formData));
     if (!validatedFields.success) {
@@ -303,7 +310,7 @@ export async function resetPasswordAction(prevState: any, formData: FormData) {
     };
 
   } catch (error: any) {
-    console.error(`[SECURITY LOG] Reset Password Error:`, error.message);
+    console.error(`[SECURITY LOG] Reset Password Error (IP: ${ip}):`, error.message);
     return { success: false, error: "An unexpected error occurred." };
   }
 }

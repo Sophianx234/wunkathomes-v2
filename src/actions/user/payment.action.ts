@@ -1,7 +1,7 @@
 "use server";
 
 import { connectToDatabase } from "@/config/DbConnect";
-import { getSession, SessionPayload } from "@/lib/session";
+import { getSession } from "@/lib/session";
 import Transaction from "@/models/transaction";
 import Listing from "@/models/listing";
 import Lease from "@/models/lease";
@@ -15,13 +15,9 @@ import { z } from "zod";
 import mongoose from "mongoose";
 import { headers } from "next/headers";
 
-// NOTE: In production, implement Redis rate-limiting to prevent webhook/verification spam
-// import { ratelimit } from "@/lib/redis";
-
 // ============================================================================
 // 1. STRICT INPUT VALIDATION SCHEMAS (ZOD)
 // ============================================================================
-// Notice we removed expectedAmount. The server dictates the price.
 const verifyPaymentSchema = z.object({
   reference: z.string().min(5, "Invalid reference length").trim(),
   listingId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid Listing ID"),
@@ -34,21 +30,43 @@ const renewalSchema = z.object({
 });
 
 // ============================================================================
+// HELPER: CALCULATE DYNAMIC MILESTONES
+// ============================================================================
+function calculateMilestones(start: Date, end: Date) {
+  const totalDurationMs = end.getTime() - start.getTime();
+  
+  return {
+    milestone1: { 
+      triggerDate: new Date(start.getTime() + (totalDurationMs * 0.50)), // 50% elapsed
+      sent: false 
+    },
+    milestone2: { 
+      triggerDate: new Date(start.getTime() + (totalDurationMs * 0.75)), // 75% elapsed
+      sent: false 
+    },
+    milestone3: { 
+      triggerDate: new Date(start.getTime() + (totalDurationMs * 0.90)), // 90% elapsed
+      sent: false 
+    },
+    expired: { sent: false }
+  };
+}
+
+// ============================================================================
 // 2. SERVER ACTIONS
 // ============================================================================
 
 export async function verifyPaystackPayment(rawReference: string, rawListingId: string, rawMoveInDate: string) {
-  let session;
   let ip = "unknown";
 
   try {
     const headersList = await headers();
     ip = headersList.get("x-forwarded-for")?.split(',')[0] || "Unknown IP";
 
-    session = await getSession() as SessionPayload;
+    // NO TYPE CASTING: Let TypeScript infer nullability, then handle it safely
+    const session = await getSession();
     if (!session || !session.userId) throw new Error("UNAUTHORIZED");
 
-    // 1. Strict Validation
     const { reference, listingId, selectedMoveInDate } = verifyPaymentSchema.parse({
       reference: rawReference,
       listingId: rawListingId,
@@ -57,14 +75,12 @@ export async function verifyPaystackPayment(rawReference: string, rawListingId: 
 
     await connectToDatabase();
 
-    // 2. Fetch the Source of Truth (Database Pricing) FIRST
     const listing = await Listing.findById(listingId);
     if (!listing) return { success: false, message: "Property not found." };
     if (listing.status === "Rented") return { success: false, message: "Property is already rented." };
 
-    const serverExpectedPrice = listing.price; // THE ONLY PRICE WE TRUST
+    const serverExpectedPrice = listing.price;
 
-    // 3. Verify with Paystack
     const response = await fetch(`https://api.paystack.co/transaction/verify/${reference}`, {
       method: "GET",
       headers: { Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}` },
@@ -77,14 +93,12 @@ export async function verifyPaystackPayment(rawReference: string, rawListingId: 
       return { success: false, message: "Payment verification failed or is pending." };
     }
 
-    // 4. Server-Side Financial Validation
     const amountPaidInGhs = data.data.amount / 100; 
     if (amountPaidInGhs < (serverExpectedPrice - 1)) {
       console.error(`[SECURITY] Underpayment attempt detected! User ${session.userId} paid ${amountPaidInGhs} but owed ${serverExpectedPrice}`);
       return { success: false, message: "Partial payment detected. Please contact support." };
     }
 
-    // 5. Calculate Dates
     const startDate = new Date(selectedMoveInDate);
     const endDate = new Date(startDate);
     const term = listing.terms?.leaseTerm?.toLowerCase() || "";
@@ -99,11 +113,12 @@ export async function verifyPaystackPayment(rawReference: string, rawListingId: 
       endDate.setFullYear(endDate.getFullYear() + 1); 
     }
 
-    // 6. DATABASE INTEGRITY: Atomic Transaction
+    // NEW: Calculate the dynamic email triggers for this specific lease length
+    const dynamicReminders = calculateMilestones(startDate, endDate);
+
     const dbSession = await mongoose.startSession();
     const result = await dbSession.withTransaction(async () => {
       
-      // Idempotency check inside the locked transaction
       const existingTx = await Transaction.findOne({ reference }).session(dbSession);
       if (existingTx && existingTx.status === "Success") {
         throw new Error("ALREADY_VERIFIED");
@@ -115,6 +130,7 @@ export async function verifyPaystackPayment(rawReference: string, rawListingId: 
         totalRentAmount: amountPaidInGhs,
         startDate,
         endDate, 
+        reminders: dynamicReminders, // <-- INJECTING THE MILESTONES
         status: "Pending_Verification" 
       }], { session: dbSession });
 
@@ -141,7 +157,6 @@ export async function verifyPaystackPayment(rawReference: string, rawListingId: 
     await dbSession.endSession();
 
     if (result === "SUCCESS") {
-      // 7. Fire and Forget Email
       const user = await User.findById(session.userId).select("email");
       if (user?.email) {
         sendEmail({
@@ -169,14 +184,13 @@ export async function verifyPaystackPayment(rawReference: string, rawListingId: 
 }
 
 export async function processLeaseRenewal(rawReference: string, rawLeaseId: string) {
-  let session:SessionPayload;
   let ip = "unknown";
 
   try {
     const headersList = await headers();
     ip = headersList.get("x-forwarded-for")?.split(',')[0] || "Unknown IP";
 
-    session = await getSession() as SessionPayload;
+    const session = await getSession();
     if (!session || !session.userId) throw new Error("UNAUTHORIZED");
 
     const { reference, leaseId } = renewalSchema.parse({
@@ -186,15 +200,13 @@ export async function processLeaseRenewal(rawReference: string, rawLeaseId: stri
 
     await connectToDatabase();
 
-    // 1. Fetch Source of Truth First (IDOR protection built-in by checking userId)
     const existingLease = await Lease.findOne({ _id: leaseId, userId: session.userId }).populate("listingId");
     if (!existingLease || !existingLease.listingId) {
       return { success: false, message: "Lease not found or unauthorized." };
     }
 
-    const serverExpectedPrice = existingLease.listingId.price; // SERVER DICTATES RENEWAL PRICE
+    const serverExpectedPrice = existingLease.listingId.price; 
 
-    // 2. Verify with Paystack
     const response = await fetch(`https://api.paystack.co/transaction/verify/${reference}`, {
       method: "GET",
       headers: { Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}` },
@@ -207,14 +219,12 @@ export async function processLeaseRenewal(rawReference: string, rawLeaseId: stri
       return { success: false, message: "Payment verification failed or is pending." };
     }
 
-    // 3. Server-Side Financial Validation
     const amountPaidInGhs = data.data.amount / 100; 
     if (amountPaidInGhs < (serverExpectedPrice - 1)) {
        console.error(`[SECURITY] Renewal Underpayment! User ${session.userId} paid ${amountPaidInGhs} but owed ${serverExpectedPrice}`);
        return { success: false, message: "Partial payment detected. Please contact support." };
     }
 
-    // 4. Calculate New End Date
     const now = new Date();
     const currentEndDate = existingLease.endDate ? new Date(existingLease.endDate) : now;
     const baseDateForExtension = currentEndDate > now ? currentEndDate : now;
@@ -228,7 +238,9 @@ export async function processLeaseRenewal(rawReference: string, rawLeaseId: stri
       newEndDate.setFullYear(newEndDate.getFullYear() + yearsToAdd);
     } else newEndDate.setFullYear(newEndDate.getFullYear() + 1);
 
-    // 5. DATABASE INTEGRITY: Atomic Transaction
+    // NEW: Re-calculate the reminder milestones based on the newly extended period
+    const newDynamicReminders = calculateMilestones(baseDateForExtension, newEndDate);
+
     const dbSession = await mongoose.startSession();
     const result = await dbSession.withTransaction(async () => {
       
@@ -236,9 +248,9 @@ export async function processLeaseRenewal(rawReference: string, rawLeaseId: stri
       if (existingTx && existingTx.status === "Success") throw new Error("ALREADY_VERIFIED");
 
       existingLease.endDate = newEndDate;
+      existingLease.reminders = newDynamicReminders; // <-- RESETTING THE TRIGGERS
       if (existingLease.status === "Expired") existingLease.status = "Active";
       
-      // Save passing the session to maintain atomicity
       await existingLease.save({ session: dbSession });
 
       await Transaction.create([{
@@ -262,7 +274,6 @@ export async function processLeaseRenewal(rawReference: string, rawLeaseId: stri
     await dbSession.endSession();
 
     if (result === "SUCCESS") {
-      // 6. Fire and Forget Email
       const user = await User.findById(session.userId).select("email");
       if (user?.email) {
         sendEmail({

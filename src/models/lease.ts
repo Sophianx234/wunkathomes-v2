@@ -38,10 +38,37 @@ const leaseSchema = new mongoose.Schema({
   },
   smartLockPin: {
     type: String,
-    select: false, // Security: Never send this to the frontend unless explicitly requested by the authenticated tenant
+    select: false, // Security: Never send this to the frontend unless explicitly requested
   },
-
   
+  // ==========================================
+  // NEW: DYNAMIC REMINDER MILESTONES
+  // ==========================================
+  reminders: {
+    milestone1: { 
+      triggerDate: { type: Date }, 
+      sent: { type: Boolean, default: false } 
+    }, // e.g., 50% through the lease
+    milestone2: { 
+      triggerDate: { type: Date }, 
+      sent: { type: Boolean, default: false } 
+    }, // e.g., 75% through the lease
+    milestone3: { 
+      triggerDate: { type: Date }, 
+      sent: { type: Boolean, default: false } 
+    }, // e.g., 90% through the lease
+    expired: { 
+      sent: { type: Boolean, default: false } 
+    }  // Triggers when now >= endDate
+  },
+  intentToVacate: { 
+  type: Boolean, 
+  default: false 
+},
+moveOutDate: { 
+  type: Date 
+},
+
   signatureAudit: {
     isSigned: { type: Boolean, default: false },
     signedAt: { type: Date },
@@ -52,5 +79,6 @@ const leaseSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
+// Prevent Mongoose from recompiling the model in Next.js development mode
 const Lease = mongoose.models.Lease || mongoose.model('Lease', leaseSchema);
 export default Lease;

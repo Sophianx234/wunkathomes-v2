@@ -18,7 +18,6 @@ export default async function DashboardPage() {
   const dbUser = await User.findById(session.userId).lean();
   if (!dbUser) redirect("/login");
 
-  // Fetch ALL Leases for this user (Including ones waiting on KYC/Signatures)
   const dbLeases = await Lease.find({
     userId: session.userId,
     status: { $in: ["Pending_Verification", "Awaiting_Admin_Approval", "Active"] },
@@ -36,10 +35,7 @@ export default async function DashboardPage() {
       <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-500 font-bold uppercase tracking-widest text-sm">
         <div className="text-center space-y-4">
           <p>No active leases found. Please explore properties.</p>
-          <Link
-            href="/"
-            className="bg-black hover:bg-zinc-900 text-white font-bold py-3 px-4 rounded"
-          >
+          <Link href="/" className="bg-black hover:bg-zinc-900 text-white font-bold py-3 px-4 rounded">
             Explore Properties
           </Link>
         </div>
@@ -47,13 +43,11 @@ export default async function DashboardPage() {
     );
   }
 
-  // Serialize User Data
   const serializedUser = {
     name: dbUser.name,
     kycStatus: dbUser.kycStatus || "Unverified",
   };
 
-  // Serialize the Array of Leases
   const serializedActiveLeases = dbLeases.map((dbLease: any) => {
     let endDate = dbLease.endDate;
     if (!endDate && dbLease.startDate) {
@@ -66,9 +60,7 @@ export default async function DashboardPage() {
     const propertyDoc = listingDoc?.propertyId;
     const loc = propertyDoc?.location || listingDoc?.location;
     const locationString = loc
-      ? typeof loc === "string"
-        ? loc
-        : `${loc.area}, ${loc.city || loc.region}`
+      ? typeof loc === "string" ? loc : `${loc.area}, ${loc.city || loc.region}`
       : "Accra, Ghana";
 
     return {
@@ -76,11 +68,10 @@ export default async function DashboardPage() {
         id: dbLease._id.toString(),
         status: dbLease.status,
         totalRentAmount: dbLease.totalRentAmount,
-        startDate: dbLease.startDate
-          ? new Date(dbLease.startDate).toISOString()
-          : new Date().toISOString(),
+        startDate: dbLease.startDate ? new Date(dbLease.startDate).toISOString() : new Date().toISOString(),
         endDate: endDate ? new Date(endDate).toISOString() : undefined,
         smartLockPin: dbLease.smartLockPin,
+        intentToVacate: dbLease.intentToVacate || false, // Included for the client
         signatureAudit: {
           isSigned: dbLease.signatureAudit?.isSigned || false,
         },
