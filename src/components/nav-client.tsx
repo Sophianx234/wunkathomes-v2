@@ -114,7 +114,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
             <div className="relative size-10">
               <Image fill alt="WunkatHomes logo" src="/images/home.png" className="object-contain size-10 transition-transform" />
             </div>
-            <span className="pt-2 text-primary hidden sm:block tracking-tight text-slate-800">
+            <span className="pt-2 text-primary  sm:block tracking-tight text-slate-800">
               Wunkat<span className="text-slate-500">Homes</span>
             </span>
           </Link>
@@ -336,9 +336,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
               <div className="size-2.5 bg-red-500 rounded-full border-2 border-white absolute right-14 top-8 z-10 pointer-events-none shadow-sm" />
             )}
             
-            <Button variant="ghost" size="icon" className="rounded-full text-slate-600 hover:bg-slate-100">
-              <HugeiconsIcon icon={Search01Icon} size={22} />
-            </Button>
+            
 
             <motion.button onClick={toggleMenu} whileTap={{ scale: 0.9 }} className="text-slate-800 focus:outline-none p-2 bg-slate-100 rounded-full">
               {menuOpen ? <HugeiconsIcon icon={Cancel01Icon} size={20} /> : <HugeiconsIcon icon={Menu01Icon} size={20} />}

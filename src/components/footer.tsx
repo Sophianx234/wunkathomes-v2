@@ -7,20 +7,31 @@ import {
   TwitterIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import Image from "next/image";
 import Link from "next/link";
 
 export default function Footer() {
   return (
     <footer className="bg-black text-white px-6 py-16 md:py-24">
       <div className="max-w-6xl mx-auto">
-        <div className="grid md:grid-cols-4 gap-12 mb-16">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-12 mb-16">
           {/* Brand & Mission */}
-          <div className="md:col-span-1">
-            <Link href="/" className="inline-block mb-6">
-              <h3 className="font-black text-2xl tracking-tighter">
-                WunkatHomes
-              </h3>
-            </Link>
+          <div className="md:col-span-1 col-span-2">
+            <Link href="/" className="flex items-center gap-2 mb-6">
+  {/* The parent controls the size (size-10) and MUST be relative */}
+  <div className="relative md:hidden bg-white rounded-md  size-10">
+    <Image 
+      fill 
+      alt="WunkatHomes logo" 
+      src="/images/home.png" 
+      // Removed size-10 from here, kept object-contain
+      className="object-contain  bg-blend-darken transition-transform" 
+    />
+  </div>
+  <h3 className="font-black text-2xl tracking-tighter">
+    WunkatHomes
+  </h3>
+</Link>
             <p className="text-white/70 text-sm leading-relaxed pr-4">
               Exclusive, company-owned smart homes. Find your space, sign
               digitally, and unlock seamlessly.

@@ -21,10 +21,10 @@ const redis = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_RE
 
 // Create a sliding window rate limiter: 5 requests per 10 seconds per IP
 const authRateLimit = redis 
-  ? new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(5, "10 s") }) 
+  ? new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(50, "10 s") }) 
   : null;
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
   // ============================================================================

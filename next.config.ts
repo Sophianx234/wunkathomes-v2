@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
+  allowedDevOrigins: ['10.107.64.178'],
   images: {
     remotePatterns: [
       {
@@ -23,7 +24,7 @@ const nextConfig: NextConfig = {
     },
   },
   // 1. NATIVE PROXYING
-  async rewrites() {
+  /* async rewrites() {
     return [
       {
         // When frontend calls /api/tuya/...
@@ -37,7 +38,7 @@ const nextConfig: NextConfig = {
         destination: "https://api.external-service.com/:path*",
       }
     ];
-  },
+  }, */
 
   // 2. DISABLE POWERED BY HEADER (Security)
   // Prevents attackers from knowing you are running Next.js

@@ -27,7 +27,7 @@ export default function FeaturedRentalsClient({ properties }: FeaturedRentalsCli
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* === Section Header === */}
-        <div className="flex flex-col md:flex-row justify-between items-end gap-8 mb-12 md:mb-16">
+        <div className="flex flex-col md:flex-row justify-between md:items-end gap-8 mb-12 md:mb-16">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
