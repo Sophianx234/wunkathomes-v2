@@ -18,7 +18,7 @@ import { toast } from "sonner";
 interface BookingCardProps {
   listing: any;
   hasBookedTour: boolean;
-  bookedTourDate?: string | null; // Added so the date shows correctly on reload
+  bookedTourDate?: string | null;
   isRent: boolean;
 }
 
@@ -32,7 +32,6 @@ export default function BookingCard({ listing, isRent, hasBookedTour, bookedTour
     initialState,
   );
 
-  // Set initial state directly to SUCCESS if they already booked
   const [step, setStep] = useState<SchedulingStep>(hasBookedTour ? "SUCCESS" : "IDLE");
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
@@ -57,33 +56,72 @@ export default function BookingCard({ listing, isRent, hasBookedTour, bookedTour
     setPhoneNumber("");
   };
 
-  const getFormattedDateTime = () => {
-    if (!selectedDate || !selectedTime) return "";
-    const dateObj = new Date(`${selectedDate}T${selectedTime}`);
-    const dateStr = dateObj.toLocaleDateString("en-US", {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-    });
-    const timeStr = dateObj.toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "2-digit",
-    });
-    return `${dateStr} at ${timeStr}`;
-  };
-
-  // Use either the previously booked date or the newly selected date
   const displayDate = bookedTourDate || selectedDate;
 
   return (
-    <div className="lg:col-span-4 -translate-8 w-[300px] ml-auto relative hidden lg:block">
-      <div className="sticky top-32 min-h-[460px] p-8 border-2 border-black bg-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col rounded-xl">
-        {/* === Header === */}
-        <div className="mb-8 shrink-0">
+    <div className="lg:col-span-4 lg:-translate-y-8 w-full lg:w-[300px] lg:ml-auto relative">
+      
+      {/* Unified Responsive Container */}
+      <div className="
+        fixed bottom-0 left-0 right-0 z-50 bg-white border-t-2 border-black p-4 rounded-t-2xl shadow-[0_-10px_40px_rgba(0,0,0,0.15)] transition-all duration-300 box-border w-full max-w-[100vw]
+        lg:sticky lg:top-32 lg:min-h-[460px] lg:p-8 lg:border-2 lg:border-black lg:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] lg:flex lg:flex-col lg:rounded-xl lg:bottom-auto lg:left-auto lg:right-auto lg:z-auto lg:max-w-none
+      ">
+        
+        {/* === Mobile Only: Header / Condensed View === */}
+        <div className="lg:hidden w-full max-w-full box-border">
+          {step === "IDLE" && (
+            <div className="flex items-center justify-between animate-in fade-in duration-300 w-full">
+              <div className="min-w-0 shrink overflow-hidden pr-2">
+                <div className="text-xl font-black truncate">
+                  ${listing.price?.toLocaleString()}
+                  <span className="text-[10px] font-medium text-slate-500">
+                    {" "}
+                    {formatLeaseTerm(listing.terms?.leaseTerm)}
+                  </span>
+                </div>
+                <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500 truncate">
+                  {isRent ? "For Rent" : "Purchase Price"}
+                </div>
+              </div>
+              <div className="flex gap-2 shrink-0">
+                <button
+                  onClick={() => handleNext("DATE")}
+                  className="p-3 border-2 border-black rounded-lg hover:bg-slate-50 transition-colors shrink-0"
+                >
+                  <span className="scale-90 flex items-center">
+                    <HugeiconsIcon icon={Calendar01Icon} size={16} />
+                  </span>
+                </button>
+                <Link href={`/checkout/${listing.slug}?type=deposit`} className="shrink-0">
+                  <button className="px-5 py-3 bg-black text-white font-black uppercase tracking-widest text-[10px] rounded-lg hover:bg-slate-800 transition-colors whitespace-nowrap w-full">
+                    {isRent ? "Reserve" : "Buy Now"}
+                  </button>
+                </Link>
+              </div>
+            </div>
+          )}
+
+          {step !== "IDLE" && (
+            <div className="flex justify-between items-center mb-4 pb-3 border-b border-black/10 w-full box-border">
+              <span className="font-black uppercase tracking-widest text-xs truncate pr-4">
+                Schedule a Tour
+              </span>
+              <button
+                onClick={resetFlow}
+                className="text-[10px] font-bold text-slate-500 uppercase tracking-widest hover:text-black shrink-0"
+              >
+                Close
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* === Desktop Only: Header & Ledger === */}
+        <div className="hidden lg:block mb-8 shrink-0 w-full box-border">
           <span className="text-sm font-bold uppercase tracking-widest text-slate-500 block mb-2">
             {isRent ? "Lease for" : "Purchase Price"}
           </span>
-          <div className="text-4xl font-black tracking-tight">
+          <div className="text-4xl font-black tracking-tight break-words">
             ${listing.price?.toLocaleString()}
             {listing.terms?.leaseTerm && (
               <span className="text-lg text-slate-500 font-medium tracking-normal">
@@ -94,8 +132,7 @@ export default function BookingCard({ listing, isRent, hasBookedTour, bookedTour
           </div>
         </div>
 
-        {/* === Simple Info Ledger === */}
-        <div className="space-y-4 mb-8 shrink-0">
+        <div className="hidden lg:block space-y-4 mb-8 shrink-0 w-full box-border">
           <div className="flex justify-between items-center py-3 border-b border-black/10">
             <span className="text-sm font-medium text-slate-600">
               Verified Property
@@ -117,20 +154,21 @@ export default function BookingCard({ listing, isRent, hasBookedTour, bookedTour
           </div>
         </div>
 
-        {/* === DYNAMIC ACTION AREA === */}
-        <div className="flex flex-col gap-3 mt-auto transition-all duration-300">
+        {/* === DYNAMIC ACTION AREA (Forms) === */}
+        <div className={`flex-col w-full max-w-full box-border gap-2 lg:gap-3 mt-auto transition-all duration-300 ${step === 'IDLE' ? 'hidden lg:flex' : 'flex max-h-[70vh] overflow-y-auto overflow-x-hidden pb-2 lg:pb-0'}`}>
+          
           {step === "IDLE" && (
-            <>
+            <div className="hidden lg:contents w-full box-border">
               <Link
                 href={`/checkout/${listing.slug}?type=deposit`}
-                className="w-full"
+                className="w-full block"
               >
                 <button className="w-full py-4 bg-black text-white font-black uppercase tracking-widest text-xs rounded-lg hover:bg-slate-800 transition-colors">
                   {isRent ? "Reserve Now" : "Reserve to Buy"}
                 </button>
               </Link>
 
-              <div className="relative flex items-center py-2">
+              <div className="relative flex items-center py-2 w-full box-border">
                 <div className="flex-grow border-t border-slate-200"></div>
                 <span className="flex-shrink-0 mx-4 text-slate-400 text-[10px] font-bold uppercase tracking-widest">
                   Or
@@ -140,76 +178,72 @@ export default function BookingCard({ listing, isRent, hasBookedTour, bookedTour
 
               <button
                 onClick={() => handleNext("DATE")}
-                className="w-full py-4 bg-white text-black font-black uppercase tracking-widest text-xs border-2 border-black rounded-lg hover:bg-slate-50 transition-colors flex items-center justify-center gap-2"
+                className="w-full box-border py-4 bg-white text-black font-black uppercase tracking-widest text-xs border-2 border-black rounded-lg hover:bg-slate-50 transition-colors flex items-center justify-center gap-2"
               >
                 <HugeiconsIcon icon={Calendar01Icon} size={16} /> Schedule a
                 Tour
               </button>
-            </>
+            </div>
           )}
 
           {step === "DATE" && (
-            <div className="flex flex-col gap-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
-              <button
-                onClick={() => handleBack("IDLE")}
-                className="text-[10px] text-slate-500 uppercase tracking-widest font-bold flex items-center gap-1 mb-1 hover:text-black w-fit"
-              >
-                <HugeiconsIcon icon={ArrowLeft01Icon} size={12} /> Back
-              </button>
+            <div className="flex flex-col w-full min-w-0 max-w-full box-border gap-2 lg:gap-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
+  <button
+    onClick={() => handleBack("IDLE")}
+    className="text-[10px] text-slate-500 uppercase tracking-widest font-bold flex items-center gap-1 mb-1 hover:text-black w-fit shrink-0"
+  >
+    <HugeiconsIcon icon={ArrowLeft01Icon} size={12} /> Back
+  </button>
 
-              <div className="flex flex-col gap-1">
-                <label className="text-xs font-bold uppercase tracking-widest text-black">
-                  Select a Date
-                </label>
-                <div className="relative">
-                  <HugeiconsIcon
-                    icon={Calendar01Icon}
-                    size={16}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
-                  />
-                  <input
-                    type="date"
-                    value={selectedDate}
-                    onChange={(e) => setSelectedDate(e.target.value)}
-                    className="w-full py-3.5 pl-10 pr-4 border-2 border-black rounded-lg text-sm font-bold focus:outline-none focus:ring-2 focus:ring-black/20 text-black bg-white"
-                    min={new Date().toISOString().split("T")[0]}
-                  />
-                </div>
-              </div>
+  <div className="flex flex-col gap-1 w-full min-w-0 max-w-full box-border">
+    <label className="text-[10px] lg:text-xs font-bold uppercase tracking-widest text-black">
+      Select a Date
+    </label>
+    <div className="relative w-full min-w-0 max-w-full box-border">
+      <span className="absolute left-3 lg:left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none scale-90 lg:scale-100 flex items-center">
+        <HugeiconsIcon icon={Calendar01Icon} size={16} />
+      </span>
+      <input
+        type="date"
+        value={selectedDate}
+        onChange={(e) => setSelectedDate(e.target.value)}
+        className="block w-full min-w-0 max-w-full box-border py-2.5 lg:py-3.5 pl-9 lg:pl-10 pr-3 lg:pr-4 border-2 border-black rounded-lg text-xs lg:text-sm font-bold focus:outline-none focus:ring-2 focus:ring-black/20 text-black bg-white m-0 appearance-none"
+        min={new Date().toISOString().split("T")[0]}
+      />
+    </div>
+  </div>
 
-              <div className="flex flex-col gap-1">
-                <label className="text-xs font-bold uppercase tracking-widest text-black">
-                  Select a Time
-                </label>
-                <div className="relative">
-                  <HugeiconsIcon
-                    icon={Clock01Icon}
-                    size={16}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
-                  />
-                  <input
-                    type="time"
-                    value={selectedTime}
-                    onChange={(e) => setSelectedTime(e.target.value)}
-                    className="w-full py-3.5 pl-10 pr-4 border-2 border-black rounded-lg text-sm font-bold focus:outline-none focus:ring-2 focus:ring-black/20 text-black bg-white"
-                  />
-                </div>
-              </div>
+  <div className="flex flex-col gap-1 w-full min-w-0 max-w-full box-border">
+    <label className="text-[10px] lg:text-xs font-bold uppercase tracking-widest text-black">
+      Select a Time
+    </label>
+    <div className="relative w-full min-w-0 max-w-full box-border">
+      <span className="absolute left-3 lg:left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none scale-90 lg:scale-100 flex items-center">
+          <HugeiconsIcon icon={Clock01Icon} size={16} />
+      </span>
+      <input
+        type="time"
+        value={selectedTime}
+        onChange={(e) => setSelectedTime(e.target.value)}
+        className="block w-full min-w-0 max-w-full box-border py-2.5 lg:py-3.5 pl-9 lg:pl-10 pr-3 lg:pr-4 border-2 border-black rounded-lg text-xs lg:text-sm font-bold focus:outline-none focus:ring-2 focus:ring-black/20 text-black bg-white m-0 appearance-none"
+      />
+    </div>
+  </div>
 
-              <button
-                onClick={() => handleNext("PHONE")}
-                disabled={!selectedDate || !selectedTime}
-                className="w-full py-4 bg-black text-white font-black uppercase tracking-widest text-xs rounded-lg hover:bg-slate-800 transition-colors mt-2 disabled:opacity-30 disabled:cursor-not-allowed"
-              >
-                Continue
-              </button>
-            </div>
+  <button
+    onClick={() => handleNext("PHONE")}
+    disabled={!selectedDate || !selectedTime}
+    className="block w-full min-w-0 max-w-full box-border py-3 lg:py-4 bg-black text-white font-black uppercase tracking-widest text-[10px] lg:text-xs rounded-lg hover:bg-slate-800 transition-colors mt-2 disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
+  >
+    Continue
+  </button>
+</div>
           )}
 
           {step === "PHONE" && (
             <form
               action={formAction}
-              className="flex flex-col gap-2 animate-in fade-in slide-in-from-bottom-2 duration-300"
+              className="flex flex-col w-full max-w-full box-border gap-2 animate-in fade-in slide-in-from-bottom-2 duration-300"
             >
               <button
                 type="button"
@@ -219,50 +253,39 @@ export default function BookingCard({ listing, isRent, hasBookedTour, bookedTour
                 <HugeiconsIcon icon={ArrowLeft01Icon} size={12} /> Back
               </button>
 
-              <label className="text-xs font-bold uppercase tracking-widest text-black mb-1">
-                Your WhatsApp Number
-              </label>
-              <div className="relative">
-                <HugeiconsIcon
-                  icon={SmartPhone01Icon}
-                  size={16}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
-                />
+              <div className="flex flex-col gap-1 w-full max-w-full box-border">
+                <label className="text-[10px] lg:text-xs font-bold uppercase tracking-widest text-black">
+                  Your WhatsApp Number
+                </label>
+                <div className="relative w-full max-w-full box-border">
+                  <span className="absolute left-3 lg:left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none scale-90 lg:scale-100 flex items-center">
+                    <HugeiconsIcon icon={SmartPhone01Icon} size={16} />
+                  </span>
 
-                {/* Passing both date and time to the server securely */}
-                <input type="hidden" name="listingId" value={listing.id} />
-                <input
-                  type="hidden"
-                  name="scheduledDate"
-                  value={selectedDate}
-                />
-                <input
-                  type="hidden"
-                  name="scheduledTime"
-                  value={selectedTime}
-                />
+                  <input type="hidden" name="listingId" value={listing.id} />
+                  <input type="hidden" name="scheduledDate" value={selectedDate} />
+                  <input type="hidden" name="scheduledTime" value={selectedTime} />
 
-                <input
-                  type="tel"
-                  name="phoneNumber"
-                  placeholder="+233 XX XXX XXXX"
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  className="w-full py-4 pl-10 pr-4 border-2 border-black rounded-lg text-sm font-bold focus:outline-none focus:ring-2 focus:ring-black/20 text-black placeholder:text-slate-300"
-                />
+                  <input
+                    type="tel"
+                    name="phoneNumber"
+                    placeholder="+233 XX XXX XXXX"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    className="block w-full max-w-full box-border py-3 lg:py-4 pl-9 lg:pl-10 pr-3 lg:pr-4 border-2 border-black rounded-lg text-xs lg:text-sm font-bold focus:outline-none focus:ring-2 focus:ring-black/20 text-black placeholder:text-slate-300 m-0"
+                  />
+                </div>
               </div>
 
               <button
                 type="submit"
                 disabled={isPending || phoneNumber.length < 9}
-                className="w-full py-4 flex items-center justify-center bg-black text-white font-black uppercase tracking-widest text-xs rounded-lg hover:bg-slate-800 transition-colors mt-2 disabled:opacity-30 disabled:cursor-not-allowed"
+                className="block w-full max-w-full box-border py-3 lg:py-4 flex items-center justify-center bg-black text-white font-black uppercase tracking-widest text-[10px] lg:text-xs rounded-lg hover:bg-slate-800 transition-colors mt-2 disabled:opacity-30 disabled:cursor-not-allowed m-0"
               >
                 {isPending && (
-                  <HugeiconsIcon
-                    icon={Loading03Icon}
-                    size={16}
-                    className="animate-spin mr-2"
-                  />
+                  <span className="scale-90 flex items-center mr-1.5 lg:mr-2">
+                     <HugeiconsIcon icon={Loading03Icon} size={16} className="animate-spin" />
+                  </span>
                 )}
                 {isPending ? "Confirming..." : "Confirm Tour"}
               </button>
@@ -270,18 +293,20 @@ export default function BookingCard({ listing, isRent, hasBookedTour, bookedTour
           )}
 
           {step === "SUCCESS" && (
-            <div className="flex flex-col items-center justify-center text-center gap-2 py-4 animate-in fade-in zoom-in-95 duration-300">
-              <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mb-2">
-                <HugeiconsIcon
-                  icon={CheckmarkBadge01Icon}
-                  size={32}
-                  className="text-green-600"
-                />
+            <div className="flex flex-col w-full max-w-full box-border items-center justify-center text-center gap-2 py-4 animate-in fade-in zoom-in-95 duration-300">
+              <div className="w-12 h-12 lg:w-16 lg:h-16 bg-green-50 rounded-full flex items-center justify-center mb-2 shrink-0">
+                <span className="scale-75 lg:scale-100 flex items-center">
+                  <HugeiconsIcon
+                    icon={CheckmarkBadge01Icon}
+                    size={32}
+                    className="text-green-600"
+                  />
+                </span>
               </div>
-              <h3 className="font-black text-lg uppercase tracking-tight text-black">
+              <h3 className="font-black text-sm lg:text-lg uppercase tracking-tight text-black break-words">
                 Tour Scheduled!
               </h3>
-              <p className="text-xs font-medium text-slate-500 mb-6 leading-relaxed px-4">
+              <p className="text-[10px] lg:text-xs font-medium text-slate-500 mb-4 lg:mb-6 leading-relaxed w-full box-border px-2">
                 One of our friendly team members will meet you on <br />
                 {displayDate && (
                   <strong className="text-black">
@@ -295,11 +320,10 @@ export default function BookingCard({ listing, isRent, hasBookedTour, bookedTour
                 .
               </p>
               
-              {/* Hide the Done button if they are viewing a pre-booked tour */}
               {!hasBookedTour && (
                 <button
                   onClick={resetFlow}
-                  className="w-full py-3 bg-white text-black font-black uppercase tracking-widest text-xs border-2 border-black rounded-lg hover:bg-slate-50 transition-colors"
+                  className="block w-full max-w-full box-border py-2.5 lg:py-3 bg-white text-black font-black uppercase tracking-widest text-[10px] lg:text-xs border-2 border-black rounded-lg hover:bg-slate-50 transition-colors m-0"
                 >
                   Done
                 </button>

@@ -52,9 +52,8 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
     publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY as string,
     currency: "GHS", 
     metadata: {
-      // ADD THESE TWO DIRECT VARIABLES FOR EASY ACCESS IN THE WEBHOOK
-      userId: currentUser?.id, // Ensure you pass the user's ID to this component
-      listingId: listing._id,
+      userId: currentUser?.id, 
+      listingId: listing.id,
       moveInDate: moveInDate,
       custom_fields: [
         {
@@ -90,11 +89,9 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
   const onSuccess = async (paystackResponse: any) => {
     toast.loading("Verifying your payment securely...", { id: "payment-toast" });
 
-    // Call the Server Action, now passing the moveInDate
     const result = await verifyPaystackPayment(
       paystackResponse.reference, 
-      listing._id, 
-      priceInGhs,
+      listing.id, 
       moveInDate 
     );
 
@@ -126,8 +123,6 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
     }
 
     setIsProcessing(true)
-
-    // Trigger the Paystack popup
     initializePayment({
       onSuccess,
       onClose
@@ -135,38 +130,40 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 text-black py-12 md:py-24 px-4 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-slate-50 text-black py-6 md:py-24 px-2 md:px-4 sm:px-6 lg:px-8 overflow-x-hidden">
       
       {/* Top Nav */}
-      <div className="max-w-6xl mx-auto mb-10">
-        <Link href={`/properties/${listing.slug}`} className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-500 hover:text-black transition-colors">
-          <HugeiconsIcon icon={ArrowLeft01Icon} size={16} />
+      <div className="max-w-6xl mx-auto mb-5 md:mb-10 px-2 md:px-0">
+        <Link href={`/properties/${listing.slug}`} className="inline-flex items-center gap-1 md:gap-2 text-[10px] md:text-xs font-bold uppercase tracking-widest text-slate-500 hover:text-black transition-colors">
+          <span className="scale-75 md:scale-100 flex items-center">
+            <HugeiconsIcon icon={ArrowLeft01Icon} size={16} />
+          </span>
           Return to Property
         </Link>
       </div>
 
-      <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20">
+      <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-20 px-2 md:px-0">
         
         {/* --- LEFT COLUMN: Form & Payment --- */}
         <div className="lg:col-span-7 flex flex-col">
-          <h1 className="text-3xl md:text-4xl font-black uppercase tracking-tight mb-2">
+          <h1 className="text-xl md:text-4xl font-black uppercase tracking-tight mb-1 md:mb-2">
             Secure Your New Home
           </h1>
-          <p className="text-sm font-medium text-slate-500 mb-10">
+          <p className="text-xs md:text-sm font-medium text-slate-500 mb-5 md:mb-10">
             Enter your details below to reserve this property and start your move-in process.
           </p>
 
-          <form onSubmit={handlePayment} className="space-y-8">
+          <form onSubmit={handlePayment} className="space-y-4 md:space-y-8 w-full max-w-full box-border">
             
             {/* Legal Information Section */}
-            <div className="bg-white p-6 md:p-8 rounded-xl border border-slate-200 ">
-              <h2 className="text-sm font-bold uppercase tracking-widest mb-6 border-b border-slate-100 pb-4">
+            <div className="bg-white p-3 md:p-8 rounded-xl border border-slate-200 w-full max-w-full box-border">
+              <h2 className="text-xs md:text-sm font-bold uppercase tracking-widest mb-3 md:mb-6 border-b border-slate-100 pb-2 md:pb-4">
                 Tenant Details
               </h2>
               
-              <div className="space-y-5">
-                <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-widest text-slate-500 mb-2">
+              <div className="space-y-2.5 md:space-y-5 w-full max-w-full box-border">
+                <div className="w-full min-w-0 max-w-full box-border">
+                  <label className="block text-[9px] md:text-[11px] font-bold uppercase tracking-widest text-slate-500 mb-1 md:mb-2">
                     Full Name (Match with your Ghana Card)
                   </label>
                   <input 
@@ -174,13 +171,13 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
                     type="text" 
                     value={formData.legalName}
                     onChange={e => setFormData({...formData, legalName: e.target.value})}
-                    className="w-full p-4 border border-slate-300 rounded-lg text-sm font-bold focus:outline-none focus:border-black focus:ring-1 focus:ring-black bg-slate-50 focus:bg-white transition-all"
+                    className="block w-full min-w-0 max-w-full box-border m-0 p-2 md:p-4 border border-slate-300 rounded-lg text-xs md:text-sm font-bold focus:outline-none focus:border-black focus:ring-1 focus:ring-black bg-slate-50 focus:bg-white transition-all appearance-none"
                   />
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-widest text-slate-500 mb-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 md:gap-5 w-full max-w-full box-border">
+                  <div className="w-full min-w-0 max-w-full box-border">
+                    <label className="block text-[9px] md:text-[11px] font-bold uppercase tracking-widest text-slate-500 mb-1 md:mb-2">
                       Email Address
                     </label>
                     <input 
@@ -188,11 +185,11 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
                       type="email" 
                       value={formData.email}
                       onChange={e => setFormData({...formData, email: e.target.value})}
-                      className="w-full p-4 border border-slate-300 rounded-lg text-sm font-bold focus:outline-none focus:border-black focus:ring-1 focus:ring-black bg-slate-50 focus:bg-white transition-all"
+                      className="block w-full min-w-0 max-w-full box-border m-0 p-2 md:p-4 border border-slate-300 rounded-lg text-xs md:text-sm font-bold focus:outline-none focus:border-black focus:ring-1 focus:ring-black bg-slate-50 focus:bg-white transition-all appearance-none"
                     />
                   </div>
-                  <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-widest text-slate-500 mb-2">
+                  <div className="w-full min-w-0 max-w-full box-border">
+                    <label className="block text-[9px] md:text-[11px] font-bold uppercase tracking-widest text-slate-500 mb-1 md:mb-2">
                       WhatsApp Number
                     </label>
                     <input 
@@ -200,14 +197,14 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
                       type="tel" 
                       value={formData.phone}
                       onChange={e => setFormData({...formData, phone: e.target.value})}
-                      className="w-full p-4 border border-slate-300 rounded-lg text-sm font-bold focus:outline-none focus:border-black focus:ring-1 focus:ring-black bg-slate-50 focus:bg-white transition-all"
+                      className="block w-full min-w-0 max-w-full box-border m-0 p-2 md:p-4 border border-slate-300 rounded-lg text-xs md:text-sm font-bold focus:outline-none focus:border-black focus:ring-1 focus:ring-black bg-slate-50 focus:bg-white transition-all appearance-none"
                     />
                   </div>
                 </div>
 
                 {/* Move-In Date Selector */}
-                <div className="pt-2">
-                  <label className="block text-[11px] font-bold uppercase tracking-widest text-slate-500 mb-2">
+                <div className="pt-1 md:pt-2 w-full min-w-0 max-w-full box-border">
+                  <label className="block text-[9px] md:text-[11px] font-bold uppercase tracking-widest text-slate-500 mb-1 md:mb-2">
                     Expected Move-In Date
                   </label>
                   <input 
@@ -216,9 +213,9 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
                     min={defaultDate}
                     value={moveInDate}
                     onChange={e => setMoveInDate(e.target.value)}
-                    className="w-full p-4 border border-slate-300 rounded-lg text-sm font-bold focus:outline-none focus:border-black focus:ring-1 focus:ring-black bg-slate-50 focus:bg-white transition-all"
+                    className="block w-full min-w-0 max-w-full box-border m-0 p-2 md:p-4 border border-slate-300 rounded-lg text-xs md:text-sm font-bold focus:outline-none focus:border-black focus:ring-1 focus:ring-black bg-slate-50 focus:bg-white transition-all appearance-none"
                   />
-                  <p className="text-[10px] text-slate-400 mt-2 font-medium">
+                  <p className="text-[8px] md:text-[10px] text-slate-400 mt-1 md:mt-2 font-medium break-words">
                     Your digital lease and Smart Lock PIN will activate at 12:00 AM on this date.
                   </p>
                 </div>
@@ -229,24 +226,38 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
             <button 
               type="submit"
               disabled={isProcessing}
-              className="w-full py-5 bg-zinc-950 text-white font-black uppercase tracking-widest text-sm rounded-xl hover:bg-zinc-800 transition-colors flex items-center justify-center gap-3 disabled:opacity-70"
+              className="block w-full min-w-0 max-w-full box-border py-2.5 md:py-5 bg-zinc-950 text-white font-black uppercase tracking-widest text-[10px] md:text-sm rounded-xl hover:bg-zinc-800 transition-colors flex items-center justify-center gap-1.5 md:gap-3 disabled:opacity-70 m-0"
             >
-              {isProcessing && <HugeiconsIcon icon={Loading03Icon} size={18} className="animate-spin" />}
-              {isProcessing ? "Connecting to Paystack..." : `Pay $${listing.price.toLocaleString()} Securely`}
-              {!isProcessing && <HugeiconsIcon icon={Shield01Icon} size={18} />}
+              {isProcessing && (
+                <span className="scale-75 md:scale-100 flex items-center">
+                  <HugeiconsIcon icon={Loading03Icon} size={18} className="animate-spin" />
+                </span>
+              )}
+              {isProcessing ? "Connecting..." : `Pay $${listing.price.toLocaleString()} Securely`}
+              {!isProcessing && (
+                <span className="scale-75 md:scale-100 flex items-center">
+                   <HugeiconsIcon icon={Shield01Icon} size={18} />
+                </span>
+              )}
             </button>
 
             {/* Trust Badges */}
-            <div className="flex flex-col items-center gap-4 mt-6">
-              <div className="flex items-center gap-6 text-slate-400">
-                <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest">
-                  <HugeiconsIcon icon={CreditCardIcon} size={16} /> Card
+            <div className="flex flex-col items-center gap-2 md:gap-4 mt-3 md:mt-6 w-full box-border">
+              <div className="flex items-center gap-3 md:gap-6 text-slate-400">
+                <span className="flex items-center gap-1 md:gap-1.5 text-[9px] md:text-xs font-bold uppercase tracking-widest">
+                  <span className="scale-75 md:scale-100 flex items-center">
+                     <HugeiconsIcon icon={CreditCardIcon} size={16} />
+                  </span>
+                  Card
                 </span>
-                <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest">
-                  <HugeiconsIcon icon={SmartPhone01Icon} size={16} /> Mobile Money
+                <span className="flex items-center gap-1 md:gap-1.5 text-[9px] md:text-xs font-bold uppercase tracking-widest">
+                  <span className="scale-75 md:scale-100 flex items-center">
+                     <HugeiconsIcon icon={SmartPhone01Icon} size={16} />
+                  </span>
+                  Mobile Money
                 </span>
               </div>
-              <p className="text-[10px] text-center font-bold text-slate-500 uppercase tracking-widest leading-relaxed">
+              <p className="text-[8px] md:text-[10px] text-center font-bold text-slate-500 uppercase tracking-widest leading-relaxed break-words px-2">
                 Payments are processed securely via Paystack. <br/> 
                 WunkatHomes does not store your payment details.
               </p>
@@ -255,55 +266,59 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
         </div>
 
         {/* --- RIGHT COLUMN: Order Summary --- */}
-        <div className="lg:col-span-5">
-          <div className="sticky top-12 bg-white p-6 md:p-8 rounded-xl border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+        <div className="lg:col-span-5 w-full box-border">
+          <div className="sticky top-6 md:top-12 bg-white p-3 md:p-8 rounded-xl border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] md:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] w-full box-border">
             
             {/* Property Preview Card */}
-            <div className="flex gap-4 mb-8 pb-8 border-b border-slate-100">
-              <div className="relative w-24 h-24 rounded-lg overflow-hidden shrink-0 bg-slate-100">
-                <Image src={listing.images[0] || '/placeholder.jpg'} alt={listing.title} fill className="object-cover" />
+            <div className="flex gap-2 md:gap-4 mb-4 md:mb-8 pb-4 md:pb-8 border-b border-slate-100 w-full box-border">
+              <div className="relative w-16 h-16 md:w-24 md:h-24 rounded-lg overflow-hidden shrink-0 bg-slate-100">
+                <Image src={listing?.images?.[0] || '/a-1.jpg'} alt={listing?.title}
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                fill className="object-cover" />
               </div>
-              <div className="flex flex-col justify-center">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">
-                  {listing.property?.propertyType?.replace('_', ' ')} • {formatLocation(listing.property?.location)}
+              <div className="flex flex-col justify-center min-w-0 pr-2">
+                <span className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-0.5 md:mb-1 truncate">
+                  {listing?.property?.propertyType?.replace('_', ' ')} • {formatLocation(listing?.property?.location)}
                 </span>
-                <h3 className="text-sm font-black uppercase tracking-tight leading-snug">
-                  {listing.title}
+                <h3 className="text-xs md:text-sm font-black uppercase tracking-tight leading-snug break-words line-clamp-2">
+                  {listing?.title}
                 </h3>
               </div>
             </div>
 
             {/* Price Breakdown */}
-            <h4 className="text-sm font-bold uppercase tracking-widest mb-4">Payment Summary</h4>
+            <h4 className="text-xs md:text-sm font-bold uppercase tracking-widest mb-2 md:mb-4">Payment Summary</h4>
             
-            <div className="space-y-4 mb-6">
-              <div className="flex justify-between items-center text-sm font-medium text-slate-600">
+            <div className="space-y-2 md:space-y-4 mb-3 md:mb-6 w-full box-border">
+              <div className="flex justify-between items-center text-xs md:text-sm font-medium text-slate-600">
                 <span>Total Rent</span>
                 <span>${listing.price.toLocaleString()}</span>
               </div>
-              <div className="flex justify-between items-center text-sm font-medium text-slate-600">
+              <div className="flex justify-between items-center text-xs md:text-sm font-medium text-slate-600">
                 <span>Agency Fees</span>
-                <span className="text-green-600 font-bold">Free (Direct to Owner)</span>
+                <span className="text-green-600 font-bold text-[10px] md:text-sm">Free</span>
               </div>
             </div>
 
-            <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg mb-6">
+            <div className="p-2 md:p-4 bg-slate-50 border border-slate-200 rounded-lg mb-3 md:mb-6 w-full box-border">
               <div className="flex justify-between items-center mb-1">
-                <span className="text-xs font-bold uppercase tracking-widest text-slate-500">
-                  Total Due Today
+                <span className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-slate-500">
+                  Total Due
                 </span>
-                <span className="text-xl font-black text-black">
+                <span className="text-lg md:text-xl font-black text-black">
                   ${listing.price.toLocaleString()}
                 </span>
               </div>
-              <p className="text-[10px] text-slate-500 font-medium leading-relaxed mt-2">
-                This payment instantly secures the property and locks in your reservation. You're one step closer to your new home!
+              <p className="text-[8px] md:text-[10px] text-slate-500 font-medium leading-relaxed mt-1 md:mt-2 break-words">
+                This payment instantly secures the property and locks in your reservation.
               </p>
             </div>
 
-            <div className="mt-8 flex items-start gap-3 bg-green-50 p-4 rounded-lg border border-green-100">
-              <HugeiconsIcon icon={CheckmarkBadge01Icon} size={20} className="text-green-600 shrink-0 mt-0.5" />
-              <p className="text-[10px] font-bold uppercase tracking-widest text-green-800 leading-relaxed">
+            <div className="mt-4 md:mt-8 flex items-start gap-1.5 md:gap-3 bg-green-50 p-2 md:p-4 rounded-lg border border-green-100 w-full box-border">
+              <span className="scale-75 md:scale-100 shrink-0 mt-0.5 flex items-center">
+                 <HugeiconsIcon icon={CheckmarkBadge01Icon} size={20} className="text-green-600" />
+              </span>
+              <p className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-green-800 leading-relaxed break-words">
                 Once payment is successful, your digital Tenancy Agreement and Smart Lock PIN will be generated instantly.
               </p>
             </div>

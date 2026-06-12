@@ -138,7 +138,6 @@ async function getListingData(slug: string) {
     comment: r.comment,
     date: r.createdAt,
     userName: r.userId?.name || "Verified Guest",
-    // EXTRACT THE USER ID SO WE CAN CHECK IT LATER
     userId: r.userId?._id?.toString() || "",
   }));
 
@@ -164,6 +163,7 @@ export default async function PropertyDetailsPage({
   const hasBookedTour = !!tourCookie;
   const bookedTourDate = tourCookie ? tourCookie.value : null;
   let isSaved = false;
+  
   if (session && session.userId && listing.id) {
     const existingSave = await SavedProperty.findOne({
       user: session.userId,
@@ -175,7 +175,6 @@ export default async function PropertyDetailsPage({
     }
   }
 
-  // CHECK IF THE CURRENT LOGGED-IN USER HAS ALREADY REVIEWED
   const hasReviewed = session?.userId
     ? reviews.some((review) => review.userId === session.userId)
     : false;
@@ -191,37 +190,40 @@ export default async function PropertyDetailsPage({
       : "New";
 
   return (
-    <main className="min-h-screen bg-white text-black pt-24 pb-32">
-      {/* ... [Rest of your gallery and info markup remains completely untouched] ... */}
-      <div className="max-w-6xl mx-auto">
+    <main className="min-h-screen bg-white text-black pt-12 md:pt-24 pb-20 md:pb-32">
+      <div className="max-w-6xl mx-auto px-2 md:px-0">
         <ImageGallery images={listing.images} title={listing.title} />
       </div>
 
-      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 mt-12">
-        <div className="lg:col-span-8 flex flex-col pb-12">
-          {/* ... [Title and Location formatting untouched] ... */}
-          <div className="mb-8">
-            <h1 className="text-3xl md:text-5xl font-black uppercase tracking-tight leading-[1.1] mb-4">
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-12 lg:gap-20 mt-6 md:mt-12">
+        <div className="lg:col-span-8 flex flex-col pb-6 md:pb-12">
+          
+          <div className="mb-4 md:mb-8">
+            <h1 className="text-xl md:text-3xl lg:text-5xl font-black uppercase tracking-tight leading-[1.1] mb-2 md:mb-4">
               {listing.title}
             </h1>
             <div className="flex items-center justify-between">
-              <div className="flex flex-wrap items-center gap-4 text-sm font-bold uppercase tracking-widest text-slate-500">
-                <span className="flex items-center gap-1.5 text-black">
-                  <HugeiconsIcon
-                    icon={StarIcon}
-                    size={16}
-                    className={reviewCount > 0 ? "fill-black" : ""}
-                  />
+              <div className="flex flex-wrap items-center gap-2 md:gap-4 text-[10px] md:text-sm font-bold uppercase tracking-widest text-slate-500">
+                <span className="flex items-center gap-1 md:gap-1.5 text-black">
+                  <span className="scale-75 md:scale-100 flex items-center">
+                    <HugeiconsIcon
+                      icon={StarIcon}
+                      size={16}
+                      className={reviewCount > 0 ? "fill-black" : ""}
+                    />
+                  </span>
                   {averageRating}{" "}
                   {reviewCount > 0 && `· ${reviewCount} Reviews`}
                 </span>
                 <span>•</span>
-                <span className="flex items-center gap-1.5">
-                  <HugeiconsIcon icon={Location01Icon} size={16} />
+                <span className="flex items-center gap-1 md:gap-1.5">
+                  <span className="scale-75 md:scale-100 flex items-center">
+                    <HugeiconsIcon icon={Location01Icon} size={16} />
+                  </span>
                   {listing.property.location}
                 </span>
               </div>
-              <div className="mt-2 shrink-0">
+              <div className="mt-1 md:mt-2 shrink-0 scale-75 md:scale-100 origin-right">
                 <SavePropertyButton
                   propertyId={listing.id || listing.slug}
                   initialIsSaved={isSaved}
@@ -230,28 +232,32 @@ export default async function PropertyDetailsPage({
             </div>
           </div>
 
-          <div className="flex items-center justify-between py-6 border-y border-black/10 mb-8">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-black rounded-full flex items-center justify-center text-white">
-                <HugeiconsIcon icon={Building03Icon} size={24} />
+          <div className="flex items-center justify-between py-3 md:py-6 border-y border-black/10 mb-4 md:mb-8">
+            <div className="flex items-center gap-3 md:gap-4">
+              <div className="w-8 h-8 md:w-12 md:h-12 bg-black rounded-full flex items-center justify-center text-white">
+                <span className="scale-75 md:scale-100">
+                   <HugeiconsIcon icon={Building03Icon} size={24} />
+                </span>
               </div>
               <div>
-                <h3 className="text-lg font-black uppercase tracking-tight">
+                <h3 className="text-sm md:text-lg font-black uppercase tracking-tight">
                   Managed by WunkatHomes
                 </h3>
-                <p className="text-sm font-medium text-slate-500">
+                <p className="text-[10px] md:text-sm font-medium text-slate-500">
                   Verified Property • No Agent Fees
                 </p>
               </div>
             </div>
-            <HugeiconsIcon
-              icon={CheckmarkBadge01Icon}
-              size={28}
-              className="text-green-600"
-            />
+            <span className="scale-75 md:scale-100">
+               <HugeiconsIcon
+                 icon={CheckmarkBadge01Icon}
+                 size={28}
+                 className="text-green-600"
+               />
+            </span>
           </div>
 
-          <div className="flex flex-wrap gap-6 mb-10">
+          <div className="flex flex-wrap gap-3 md:gap-6 mb-5 md:mb-10">
             {[
               {
                 icon: BedSingle02Icon,
@@ -278,47 +284,51 @@ export default async function PropertyDetailsPage({
             ].map((metric, i) => (
               <div
                 key={i}
-                className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-black"
+                className="flex items-center gap-1 md:gap-2 text-[10px] md:text-sm font-bold uppercase tracking-widest text-black"
               >
-                <HugeiconsIcon
-                  icon={metric.icon}
-                  size={20}
-                  className="text-slate-400"
-                />
+                <span className="scale-75 md:scale-100 flex items-center">
+                  <HugeiconsIcon
+                    icon={metric.icon}
+                    size={20}
+                    className="text-slate-400"
+                  />
+                </span>
                 {metric.label}
               </div>
             ))}
           </div>
 
-          <div className="mb-12">
-            <h2 className="text-xl font-black uppercase tracking-widest mb-4">
+          <div className="mb-6 md:mb-12">
+            <h2 className="text-sm md:text-xl font-black uppercase tracking-widest mb-2 md:mb-4">
               About This Property
             </h2>
-            <p className="text-slate-600 text-base md:text-lg leading-relaxed font-medium whitespace-pre-wrap">
+            <p className="text-slate-600 text-xs md:text-lg leading-relaxed font-medium whitespace-pre-wrap">
               {listing.description}
             </p>
           </div>
 
           {listing.property.generalAmenities &&
             listing.property.generalAmenities.length > 0 && (
-              <div className="mb-12 pt-10 border-t border-black/10">
-                <h2 className="text-xl font-black uppercase tracking-widest mb-6">
+              <div className="mb-6 md:mb-12 pt-5 md:pt-10 border-t border-black/10">
+                <h2 className="text-sm md:text-xl font-black uppercase tracking-widest mb-3 md:mb-6">
                   Amenities & Features
                 </h2>
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-wrap gap-1.5 md:gap-3">
                   {listing.property.generalAmenities.map((amenity, idx) => {
                     const IconComponent =
                       AMENITY_ICONS[amenity] || CheckmarkBadge01Icon;
                     return (
                       <div
                         key={idx}
-                        className="flex items-center gap-2 px-4 py-2.5 rounded-full border border-slate-200 text-sm font-bold text-slate-700 bg-slate-50"
+                        className="flex items-center gap-1 md:gap-2 px-2 py-1.5 md:px-4 md:py-2.5 rounded-full border border-slate-200 text-[10px] md:text-sm font-bold text-slate-700 bg-slate-50"
                       >
-                        <HugeiconsIcon
-                          icon={IconComponent}
-                          size={16}
-                          className="text-slate-400"
-                        />
+                        <span className="scale-75 md:scale-100 flex items-center">
+                          <HugeiconsIcon
+                            icon={IconComponent}
+                            size={16}
+                            className="text-slate-400"
+                          />
+                        </span>
                         {amenity}
                       </div>
                     );
@@ -327,34 +337,36 @@ export default async function PropertyDetailsPage({
               </div>
             )}
 
-          <div className="mb-12 pt-10 border-t border-black/10">
-            <h2 className="text-xl font-black uppercase tracking-widest mb-6">
+          <div className="mb-6 md:mb-12 pt-5 md:pt-10 border-t border-black/10">
+            <h2 className="text-sm md:text-xl font-black uppercase tracking-widest mb-3 md:mb-6">
               Neighborhood & Location
             </h2>
             <PropertyMap
               lat={listing.property.coordinates?.lat}
               lng={listing.property.coordinates?.lng}
             />
-            <h3 className="font-bold text-lg mb-2">
+            <h3 className="font-bold text-sm md:text-lg mb-1 md:mb-2 mt-4 md:mt-6">
               {listing.property.location}
             </h3>
-            <p className="text-slate-600 font-medium">
+            <p className="text-slate-600 font-medium text-xs md:text-base">
               {getNeighborhoodDescription(listing.property)}
             </p>
           </div>
 
           {/* === REVIEWS SECTION === */}
-          <div className="pt-10 border-t border-black/10">
-            <div className="flex items-center justify-between gap-2 mb-8">
-              <div className="flex items-center gap-2">
+          <div className="pt-5 md:pt-10 border-t border-black/10">
+            <div className="flex items-center justify-between gap-1 md:gap-2 mb-4 md:mb-8">
+              <div className="flex items-center gap-1 md:gap-2">
                 {reviewCount > 0 && (
-                  <HugeiconsIcon
-                    icon={StarIcon}
-                    size={24}
-                    className={reviewCount > 0 ? "fill-black" : ""}
-                  />
+                  <span className="scale-75 md:scale-100 flex items-center">
+                    <HugeiconsIcon
+                      icon={StarIcon}
+                      size={24}
+                      className={reviewCount > 0 ? "fill-black" : ""}
+                    />
+                  </span>
                 )}
-                <h2 className="text-2xl font-black uppercase tracking-tight">
+                <h2 className="text-lg md:text-2xl font-black uppercase tracking-tight">
                   {reviewCount > 0
                     ? `${averageRating} · ${reviewCount} Reviews`
                     : "No Reviews Yet"}
@@ -362,35 +374,36 @@ export default async function PropertyDetailsPage({
               </div>
             </div>
 
-            {/* PASS THE hasReviewed PROP TO THE FORM */}
             <ReviewForm
               listingId={listing.id as string}
               hasReviewed={hasReviewed}
             />
 
             {reviewCount > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 mt-4 md:mt-8">
                 {reviews.map((review) => (
                   <div key={review.id} className="flex flex-col">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center font-black text-slate-500">
+                    <div className="flex items-center gap-2 md:gap-3 mb-1.5 md:mb-3">
+                      <div className="w-6 h-6 md:w-10 md:h-10 rounded-full bg-slate-200 flex items-center justify-center font-black text-slate-500 text-[10px] md:text-base">
                         {review.userName.charAt(0)}
                       </div>
                       <div>
-                        <div className="font-bold text-sm flex items-center gap-2">
+                        <div className="font-bold text-xs md:text-sm flex items-center gap-1 md:gap-2">
                           {review.userName}
-                          <span className="flex text-black">
-                            <HugeiconsIcon
-                              icon={StarIcon}
-                              size={12}
-                              className="fill-black"
-                            />
-                            <span className="ml-1 leading-none">
+                          <span className="flex text-black items-center">
+                            <span className="scale-75 md:scale-100 flex items-center">
+                               <HugeiconsIcon
+                                 icon={StarIcon}
+                                 size={12}
+                                 className="fill-black"
+                               />
+                            </span>
+                            <span className="ml-0.5 md:ml-1 leading-none text-[10px] md:text-xs">
                               {review.rating}
                             </span>
                           </span>
                         </div>
-                        <div className="text-xs text-slate-500 font-medium">
+                        <div className="text-[10px] md:text-xs text-slate-500 font-medium mt-0.5">
                           {new Date(review.date).toLocaleDateString("en-US", {
                             month: "short",
                             year: "numeric",
@@ -399,7 +412,7 @@ export default async function PropertyDetailsPage({
                       </div>
                     </div>
                     {review.comment && (
-                      <p className="text-slate-700 text-sm leading-relaxed">
+                      <p className="text-slate-700 text-xs md:text-sm leading-relaxed">
                         {review.comment}
                       </p>
                     )}
@@ -407,7 +420,7 @@ export default async function PropertyDetailsPage({
                 ))}
               </div>
             ) : (
-              <p className="text-slate-500 text-sm">
+              <p className="text-slate-500 text-xs md:text-sm">
                 Be the first to review this property!
               </p>
             )}
@@ -434,26 +447,6 @@ export default async function PropertyDetailsPage({
         />
       )}
 
-      {/* Mobile Sticky Action Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-black p-4 flex items-center justify-between z-50 lg:hidden">
-        <div>
-          <div className="text-xl font-black">
-            ${listing.price.toLocaleString()}
-            <span className="text-sm font-medium text-slate-500">
-              {" "}
-              {formatLeaseTerm(listing.terms.leaseTerm)}
-            </span>
-          </div>
-          <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
-            {isRent ? "Monthly Rent" : "Purchase Price"}
-          </div>
-        </div>
-        <Link href={`/checkout/${listing.slug}?type=deposit`}>
-          <button className="px-6 py-3 bg-black text-white font-black uppercase tracking-widest text-[10px] rounded hover:bg-slate-800 transition-colors">
-            {isRent ? "Reserve Now" : "Reserve to Buy"}
-          </button>
-        </Link>
-      </div>
       <Toaster position="top-right" />
     </main>
   );

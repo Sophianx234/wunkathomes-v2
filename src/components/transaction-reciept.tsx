@@ -45,7 +45,7 @@ export function TransactionReceipt({ transaction, onBack }: TransactionReceiptPr
   const isSuccess = transaction.status === "Success";
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] font-sans print:bg-white pb-20">
+    <div className="min-h-screen bg-[#FAFAFA] font-sans print:bg-white pb-10 md:pb-20 w-full overflow-x-hidden box-border">
       
       {/* PRINT STYLES */}
       <style
@@ -59,59 +59,66 @@ export function TransactionReceipt({ transaction, onBack }: TransactionReceiptPr
       />
 
       {/* TOP NAVIGATION BAR (Hidden during printing) */}
-      <div className="print-hide sticky top-0 z-10 flex items-center justify-between p-4 bg-white border-b border-zinc-200/60 shadow-sm">
-        <div className="flex items-center gap-4">
+      <div className="print-hide sticky top-0 z-10 flex items-center justify-between p-2 md:p-4 bg-white border-b border-zinc-200/60 shadow-sm w-full box-border">
+        <div className="flex items-center gap-2 md:gap-4 min-w-0">
           <Button
             variant="ghost"
             onClick={onBack}
-            className="text-zinc-600 hover:text-zinc-900"
+            className="text-zinc-600 hover:text-zinc-900 px-2 md:px-4 h-8 md:h-10 shrink-0"
           >
-            <HugeiconsIcon icon={ArrowLeft01Icon} size={18} className="mr-2" />
-            Back to Transactions
+            <span className="scale-75 md:scale-100 flex items-center md:mr-2">
+              <HugeiconsIcon icon={ArrowLeft01Icon} size={18} />
+            </span>
+            <span className="hidden sm:inline text-[13px]">Back to Transactions</span>
+            <span className="sm:hidden text-[10px]">Back</span>
           </Button>
-          <div className="h-4 w-px bg-zinc-200" />
-          <h3 className="font-bold text-zinc-800 text-[13px] uppercase tracking-widest">
-            Payment Receipt
+          <div className="h-3 md:h-4 w-px bg-zinc-200 shrink-0" />
+          <h3 className="font-bold text-zinc-800 text-[10px] md:text-[13px] uppercase tracking-widest truncate">
+            <span className="hidden sm:inline">Payment Receipt</span>
+            <span className="sm:hidden">Receipt</span>
           </h3>
         </div>
         <Button
           onClick={() => window.print()}
-          className="bg-zinc-900 text-white hover:bg-zinc-800 h-9 px-6 text-[12px] font-bold uppercase tracking-wider rounded-lg shadow-sm"
+          className="bg-zinc-900 text-white hover:bg-zinc-800 h-8 md:h-9 px-3 md:px-6 text-[9px] md:text-[12px] font-bold uppercase tracking-wider rounded-md md:rounded-lg shadow-sm shrink-0"
         >
-          <HugeiconsIcon icon={PrinterIcon} size={16} className="mr-2" />
-          Print / Save PDF
+          <span className="scale-75 md:scale-100 flex items-center mr-1 md:mr-2">
+            <HugeiconsIcon icon={PrinterIcon} size={16} />
+          </span>
+          <span className="hidden sm:inline">Print / Save PDF</span>
+          <span className="sm:hidden">Print</span>
         </Button>
       </div>
 
       {/* RECEIPT BODY */}
-      <div className="max-w-2xl mx-auto mt-10 print:mt-0 p-6 md:p-0">
+      <div className="max-w-2xl mx-auto mt-4 md:mt-10 print:mt-0 p-3 md:p-0 w-full box-border">
         
         {/* The Receipt "Slip" */}
-        <div className="bg-white border border-zinc-200/80 rounded-2xl shadow-[0_2px_12px_-4px_rgba(0,0,0,0.06)] overflow-hidden print:border-none print:shadow-none print:rounded-none">
+        <div className="bg-white border border-zinc-200/80 rounded-xl md:rounded-2xl shadow-[0_2px_12px_-4px_rgba(0,0,0,0.06)] overflow-hidden print:border-none print:shadow-none print:rounded-none w-full box-border">
           
           {/* Header */}
-          <div className="p-8 md:p-10 md:pb-4 border-b border-zinc-200/80 flex flex-col items-center text-center bg-zinc-50/50 print:bg-white">
-            <div className="h-12 w-12 relative  rounded-xl flex items-center justify-center mb-6">
+          <div className="p-4 md:p-10 md:pb-4 border-b border-zinc-200/80 flex flex-col items-center text-center bg-zinc-50/50 print:bg-white w-full box-border">
+            <div className="h-8 w-8 md:h-12 md:w-12 relative rounded-lg md:rounded-xl flex items-center justify-center mb-3 md:mb-6">
               <Image src={'/images/home.png'} alt="WunkatHomes" fill className="text-white object-cover" />
             </div>
-            <h1 className="text-xl font-bold tracking-tight text-zinc-900">
+            <h1 className="text-base md:text-xl font-bold tracking-tight text-zinc-900">
               WunkatHomes Ltd.
             </h1>
-            <p className="text-[13px] text-zinc-500 mt-1">
+            <p className="text-[10px] md:text-[13px] text-zinc-500 mt-0.5 md:mt-1">
               Payment Receipt
             </p>
 
-            <div className="mt-8 mb-2">
-              <p className="text-[12px] font-bold text-zinc-400 uppercase tracking-widest mb-2">
+            <div className="mt-4 md:mt-8 mb-1 md:mb-2">
+              <p className="text-[9px] md:text-[12px] font-bold text-zinc-400 uppercase tracking-widest mb-1 md:mb-2">
                 Amount Paid
               </p>
-              <p className={`text-4xl font-semibold tracking-tighter font-tabular-nums ${isSuccess ? "text-zinc-900" : "text-zinc-400 line-through"}`}>
+              <p className={`text-2xl md:text-4xl font-semibold tracking-tighter font-tabular-nums ${isSuccess ? "text-zinc-900" : "text-zinc-400 line-through"}`}>
                 {formatCurrency(transaction.amount, transaction.currency)}
               </p>
             </div>
 
             {/* Status Badge */}
-            <div className={`mt-4 px-3 py-1 text-[11px] font-bold uppercase tracking-widest rounded-full border ${
+            <div className={`mt-2 md:mt-4 px-2 py-0.5 md:px-3 md:py-1 text-[9px] md:text-[11px] font-bold uppercase tracking-widest rounded-full border ${
               isSuccess ? "bg-emerald-50 text-emerald-700 border-emerald-200" 
               : transaction.status === "Pending" ? "bg-amber-50 text-amber-700 border-amber-200"
               : "bg-rose-50 text-rose-700 border-rose-200"
@@ -121,67 +128,67 @@ export function TransactionReceipt({ transaction, onBack }: TransactionReceiptPr
           </div>
 
           {/* Details Section */}
-          <div className="p-8 md:p-10 space-y-8">
+          <div className="p-4 md:p-10 space-y-4 md:space-y-8 w-full box-border">
             
-            <section>
-              <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-4">
+            <section className="w-full min-w-0">
+              <h3 className="text-[9px] md:text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-2 md:mb-4">
                 Transaction Details
               </h3>
-              <dl className="space-y-4 text-[14px]">
-                <div className="flex justify-between items-start border-b border-zinc-100 pb-4">
-                  <dt className="text-zinc-500 font-medium">Reference ID</dt>
-                  <dd className="font-mono text-zinc-900 font-medium text-right break-all max-w-[200px]">
+              <dl className="space-y-2 md:space-y-4 text-[11px] md:text-[14px] w-full min-w-0">
+                <div className="flex justify-between items-start border-b border-zinc-100 pb-2 md:pb-4 w-full min-w-0">
+                  <dt className="text-zinc-500 font-medium shrink-0 pr-2">Reference ID</dt>
+                  <dd className="font-mono text-zinc-900 font-medium text-right break-all max-w-[140px] md:max-w-[200px]">
                     {transaction.reference}
                   </dd>
                 </div>
-                <div className="flex justify-between items-center border-b border-zinc-100 pb-4">
-                  <dt className="text-zinc-500 font-medium">Date & Time</dt>
-                  <dd className="text-zinc-900 font-medium text-right font-tabular-nums">
+                <div className="flex justify-between items-center border-b border-zinc-100 pb-2 md:pb-4 w-full min-w-0">
+                  <dt className="text-zinc-500 font-medium shrink-0 pr-2">Date & Time</dt>
+                  <dd className="text-zinc-900 font-medium text-right font-tabular-nums truncate">
                     {formatDateFull(transaction.paidAt || transaction.createdAt)}
                   </dd>
                 </div>
-                <div className="flex justify-between items-center border-b border-zinc-100 pb-4">
-                  <dt className="text-zinc-500 font-medium">Payment Method</dt>
-                  <dd className="text-zinc-900 font-medium text-right capitalize">
+                <div className="flex justify-between items-center border-b border-zinc-100 pb-2 md:pb-4 w-full min-w-0">
+                  <dt className="text-zinc-500 font-medium shrink-0 pr-2">Payment Method</dt>
+                  <dd className="text-zinc-900 font-medium text-right capitalize truncate">
                     {transaction.channel.replace("_", " ")}
                   </dd>
                 </div>
-                <div className="flex justify-between items-center border-b border-zinc-100 pb-4">
-                  <dt className="text-zinc-500 font-medium">Payment Purpose</dt>
-                  <dd className="text-zinc-900 font-medium text-right capitalize">
+                <div className="flex justify-between items-center border-b border-zinc-100 pb-2 md:pb-4 w-full min-w-0">
+                  <dt className="text-zinc-500 font-medium shrink-0 pr-2">Payment Purpose</dt>
+                  <dd className="text-zinc-900 font-medium text-right capitalize truncate">
                     {transaction.paymentPurpose.replace(/_/g, " ")}
                   </dd>
                 </div>
               </dl>
             </section>
 
-            <section>
-              <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-4 mt-8">
+            <section className="w-full min-w-0">
+              <h3 className="text-[9px] md:text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-2 md:mb-4 mt-4 md:mt-8">
                 Billed To
               </h3>
-              <div className="bg-zinc-50/80 p-5 rounded-xl border border-zinc-200/60 print:border-none print:p-0 print:bg-white">
-                <p className="text-[14px] font-semibold text-zinc-900 mb-1">
+              <div className="bg-zinc-50/80 p-3 md:p-5 rounded-lg md:rounded-xl border border-zinc-200/60 print:border-none print:p-0 print:bg-white w-full min-w-0">
+                <p className="text-[11px] md:text-[14px] font-semibold text-zinc-900 mb-0.5 md:mb-1 truncate">
                   {transaction.user.name}
                 </p>
-                <p className="text-[13px] text-zinc-500">
+                <p className="text-[10px] md:text-[13px] text-zinc-500 truncate">
                   {transaction.user.email}
                 </p>
               </div>
             </section>
 
-            <section>
-              <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-4 mt-8">
+            <section className="w-full min-w-0">
+              <h3 className="text-[9px] md:text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-2 md:mb-4 mt-4 md:mt-8">
                 Associated Property
               </h3>
-              <div className="flex items-start justify-between bg-zinc-50/80 p-5 rounded-xl border border-zinc-200/60 print:border-none print:p-0 print:bg-white">
-                <div className="flex-1 pr-4">
-                  <p className="text-[14px] font-semibold text-zinc-900 mb-1">
+              <div className="flex items-start justify-between bg-zinc-50/80 p-3 md:p-5 rounded-lg md:rounded-xl border border-zinc-200/60 print:border-none print:p-0 print:bg-white w-full min-w-0">
+                <div className="flex-1 pr-2 md:pr-4 min-w-0">
+                  <p className="text-[11px] md:text-[14px] font-semibold text-zinc-900 mb-0.5 md:mb-1 truncate">
                     {transaction.listing.title}
                   </p>
-                  <p className="text-[13px] text-zinc-500">
+                  <p className="text-[10px] md:text-[13px] text-zinc-500 truncate">
                     {transaction.listing.property.location}
                   </p>
-                  <p className="text-[11px] text-zinc-400 font-medium mt-2 capitalize">
+                  <p className="text-[9px] md:text-[11px] text-zinc-400 font-medium mt-1 md:mt-2 capitalize truncate">
                     Asset Type: {transaction.listing.property.propertyType.replace("_", " ")}
                   </p>
                 </div>
@@ -191,11 +198,11 @@ export function TransactionReceipt({ transaction, onBack }: TransactionReceiptPr
           </div>
           
           {/* Footer */}
-          <div className="p-8 md:p-10 border-t border-zinc-200/80 bg-zinc-50/50 print:bg-white print:pt-4 text-center">
-             <p className="text-[12px] text-zinc-500 leading-relaxed max-w-md mx-auto">
+          <div className="p-4 md:p-10 border-t border-zinc-200/80 bg-zinc-50/50 print:bg-white print:pt-4 text-center w-full box-border">
+             <p className="text-[10px] md:text-[12px] text-zinc-500 leading-relaxed max-w-md mx-auto break-words">
                If you have any questions about this receipt, please contact support at <span className="font-semibold text-zinc-700">support@wunkathomes.com</span>.
              </p>
-             <p className="text-[10px] font-mono text-zinc-400 mt-6 tracking-widest uppercase">
+             <p className="text-[8px] md:text-[10px] font-mono text-zinc-400 mt-3 md:mt-6 tracking-widest uppercase">
                Generated securely by WunkatHomes Sys.
              </p>
           </div>
