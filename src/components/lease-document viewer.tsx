@@ -3,10 +3,7 @@
 import React from "react";
 import { ArrowLeft01Icon, PrinterIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-
-// NOTE: Ensure you import your Button component from wherever it lives in your project!
-// Example: import { Button } from "@/components/ui/button";
-import { Button } from "@/components/ui/button"; // Replace with your actual Button import
+import { Button } from "@/components/ui/button"; 
 
 // Define the shape of the data this component requires to render correctly
 export interface TenancyDocumentProps {
@@ -45,7 +42,7 @@ export function TenancyDocument({ selectedActivation, onBack,showNav=true }: Ten
   };
 
   return (
-    <div className="min-h-screen bg-zinc-100 font-sans print:bg-white">
+    <div className="min-h-screen bg-zinc-100 font-sans print:bg-white w-full overflow-x-hidden box-border">
       {/* Print styles injected via dangerouslySetInnerHTML. 
         This ensures that when the user prints the page, 
         the background is white and the "Back" / "Print" buttons disappear. 
@@ -61,49 +58,52 @@ export function TenancyDocument({ selectedActivation, onBack,showNav=true }: Ten
       />
 
       {/* TOP NAVIGATION BAR (Hidden during printing) */}
-      {showNav&&<div className="print-hide sticky top-0 z-10 flex items-center justify-between p-4 bg-white border-b border-zinc-200 shadow-sm">
-        <div className="flex items-center gap-4">
+      {showNav&&<div className="print-hide sticky top-0 z-10 flex items-center justify-between p-2 md:p-4 bg-white border-b border-zinc-200 shadow-sm w-full box-border">
+        <div className="flex items-center gap-2 md:gap-4 min-w-0">
           <Button
             variant="ghost"
             onClick={onBack}
-            className="text-zinc-600 hover:text-zinc-900"
+            className="text-zinc-600 hover:text-zinc-900 px-2 md:px-4 h-8 md:h-10 shrink-0"
           >
-            <HugeiconsIcon
-              icon={ArrowLeft01Icon}
-              size={18}
-              className="mr-2"
-            />{" "}
-            Back to Onboarding
+            <span className="scale-75 md:scale-100 flex items-center md:mr-2">
+              <HugeiconsIcon
+                icon={ArrowLeft01Icon}
+                size={18}
+              />
+            </span>
+            <span className="hidden sm:inline">Back to Onboarding</span>
+            <span className="sm:hidden text-xs">Back</span>
           </Button>
-          <div className="h-4 w-px bg-zinc-200" />
-          <h3 className="font-bold text-zinc-800 flex items-center gap-2">
+          <div className="h-3 md:h-4 w-px bg-zinc-200 hidden sm:block shrink-0" />
+          <h3 className="font-bold text-zinc-800 flex items-center gap-1 md:gap-2 text-[10px] md:text-base truncate">
             Tenancy Agreement
           </h3>
         </div>
         <Button
           onClick={() => window.print()}
-          className="bg-zinc-900 text-white hover:bg-zinc-800 h-9 px-6 text-xs font-bold uppercase tracking-wider rounded-lg shadow-sm"
+          className="bg-zinc-900 text-white hover:bg-zinc-800 h-7 md:h-9 px-3 md:px-6 text-[9px] md:text-xs font-bold uppercase tracking-wider rounded-md md:rounded-lg shadow-sm shrink-0 ml-2"
         >
-          <HugeiconsIcon icon={PrinterIcon} size={16} className="mr-2" />{" "}
-          Print Document
+          <span className="scale-75 md:scale-100 flex items-center md:mr-2 shrink-0"><HugeiconsIcon icon={PrinterIcon} size={16} /></span>
+          <span className="hidden sm:inline">Print Document</span>
+          <span className="sm:hidden">Print</span>
         </Button>
       </div>}
 
       {/* DOCUMENT BODY */}
-      <div className="max-w-4xl mx-auto p-8 print:p-0">
-        <div className="flex-1 w-full bg-white border border-zinc-200/80 rounded-sm shadow-[0_2px_12px_-4px_rgba(0,0,0,0.04)] print:border-none print:shadow-none print:w-full print:block">
-          <div className="p-8 md:p-14 lg:p-20 font-serif text-zinc-800 leading-[1.8] text-[14px] text-justify print:p-0 print:text-black">
+      <div className="max-w-4xl mx-auto p-4 md:p-8 print:p-0 w-full box-border">
+        <div className="flex-1 w-full bg-white border border-zinc-200/80 rounded-md md:rounded-sm shadow-[0_2px_12px_-4px_rgba(0,0,0,0.04)] print:border-none print:shadow-none print:w-full print:block box-border overflow-hidden">
+          <div className="p-5 md:p-14 lg:p-20 font-serif text-zinc-800 leading-relaxed md:leading-[1.8] text-[10px] md:text-[14px] text-justify print:p-0 print:text-black w-full box-border">
             
-            <div className="text-center mb-14">
-              <h2 className="text-xl font-bold uppercase tracking-widest border-b border-zinc-200 pb-4 inline-block mx-auto text-zinc-900">
+            <div className="text-center mb-8 md:mb-14 w-full box-border">
+              <h2 className="text-sm md:text-xl font-bold uppercase tracking-widest border-b border-zinc-200 pb-2 md:pb-4 inline-block mx-auto text-zinc-900 break-words max-w-full">
                 Standard Tenancy Agreement
               </h2>
-              <p className="mt-4 font-sans text-[10px] uppercase tracking-widest text-zinc-400 font-bold">
-                Document Reference: {selectedActivation.lease.id.slice(-12).toUpperCase()}
+              <p className="mt-2 md:mt-4 font-sans text-[7px] md:text-[10px] uppercase tracking-widest text-zinc-400 font-bold truncate px-2">
+                Doc Ref: {selectedActivation.lease.id.slice(-12).toUpperCase()}
               </p>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-4 md:space-y-6 w-full box-border">
               <p>
                 This Tenancy Agreement is formally established between <strong>WunkatHomes Ltd.</strong> (referred to as the "Landlord") and <strong>{selectedActivation.user.name}</strong> (referred to as the "Tenant").
               </p>
@@ -130,34 +130,34 @@ export function TenancyDocument({ selectedActivation, onBack,showNav=true }: Ten
             </div>
 
             {/* Document Signatures with "Live Ink" styling */}
-            <div className="mt-20 pt-10 border-t border-zinc-100 flex flex-col sm:flex-row justify-between gap-10 sm:gap-4 print:break-inside-avoid">
+            <div className="mt-10 md:mt-20 pt-6 md:pt-10 border-t border-zinc-100 flex flex-col sm:flex-row justify-between gap-6 md:gap-10 sm:gap-4 print:break-inside-avoid w-full box-border">
               
-              <div className="w-full sm:w-56 font-sans">
-                <p className="text-[10px] uppercase tracking-widest text-zinc-400 font-bold mb-6">Landlord Signature</p>
-                <div className="h-12 border-b border-zinc-300 flex items-end pb-2">
-                  <span className="text-2xl" style={{ fontFamily: "'Brush Script MT', 'Bradley Hand', cursive", lineHeight: 0.8 }}>
+              <div className="w-full sm:w-56 font-sans min-w-0">
+                <p className="text-[8px] md:text-[10px] uppercase tracking-widest text-zinc-400 font-bold mb-3 md:mb-6 truncate">Landlord Signature</p>
+                <div className="h-8 md:h-12 border-b border-zinc-300 flex items-end pb-1 md:pb-2">
+                  <span className="text-lg md:text-2xl truncate w-full" style={{ fontFamily: "'Brush Script MT', 'Bradley Hand', cursive", lineHeight: 0.8 }}>
                     WunkatHomes Ltd.
                   </span>
                 </div>
-                <p className="text-[11px] text-zinc-400 mt-3 font-medium">Verified System Counter-Signature</p>
+                <p className="text-[9px] md:text-[11px] text-zinc-400 mt-2 md:mt-3 font-medium truncate">Verified System Counter-Signature</p>
               </div>
 
-              <div className="w-full sm:w-56 font-sans">
-                <p className="text-[10px] uppercase tracking-widest text-zinc-400 font-bold mb-6">Tenant E-Signature</p>
-                <div className="h-12 border-b border-zinc-300 flex items-end pb-2">
-                  <span className="text-3xl truncate" style={{ fontFamily: "'Brush Script MT', 'Bradley Hand', cursive", lineHeight: 0.8 }}>
+              <div className="w-full sm:w-56 font-sans min-w-0 mt-4 sm:mt-0">
+                <p className="text-[8px] md:text-[10px] uppercase tracking-widest text-zinc-400 font-bold mb-3 md:mb-6 truncate">Tenant E-Signature</p>
+                <div className="h-8 md:h-12 border-b border-zinc-300 flex items-end pb-1 md:pb-2">
+                  <span className="text-xl md:text-3xl truncate w-full" style={{ fontFamily: "'Brush Script MT', 'Bradley Hand', cursive", lineHeight: 0.8 }}>
                     {selectedActivation.lease.signatureAudit?.typedName || selectedActivation.user.name}
                   </span>
                 </div>
-                <div className="mt-3 space-y-1">
-                  <p className="text-[11px] text-zinc-400 font-medium">Date: <span className="text-zinc-600">{selectedActivation.lease.signatureAudit?.signedAt || "Pending"}</span></p>
-                  <p className="text-[11px] text-zinc-400 font-medium">IP Addr: <span className="text-zinc-600 font-mono">{selectedActivation.lease.signatureAudit?.ipAddress || "N/A"}</span></p>
+                <div className="mt-2 md:mt-3 space-y-0.5 md:space-y-1">
+                  <p className="text-[9px] md:text-[11px] text-zinc-400 font-medium truncate">Date: <span className="text-zinc-600">{selectedActivation.lease.signatureAudit?.signedAt || "Pending"}</span></p>
+                  <p className="text-[9px] md:text-[11px] text-zinc-400 font-medium truncate">IP Addr: <span className="text-zinc-600 font-mono">{selectedActivation.lease.signatureAudit?.ipAddress || "N/A"}</span></p>
                 </div>
               </div>
 
             </div>
             
-            <div className="mt-12 bg-zinc-50 p-4 rounded-md font-mono text-[10px] text-zinc-400 break-all border border-zinc-100 print:border-none print:bg-white print:p-0 print:text-black">
+            <div className="mt-8 md:mt-12 bg-zinc-50 p-2 md:p-4 rounded-md font-mono text-[8px] md:text-[10px] text-zinc-400 break-all border border-zinc-100 print:border-none print:bg-white print:p-0 print:text-black w-full box-border">
               <strong>SEC-HASH:</strong> {selectedActivation.lease.signatureAudit?.documentHash || "Pending Generation"}
             </div>
 

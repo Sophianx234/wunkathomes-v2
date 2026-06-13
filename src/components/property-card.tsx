@@ -40,10 +40,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { deletePropertyAction } from "@/actions/user/property.action";
 
-// IMPORT YOUR SERVER ACTION HERE
-// import { deletePropertyAction } from "@/actions/admin/property.action"; 
-
-// Updated to perfectly match the populated Mongoose schemas
 export interface IProperty {
   _id?: string;
   id?: string;
@@ -111,6 +107,7 @@ export default function PropertyCard({
       opacity: 0,
     }),
   };
+  
   const paginate = (newDirection: number, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -124,9 +121,8 @@ export default function PropertyCard({
     });
   };
 
-// --- DELETE EXECUTION ---
+  // --- DELETE EXECUTION ---
   const handleDeleteConfirm = () => {
-    // Look for either _id or id safely
     const targetId = property._id || property.id;
 
     if (!targetId) {
@@ -137,7 +133,7 @@ export default function PropertyCard({
 
     startTransition(async () => {
       try {
-        const result = await deletePropertyAction(targetId); // Pass the safe targetId
+        const result = await deletePropertyAction(targetId); 
         
         if (result.success) {
           setIsDeleteDialogOpen(false);
@@ -186,12 +182,12 @@ export default function PropertyCard({
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.5, delay: index * 0.1, ease: "easeOut" }}
-        className="group flex flex-col w-full relative"
+        className="group flex flex-col w-full min-w-0 max-w-full box-border relative"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
         {/* === Image Carousel Container === */}
-        <div className="relative w-full aspect-[4/3] sm:aspect-[16/10] overflow-hidden mb-4 rounded-xl md:rounded-2xl bg-slate-100">
+        <div className="relative w-full aspect-[4/3] sm:aspect-[16/10] overflow-hidden mb-2 md:mb-4 rounded-lg md:rounded-2xl bg-slate-100 box-border">
           <Link href={href} className="absolute inset-0 z-0">
             <AnimatePresence initial={false} custom={direction}>
               <motion.div
@@ -219,25 +215,27 @@ export default function PropertyCard({
           </Link>
 
           {/* Status Badge */}
-          <div className="absolute top-3 left-3 z-10 bg-black/80 backdrop-blur-sm text-white px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-widest pointer-events-none">
+          <div className="absolute top-2 md:top-3 left-2 md:left-3 z-10 bg-black/80 backdrop-blur-sm text-white px-1.5 md:px-2.5 py-0.5 md:py-1 rounded text-[7px] md:text-[10px] font-bold uppercase tracking-widest pointer-events-none">
             {property.property.propertyType.split("_")[0]}
           </div>
 
           {/* --- ADMIN QUICK ACTIONS (Dropdown) --- */}
           {isAdminView && (
-            <div className="absolute top-3 right-3 z-20">
+            <div className="absolute top-2 md:top-3 right-2 md:right-3 z-20">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button 
                     onClick={(e) => e.stopPropagation()} 
-                    className="h-8 w-8 rounded-full bg-white/90 hover:bg-white backdrop-blur-sm flex items-center justify-center text-slate-700 shadow-sm transition-colors focus:outline-none"
+                    className="h-6 w-6 md:h-8 md:w-8 rounded-full bg-white/90 hover:bg-white backdrop-blur-sm flex items-center justify-center text-slate-700 shadow-sm transition-colors focus:outline-none"
                   >
-                    <HugeiconsIcon icon={MoreHorizontalIcon} size={18} />
+                    <span className="scale-75 md:scale-100 flex items-center">
+                      <HugeiconsIcon icon={MoreHorizontalIcon} size={18} />
+                    </span>
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-40 rounded-xl font-sans">
-                  <DropdownMenuItem asChild className="cursor-pointer">
-                    <Link href={`/admin/properties/${property.slug}/edit`} className="flex items-center gap-2">
+                <DropdownMenuContent align="end" className="w-32 md:w-40 rounded-lg md:rounded-xl font-sans">
+                  <DropdownMenuItem asChild className="cursor-pointer text-[10px] md:text-sm">
+                    <Link href={`/admin/properties/${property.slug}/edit`} className="flex items-center gap-1.5 md:gap-2">
                       <HugeiconsIcon icon={PencilEdit01Icon} size={14} />
                       Edit Details
                     </Link>
@@ -245,13 +243,13 @@ export default function PropertyCard({
                   
                   {/* UPDATE: Trigger Local Modal */}
                   <DropdownMenuItem 
-                    className="cursor-pointer text-rose-600 focus:text-rose-700 focus:bg-rose-50"
+                    className="cursor-pointer text-rose-600 focus:text-rose-700 focus:bg-rose-50 text-[10px] md:text-sm"
                     onClick={(e) => {
                       e.stopPropagation();
                       setIsDeleteDialogOpen(true);
                     }}
                   >
-                    <HugeiconsIcon icon={Delete01Icon} size={14} className="mr-2" />
+                    <HugeiconsIcon icon={Delete01Icon} size={14} className="mr-1.5 md:mr-2" />
                     Delete Asset
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -260,10 +258,9 @@ export default function PropertyCard({
           )}
 
           {/* Floating Price Tag */}
-          <div className="absolute bottom-3 right-3 z-10 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-sm font-black text-black tracking-tight text-sm pointer-events-none">
+          <div className="absolute bottom-2 md:bottom-3 right-2 md:right-3 z-10 bg-white/95 backdrop-blur-sm px-2 md:px-3 py-1 md:py-1.5 rounded-md md:rounded-lg shadow-sm font-black text-black tracking-tight text-[10px] md:text-sm pointer-events-none truncate max-w-[85%]">
             {formattedPrice}
-            <span className="text-xs font-medium text-slate-500 tracking-normal">
-              {" "}
+            <span className="text-[8px] md:text-xs font-medium text-slate-500 tracking-normal ml-0.5">
               {priceSuffix}
             </span>
           </div>
@@ -277,9 +274,11 @@ export default function PropertyCard({
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -10 }}
                   onClick={(e) => paginate(-1, e)}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white/80 hover:bg-white backdrop-blur-md flex items-center justify-center text-black shadow-sm transition-all"
+                  className="absolute left-2 md:left-3 top-1/2 -translate-y-1/2 z-20 w-6 h-6 md:w-8 md:h-8 rounded-full bg-white/80 hover:bg-white backdrop-blur-md flex items-center justify-center text-black shadow-sm transition-all"
                 >
-                  <HugeiconsIcon icon={ArrowLeft01Icon} size={16} />
+                  <span className="scale-75 md:scale-100 flex items-center">
+                    <HugeiconsIcon icon={ArrowLeft01Icon} size={16} />
+                  </span>
                 </motion.button>
 
                 <motion.button
@@ -287,9 +286,11 @@ export default function PropertyCard({
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 10 }}
                   onClick={(e) => paginate(1, e)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white/80 hover:bg-white backdrop-blur-md flex items-center justify-center text-black shadow-sm transition-all"
+                  className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 z-20 w-6 h-6 md:w-8 md:h-8 rounded-full bg-white/80 hover:bg-white backdrop-blur-md flex items-center justify-center text-black shadow-sm transition-all"
                 >
-                  <HugeiconsIcon icon={ArrowRight01Icon} size={16} />
+                  <span className="scale-75 md:scale-100 flex items-center">
+                    <HugeiconsIcon icon={ArrowRight01Icon} size={16} />
+                  </span>
                 </motion.button>
               </>
             )}
@@ -301,15 +302,15 @@ export default function PropertyCard({
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 10 }}
-                className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5 bg-black/20 px-2 py-1 rounded-full backdrop-blur-md"
+                className="absolute bottom-2 md:bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1 md:gap-1.5 bg-black/20 px-1.5 md:px-2 py-0.5 md:py-1 rounded-full backdrop-blur-md"
               >
                 {property.images.map((_, i) => (
                   <div
                     key={i}
                     className={`transition-all duration-300 rounded-full ${
                       i === currentImage
-                        ? "w-2 h-2 bg-white"
-                        : "w-1.5 h-1.5 bg-white/50"
+                        ? "w-1.5 h-1.5 md:w-2 md:h-2 bg-white"
+                        : "w-1 h-1 md:w-1.5 md:h-1.5 bg-white/50"
                     }`}
                   />
                 ))}
@@ -319,49 +320,57 @@ export default function PropertyCard({
         </div>
 
         {/* === Minimalist Content Container === */}
-        <div className="flex flex-col flex-1 px-1">
-          <div className="mb-3 cursor-pointer">
+        <div className="flex flex-col flex-1 px-0.5 md:px-1 min-w-0 box-border">
+          <div className="mb-1.5 md:mb-3 cursor-pointer min-w-0">
             <Link href={href}>
-              <h3 className="text-lg font-bold text-slate-900 leading-tight mb-1 group-hover:text-black transition-colors line-clamp-1">
+              <h3 className="text-sm md:text-lg font-bold text-slate-900 leading-tight mb-0.5 md:mb-1 group-hover:text-black transition-colors truncate">
                 {property.title}
               </h3>
             </Link>
-            <p className="flex items-center gap-1.5 text-sm font-medium text-slate-500 line-clamp-1">
-              <HugeiconsIcon icon={Location01Icon} size={14} />
-              {locationString}
+            <p className="flex items-center gap-1 md:gap-1.5 text-[10px] md:text-sm font-medium text-slate-500 truncate">
+              <span className="scale-75 md:scale-100 flex items-center shrink-0">
+                <HugeiconsIcon icon={Location01Icon} size={14} />
+              </span>
+              <span className="truncate">{locationString}</span>
             </p>
           </div>
 
           {/* Elegant Specs Row */}
-          <div className="flex items-center gap-4 text-slate-700 font-medium text-sm mt-auto pt-1">
-            <div className="flex items-center gap-1.5">
-              <HugeiconsIcon
-                icon={BedSingle02Icon}
-                size={16}
-                className="text-slate-400"
-              />
-              <span>{property.features.bedrooms}</span>
+          <div className="flex items-center gap-2 md:gap-4 text-slate-700 font-medium text-[10px] md:text-sm mt-auto pt-0.5 md:pt-1 min-w-0 box-border">
+            <div className="flex items-center gap-1 md:gap-1.5 shrink-0">
+              <span className="scale-75 md:scale-100 flex items-center shrink-0">
+                <HugeiconsIcon
+                  icon={BedSingle02Icon}
+                  size={16}
+                  className="text-slate-400"
+                />
+              </span>
+              <span className="truncate">{property.features.bedrooms}</span>
             </div>
-            <span className="text-slate-300 text-[10px]">●</span>
-            <div className="flex items-center gap-1.5">
-              <HugeiconsIcon
-                icon={Bathtub01Icon}
-                size={16}
-                className="text-slate-400"
-              />
-              <span>{property.features.bathrooms}</span>
+            <span className="text-slate-300 text-[6px] md:text-[10px] shrink-0">●</span>
+            <div className="flex items-center gap-1 md:gap-1.5 shrink-0">
+              <span className="scale-75 md:scale-100 flex items-center shrink-0">
+                <HugeiconsIcon
+                  icon={Bathtub01Icon}
+                  size={16}
+                  className="text-slate-400"
+                />
+              </span>
+              <span className="truncate">{property.features.bathrooms}</span>
             </div>
 
             {property.features.sizeSqm && (
               <>
-                <span className="text-slate-300 text-[10px]">●</span>
-                <div className="flex items-center gap-1.5">
-                  <HugeiconsIcon
-                    icon={MaximizeIcon}
-                    size={16}
-                    className="text-slate-400"
-                  />
-                  <span>{property.features.sizeSqm} sqm</span>
+                <span className="text-slate-300 text-[6px] md:text-[10px] shrink-0">●</span>
+                <div className="flex items-center gap-1 md:gap-1.5 shrink-0">
+                  <span className="scale-75 md:scale-100 flex items-center shrink-0">
+                    <HugeiconsIcon
+                      icon={MaximizeIcon}
+                      size={16}
+                      className="text-slate-400"
+                    />
+                  </span>
+                  <span className="truncate">{property.features.sizeSqm} sqm</span>
                 </div>
               </>
             )}
@@ -371,15 +380,14 @@ export default function PropertyCard({
 
       {/* --- WARNING MODAL --- */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent className="bg-white border-rose-100 shadow-xl">
+        <AlertDialogContent className="bg-white border-rose-100 shadow-xl max-w-[90vw] md:max-w-lg rounded-xl md:rounded-2xl p-4 md:p-6 font-sans">
           <AlertDialogHeader>
-            <div className="flex items-center gap-3 mb-2">
-              
-              <AlertDialogTitle className="text-slate-900 text-xl font-bold">
+            <div className="flex items-center gap-2 md:gap-3 mb-1 md:mb-2">
+              <AlertDialogTitle className="text-slate-900 text-base md:text-xl font-bold">
                 Delete Property Asset?
               </AlertDialogTitle>
             </div>
-            <AlertDialogDescription className="text-slate-600 text-sm leading-relaxed">
+            <AlertDialogDescription className="text-slate-600 text-[11px] md:text-sm leading-relaxed">
               This action cannot be undone. This will permanently delete{" "}
               <span className="font-bold text-slate-900">{property.title}</span>,
               including all media, smart lock configurations, and listing data from the database. 
@@ -387,10 +395,10 @@ export default function PropertyCard({
               <span className="text-rose-600 font-medium">Warning:</span> If there are active leases tied to this asset, they will be orphaned.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="mt-6">
+          <AlertDialogFooter className="mt-4 md:mt-6 gap-2 sm:gap-0">
             <AlertDialogCancel 
               disabled={isPending}
-              className="bg-white text-slate-700 hover:bg-slate-50 border-slate-200 mt-0"
+              className="bg-white text-slate-700 hover:bg-slate-50 border-slate-200 mt-0 h-8 md:h-10 text-[11px] md:text-sm rounded-lg"
             >
               Cancel
             </AlertDialogCancel>
@@ -400,11 +408,13 @@ export default function PropertyCard({
                 handleDeleteConfirm();
               }}
               disabled={isPending}
-              className="bg-rose-600 text-white hover:bg-rose-700 focus:ring-rose-600 min-w-[140px]"
+              className="bg-rose-600 text-white hover:bg-rose-700 focus:ring-rose-600 min-w-[120px] md:min-w-[140px] h-8 md:h-10 text-[11px] md:text-sm rounded-lg m-0"
             >
               {isPending ? (
                 <>
-                  <HugeiconsIcon icon={Loading03Icon} size={16} className="animate-spin mr-2" />
+                  <span className="scale-75 md:scale-100 flex items-center mr-1 md:mr-2">
+                    <HugeiconsIcon icon={Loading03Icon} size={16} className="animate-spin" />
+                  </span>
                   Deleting...
                 </>
               ) : (

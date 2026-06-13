@@ -1,10 +1,11 @@
 import { getListingData } from "@/actions/user/listing.action";
-import CheckoutClient from "@/components/checkout-client";
+
 import { notFound, redirect } from "next/navigation";
 import { getSession, SessionPayload } from "@/lib/session";
 import { connectToDatabase } from "@/config/DbConnect";
 import User from "@/models/user"; 
 import Lease from "@/models/lease"; // 1. Import the Lease model
+import CheckoutWrapper from "@/components/checkout-wrapper";
 
 interface CheckoutPageProps {
   params: Promise<{ slug: string }>;
@@ -28,7 +29,7 @@ export default async function CheckoutPage({ params }: CheckoutPageProps) {
   if (session && session.userId) {
     const activeLease = await Lease.findOne({
       userId: session.userId,
-      listingId: listing._id,
+      listingId: listing.id,
       // Check for statuses that indicate they currently hold the property
       status: { $in: ["Pending_Verification", "Active", "Approved"] },
     }).lean().exec();
@@ -55,7 +56,8 @@ export default async function CheckoutPage({ params }: CheckoutPageProps) {
       };
     }
   }
+  console.log("Current User:", listing)
 
   // Pass both the listing and the user data down
-  return <CheckoutClient listing={listing} currentUser={currentUser} />;
+  return <CheckoutWrapper listing={listing} currentUser={currentUser} />;
 }

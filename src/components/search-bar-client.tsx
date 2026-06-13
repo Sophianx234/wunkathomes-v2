@@ -79,39 +79,41 @@ export default function SearchBarClient({ availableAreas, availableTypes }: Sear
   };
 
   return (
-    <section className="relative z-10 -mt-16 px-4 sm:px-6">
+    <section className="relative z-10 -mt-10 md:-mt-16 px-2 md:px-4 sm:px-6 w-full overflow-x-hidden box-border">
       <motion.form
         onSubmit={handleSearch}
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, ease: "easeOut" }}
         viewport={{ once: true }}
-        className="max-w-5xl mx-auto bg-white shadow-[0_12px_40px_rgba(0,0,0,0.06)] rounded-3xl md:rounded-full p-2 flex flex-col md:flex-row md:items-center border border-zinc-100 md:divide-x md:divide-zinc-100"
+        className="max-w-5xl mx-auto w-full min-w-0 max-w-full box-border bg-white shadow-[0_6px_20px_rgba(0,0,0,0.06)] md:shadow-[0_12px_40px_rgba(0,0,0,0.06)] rounded-2xl md:rounded-full p-1.5 md:p-2 flex flex-col md:flex-row md:items-center border border-zinc-100 md:divide-x md:divide-zinc-100"
       >
         {/* 1. Property Type Dropdown */}
-        <div className="flex items-center gap-3 flex-1 px-5 py-3 hover:bg-zinc-50/80 rounded-full md:rounded-r-none md:rounded-l-full transition-colors group cursor-pointer border-b md:border-b-0 border-zinc-100">
-          <HugeiconsIcon
-            icon={House03Icon}
-            size={22}
-            className="text-zinc-400 group-hover:text-zinc-900 transition-colors shrink-0"
-          />
-          <div className="flex flex-col w-full">
-            <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-0.5">
+        <div className="flex items-center gap-2 md:gap-3 flex-1 w-full min-w-0 max-w-full box-border px-3 py-2 md:px-5 md:py-3 hover:bg-zinc-50/80 rounded-t-xl md:rounded-r-none md:rounded-l-full transition-colors group cursor-pointer border-b md:border-b-0 border-zinc-100">
+          <span className="scale-75 md:scale-100 flex items-center shrink-0">
+            <HugeiconsIcon
+              icon={House03Icon}
+              size={22}
+              className="text-zinc-400 group-hover:text-zinc-900 transition-colors"
+            />
+          </span>
+          <div className="flex flex-col w-full min-w-0 box-border">
+            <label className="text-[8px] md:text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-0 md:mb-0.5 truncate">
               Property Type
             </label>
             <Select
               value={filters.propertyType || "all"}
               onValueChange={(val) => handleSelectChange("propertyType", val)}
             >
-              <SelectTrigger className="w-full border-0 p-0 h-auto bg-transparent shadow-none focus:ring-0 focus:ring-offset-0 text-zinc-800 font-semibold text-sm outline-none [&_.dropdown-icon]:hidden">
+              <SelectTrigger className="w-full min-w-0 max-w-full box-border border-0 p-0 h-auto bg-transparent shadow-none focus:ring-0 focus:ring-offset-0 text-zinc-800 font-semibold text-xs md:text-sm outline-none [&_.dropdown-icon]:hidden truncate">
                 <SelectValue placeholder="What type?" />
               </SelectTrigger>
-              <SelectContent className="bg-white border border-zinc-200/80 shadow-xl rounded-xl p-0 w-full min-w-[var(--radix-select-trigger-width)]">
-                <div className="divide-y divide-zinc-100 flex flex-col w-full">
-                  <SelectItem value="all" className="cursor-pointer w-full [&>span]:w-full text-xs font-medium py-2.5 focus:bg-zinc-50">
-                    <div className="flex w-full text-zinc-700 justify-between items-center pr-1">
-                      <span>All Types</span>
-                      <HugeiconsIcon icon={House01Icon} size={14} className="text-zinc-400 dropdown-icon" />
+              <SelectContent className="bg-white border border-zinc-200/80 shadow-xl rounded-xl p-0 w-[calc(100vw-2rem)] md:w-full min-w-[var(--radix-select-trigger-width)]">
+                <div className="divide-y divide-zinc-100 flex flex-col w-full box-border">
+                  <SelectItem value="all" className="cursor-pointer w-full [&>span]:w-full text-[10px] md:text-xs font-medium py-2 md:py-2.5 focus:bg-zinc-50 box-border">
+                    <div className="flex w-full text-zinc-700 justify-between items-center pr-1 min-w-0 box-border">
+                      <span className="truncate">All Types</span>
+                      <span className="scale-75 md:scale-100 flex items-center shrink-0"><HugeiconsIcon icon={House01Icon} size={14} className="text-zinc-400 dropdown-icon" /></span>
                     </div>
                   </SelectItem>
                   
@@ -119,10 +121,10 @@ export default function SearchBarClient({ availableAreas, availableTypes }: Sear
                   {availableTypes.map((type) => {
                     const { label, icon: Icon } = getTypeDetails(type);
                     return (
-                      <SelectItem key={type} value={type} className="cursor-pointer w-full [&>span]:w-full text-xs font-medium py-2.5 focus:bg-zinc-50">
-                        <div className="flex w-full text-zinc-700 justify-between items-center pr-1">
-                          <span>{label}</span>
-                          <HugeiconsIcon icon={Icon} size={14} className="text-zinc-400 dropdown-icon" />
+                      <SelectItem key={type} value={type} className="cursor-pointer w-full [&>span]:w-full text-[10px] md:text-xs font-medium py-2 md:py-2.5 focus:bg-zinc-50 box-border">
+                        <div className="flex w-full text-zinc-700 justify-between items-center pr-1 min-w-0 box-border">
+                          <span className="truncate">{label}</span>
+                          <span className="scale-75 md:scale-100 flex items-center shrink-0"><HugeiconsIcon icon={Icon} size={14} className="text-zinc-400 dropdown-icon" /></span>
                         </div>
                       </SelectItem>
                     );
@@ -134,36 +136,38 @@ export default function SearchBarClient({ availableAreas, availableTypes }: Sear
         </div>
 
         {/* 2. Location Dropdown */}
-        <div className="flex items-center gap-3 flex-1 px-5 py-3 hover:bg-zinc-50/80 rounded-none transition-colors group cursor-pointer border-b md:border-b-0 border-zinc-100">
-          <HugeiconsIcon
-            icon={MapingIcon}
-            size={22}
-            className="text-zinc-400 group-hover:text-zinc-900 transition-colors shrink-0"
-          />
-          <div className="flex flex-col w-full">
-            <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-0.5">
+        <div className="flex items-center gap-2 md:gap-3 flex-1 w-full min-w-0 max-w-full box-border px-3 py-2 md:px-5 md:py-3 hover:bg-zinc-50/80 rounded-none transition-colors group cursor-pointer border-b md:border-b-0 border-zinc-100">
+          <span className="scale-75 md:scale-100 flex items-center shrink-0">
+            <HugeiconsIcon
+              icon={MapingIcon}
+              size={22}
+              className="text-zinc-400 group-hover:text-zinc-900 transition-colors"
+            />
+          </span>
+          <div className="flex flex-col w-full min-w-0 box-border">
+            <label className="text-[8px] md:text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-0 md:mb-0.5 truncate">
               Location
             </label>
             <Select
               value={filters.location || "all"}
               onValueChange={(val) => handleSelectChange("location", val)}
             >
-              <SelectTrigger className="w-full border-0 p-0 h-auto bg-transparent shadow-none focus:ring-0 focus:ring-offset-0 text-zinc-800 font-semibold text-sm outline-none [&_.dropdown-icon]:hidden">
+              <SelectTrigger className="w-full min-w-0 max-w-full box-border border-0 p-0 h-auto bg-transparent shadow-none focus:ring-0 focus:ring-offset-0 text-zinc-800 font-semibold text-xs md:text-sm outline-none [&_.dropdown-icon]:hidden truncate">
                 <SelectValue placeholder="Select Area" />
               </SelectTrigger>
-              <SelectContent className="bg-white border border-zinc-200/80 shadow-xl rounded-xl p-0 w-full min-w-[var(--radix-select-trigger-width)]">
-                <div className="divide-y divide-zinc-100 flex flex-col w-full">
-                  <SelectGroup className="w-full divide-y divide-zinc-100 flex flex-col">
-                    <SelectItem value="all" className="cursor-pointer w-full [&>span]:w-full text-xs font-medium py-2.5 focus:bg-zinc-50">
-                      <div className="flex w-full justify-between items-center pr-1 text-zinc-700">
-                        <span>All Locations</span>
-                        <HugeiconsIcon icon={Location01Icon} size={14} className="text-zinc-400 dropdown-icon" />
+              <SelectContent className="bg-white border border-zinc-200/80 shadow-xl rounded-xl p-0 w-[calc(100vw-2rem)] md:w-full min-w-[var(--radix-select-trigger-width)]">
+                <div className="divide-y divide-zinc-100 flex flex-col w-full box-border">
+                  <SelectGroup className="w-full divide-y divide-zinc-100 flex flex-col box-border">
+                    <SelectItem value="all" className="cursor-pointer w-full [&>span]:w-full text-[10px] md:text-xs font-medium py-2 md:py-2.5 focus:bg-zinc-50 box-border">
+                      <div className="flex w-full justify-between items-center pr-1 text-zinc-700 min-w-0 box-border">
+                        <span className="truncate">All Locations</span>
+                        <span className="scale-75 md:scale-100 flex items-center shrink-0"><HugeiconsIcon icon={Location01Icon} size={14} className="text-zinc-400 dropdown-icon" /></span>
                       </div>
                     </SelectItem>
                     
                     {availableAreas.length > 0 && (
-                      <div className="bg-zinc-50/60 py-1 px-3">
-                        <SelectLabel className="text-[9px] uppercase tracking-widest text-zinc-400 font-bold p-0 m-0">
+                      <div className="bg-zinc-50/60 py-1 px-2 md:px-3 w-full box-border">
+                        <SelectLabel className="text-[7px] md:text-[9px] uppercase tracking-widest text-zinc-400 font-bold p-0 m-0 truncate">
                           Active Areas
                         </SelectLabel>
                       </div>
@@ -171,9 +175,9 @@ export default function SearchBarClient({ availableAreas, availableTypes }: Sear
                     
                     {/* Dynamic Database Values */}
                     {availableAreas.map((area) => (
-                      <SelectItem key={area} value={area} className="cursor-pointer w-full [&>span]:w-full text-xs font-medium py-2.5 focus:bg-zinc-50">
-                        <div className="flex w-full justify-between items-center pr-1 text-zinc-700">
-                          <span>{area}</span>
+                      <SelectItem key={area} value={area} className="cursor-pointer w-full [&>span]:w-full text-[10px] md:text-xs font-medium py-2 md:py-2.5 focus:bg-zinc-50 box-border">
+                        <div className="flex w-full justify-between items-center pr-1 text-zinc-700 min-w-0 box-border">
+                          <span className="truncate">{area}</span>
                         </div>
                       </SelectItem>
                     ))}
@@ -185,41 +189,43 @@ export default function SearchBarClient({ availableAreas, availableTypes }: Sear
         </div>
 
         {/* 3. Status Dropdown (Rent/Sale) */}
-        <div className="flex items-center gap-3 flex-1 px-5 py-3 hover:bg-zinc-50/80 rounded-full md:rounded-l-none transition-colors group cursor-pointer border-b md:border-b-0 border-zinc-100">
-          <HugeiconsIcon
-            icon={TagsIcon}
-            size={22}
-            className="text-zinc-400 group-hover:text-zinc-900 transition-colors shrink-0"
-          />
-          <div className="flex flex-col w-full">
-            <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-0.5">
+        <div className="flex items-center gap-2 md:gap-3 flex-1 w-full min-w-0 max-w-full box-border px-3 py-2 md:px-5 md:py-3 hover:bg-zinc-50/80 rounded-none md:rounded-r-full transition-colors group cursor-pointer border-b md:border-b-0 border-zinc-100">
+          <span className="scale-75 md:scale-100 flex items-center shrink-0">
+            <HugeiconsIcon
+              icon={TagsIcon}
+              size={22}
+              className="text-zinc-400 group-hover:text-zinc-900 transition-colors"
+            />
+          </span>
+          <div className="flex flex-col w-full min-w-0 box-border">
+            <label className="text-[8px] md:text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-0 md:mb-0.5 truncate">
               Status
             </label>
             <Select
               value={filters.status || "all"}
               onValueChange={(val) => handleSelectChange("status", val)}
             >
-              <SelectTrigger className="w-full border-0 p-0 h-auto bg-transparent shadow-none focus:ring-0 focus:ring-offset-0 text-zinc-800 font-semibold text-sm outline-none [&_.dropdown-icon]:hidden">
+              <SelectTrigger className="w-full min-w-0 max-w-full box-border border-0 p-0 h-auto bg-transparent shadow-none focus:ring-0 focus:ring-offset-0 text-zinc-800 font-semibold text-xs md:text-sm outline-none [&_.dropdown-icon]:hidden truncate">
                 <SelectValue placeholder="Rent or Sale?" />
               </SelectTrigger>
-              <SelectContent className="bg-white border border-zinc-200/80 shadow-xl rounded-xl p-0 w-full min-w-[var(--radix-select-trigger-width)]">
-                <div className="divide-y divide-zinc-100 flex flex-col w-full">
-                  <SelectItem value="all" className="cursor-pointer w-full [&>span]:w-full text-xs font-medium py-2.5 focus:bg-zinc-50">
-                    <div className="flex w-full justify-between items-center pr-1 text-zinc-700">
-                      <span>Any Status</span>
-                      <HugeiconsIcon icon={Tag01Icon} size={14} className="text-zinc-400 dropdown-icon" />
+              <SelectContent className="bg-white border border-zinc-200/80 shadow-xl rounded-xl p-0 w-[calc(100vw-2rem)] md:w-full min-w-[var(--radix-select-trigger-width)]">
+                <div className="divide-y divide-zinc-100 flex flex-col w-full box-border">
+                  <SelectItem value="all" className="cursor-pointer w-full [&>span]:w-full text-[10px] md:text-xs font-medium py-2 md:py-2.5 focus:bg-zinc-50 box-border">
+                    <div className="flex w-full justify-between items-center pr-1 text-zinc-700 min-w-0 box-border">
+                      <span className="truncate">Any Status</span>
+                      <span className="scale-75 md:scale-100 flex items-center shrink-0"><HugeiconsIcon icon={Tag01Icon} size={14} className="text-zinc-400 dropdown-icon" /></span>
                     </div>
                   </SelectItem>
-                  <SelectItem value="For_Rent" className="cursor-pointer w-full [&>span]:w-full text-xs font-medium py-2.5 focus:bg-zinc-50">
-                    <div className="flex w-full justify-between items-center pr-1 text-zinc-700">
-                      <span>For Rent</span>
-                      <HugeiconsIcon icon={Key01Icon} size={14} className="text-zinc-800 dropdown-icon" />
+                  <SelectItem value="For_Rent" className="cursor-pointer w-full [&>span]:w-full text-[10px] md:text-xs font-medium py-2 md:py-2.5 focus:bg-zinc-50 box-border">
+                    <div className="flex w-full justify-between items-center pr-1 text-zinc-700 min-w-0 box-border">
+                      <span className="truncate">For Rent</span>
+                      <span className="scale-75 md:scale-100 flex items-center shrink-0"><HugeiconsIcon icon={Key01Icon} size={14} className="text-zinc-800 dropdown-icon" /></span>
                     </div>
                   </SelectItem>
-                  <SelectItem value="For_Sale" className="cursor-pointer w-full [&>span]:w-full text-xs font-medium py-2.5 focus:bg-zinc-50">
-                    <div className="flex w-full justify-between items-center pr-1 text-zinc-700">
-                      <span>For Sale</span>
-                      <HugeiconsIcon icon={Tag01Icon} size={14} className="text-zinc-800 dropdown-icon" />
+                  <SelectItem value="For_Sale" className="cursor-pointer w-full [&>span]:w-full text-[10px] md:text-xs font-medium py-2 md:py-2.5 focus:bg-zinc-50 box-border">
+                    <div className="flex w-full justify-between items-center pr-1 text-zinc-700 min-w-0 box-border">
+                      <span className="truncate">For Sale</span>
+                      <span className="scale-75 md:scale-100 flex items-center shrink-0"><HugeiconsIcon icon={Tag01Icon} size={14} className="text-zinc-800 dropdown-icon" /></span>
                     </div>
                   </SelectItem>
                 </div>
@@ -229,12 +235,12 @@ export default function SearchBarClient({ availableAreas, availableTypes }: Sear
         </div>
 
         {/* Search Submission CTA */}
-        <div className="p-1.5 w-full md:w-auto mt-2 md:mt-0">
+        <div className="p-1 md:p-1.5 w-full md:w-auto mt-1 md:mt-0 box-border shrink-0">
           <Button
             type="submit"
-            className="w-full md:w-auto bg-zinc-950 text-white hover:bg-zinc-800 px-7 py-5.5 rounded-full flex items-center justify-center gap-2 font-semibold text-sm shadow-sm transition-transform active:scale-95"
+            className="w-full md:w-auto bg-zinc-950 text-white hover:bg-zinc-800 px-4 py-3 md:px-7 md:py-5.5 rounded-b-xl md:rounded-full flex items-center justify-center gap-1.5 md:gap-2 font-semibold text-xs md:text-sm shadow-sm transition-transform active:scale-95 m-0"
           >
-            <HugeiconsIcon icon={Search01Icon} size={16} />
+            <span className="scale-75 md:scale-100 flex items-center shrink-0"><HugeiconsIcon icon={Search01Icon} size={16} /></span>
             <span>Search</span>
           </Button>
         </div>

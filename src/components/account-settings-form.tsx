@@ -39,18 +39,20 @@ function PasswordSubmitButton() {
 
   return (
     <Button
-      className="bg-zinc-950 hover:bg-zinc-800 text-white rounded-md px-8 h-11 font-medium mt-2"
+      className="bg-zinc-950 hover:bg-zinc-800 text-white rounded-md px-4 md:px-8 h-9 md:h-11 text-[10px] md:text-sm font-medium mt-1 md:mt-2 w-full sm:w-auto"
       type="submit"
       disabled={pending}
     >
       {pending && (
-        <HugeiconsIcon
-          icon={Loading03Icon}
-          className="animate-spin mr-2"
-          size={18}
-        />
+        <span className="scale-75 md:scale-100 flex items-center shrink-0">
+          <HugeiconsIcon
+            icon={Loading03Icon}
+            className="animate-spin mr-1 md:mr-2"
+            size={18}
+          />
+        </span>
       )}
-      {pending ? "Updating Password..." : "Update Password"}
+      <span className="truncate">{pending ? "Updating..." : "Update Password"}</span>
     </Button>
   );
 }
@@ -109,17 +111,15 @@ export default function AccountSettingsForm({
     if (strengthCount === 3) strengthLabel = "Strong password";
   }
 
-  // Determines if the Confirm Password field should be rendered
   const shouldShowConfirmField =
     currentPassword.length > 0 && newPassword.length > 0;
 
-  // Determines if the user has actually changed their profile data
   const isProfileDirty =
     name !== initialUser.name ||
     phone !== initialUser.phone ||
     countryCode !== initialUser.countryCode ||
     avatarPreview !== initialUser.profilePicture ||
-    avatarFile !== null; // If they picked a new file, it's definitely dirty
+    avatarFile !== null; 
 
   const handleDiscard = () => {
     setCurrentPassword("");
@@ -127,7 +127,6 @@ export default function AccountSettingsForm({
     setConfirmPassword("");
   };
 
-  // Watch for Password Action results
   useEffect(() => {
     if (passwordState?.error) {
       toast.error(passwordState.error);
@@ -159,7 +158,7 @@ export default function AccountSettingsForm({
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isProfileDirty) return; // Fallback check
+    if (!isProfileDirty) return; 
 
     setIsProfileSubmitting(true);
 
@@ -171,7 +170,6 @@ export default function AccountSettingsForm({
       formData.append("countryCode", countryCode);
       if (avatarFile) formData.append("profilePicture", avatarFile);
 
-      // Call the server action with the FormData
       const result = await updateProfileAction(formData);
       toast.success("Profile updated successfully!");
     } catch (error) {
@@ -182,72 +180,78 @@ export default function AccountSettingsForm({
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-4 md:p-8">
-      <h1 className="text-2xl font-bold text-slate-900 mb-8">
+    <div className="max-w-6xl mx-auto p-2 md:p-8 w-full overflow-x-hidden box-border">
+      <h1 className="text-xl md:text-2xl font-bold text-slate-900 mb-4 md:mb-8 truncate px-2 md:px-0">
         Account settings
       </h1>
 
-      <div className="flex flex-col md:flex-row gap-8 items-start">
-        {/* --- SIDEBAR NAVIGATION --- */}
-        <aside className="w-full md:w-64 shrink-0 bg-white border border-slate-200 rounded-xl overflow-hidden hidden md:block">
-          <nav className="flex flex-col">
+      <div className="flex flex-col md:flex-row gap-4 md:gap-8 items-start w-full box-border">
+        {/* --- NAVIGATION (Mobile Horizontal Scroll / Desktop Sidebar) --- */}
+        <aside className="w-full md:w-64 shrink-0 bg-white border border-slate-200 rounded-lg md:rounded-xl overflow-x-auto md:overflow-hidden box-border scrollbar-hide">
+          <nav className="flex flex-row md:flex-col min-w-max md:min-w-0">
             <button
               type="button"
               onClick={() => setActiveTab("profile")}
-              className={`flex items-center gap-3 px-5 py-4 text-sm font-medium transition-colors border-l-4 ${
+              className={`flex items-center gap-1.5 md:gap-3 px-3 py-2.5 md:px-5 md:py-4 text-[11px] md:text-sm font-medium transition-colors border-b-2 md:border-b-0 md:border-l-4 shrink-0 md:shrink-none ${
                 activeTab === "profile"
                   ? "border-zinc-950 bg-slate-50 text-zinc-950"
                   : "border-transparent text-slate-600 hover:bg-slate-50"
               }`}
             >
-              <HugeiconsIcon icon={UserCircleIcon} size={18} />
-              Profile Settings
+              <span className="scale-75 md:scale-100 flex items-center shrink-0">
+                <HugeiconsIcon icon={UserCircleIcon} size={18} />
+              </span>
+              <span className="truncate">Profile Settings</span>
             </button>
             <button
               type="button"
               onClick={() => setActiveTab("password")}
-              className={`flex items-center gap-3 px-5 py-4 text-sm font-medium transition-colors border-l-4 ${
+              className={`flex items-center gap-1.5 md:gap-3 px-3 py-2.5 md:px-5 md:py-4 text-[11px] md:text-sm font-medium transition-colors border-b-2 md:border-b-0 md:border-l-4 shrink-0 md:shrink-none ${
                 activeTab === "password"
                   ? "border-zinc-950 bg-slate-50 text-zinc-950"
                   : "border-transparent text-slate-600 hover:bg-slate-50"
               }`}
             >
-              <HugeiconsIcon icon={LockPasswordIcon} size={18} />
-              Password
+              <span className="scale-75 md:scale-100 flex items-center shrink-0">
+                 <HugeiconsIcon icon={LockPasswordIcon} size={18} />
+              </span>
+              <span className="truncate">Password</span>
             </button>
             <button
               type="button"
               onClick={() => setActiveTab("verification")}
-              className={`flex items-center gap-3 px-5 py-4 text-sm font-medium transition-colors border-l-4 ${
+              className={`flex items-center gap-1.5 md:gap-3 px-3 py-2.5 md:px-5 md:py-4 text-[11px] md:text-sm font-medium transition-colors border-b-2 md:border-b-0 md:border-l-4 shrink-0 md:shrink-none ${
                 activeTab === "verification"
                   ? "border-zinc-950 bg-slate-50 text-zinc-950"
                   : "border-transparent text-slate-600 hover:bg-slate-50"
               }`}
             >
-              <HugeiconsIcon icon={CheckmarkBadge01Icon} size={18} />
-              Identity Verification
+              <span className="scale-75 md:scale-100 flex items-center shrink-0">
+                <HugeiconsIcon icon={CheckmarkBadge01Icon} size={18} />
+              </span>
+              <span className="truncate">Identity Verification</span>
             </button>
           </nav>
         </aside>
 
         {/* --- MAIN CONTENT AREA --- */}
-        <main className="flex-1 w-full bg-white border border-slate-200 rounded-xl p-6 md:p-10 min-h-[500px]">
+        <main className="flex-1 w-full min-w-0 max-w-full box-border bg-white border border-slate-200 rounded-lg md:rounded-xl p-4 md:p-10 min-h-[300px] md:min-h-[500px]">
           {activeTab === "profile" && (
             <form
               onSubmit={handleProfileSubmit}
-              className="space-y-10 animate-in fade-in duration-300"
+              className="space-y-6 md:space-y-10 animate-in fade-in duration-300 w-full min-w-0 box-border"
             >
               {/* Avatar Upload */}
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+              <div className="flex flex-col sm:flex-row items-center sm:items-center gap-4 md:gap-6 w-full box-border">
                 <div
                   {...getRootProps()}
-                  className={`relative h-28 w-28 rounded-full flex items-center justify-center border-2 border-dashed overflow-hidden cursor-pointer group transition-colors shrink-0 ${
+                  className={`relative h-16 w-16 md:h-28 md:w-28 rounded-full flex items-center justify-center border-2 border-dashed overflow-hidden cursor-pointer group transition-colors shrink-0 ${
                     isDragActive
                       ? "border-zinc-950 bg-slate-50"
                       : "border-slate-300 hover:bg-slate-50"
                   }`}
                 >
-                  <input {...getInputProps()} />
+                  <input {...getInputProps()} className="hidden" />
                   {avatarPreview ? (
                     <Image
                       src={avatarPreview}
@@ -256,22 +260,26 @@ export default function AccountSettingsForm({
                       className="object-cover"
                     />
                   ) : (
-                    <HugeiconsIcon
-                      icon={UserCircleIcon}
-                      size={40}
-                      className="text-slate-400"
-                    />
+                    <span className="scale-75 md:scale-100 flex items-center">
+                      <HugeiconsIcon
+                        icon={UserCircleIcon}
+                        size={40}
+                        className="text-slate-400"
+                      />
+                    </span>
                   )}
                   <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <HugeiconsIcon
-                      icon={Camera01Icon}
-                      className="w-6 h-6 text-white"
-                    />
+                    <span className="scale-75 md:scale-100 flex items-center">
+                      <HugeiconsIcon
+                        icon={Camera01Icon}
+                        className="w-4 h-4 md:w-6 md:h-6 text-white"
+                      />
+                    </span>
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center gap-3">
+                <div className="flex flex-col gap-1.5 md:gap-2 items-center sm:items-start w-full min-w-0">
+                  <div className="flex items-center gap-2 md:gap-3 w-full sm:w-auto">
                     <Button
                       type="button"
                       onClick={() =>
@@ -281,7 +289,7 @@ export default function AccountSettingsForm({
                           ) as HTMLInputElement
                         )?.click()
                       }
-                      className="bg-zinc-950 hover:bg-zinc-800 text-white rounded-md text-sm font-medium"
+                      className="bg-zinc-950 hover:bg-zinc-800 text-white rounded-md text-[10px] md:text-sm font-medium h-8 md:h-10 px-3 md:px-4 w-full sm:w-auto truncate shrink-0"
                     >
                       Upload New
                     </Button>
@@ -290,23 +298,23 @@ export default function AccountSettingsForm({
                       variant="outline"
                       onClick={removeAvatar}
                       disabled={!avatarPreview}
-                      className="text-slate-600 hover:bg-red-50 rounded-md hover:text-red-600 hover:border-red-200 transition-colors"
+                      className="text-slate-600 hover:bg-red-50 rounded-md hover:text-red-600 hover:border-red-200 transition-colors text-[10px] md:text-sm h-8 md:h-10 px-3 md:px-4 w-full sm:w-auto truncate shrink-0"
                     >
                       Delete avatar
                     </Button>
                   </div>
-                  <p className="text-[13px] text-slate-500">
+                  <p className="text-[9px] md:text-[13px] text-slate-500 text-center sm:text-left break-words w-full px-2 sm:px-0">
                     Recommended: Square JPG, PNG, or WebP. Max 5MB.
                   </p>
                 </div>
               </div>
 
               {/* Form Fields */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-8">
-                <Field>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 md:gap-x-6 gap-y-4 md:gap-y-8 w-full box-border min-w-0">
+                <Field className="w-full min-w-0 max-w-full box-border">
                   <FieldLabel
                     htmlFor="name"
-                    className="text-sm font-medium text-slate-700"
+                    className="text-[11px] md:text-sm font-medium text-slate-700"
                   >
                     Full Name *
                   </FieldLabel>
@@ -315,15 +323,15 @@ export default function AccountSettingsForm({
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Enter your full name"
-                    className="h-11 bg-slate-50/50 rounded-xl border-slate-200 focus:ring-zinc-950"
+                    className="h-9 md:h-11 bg-slate-50/50 rounded-lg md:rounded-xl border-slate-200 focus:ring-zinc-950 text-[11px] md:text-sm block w-full min-w-0 max-w-full box-border appearance-none m-0 px-3"
                     required
                   />
                 </Field>
 
-                <Field>
+                <Field className="w-full min-w-0 max-w-full box-border">
                   <FieldLabel
                     htmlFor="email"
-                    className="text-sm font-medium text-slate-700"
+                    className="text-[11px] md:text-sm font-medium text-slate-700"
                   >
                     Email Address *
                   </FieldLabel>
@@ -332,44 +340,48 @@ export default function AccountSettingsForm({
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="h-11 bg-slate-50/50 rounded-xl border-slate-200 focus:ring-zinc-950 disabled:opacity-60"
+                    className="h-9 md:h-11 bg-slate-50/50 rounded-lg md:rounded-xl border-slate-200 focus:ring-zinc-950 disabled:opacity-60 text-[11px] md:text-sm block w-full min-w-0 max-w-full box-border appearance-none m-0 px-3"
                     required
                     disabled
                   />
                 </Field>
 
-                <Field>
+                <Field className="w-full min-w-0 max-w-full box-border md:col-span-2 lg:col-span-1">
                   <FieldLabel
                     htmlFor="phone"
-                    className="text-sm font-medium text-slate-700"
+                    className="text-[11px] md:text-sm font-medium text-slate-700"
                   >
                     Mobile Number *
                   </FieldLabel>
-                  <PhoneInput
-                    id="phone"
-                    name="phoneNumber"
-                    value={phone}
-                    onChange={setPhone}
-                    countryCode={countryCode}
-                    onCountryCodeChange={setCountryCode}
-                    required
-                  />
+                  <div className="block w-full min-w-0 max-w-full box-border">
+                    <PhoneInput
+                      id="phone"
+                      name="phoneNumber"
+                      value={phone}
+                      onChange={setPhone}
+                      countryCode={countryCode}
+                      onCountryCodeChange={setCountryCode}
+                      required
+                    />
+                  </div>
                   <input type="hidden" name="countryCode" value={countryCode} />
                 </Field>
               </div>
 
-              <div className="pt-4 border-t border-slate-100">
+              <div className="pt-3 md:pt-4 border-t border-slate-100 w-full box-border">
                 <Button
                   type="submit"
-                  disabled={!isProfileDirty || isProfileSubmitting} // <-- Smart Disable
-                  className="bg-zinc-950 hover:bg-zinc-800 text-white rounded-md px-8 h-11 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={!isProfileDirty || isProfileSubmitting}
+                  className="bg-zinc-950 hover:bg-zinc-800 text-white rounded-md px-4 md:px-8 h-9 md:h-11 text-[10px] md:text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto shrink-0 truncate"
                 >
                   {isProfileSubmitting && (
-                    <HugeiconsIcon
-                      icon={Loading03Icon}
-                      className="animate-spin mr-2"
-                      size={18}
-                    />
+                    <span className="scale-75 md:scale-100 flex items-center shrink-0">
+                      <HugeiconsIcon
+                        icon={Loading03Icon}
+                        className="animate-spin mr-1 md:mr-2"
+                        size={18}
+                      />
+                    </span>
                   )}
                   {isProfileSubmitting ? "Saving Changes..." : "Save Changes"}
                 </Button>
@@ -380,33 +392,35 @@ export default function AccountSettingsForm({
           {activeTab === "password" && (
             <form
               action={passwordAction}
-              className="max-w-md animate-in fade-in duration-300"
+              className="max-w-md animate-in fade-in duration-300 w-full min-w-0 box-border"
             >
-              <div className="flex items-start gap-4 mb-6">
-                <div className="p-3 border border-slate-200 rounded-full text-slate-700 bg-white">
-                  <HugeiconsIcon icon={LockPasswordIcon} size={24} />
+              <div className="flex items-start gap-2 md:gap-4 mb-4 md:mb-6 w-full box-border min-w-0">
+                <div className="p-2 md:p-3 border border-slate-200 rounded-full text-slate-700 bg-white shrink-0">
+                  <span className="scale-75 md:scale-100 flex items-center">
+                    <HugeiconsIcon icon={LockPasswordIcon} size={24} />
+                  </span>
                 </div>
-                <div>
-                  <h2 className="text-xl font-semibold text-slate-900">
+                <div className="min-w-0">
+                  <h2 className="text-base md:text-xl font-semibold text-slate-900 truncate">
                     Change Password
                   </h2>
-                  <p className="text-[14px] text-slate-500 mt-1">
+                  <p className="text-[10px] md:text-[14px] text-slate-500 mt-0.5 md:mt-1 break-words">
                     Update password for enhanced account security.
                   </p>
                 </div>
               </div>
 
-              <hr className="border-slate-100 mb-6" />
+              <hr className="border-slate-100 mb-4 md:mb-6" />
 
-              <div className="space-y-5">
-                <Field>
+              <div className="space-y-3 md:space-y-5 w-full min-w-0 box-border">
+                <Field className="w-full min-w-0 box-border">
                   <FieldLabel
                     htmlFor="currentPassword"
-                    className="text-sm font-medium text-slate-900"
+                    className="text-[11px] md:text-sm font-medium text-slate-900"
                   >
                     Current Password *
                   </FieldLabel>
-                  <div className="relative">
+                  <div className="relative w-full min-w-0 box-border">
                     <Input
                       id="currentPassword"
                       name="currentPassword"
@@ -415,30 +429,32 @@ export default function AccountSettingsForm({
                       onChange={(e) => setCurrentPassword(e.target.value)}
                       required
                       placeholder="••••••••"
-                      className="bg-white rounded-xl h-12 border-slate-200 focus:ring-zinc-950 pr-10"
+                      className="bg-white rounded-lg md:rounded-xl h-9 md:h-12 border-slate-200 focus:ring-zinc-950 pr-8 md:pr-10 text-[11px] md:text-sm block w-full min-w-0 box-border appearance-none m-0 px-3"
                     />
                     <button
                       type="button"
                       onClick={() => setShowCurrent(!showCurrent)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                      className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 shrink-0"
                     >
-                      {!showCurrent ? (
-                        <HugeiconsIcon icon={ViewOffIcon} className="w-5 h-5" />
-                      ) : (
-                        <HugeiconsIcon icon={ViewIcon} className="w-5 h-5" />
-                      )}
+                      <span className="scale-75 md:scale-100 flex items-center">
+                        {!showCurrent ? (
+                          <HugeiconsIcon icon={ViewOffIcon} className="w-5 h-5" />
+                        ) : (
+                          <HugeiconsIcon icon={ViewIcon} className="w-5 h-5" />
+                        )}
+                      </span>
                     </button>
                   </div>
                 </Field>
 
-                <Field>
+                <Field className="w-full min-w-0 box-border">
                   <FieldLabel
                     htmlFor="newPassword"
-                    className="text-sm font-medium text-slate-900"
+                    className="text-[11px] md:text-sm font-medium text-slate-900"
                   >
                     New Password *
                   </FieldLabel>
-                  <div className="relative">
+                  <div className="relative w-full min-w-0 box-border">
                     <Input
                       id="newPassword"
                       name="newPassword"
@@ -446,35 +462,38 @@ export default function AccountSettingsForm({
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
                       required
-                      className="bg-white rounded-xl h-12 border-slate-200 focus:ring-zinc-950 pr-10"
+                      className="bg-white rounded-lg md:rounded-xl h-9 md:h-12 border-slate-200 focus:ring-zinc-950 pr-8 md:pr-10 text-[11px] md:text-sm block w-full min-w-0 box-border appearance-none m-0 px-3"
                       placeholder="••••••••"
                     />
                     <button
                       type="button"
                       onClick={() => setShowNew(!showNew)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                      className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 shrink-0"
                     >
-                      {!showNew ? (
-                        <HugeiconsIcon icon={ViewOffIcon} className="w-5 h-5" />
-                      ) : (
-                        <HugeiconsIcon icon={ViewIcon} className="w-5 h-5" />
-                      )}
+                      <span className="scale-75 md:scale-100 flex items-center">
+                        {!showNew ? (
+                          <HugeiconsIcon icon={ViewOffIcon} className="w-5 h-5" />
+                        ) : (
+                          <HugeiconsIcon icon={ViewIcon} className="w-5 h-5" />
+                        )}
+                      </span>
                     </button>
                   </div>
                 </Field>
+                
                 {/* Confirm Password (Hidden until ready) */}
                 {shouldShowConfirmField && (
-                  <div className="animate-in slide-in-from-top-4 fade-in duration-300">
-                    <Field>
-                      <div className="flex items-center justify-between">
+                  <div className="animate-in slide-in-from-top-4 fade-in duration-300 w-full min-w-0 box-border">
+                    <Field className="w-full min-w-0 box-border">
+                      <div className="flex items-center justify-between w-full box-border">
                         <FieldLabel
                           htmlFor="confirmPassword"
-                          className="text-sm font-medium text-slate-900"
+                          className="text-[11px] md:text-sm font-medium text-slate-900 truncate"
                         >
                           Confirm New Password *
                         </FieldLabel>
                       </div>
-                      <div className="relative">
+                      <div className="relative w-full min-w-0 box-border">
                         <Input
                           id="confirmPassword"
                           name="confirmPassword"
@@ -482,33 +501,35 @@ export default function AccountSettingsForm({
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
                           required
-                          className="bg-white rounded-xl h-12 border-slate-200 focus:ring-zinc-950 pr-10"
+                          className="bg-white rounded-lg md:rounded-xl h-9 md:h-12 border-slate-200 focus:ring-zinc-950 pr-8 md:pr-10 text-[11px] md:text-sm block w-full min-w-0 box-border appearance-none m-0 px-3"
                           placeholder="••••••••"
                         />
                         <button
                           type="button"
                           onClick={() => setShowConfirm(!showConfirm)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                          className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 shrink-0"
                         >
-                          {showConfirm ? (
-                            <HugeiconsIcon
-                              icon={ViewOffIcon}
-                              className="w-5 h-5"
-                            />
-                          ) : (
-                            <HugeiconsIcon
-                              icon={ViewIcon}
-                              className="w-5 h-5"
-                            />
-                          )}
+                          <span className="scale-75 md:scale-100 flex items-center">
+                            {showConfirm ? (
+                              <HugeiconsIcon
+                                icon={ViewOffIcon}
+                                className="w-5 h-5"
+                              />
+                            ) : (
+                              <HugeiconsIcon
+                                icon={ViewIcon}
+                                className="w-5 h-5"
+                              />
+                            )}
+                          </span>
                         </button>
                       </div>
                     </Field>
                   </div>
                 )}
 
-                <div className="pt-2 pb-2">
-                  <div className="flex gap-2 h-1.5 w-full">
+                <div className="pt-1 md:pt-2 pb-1 md:pb-2 w-full box-border">
+                  <div className="flex gap-1 md:gap-2 h-1 md:h-1.5 w-full box-border">
                     <div
                       className={`flex-1 rounded-full transition-colors duration-300 ${newPassword.length === 0 ? "bg-slate-200" : strengthCount >= 1 ? (strengthCount === 1 ? "bg-red-500" : strengthCount === 2 ? "bg-amber-400" : "bg-green-500") : "bg-red-500"}`}
                     />
@@ -519,7 +540,7 @@ export default function AccountSettingsForm({
                       className={`flex-1 rounded-full transition-colors duration-300 ${newPassword.length === 0 ? "bg-slate-200" : strengthCount >= 3 ? "bg-green-500" : "bg-slate-200"}`}
                     />
                   </div>
-                  <p className="text-[13px] text-slate-500 mt-3 font-medium">
+                  <p className="text-[10px] md:text-[13px] text-slate-500 mt-2 md:mt-3 font-medium break-words px-1">
                     <span
                       className={
                         strengthCount === 3
@@ -531,64 +552,70 @@ export default function AccountSettingsForm({
                     </span>{" "}
                     Must contain:
                   </p>
-                  <ul className="text-[13px] space-y-2 mt-3">
+                  <ul className="text-[10px] md:text-[13px] space-y-1 md:space-y-2 mt-2 md:mt-3 px-1">
                     <li
-                      className={`flex items-center gap-2 ${hasUppercase ? "text-slate-900" : "text-slate-500"}`}
+                      className={`flex items-center gap-1.5 md:gap-2 ${hasUppercase ? "text-slate-900" : "text-slate-500"}`}
                     >
-                      {hasUppercase ? (
-                        <HugeiconsIcon
-                          icon={CheckmarkBadge02Icon}
-                          className="w-5 h-5 text-green-500"
-                        />
-                      ) : (
-                        <HugeiconsIcon
-                          icon={Cancel01Icon}
-                          className="w-5 h-5 text-slate-400"
-                        />
-                      )}{" "}
+                      <span className="scale-75 md:scale-100 flex items-center shrink-0">
+                        {hasUppercase ? (
+                          <HugeiconsIcon
+                            icon={CheckmarkBadge02Icon}
+                            className="w-4 h-4 md:w-5 md:h-5 text-green-500"
+                          />
+                        ) : (
+                          <HugeiconsIcon
+                            icon={Cancel01Icon}
+                            className="w-4 h-4 md:w-5 md:h-5 text-slate-400"
+                          />
+                        )}
+                      </span>
                       At least 1 uppercase
                     </li>
                     <li
-                      className={`flex items-center gap-2 ${hasNumber ? "text-slate-900" : "text-slate-500"}`}
+                      className={`flex items-center gap-1.5 md:gap-2 ${hasNumber ? "text-slate-900" : "text-slate-500"}`}
                     >
-                      {hasNumber ? (
-                        <HugeiconsIcon
-                          icon={CheckmarkBadge02Icon}
-                          className="w-5 h-5 text-green-500"
-                        />
-                      ) : (
-                        <HugeiconsIcon
-                          icon={Cancel01Icon}
-                          className="w-5 h-5 text-slate-400"
-                        />
-                      )}{" "}
+                      <span className="scale-75 md:scale-100 flex items-center shrink-0">
+                        {hasNumber ? (
+                          <HugeiconsIcon
+                            icon={CheckmarkBadge02Icon}
+                            className="w-4 h-4 md:w-5 md:h-5 text-green-500"
+                          />
+                        ) : (
+                          <HugeiconsIcon
+                            icon={Cancel01Icon}
+                            className="w-4 h-4 md:w-5 md:h-5 text-slate-400"
+                          />
+                        )}
+                      </span>
                       At least 1 number
                     </li>
                     <li
-                      className={`flex items-center gap-2 ${hasMinLength ? "text-slate-900" : "text-slate-500"}`}
+                      className={`flex items-center gap-1.5 md:gap-2 ${hasMinLength ? "text-slate-900" : "text-slate-500"}`}
                     >
-                      {hasMinLength ? (
-                        <HugeiconsIcon
-                          icon={CheckmarkBadge02Icon}
-                          className="w-5 h-5 text-green-500"
-                        />
-                      ) : (
-                        <HugeiconsIcon
-                          icon={Cancel01Icon}
-                          className="w-5 h-5 text-slate-400"
-                        />
-                      )}{" "}
+                      <span className="scale-75 md:scale-100 flex items-center shrink-0">
+                        {hasMinLength ? (
+                          <HugeiconsIcon
+                            icon={CheckmarkBadge02Icon}
+                            className="w-4 h-4 md:w-5 md:h-5 text-green-500"
+                          />
+                        ) : (
+                          <HugeiconsIcon
+                            icon={Cancel01Icon}
+                            className="w-4 h-4 md:w-5 md:h-5 text-slate-400"
+                          />
+                        )}
+                      </span>
                       At least 8 characters
                     </li>
                   </ul>
                 </div>
 
-                <div className="flex items-center gap-4 pt-4">
+                <div className="flex flex-col sm:flex-row items-center gap-2 md:gap-4 pt-2 md:pt-4 w-full box-border">
                   <Button
                     type="button"
                     variant="outline"
                     onClick={handleDiscard}
-                    className="flex-1 rounded-sm py-3 px-8 h-11 mt-2 text-slate-700 font-medium"
+                    className="w-full sm:flex-1 rounded-sm py-2 md:py-3 px-4 md:px-8 h-9 md:h-11 md:mt-2 text-[10px] md:text-sm text-slate-700 font-medium shrink-0 truncate"
                   >
                     Discard
                   </Button>
@@ -599,7 +626,7 @@ export default function AccountSettingsForm({
           )}
 
           {activeTab !== "profile" && activeTab !== "password" && (
-            <div className="h-64 flex items-center justify-center text-slate-500 font-medium animate-in fade-in">
+            <div className="h-40 md:h-64 flex items-center justify-center text-slate-500 font-medium animate-in fade-in text-[10px] md:text-sm break-words text-center px-4 w-full box-border">
               {activeTab === "verification"
                 ? "Identity Verification (Ghana Card) Flow goes here."
                 : "This section is under construction."}

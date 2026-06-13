@@ -19,12 +19,16 @@ const slugSchema = z.string()
 // ============================================================================
 // Explicitly map only the fields the client actually needs. This prevents
 // prototype pollution and accidental data leakage of hidden DB fields.
+// ============================================================================
+// 2. SAFE SERIALIZATION UTILITY
+// ============================================================================
 const serializeListing = (doc: any) => ({
   id: doc._id.toString(),
   slug: doc.slug,
   title: doc.title,
   listingType: doc.listingType,
   price: doc.price,
+  images: doc.images || doc.propertyId?.images || [], // <--- ADD THIS LINE
   // Add other explicitly required fields here...
   property: doc.propertyId ? {
     id: doc.propertyId._id.toString(),

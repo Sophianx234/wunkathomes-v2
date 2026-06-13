@@ -37,8 +37,24 @@ export default function BookingCard({ listing, isRent, hasBookedTour, bookedTour
   const [selectedTime, setSelectedTime] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
 
-  const handleNext = (nextStep: SchedulingStep) => setStep(nextStep);
-  const handleBack = (prevStep: SchedulingStep) => setStep(prevStep);
+  // Lock navigation if a tour is already booked
+  const handleNext = (nextStep: SchedulingStep) => {
+    if (hasBookedTour) return;
+    setStep(nextStep);
+  };
+  
+  const handleBack = (prevStep: SchedulingStep) => {
+    if (hasBookedTour) return;
+    setStep(prevStep);
+  };
+
+  const resetFlow = () => {
+    if (hasBookedTour) return;
+    setStep("IDLE");
+    setSelectedDate("");
+    setSelectedTime("");
+    setPhoneNumber("");
+  };
 
   useEffect(() => {
     if (state.success) {
@@ -48,13 +64,6 @@ export default function BookingCard({ listing, isRent, hasBookedTour, bookedTour
       toast.error(state.error);
     }
   }, [state]);
-
-  const resetFlow = () => {
-    setStep("IDLE");
-    setSelectedDate("");
-    setSelectedTime("");
-    setPhoneNumber("");
-  };
 
   const displayDate = bookedTourDate || selectedDate;
 
@@ -86,7 +95,8 @@ export default function BookingCard({ listing, isRent, hasBookedTour, bookedTour
               <div className="flex gap-2 shrink-0">
                 <button
                   onClick={() => handleNext("DATE")}
-                  className="p-3 border-2 border-black rounded-lg hover:bg-slate-50 transition-colors shrink-0"
+                  disabled={hasBookedTour}
+                  className="p-3 border-2 border-black rounded-lg hover:bg-slate-50 transition-colors shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <span className="scale-90 flex items-center">
                     <HugeiconsIcon icon={Calendar01Icon} size={16} />
@@ -104,14 +114,16 @@ export default function BookingCard({ listing, isRent, hasBookedTour, bookedTour
           {step !== "IDLE" && (
             <div className="flex justify-between items-center mb-4 pb-3 border-b border-black/10 w-full box-border">
               <span className="font-black uppercase tracking-widest text-xs truncate pr-4">
-                Schedule a Tour
+                {step === "SUCCESS" ? "Tour Confirmed" : "Schedule a Tour"}
               </span>
-              <button
-                onClick={resetFlow}
-                className="text-[10px] font-bold text-slate-500 uppercase tracking-widest hover:text-black shrink-0"
-              >
-                Close
-              </button>
+              {!hasBookedTour && (
+                <button
+                  onClick={resetFlow}
+                  className="text-[10px] font-bold text-slate-500 uppercase tracking-widest hover:text-black shrink-0"
+                >
+                  Close
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -178,7 +190,8 @@ export default function BookingCard({ listing, isRent, hasBookedTour, bookedTour
 
               <button
                 onClick={() => handleNext("DATE")}
-                className="w-full box-border py-4 bg-white text-black font-black uppercase tracking-widest text-xs border-2 border-black rounded-lg hover:bg-slate-50 transition-colors flex items-center justify-center gap-2"
+                disabled={hasBookedTour}
+                className="w-full box-border py-4 bg-white text-black font-black uppercase tracking-widest text-xs border-2 border-black rounded-lg hover:bg-slate-50 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <HugeiconsIcon icon={Calendar01Icon} size={16} /> Schedule a
                 Tour
@@ -188,56 +201,56 @@ export default function BookingCard({ listing, isRent, hasBookedTour, bookedTour
 
           {step === "DATE" && (
             <div className="flex flex-col w-full min-w-0 max-w-full box-border gap-2 lg:gap-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
-  <button
-    onClick={() => handleBack("IDLE")}
-    className="text-[10px] text-slate-500 uppercase tracking-widest font-bold flex items-center gap-1 mb-1 hover:text-black w-fit shrink-0"
-  >
-    <HugeiconsIcon icon={ArrowLeft01Icon} size={12} /> Back
-  </button>
+              <button
+                onClick={() => handleBack("IDLE")}
+                className="text-[10px] text-slate-500 uppercase tracking-widest font-bold flex items-center gap-1 mb-1 hover:text-black w-fit shrink-0"
+              >
+                <HugeiconsIcon icon={ArrowLeft01Icon} size={12} /> Back
+              </button>
 
-  <div className="flex flex-col gap-1 w-full min-w-0 max-w-full box-border">
-    <label className="text-[10px] lg:text-xs font-bold uppercase tracking-widest text-black">
-      Select a Date
-    </label>
-    <div className="relative w-full min-w-0 max-w-full box-border">
-      <span className="absolute left-3 lg:left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none scale-90 lg:scale-100 flex items-center">
-        <HugeiconsIcon icon={Calendar01Icon} size={16} />
-      </span>
-      <input
-        type="date"
-        value={selectedDate}
-        onChange={(e) => setSelectedDate(e.target.value)}
-        className="block w-full min-w-0 max-w-full box-border py-2.5 lg:py-3.5 pl-9 lg:pl-10 pr-3 lg:pr-4 border-2 border-black rounded-lg text-xs lg:text-sm font-bold focus:outline-none focus:ring-2 focus:ring-black/20 text-black bg-white m-0 appearance-none"
-        min={new Date().toISOString().split("T")[0]}
-      />
-    </div>
-  </div>
+              <div className="flex flex-col gap-1 w-full min-w-0 max-w-full box-border">
+                <label className="text-[10px] lg:text-xs font-bold uppercase tracking-widest text-black">
+                  Select a Date
+                </label>
+                <div className="relative w-full min-w-0 max-w-full box-border">
+                  <span className="absolute left-3 lg:left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none scale-90 lg:scale-100 flex items-center">
+                    <HugeiconsIcon icon={Calendar01Icon} size={16} />
+                  </span>
+                  <input
+                    type="date"
+                    value={selectedDate}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                    className="block w-full min-w-0 max-w-full box-border py-2.5 lg:py-3.5 pl-9 lg:pl-10 pr-3 lg:pr-4 border-2 border-black rounded-lg text-xs lg:text-sm font-bold focus:outline-none focus:ring-2 focus:ring-black/20 text-black bg-white m-0 appearance-none"
+                    min={new Date().toISOString().split("T")[0]}
+                  />
+                </div>
+              </div>
 
-  <div className="flex flex-col gap-1 w-full min-w-0 max-w-full box-border">
-    <label className="text-[10px] lg:text-xs font-bold uppercase tracking-widest text-black">
-      Select a Time
-    </label>
-    <div className="relative w-full min-w-0 max-w-full box-border">
-      <span className="absolute left-3 lg:left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none scale-90 lg:scale-100 flex items-center">
-          <HugeiconsIcon icon={Clock01Icon} size={16} />
-      </span>
-      <input
-        type="time"
-        value={selectedTime}
-        onChange={(e) => setSelectedTime(e.target.value)}
-        className="block w-full min-w-0 max-w-full box-border py-2.5 lg:py-3.5 pl-9 lg:pl-10 pr-3 lg:pr-4 border-2 border-black rounded-lg text-xs lg:text-sm font-bold focus:outline-none focus:ring-2 focus:ring-black/20 text-black bg-white m-0 appearance-none"
-      />
-    </div>
-  </div>
+              <div className="flex flex-col gap-1 w-full min-w-0 max-w-full box-border">
+                <label className="text-[10px] lg:text-xs font-bold uppercase tracking-widest text-black">
+                  Select a Time
+                </label>
+                <div className="relative w-full min-w-0 max-w-full box-border">
+                  <span className="absolute left-3 lg:left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none scale-90 lg:scale-100 flex items-center">
+                      <HugeiconsIcon icon={Clock01Icon} size={16} />
+                  </span>
+                  <input
+                    type="time"
+                    value={selectedTime}
+                    onChange={(e) => setSelectedTime(e.target.value)}
+                    className="block w-full min-w-0 max-w-full box-border py-2.5 lg:py-3.5 pl-9 lg:pl-10 pr-3 lg:pr-4 border-2 border-black rounded-lg text-xs lg:text-sm font-bold focus:outline-none focus:ring-2 focus:ring-black/20 text-black bg-white m-0 appearance-none"
+                  />
+                </div>
+              </div>
 
-  <button
-    onClick={() => handleNext("PHONE")}
-    disabled={!selectedDate || !selectedTime}
-    className="block w-full min-w-0 max-w-full box-border py-3 lg:py-4 bg-black text-white font-black uppercase tracking-widest text-[10px] lg:text-xs rounded-lg hover:bg-slate-800 transition-colors mt-2 disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
-  >
-    Continue
-  </button>
-</div>
+              <button
+                onClick={() => handleNext("PHONE")}
+                disabled={!selectedDate || !selectedTime}
+                className="block w-full min-w-0 max-w-full box-border py-3 lg:py-4 bg-black text-white font-black uppercase tracking-widest text-[10px] lg:text-xs rounded-lg hover:bg-slate-800 transition-colors mt-2 disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
+              >
+                Continue
+              </button>
+            </div>
           )}
 
           {step === "PHONE" && (

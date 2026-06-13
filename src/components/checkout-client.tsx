@@ -27,6 +27,8 @@ interface CheckoutClientProps {
 export default function CheckoutClient({ listing, currentUser }: CheckoutClientProps) {
   const searchParams = useSearchParams()
   const router = useRouter()
+    console.log("Listing:", listing) 
+
   
   // Setup default move-in date to tomorrow
   const tomorrow = new Date()
@@ -274,6 +276,7 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
               <div className="relative w-16 h-16 md:w-24 md:h-24 rounded-lg overflow-hidden shrink-0 bg-slate-100">
                 <Image src={listing?.images?.[0] || '/a-1.jpg'} alt={listing?.title}
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                
                 fill className="object-cover" />
               </div>
               <div className="flex flex-col justify-center min-w-0 pr-2">
