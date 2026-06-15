@@ -16,7 +16,12 @@ import { headers } from "next/headers";
 // ============================================================================
 const updateProfileSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(100).trim(),
-  phoneNumber: z.string().min(8, "Phone number is too short").max(15).regex(/^\d+$/, "Phone must contain only numbers").trim(),
+  phoneNumber: z
+    .string()
+    .min(8, "Phone number is too short")
+    .max(15)
+    .regex(/^\d+$/, "Phone must contain only numbers")
+    .trim(),
   countryCode: z.string().max(5).trim(),
 });
 
@@ -34,7 +39,7 @@ export async function updateProfileAction(formData: FormData) {
   try {
     // 1. Capture Digital Footprint
     const headersList = await headers();
-    ip = headersList.get("x-forwarded-for")?.split(',')[0] || "Unknown IP";
+    ip = headersList.get("x-forwarded-for")?.split(",")[0] || "Unknown IP";
 
     // 2. Strict Zero-Trust Authorization
     const session = await getSession();
@@ -68,16 +73,22 @@ export async function updateProfileAction(formData: FormData) {
     if (profilePhotoFile && profilePhotoFile.size > 0) {
       // Defense-in-Depth: Validate MIME type and Size BEFORE sending to Cloudinary
       if (!ALLOWED_MIME_TYPES.includes(profilePhotoFile.type)) {
-        return { success: false, error: "Invalid image format. Only JPG, PNG, and WEBP are allowed." };
+        return {
+          success: false,
+          error: "Invalid image format. Only JPG, PNG, and WEBP are allowed.",
+        };
       }
       if (profilePhotoFile.size > MAX_FILE_SIZE) {
-        return { success: false, error: "Profile picture must be less than 2MB." };
+        return {
+          success: false,
+          error: "Profile picture must be less than 2MB.",
+        };
       }
 
       // Safe to upload
       profilePhotoUrl = await uploadToCloudinary(
         profilePhotoFile,
-        `wunkathomes/profiles`
+        `wunkathomes/profiles`,
       );
     }
 
@@ -95,25 +106,34 @@ export async function updateProfileAction(formData: FormData) {
     }
 
     // 7. Update User (IDOR prevention built-in via session.userId constraint)
-    const updatedUser = await User.findByIdAndUpdate(userId, updatePayload, { new: true });
-    
+    const updatedUser = await User.findByIdAndUpdate(userId, updatePayload, {
+      new: true,
+    });
+
     if (!updatedUser) {
       return { success: false, error: "User profile could not be found." };
     }
 
     // 8. Revalidate UI Cache
-    revalidatePath("/dashboard/settings"); 
+    revalidatePath("/overview/settings");
     // If you display the avatar in the global navbar, you might need to revalidate layout:
     // revalidatePath("/", "layout");
 
     return { success: true, message: "Profile updated successfully!" };
-
   } catch (error: any) {
     // 9. Fail Securely & Contextual Logging
-    if (error.message === "UNAUTHORIZED") return { success: false, error: "Unauthorized. Please log in again." };
-    if (error.message === "RATE_LIMIT_EXCEEDED") return { success: false, error: "Too many requests. Please wait a moment." };
+    if (error.message === "UNAUTHORIZED")
+      return { success: false, error: "Unauthorized. Please log in again." };
+    if (error.message === "RATE_LIMIT_EXCEEDED")
+      return {
+        success: false,
+        error: "Too many requests. Please wait a moment.",
+      };
 
-    console.error(`[SECURITY LOG] Profile Update Error (User: ${userId}, IP: ${ip}):`, error.message);
+    console.error(
+      `[SECURITY LOG] Profile Update Error (User: ${userId}, IP: ${ip}):`,
+      error.message,
+    );
     return {
       success: false,
       error: "An unexpected error occurred during the update.",

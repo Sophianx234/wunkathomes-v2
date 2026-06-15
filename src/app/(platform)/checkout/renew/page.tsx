@@ -1,8 +1,8 @@
 import { notFound, redirect } from "next/navigation";
 import { getSession, SessionPayload } from "@/lib/session";
 import { connectToDatabase } from "@/config/DbConnect";
-import User from "@/models/user"; 
-import Lease from "@/models/lease"; 
+import User from "@/models/user";
+import Lease from "@/models/lease";
 import Listing from "@/models/listing";
 import Property from "@/models/property";
 import RenewClient from "@/components/renew-client";
@@ -12,12 +12,12 @@ interface RenewPageProps {
 }
 
 export default async function RenewPage({ searchParams }: RenewPageProps) {
-  const session = await getSession() as SessionPayload;
+  const session = (await getSession()) as SessionPayload;
   if (!session?.userId) redirect("/login");
 
   const params = await searchParams;
   const leaseId = params?.leaseId;
-  
+
   if (!leaseId) redirect("/user/dashboard");
 
   await connectToDatabase();
@@ -30,7 +30,7 @@ export default async function RenewPage({ searchParams }: RenewPageProps) {
     .populate({
       path: "listingId",
       model: Listing,
-      populate: { path: "propertyId", model: Property }
+      populate: { path: "propertyId", model: Property },
     })
     .lean()
     .exec();
@@ -42,7 +42,9 @@ export default async function RenewPage({ searchParams }: RenewPageProps) {
   const serializedData = {
     leaseId: existingLease._id.toString(),
     rentAmount: existingLease.totalRentAmount || existingLease.listingId.price,
-    currentEndDate: existingLease.endDate ? new Date(existingLease.endDate).toLocaleDateString() : "N/A",
+    currentEndDate: existingLease.endDate
+      ? new Date(existingLease.endDate).toLocaleDateString()
+      : "N/A",
     user: {
       id: userRecord?._id.toString(),
       name: userRecord?.name || "",
@@ -52,9 +54,10 @@ export default async function RenewPage({ searchParams }: RenewPageProps) {
     listing: {
       title: existingLease.listingId.title,
       price: existingLease.listingId.price,
-      image: existingLease.listingId.images?.[0] || '/placeholder.jpg',
-      propertyType: existingLease.listingId.propertyId?.propertyType || "Property",
-    }
+      image: existingLease.listingId.images?.[0] || "/placeholder.jpg",
+      propertyType:
+        existingLease.listingId.propertyId?.propertyType || "Property",
+    },
   };
 
   return <RenewClient data={serializedData} />;

@@ -8,7 +8,7 @@ import {
   PrinterIcon,
   ArrowRight01Icon,
   Shield02Icon,
-  Home09Icon 
+  Home09Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { TransactionReceipt } from "./transaction-reciept";
@@ -83,23 +83,23 @@ export default function SuccessReceipt({ transaction }: SuccessReceiptProps) {
       listing: {
         title: transaction.listingId?.title || "WunkatHomes Property",
         property: {
-          propertyType: transaction.listingId?.propertyId?.propertyType || "Property",
+          propertyType:
+            transaction.listingId?.propertyId?.propertyType || "Property",
           location: locationString,
-        }
-      }
+        },
+      },
     };
 
     return (
-      <TransactionReceipt 
-        transaction={formattedReceiptData as any} 
-        onBack={() => setIsViewingReceipt(false)} 
+      <TransactionReceipt
+        transaction={formattedReceiptData as any}
+        onBack={() => setIsViewingReceipt(false)}
       />
     );
   }
 
   return (
     <div className="max-w-2xl mx-auto w-full font-sans px-4 md:px-0">
-      
       {/* --- 1. MINIMALIST HEADER --- */}
       <div className="flex flex-col items-center text-center mb-6 md:mb-10 mt-2 md:mt-4">
         <motion.div
@@ -132,7 +132,8 @@ export default function SuccessReceipt({ transaction }: SuccessReceiptProps) {
           transition={{ delay: 0.2 }}
           className="text-[10px] md:text-[13px] text-zinc-500 font-medium px-4 md:px-0"
         >
-          Your payment is confirmed. You can view your receipt anytime in your dashboard.
+          Your payment is confirmed. You can view your receipt anytime in your
+          dashboard.
         </motion.p>
       </div>
 
@@ -149,45 +150,71 @@ export default function SuccessReceipt({ transaction }: SuccessReceiptProps) {
             Total Amount Paid
           </p>
           <h2 className="text-2xl md:text-4xl font-light tracking-tighter text-zinc-900">
-            GHS {transaction.amount?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+            GHS{" "}
+            {transaction.amount?.toLocaleString(undefined, {
+              minimumFractionDigits: 2,
+            })}
           </h2>
           <div className="mt-2 md:mt-4 flex items-center gap-1.5 px-2 py-0.5 md:px-3 md:py-1 bg-green-50 rounded-full border border-green-100/50">
             <span className="w-1 md:w-1.5 h-1 md:h-1.5 rounded-full bg-green-500 animate-pulse" />
-            <span className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-green-700">Verified</span>
+            <span className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-green-700">
+              Verified
+            </span>
           </div>
         </div>
 
         <div className="p-5 md:p-10 space-y-5 md:space-y-8">
-          
           {/* Section: Transaction Specs */}
           <div className="space-y-3 md:space-y-4">
-            <ReceiptRow label="Reference ID" value={transaction.reference} isMono />
+            <ReceiptRow
+              label="Reference ID"
+              value={transaction.reference}
+              isMono
+            />
             <ReceiptRow label="Date & Time" value={formattedDateTimeFull} />
-            <ReceiptRow label="Payment Method" value={`Paystack (${transaction.channel || "Secure Gateway"})`} />
-            <ReceiptRow label="Transaction Type" value={isRenewal ? "Lease Extension" : "Upfront Rent"} />
+            <ReceiptRow
+              label="Payment Method"
+              value={`Paystack (${transaction.channel || "Secure Gateway"})`}
+            />
+            <ReceiptRow
+              label="Transaction Type"
+              value={isRenewal ? "Lease Extension" : "Upfront Rent"}
+            />
           </div>
 
           <div className="w-full h-px bg-zinc-100" />
 
           {/* Section: Property & User Specs */}
           <div className="space-y-3 md:space-y-4">
-            <ReceiptRow 
-              label={isRenewal ? "Renewal Property" : "Reserved Property"} 
-              value={transaction.listingId?.title || "WunkatHomes Property"} 
-              subValue={locationString} 
+            <ReceiptRow
+              label={isRenewal ? "Renewal Property" : "Reserved Property"}
+              value={transaction.listingId?.title || "WunkatHomes Property"}
+              subValue={locationString}
             />
-            <ReceiptRow label="Tenant Name" value={transaction.userId?.name || "Verified User"} />
-            <ReceiptRow label="Contact Email" value={transaction.userId?.email || "N/A"} />
+            <ReceiptRow
+              label="Tenant Name"
+              value={transaction.userId?.name || "Verified User"}
+            />
+            <ReceiptRow
+              label="Contact Email"
+              value={transaction.userId?.email || "N/A"}
+            />
           </div>
 
           <div className="w-full h-px bg-zinc-100" />
 
           {/* Section: Breakdown */}
           <div className="space-y-3 md:space-y-4">
-            <ReceiptRow label="Subtotal" value={`GHS ${transaction.amount?.toLocaleString()}`} />
-            <ReceiptRow label="Platform & Agency Fees" value="Free" valueClass="text-zinc-400" />
+            <ReceiptRow
+              label="Subtotal"
+              value={`GHS ${transaction.amount?.toLocaleString()}`}
+            />
+            <ReceiptRow
+              label="Platform & Agency Fees"
+              value="Free"
+              valueClass="text-zinc-400"
+            />
           </div>
-
         </div>
       </motion.div>
 
@@ -203,11 +230,11 @@ export default function SuccessReceipt({ transaction }: SuccessReceiptProps) {
           className="w-full sm:flex-1 min-w-0 box-border h-10 md:h-12 px-2 bg-white border border-zinc-200 text-zinc-700 text-[10px] md:text-[13px] font-semibold rounded-lg md:rounded-xl hover:bg-zinc-50 transition-colors flex items-center justify-center gap-1.5 md:gap-2 truncate"
         >
           <span className="scale-75 md:scale-100 flex items-center shrink-0">
-             <HugeiconsIcon icon={PrinterIcon} size={16} />
+            <HugeiconsIcon icon={PrinterIcon} size={16} />
           </span>
           <span className="truncate">View Official Receipt</span>
         </button>
-        
+
         <Link
           href={continueUrl}
           className="w-full sm:flex-1 min-w-0 box-border h-10 md:h-12 px-2 bg-zinc-900 text-white text-[10px] md:text-[13px] font-semibold rounded-lg md:rounded-xl hover:bg-zinc-800 transition-colors flex items-center justify-center gap-1.5 md:gap-2 shadow-sm truncate"
@@ -223,24 +250,28 @@ export default function SuccessReceipt({ transaction }: SuccessReceiptProps) {
 }
 
 // --- HELPER COMPONENT FOR CLEAN LEDGER ROWS ---
-function ReceiptRow({ 
-  label, 
-  value, 
-  subValue, 
+function ReceiptRow({
+  label,
+  value,
+  subValue,
   isMono = false,
-  valueClass = "text-zinc-900"
-}: { 
-  label: string; 
-  value: string; 
-  subValue?: string; 
+  valueClass = "text-zinc-900",
+}: {
+  label: string;
+  value: string;
+  subValue?: string;
   isMono?: boolean;
   valueClass?: string;
 }) {
   return (
     <div className="flex items-start justify-between gap-2 md:gap-4">
-      <span className="text-[9px] md:text-[12px] font-medium text-zinc-500 mt-0.5 shrink-0">{label}</span>
+      <span className="text-[9px] md:text-[12px] font-medium text-zinc-500 mt-0.5 shrink-0">
+        {label}
+      </span>
       <div className="text-right min-w-0">
-        <span className={`block text-[10px] md:text-[13px] ${isMono ? 'font-mono font-medium tracking-tight' : 'font-semibold'} ${valueClass} break-words`}>
+        <span
+          className={`block text-[10px] md:text-[13px] ${isMono ? "font-mono font-medium tracking-tight" : "font-semibold"} ${valueClass} break-words`}
+        >
           {value}
         </span>
         {subValue && (

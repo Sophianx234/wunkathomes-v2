@@ -2,6 +2,8 @@
 
 import { AcceptInviteForm } from "@/components/accept-invite-form";
 import Logo from "@/components/logo";
+import { Loading03Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { Suspense } from "react";
 
 export default function AcceptInvitePage() {
@@ -15,7 +17,7 @@ export default function AcceptInvitePage() {
         <div className="flex flex-1 items-center justify-center">
           <div className="w-full max-w-sm   ">
             {/* Suspense is required here because AcceptInviteForm uses useSearchParams */}
-            <Suspense fallback={<div className="text-center text-sm text-zinc-500">Loading secure connection...</div>}>
+            <Suspense fallback={<div className="text-center text-sm text-zinc-500"><HugeiconsIcon icon={Loading03Icon} className="animate-spin" /></div>}>
               <AcceptInviteForm />
             </Suspense>
           </div>

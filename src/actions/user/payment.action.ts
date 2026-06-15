@@ -21,7 +21,9 @@ import { headers } from "next/headers";
 const verifyPaymentSchema = z.object({
   reference: z.string().min(5, "Invalid reference length").trim(),
   listingId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid Listing ID"),
-  selectedMoveInDate: z.string().refine((val) => !isNaN(Date.parse(val)), { message: "Invalid date format" }),
+  selectedMoveInDate: z.string().refine((val) => !isNaN(Date.parse(val)), {
+    message: "Invalid date format",
+  }),
 });
 
 const renewalSchema = z.object({
@@ -34,21 +36,21 @@ const renewalSchema = z.object({
 // ============================================================================
 function calculateMilestones(start: Date, end: Date) {
   const totalDurationMs = end.getTime() - start.getTime();
-  
+
   return {
-    milestone1: { 
-      triggerDate: new Date(start.getTime() + (totalDurationMs * 0.50)), // 50% elapsed
-      sent: false 
+    milestone1: {
+      triggerDate: new Date(start.getTime() + totalDurationMs * 0.5), // 50% elapsed
+      sent: false,
     },
-    milestone2: { 
-      triggerDate: new Date(start.getTime() + (totalDurationMs * 0.75)), // 75% elapsed
-      sent: false 
+    milestone2: {
+      triggerDate: new Date(start.getTime() + totalDurationMs * 0.75), // 75% elapsed
+      sent: false,
     },
-    milestone3: { 
-      triggerDate: new Date(start.getTime() + (totalDurationMs * 0.90)), // 90% elapsed
-      sent: false 
+    milestone3: {
+      triggerDate: new Date(start.getTime() + totalDurationMs * 0.9), // 90% elapsed
+      sent: false,
     },
-    expired: { sent: false }
+    expired: { sent: false },
   };
 }
 
@@ -56,47 +58,64 @@ function calculateMilestones(start: Date, end: Date) {
 // 2. SERVER ACTIONS
 // ============================================================================
 
-export async function verifyPaystackPayment(rawReference: string, rawListingId: string, rawMoveInDate: string) {
+export async function verifyPaystackPayment(
+  rawReference: string,
+  rawListingId: string,
+  rawMoveInDate: string,
+) {
   let ip = "unknown";
 
   try {
     const headersList = await headers();
-    ip = headersList.get("x-forwarded-for")?.split(',')[0] || "Unknown IP";
+    ip = headersList.get("x-forwarded-for")?.split(",")[0] || "Unknown IP";
 
     // NO TYPE CASTING: Let TypeScript infer nullability, then handle it safely
     const session = await getSession();
     if (!session || !session.userId) throw new Error("UNAUTHORIZED");
 
-    const { reference, listingId, selectedMoveInDate } = verifyPaymentSchema.parse({
-      reference: rawReference,
-      listingId: rawListingId,
-      selectedMoveInDate: rawMoveInDate
-    });
+    const { reference, listingId, selectedMoveInDate } =
+      verifyPaymentSchema.parse({
+        reference: rawReference,
+        listingId: rawListingId,
+        selectedMoveInDate: rawMoveInDate,
+      });
 
     await connectToDatabase();
 
     const listing = await Listing.findById(listingId);
     if (!listing) return { success: false, message: "Property not found." };
-    if (listing.status === "Rented") return { success: false, message: "Property is already rented." };
+    if (listing.status === "Rented")
+      return { success: false, message: "Property is already rented." };
 
     const serverExpectedPrice = listing.price;
 
-    const response = await fetch(`https://api.paystack.co/transaction/verify/${reference}`, {
-      method: "GET",
-      headers: { Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}` },
-    });
+    const response = await fetch(
+      `https://api.paystack.co/transaction/verify/${reference}`,
+      {
+        method: "GET",
+        headers: { Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}` },
+      },
+    );
 
     if (!response.ok) throw new Error("PAYSTACK_NETWORK_ERROR");
-    
+
     const data = await response.json();
     if (!data.status || data.data.status !== "success") {
-      return { success: false, message: "Payment verification failed or is pending." };
+      return {
+        success: false,
+        message: "Payment verification failed or is pending.",
+      };
     }
 
-    const amountPaidInGhs = data.data.amount / 100; 
-    if (amountPaidInGhs < (serverExpectedPrice - 1)) {
-      console.error(`[SECURITY] Underpayment attempt detected! User ${session.userId} paid ${amountPaidInGhs} but owed ${serverExpectedPrice}`);
-      return { success: false, message: "Partial payment detected. Please contact support." };
+    const amountPaidInGhs = data.data.amount / 100;
+    if (amountPaidInGhs < serverExpectedPrice - 1) {
+      console.error(
+        `[SECURITY] Underpayment attempt detected! User ${session.userId} paid ${amountPaidInGhs} but owed ${serverExpectedPrice}`,
+      );
+      return {
+        success: false,
+        message: "Partial payment detected. Please contact support.",
+      };
     }
 
     const startDate = new Date(selectedMoveInDate);
@@ -107,10 +126,10 @@ export async function verifyPaystackPayment(rawReference: string, rawListingId: 
       endDate.setMonth(endDate.getMonth() + 1);
     } else if (term.includes("year")) {
       const yearMatch = term.match(/(\d+)_year/);
-      const yearsToAdd = yearMatch ? parseInt(yearMatch[1], 10) : 1; 
+      const yearsToAdd = yearMatch ? parseInt(yearMatch[1], 10) : 1;
       endDate.setFullYear(endDate.getFullYear() + yearsToAdd);
     } else {
-      endDate.setFullYear(endDate.getFullYear() + 1); 
+      endDate.setFullYear(endDate.getFullYear() + 1);
     }
 
     // NEW: Calculate the dynamic email triggers for this specific lease length
@@ -118,39 +137,54 @@ export async function verifyPaystackPayment(rawReference: string, rawListingId: 
 
     const dbSession = await mongoose.startSession();
     const result = await dbSession.withTransaction(async () => {
-      
-      const existingTx = await Transaction.findOne({ reference }).session(dbSession);
+      const existingTx = await Transaction.findOne({ reference }).session(
+        dbSession,
+      );
       if (existingTx && existingTx.status === "Success") {
         throw new Error("ALREADY_VERIFIED");
       }
 
-      const newLease = await Lease.create([{
-        listingId,
-        userId: session.userId,
-        totalRentAmount: amountPaidInGhs,
-        startDate,
-        endDate, 
-        reminders: dynamicReminders, // <-- INJECTING THE MILESTONES
-        status: "Pending_Verification" 
-      }], { session: dbSession });
+      const newLease = await Lease.create(
+        [
+          {
+            listingId,
+            userId: session.userId,
+            totalRentAmount: amountPaidInGhs,
+            startDate,
+            endDate,
+            reminders: dynamicReminders, // <-- INJECTING THE MILESTONES
+            status: "Pending_Verification",
+          },
+        ],
+        { session: dbSession },
+      );
 
-      await Transaction.create([{
-        userId: session.userId,
-        listingId,
-        leaseId: newLease[0]._id, 
-        amount: amountPaidInGhs,
-        currency: data.data.currency,
-        paymentPurpose: "Upfront_Rent", 
-        reference,
-        transactionReference: reference,
-        paystackTransactionId: data.data.id.toString(),
-        channel: data.data.channel || "card",
-        paystackFee: data.data.fees ? (data.data.fees / 100) : 0,
-        status: "Success",
-        paidAt: new Date(data.data.paid_at)
-      }], { session: dbSession });
+      await Transaction.create(
+        [
+          {
+            userId: session.userId,
+            listingId,
+            leaseId: newLease[0]._id,
+            amount: amountPaidInGhs,
+            currency: data.data.currency,
+            paymentPurpose: "Upfront_Rent",
+            reference,
+            transactionReference: reference,
+            paystackTransactionId: data.data.id.toString(),
+            channel: data.data.channel || "card",
+            paystackFee: data.data.fees ? data.data.fees / 100 : 0,
+            status: "Success",
+            paidAt: new Date(data.data.paid_at),
+          },
+        ],
+        { session: dbSession },
+      );
 
-      await Listing.findByIdAndUpdate(listingId, { status: "Rented" }, { session: dbSession });
+      await Listing.findByIdAndUpdate(
+        listingId,
+        { status: "Rented" },
+        { session: dbSession },
+      );
 
       return "SUCCESS";
     });
@@ -162,71 +196,103 @@ export async function verifyPaystackPayment(rawReference: string, rawListingId: 
         sendEmail({
           to: user.email,
           subject: `Payment Confirmed: ${listing.title}`,
-          react: React.createElement(PaymentReceiptEmail, { propertyTitle: listing.title, amount: amountPaidInGhs, reference })
-        }).catch(err => console.error("[NON-FATAL] Failed to send receipt:", err));
+          react: React.createElement(PaymentReceiptEmail, {
+            propertyTitle: listing.title,
+            amount: amountPaidInGhs,
+            reference,
+          }),
+        }).catch((err) =>
+          console.error("[NON-FATAL] Failed to send receipt:", err),
+        );
       }
 
       revalidatePath("/admin/transactions");
       revalidatePath("/explore");
       revalidatePath("/user/leases");
-      revalidatePath(`/properties/${listingId}`); 
+      revalidatePath(`/properties/${listingId}`);
 
       return { success: true, message: "Payment secured successfully!" };
     }
-
   } catch (error: any) {
-    if (error.message === "UNAUTHORIZED") return { success: false, message: "Unauthorized: Please log in." };
-    if (error.message === "ALREADY_VERIFIED") return { success: true, message: "Payment was already verified!" };
-    
-    console.error(`[SECURITY LOG] Payment Verification Error (IP: ${ip}):`, error.message);
-    return { success: false, message: "A server error occurred during verification." };
+    if (error.message === "UNAUTHORIZED")
+      return { success: false, message: "Unauthorized: Please log in." };
+    if (error.message === "ALREADY_VERIFIED")
+      return { success: true, message: "Payment was already verified!" };
+
+    console.error(
+      `[SECURITY LOG] Payment Verification Error (IP: ${ip}):`,
+      error.message,
+    );
+    return {
+      success: false,
+      message: "A server error occurred during verification.",
+    };
   }
 }
 
-export async function processLeaseRenewal(rawReference: string, rawLeaseId: string) {
+export async function processLeaseRenewal(
+  rawReference: string,
+  rawLeaseId: string,
+) {
   let ip = "unknown";
 
   try {
     const headersList = await headers();
-    ip = headersList.get("x-forwarded-for")?.split(',')[0] || "Unknown IP";
+    ip = headersList.get("x-forwarded-for")?.split(",")[0] || "Unknown IP";
 
     const session = await getSession();
     if (!session || !session.userId) throw new Error("UNAUTHORIZED");
 
     const { reference, leaseId } = renewalSchema.parse({
       reference: rawReference,
-      leaseId: rawLeaseId
+      leaseId: rawLeaseId,
     });
 
     await connectToDatabase();
 
-    const existingLease = await Lease.findOne({ _id: leaseId, userId: session.userId }).populate("listingId");
+    const existingLease = await Lease.findOne({
+      _id: leaseId,
+      userId: session.userId,
+    }).populate("listingId");
     if (!existingLease || !existingLease.listingId) {
       return { success: false, message: "Lease not found or unauthorized." };
     }
 
-    const serverExpectedPrice = existingLease.listingId.price; 
+    const serverExpectedPrice = existingLease.listingId.price;
 
-    const response = await fetch(`https://api.paystack.co/transaction/verify/${reference}`, {
-      method: "GET",
-      headers: { Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}` },
-    });
+    const response = await fetch(
+      `https://api.paystack.co/transaction/verify/${reference}`,
+      {
+        method: "GET",
+        headers: { Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}` },
+      },
+    );
 
     if (!response.ok) throw new Error("PAYSTACK_NETWORK_ERROR");
 
     const data = await response.json();
     if (!data.status || data.data.status !== "success") {
-      return { success: false, message: "Payment verification failed or is pending." };
+      return {
+        success: false,
+        message: "Payment verification failed or is pending.",
+      };
     }
 
-    const amountPaidInGhs = data.data.amount / 100; 
-    if (amountPaidInGhs < (serverExpectedPrice - 1)) {
-       console.error(`[SECURITY] Renewal Underpayment! User ${session.userId} paid ${amountPaidInGhs} but owed ${serverExpectedPrice}`);
-       return { success: false, message: "Partial payment detected. Please contact support." };
+    const amountPaidInGhs = data.data.amount / 100;
+    if (amountPaidInGhs < serverExpectedPrice - 1) {
+      console.error(
+        `[SECURITY] Renewal Underpayment! User ${session.userId} paid ${amountPaidInGhs} but owed ${serverExpectedPrice}`,
+      );
+      return {
+        success: false,
+        message: "Partial payment detected. Please contact support.",
+      };
     }
 
     const now = new Date();
-    const currentEndDate = existingLease.endDate ? new Date(existingLease.endDate) : now;
+    const currentEndDate = existingLease.endDate
+      ? new Date(existingLease.endDate)
+      : now;
     const baseDateForExtension = currentEndDate > now ? currentEndDate : now;
     const newEndDate = new Date(baseDateForExtension);
     const term = existingLease.listingId?.terms?.leaseTerm?.toLowerCase() || "";
@@ -234,40 +300,50 @@ export async function processLeaseRenewal(rawReference: string, rawLeaseId: stri
     if (term.includes("month")) newEndDate.setMonth(newEndDate.getMonth() + 1);
     else if (term.includes("year")) {
       const yearMatch = term.match(/(\d+)_year/);
-      const yearsToAdd = yearMatch ? parseInt(yearMatch[1], 10) : 1; 
+      const yearsToAdd = yearMatch ? parseInt(yearMatch[1], 10) : 1;
       newEndDate.setFullYear(newEndDate.getFullYear() + yearsToAdd);
     } else newEndDate.setFullYear(newEndDate.getFullYear() + 1);
 
     // NEW: Re-calculate the reminder milestones based on the newly extended period
-    const newDynamicReminders = calculateMilestones(baseDateForExtension, newEndDate);
+    const newDynamicReminders = calculateMilestones(
+      baseDateForExtension,
+      newEndDate,
+    );
 
     const dbSession = await mongoose.startSession();
     const result = await dbSession.withTransaction(async () => {
-      
-      const existingTx = await Transaction.findOne({ reference }).session(dbSession);
-      if (existingTx && existingTx.status === "Success") throw new Error("ALREADY_VERIFIED");
+      const existingTx = await Transaction.findOne({ reference }).session(
+        dbSession,
+      );
+      if (existingTx && existingTx.status === "Success")
+        throw new Error("ALREADY_VERIFIED");
 
       existingLease.endDate = newEndDate;
       existingLease.reminders = newDynamicReminders; // <-- RESETTING THE TRIGGERS
       if (existingLease.status === "Expired") existingLease.status = "Active";
-      
+
       await existingLease.save({ session: dbSession });
 
-      await Transaction.create([{
-        userId: session.userId,
-        listingId: existingLease.listingId._id,
-        leaseId: existingLease._id, 
-        amount: amountPaidInGhs,
-        currency: data.data.currency,
-        paymentPurpose: "Lease_Renewal", 
-        reference,
-        transactionReference: reference,
-        paystackTransactionId: data.data.id.toString(),
-        channel: data.data.channel || "card",
-        paystackFee: data.data.fees ? (data.data.fees / 100) : 0,
-        status: "Success",
-        paidAt: new Date(data.data.paid_at)
-      }], { session: dbSession });
+      await Transaction.create(
+        [
+          {
+            userId: session.userId,
+            listingId: existingLease.listingId._id,
+            leaseId: existingLease._id,
+            amount: amountPaidInGhs,
+            currency: data.data.currency,
+            paymentPurpose: "Lease_Renewal",
+            reference,
+            transactionReference: reference,
+            paystackTransactionId: data.data.id.toString(),
+            channel: data.data.channel || "card",
+            paystackFee: data.data.fees ? data.data.fees / 100 : 0,
+            status: "Success",
+            paidAt: new Date(data.data.paid_at),
+          },
+        ],
+        { session: dbSession },
+      );
 
       return "SUCCESS";
     });
@@ -281,9 +357,15 @@ export async function processLeaseRenewal(rawReference: string, rawLeaseId: stri
           subject: `Lease Renewal Confirmed: ${existingLease.listingId.title}`,
           react: React.createElement(RenewalConfirmationEmail, {
             propertyTitle: existingLease.listingId.title,
-            newEndDate: newEndDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
-          })
-        }).catch(err => console.error("[NON-FATAL] Failed to send renewal email:", err));
+            newEndDate: newEndDate.toLocaleDateString("en-GB", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            }),
+          }),
+        }).catch((err) =>
+          console.error("[NON-FATAL] Failed to send renewal email:", err),
+        );
       }
 
       revalidatePath("/user/dashboard");
@@ -292,12 +374,19 @@ export async function processLeaseRenewal(rawReference: string, rawLeaseId: stri
 
       return { success: true, message: "Lease successfully renewed!" };
     }
-
   } catch (error: any) {
-    if (error.message === "UNAUTHORIZED") return { success: false, message: "Unauthorized: Please log in." };
-    if (error.message === "ALREADY_VERIFIED") return { success: true, message: "Renewal payment was already verified!" };
+    if (error.message === "UNAUTHORIZED")
+      return { success: false, message: "Unauthorized: Please log in." };
+    if (error.message === "ALREADY_VERIFIED")
+      return {
+        success: true,
+        message: "Renewal payment was already verified!",
+      };
 
     console.error(`[SECURITY LOG] Renewal Error (IP: ${ip}):`, error.message);
-    return { success: false, message: "A server error occurred during renewal verification." };
+    return {
+      success: false,
+      message: "A server error occurred during renewal verification.",
+    };
   }
 }

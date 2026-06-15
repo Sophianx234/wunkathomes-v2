@@ -1,11 +1,11 @@
-"use server"
+"use server";
 
 import { z } from "zod";
-import { revalidatePath } from "next/cache"
-import { uploadToCloudinary } from "@/lib/cloudinary" 
-import { connectToDatabase } from "@/config/DbConnect"
-import User from "@/models/user"
-import { getSession } from "@/lib/session"
+import { revalidatePath } from "next/cache";
+import { uploadToCloudinary } from "@/lib/cloudinary";
+import { connectToDatabase } from "@/config/DbConnect";
+import User from "@/models/user";
+import { getSession } from "@/lib/session";
 import { headers } from "next/headers";
 
 // NOTE: In production, implement Redis rate-limiting to prevent upload spam
@@ -23,39 +23,49 @@ export type ActionState = {
 // Max Base64 length for a 5MB image is roughly 7,000,000 characters.
 const MAX_BASE64_LENGTH = 7000000;
 
-const kycSchema = z.object({
-  fullName: z.string().min(2, "Full name is too short").max(100).trim(),
-  dob: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format"),
-  // Explicitly defining acceptable ID types
-  idType: z.enum(["Ghana_Card", "Passport", "Driver_License", "Voter_ID"]),
-  idNumber: z.string().min(4, "ID Number is too short").max(50).trim(),
-  
-  existingProfileUrl: z.string().url("Invalid URL").optional().nullable(),
-  
-  profilePhotoBase64: z.string()
-    .max(MAX_BASE64_LENGTH, "Profile photo exceeds 5MB limit.")
-    .refine(val => !val || val.startsWith("data:image/"), "Invalid image format.")
-    .optional().nullable(),
-    
-  verificationPhotoBase64: z.string()
-    .max(MAX_BASE64_LENGTH, "Verification photo exceeds 5MB limit.")
-    .startsWith("data:image/", "Invalid image format."),
-}).refine(data => data.profilePhotoBase64 || data.existingProfileUrl, {
-  message: "Profile photo is required.",
-  path: ["profilePhotoBase64"]
-});
+const kycSchema = z
+  .object({
+    fullName: z.string().min(2, "Full name is too short").max(100).trim(),
+    dob: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format"),
+    // Explicitly defining acceptable ID types
+    idType: z.enum(["Ghana_Card", "Passport", "Driver_License", "Voter_ID"]),
+    idNumber: z.string().min(4, "ID Number is too short").max(50).trim(),
+
+    existingProfileUrl: z.string().url("Invalid URL").optional().nullable(),
+
+    profilePhotoBase64: z
+      .string()
+      .max(MAX_BASE64_LENGTH, "Profile photo exceeds 5MB limit.")
+      .refine(
+        (val) => !val || val.startsWith("data:image/"),
+        "Invalid image format.",
+      )
+      .optional()
+      .nullable(),
+
+    verificationPhotoBase64: z
+      .string()
+      .max(MAX_BASE64_LENGTH, "Verification photo exceeds 5MB limit.")
+      .startsWith("data:image/", "Invalid image format."),
+  })
+  .refine((data) => data.profilePhotoBase64 || data.existingProfileUrl, {
+    message: "Profile photo is required.",
+    path: ["profilePhotoBase64"],
+  });
 
 // ============================================================================
 // 2. SERVER ACTION
 // ============================================================================
-export async function submitIdentityVerification(formData: FormData): Promise<ActionState> {
+export async function submitIdentityVerification(
+  formData: FormData,
+): Promise<ActionState> {
   let ip = "unknown";
   let userId = "unknown";
 
   try {
     // 1. Capture Identity & Digital Footprint
     const headersList = await headers();
-    ip = headersList.get("x-forwarded-for")?.split(',')[0] || "Unknown IP";
+    ip = headersList.get("x-forwarded-for")?.split(",")[0] || "Unknown IP";
 
     // 2. Strict Authentication Check (NO Type Casting)
     const session = await getSession();
@@ -81,12 +91,21 @@ export async function submitIdentityVerification(formData: FormData): Promise<Ac
 
     const validationResult = kycSchema.safeParse(rawData);
     if (!validationResult.success) {
-      return { success: false, message: "", error: validationResult.error.errors[0].message };
+      return {
+        success: false,
+        message: "",
+        error: validationResult.error.errors[0].message,
+      };
     }
 
-    const { 
-      fullName, dob, idType, idNumber, 
-      profilePhotoBase64, existingProfileUrl, verificationPhotoBase64 
+    const {
+      fullName,
+      dob,
+      idType,
+      idNumber,
+      profilePhotoBase64,
+      existingProfileUrl,
+      verificationPhotoBase64,
     } = validationResult.data;
 
     // 5. Secure External API Execution (Cloudinary)
@@ -94,10 +113,16 @@ export async function submitIdentityVerification(formData: FormData): Promise<Ac
 
     // Because Zod guarantees the length and prefix, we are safe to upload
     if (profilePhotoBase64) {
-      profilePhotoUrl = await uploadToCloudinary(profilePhotoBase64, "wunkathomes/profiles");
+      profilePhotoUrl = await uploadToCloudinary(
+        profilePhotoBase64,
+        "wunkathomes/profiles",
+      );
     }
-    
-    const verificationPhotoUrl = await uploadToCloudinary(verificationPhotoBase64, "wunkathomes/kyc");
+
+    const verificationPhotoUrl = await uploadToCloudinary(
+      verificationPhotoBase64,
+      "wunkathomes/kyc",
+    );
 
     await connectToDatabase();
 
@@ -107,20 +132,36 @@ export async function submitIdentityVerification(formData: FormData): Promise<Ac
       dateOfBirth: new Date(dob),
       idDocumentType: idType,
       idDocumentNumber: idNumber,
-      profilePicture: profilePhotoUrl, 
-      idVerificationPhotoUrl: verificationPhotoUrl, 
-      kycStatus: "Pending"
+      profilePicture: profilePhotoUrl,
+      idVerificationPhotoUrl: verificationPhotoUrl,
+      kycStatus: "Pending",
     });
 
-    revalidatePath("/dashboard/leases");
+    revalidatePath("/overview/leases");
     return { success: true, message: "Verification submitted successfully." };
-
   } catch (error: any) {
     // 7. Secure Failure & Contextual Logging
-    if (error.message === "UNAUTHORIZED") return { success: false, message: "", error: "Unauthorized. Please log in." };
-    if (error.message === "RATE_LIMIT_EXCEEDED") return { success: false, message: "", error: "Upload rate limit exceeded. Please wait." };
+    if (error.message === "UNAUTHORIZED")
+      return {
+        success: false,
+        message: "",
+        error: "Unauthorized. Please log in.",
+      };
+    if (error.message === "RATE_LIMIT_EXCEEDED")
+      return {
+        success: false,
+        message: "",
+        error: "Upload rate limit exceeded. Please wait.",
+      };
 
-    console.error(`[SECURITY LOG] KYC Submission Error (User: ${userId}, IP: ${ip}):`, error.message);
-    return { success: false, message: "", error: "An unexpected error occurred during submission." };
+    console.error(
+      `[SECURITY LOG] KYC Submission Error (User: ${userId}, IP: ${ip}):`,
+      error.message,
+    );
+    return {
+      success: false,
+      message: "",
+      error: "An unexpected error occurred during submission.",
+    };
   }
 }

@@ -5,7 +5,7 @@ import { connectToDatabase } from "@/config/DbConnect";
 import Maintenance from "@/models/maintenance";
 import Lease from "@/models/lease";
 import { revalidatePath } from "next/cache";
-import { uploadToCloudinary } from "@/lib/cloudinary"; 
+import { uploadToCloudinary } from "@/lib/cloudinary";
 import { z } from "zod";
 import crypto from "crypto";
 import { headers } from "next/headers";
@@ -24,9 +24,19 @@ export type ActionState = {
 // ============================================================================
 const maintenanceSchema = z.object({
   category: z.string().min(2).max(50).trim(),
-  priority: z.enum(["Low", "Medium", "High", "Emergency"], { message: "Invalid priority level" }),
-  title: z.string().min(5, "Title is too short").max(100, "Title is too long").trim(),
-  description: z.string().min(10, "Please provide more details").max(2000, "Description is too long").trim(),
+  priority: z.enum(["Low", "Medium", "High", "Emergency"], {
+    message: "Invalid priority level",
+  }),
+  title: z
+    .string()
+    .min(5, "Title is too short")
+    .max(100, "Title is too long")
+    .trim(),
+  description: z
+    .string()
+    .min(10, "Please provide more details")
+    .max(2000, "Description is too long")
+    .trim(),
 });
 
 // Security Constraints for File Uploads
@@ -37,15 +47,18 @@ const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
 // ============================================================================
 // 2. SERVER ACTION
 // ============================================================================
-export async function submitMaintenanceRequest(prevState: ActionState, formData: FormData): Promise<ActionState> {
+export async function submitMaintenanceRequest(
+  prevState: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
   let session;
   let ip = "unknown";
 
   try {
     // 1. Capture Identity & Digital Footprint
     const headersList = await headers();
-    ip = headersList.get("x-forwarded-for")?.split(',')[0] || "Unknown IP";
-    
+    ip = headersList.get("x-forwarded-for")?.split(",")[0] || "Unknown IP";
+
     session = await getSession();
     if (!session?.userId) {
       throw new Error("UNAUTHORIZED");
@@ -56,9 +69,15 @@ export async function submitMaintenanceRequest(prevState: ActionState, formData:
     // if (!success) throw new Error("RATE_LIMIT_EXCEEDED");
 
     // 3. Strict Zod Validation (Prevent Mass Assignment via Object.fromEntries)
-    const validatedFields = maintenanceSchema.safeParse(Object.fromEntries(formData));
+    const validatedFields = maintenanceSchema.safeParse(
+      Object.fromEntries(formData),
+    );
     if (!validatedFields.success) {
-      return { success: false, message: "", error: validatedFields.error.errors[0].message };
+      return {
+        success: false,
+        message: "",
+        error: validatedFields.error.errors[0].message,
+      };
     }
 
     const { category, priority, title, description } = validatedFields.data;
@@ -66,12 +85,16 @@ export async function submitMaintenanceRequest(prevState: ActionState, formData:
     await connectToDatabase();
 
     // 4. Contextual Authorization (IDOR Prevention)
-    const activeLease = await Lease.findOne({ userId: session.userId, status: "Active" }).lean();
+    const activeLease = await Lease.findOne({
+      userId: session.userId,
+      status: "Active",
+    }).lean();
     if (!activeLease) {
-      return { 
-        success: false, 
-        message: "", 
-        error: "No active lease found. Maintenance requests are only available for current residents." 
+      return {
+        success: false,
+        message: "",
+        error:
+          "No active lease found. Maintenance requests are only available for current residents.",
       };
     }
 
@@ -81,24 +104,39 @@ export async function submitMaintenanceRequest(prevState: ActionState, formData:
 
     for (const file of rawMediaFiles) {
       if (!file || file.size === 0) continue; // Skip empty nodes
-      
+
       if (!ALLOWED_MIME_TYPES.includes(file.type)) {
-        return { success: false, message: "", error: "Invalid file format. Only JPG, PNG, and WEBP are allowed." };
+        return {
+          success: false,
+          message: "",
+          error: "Invalid file format. Only JPG, PNG, and WEBP are allowed.",
+        };
       }
       if (file.size > MAX_FILE_SIZE) {
-        return { success: false, message: "", error: `File ${file.name} exceeds the 5MB limit.` };
+        return {
+          success: false,
+          message: "",
+          error: `File ${file.name} exceeds the 5MB limit.`,
+        };
       }
       validMediaFiles.push(file);
     }
 
     if (validMediaFiles.length > MAX_FILE_COUNT) {
-      return { success: false, message: "", error: `You can only upload a maximum of ${MAX_FILE_COUNT} images.` };
+      return {
+        success: false,
+        message: "",
+        error: `You can only upload a maximum of ${MAX_FILE_COUNT} images.`,
+      };
     }
 
     // 6. External API Upload (Cloudinary)
     let imageUrls: string[] = [];
     if (validMediaFiles.length > 0) {
-      const uploadResult = await uploadToCloudinary(validMediaFiles, "wunkathomes/maintenance");
+      const uploadResult = await uploadToCloudinary(
+        validMediaFiles,
+        "wunkathomes/maintenance",
+      );
       imageUrls = Array.isArray(uploadResult) ? uploadResult : [uploadResult];
     }
 
@@ -117,29 +155,38 @@ export async function submitMaintenanceRequest(prevState: ActionState, formData:
       title,
       description,
       images: imageUrls,
-      status: "Pending"
+      status: "Pending",
     });
 
     // 9. Cache Invalidation
     revalidatePath("/user/dashboard");
     revalidatePath("/user/maintenance/history");
-    
-    return { 
-      success: true, 
-      message: `Ticket ${ticketNumber} submitted successfully.` 
-    };
 
+    return {
+      success: true,
+      message: `Ticket ${ticketNumber} submitted successfully.`,
+    };
   } catch (error: any) {
     // 10. Fail Securely & Contextual Logging
-    if (error.message === "UNAUTHORIZED") return { success: false, message: "", error: "Unauthorized access." };
-    if (error.message === "RATE_LIMIT_EXCEEDED") return { success: false, message: "", error: "You are submitting tickets too quickly. Please wait." };
+    if (error.message === "UNAUTHORIZED")
+      return { success: false, message: "", error: "Unauthorized access." };
+    if (error.message === "RATE_LIMIT_EXCEEDED")
+      return {
+        success: false,
+        message: "",
+        error: "You are submitting tickets too quickly. Please wait.",
+      };
 
-    console.error(`[SECURITY LOG] Maintenance Submission Error (User: ${session?.userId}, IP: ${ip}):`, error.message);
-    
-    return { 
-      success: false, 
-      message: "", 
-      error: "A server error occurred while processing your request. Please try again." 
+    console.error(
+      `[SECURITY LOG] Maintenance Submission Error (User: ${session?.userId}, IP: ${ip}):`,
+      error.message,
+    );
+
+    return {
+      success: false,
+      message: "",
+      error:
+        "A server error occurred while processing your request. Please try again.",
     };
   }
 }

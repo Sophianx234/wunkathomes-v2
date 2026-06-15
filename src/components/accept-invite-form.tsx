@@ -45,7 +45,7 @@ export function AcceptInviteForm({
     } else if (state?.success) {
       toast.success(state.message);
       // Route new staff member to the dashboard
-      router.push("/dashboard");
+      router.push("/admin/overview");
     }
   }, [state, router]);
 

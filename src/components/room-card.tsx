@@ -6,7 +6,6 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
-
 export interface IRoom {
   _id: string;
   name: string;
@@ -51,23 +50,17 @@ export default function RoomCard({ room, type = "user" }: propertyCardProps) {
     }
   };
 
-    const handleReadMore = () => {
+  const handleReadMore = () => {
     // If logged in → go to property page
-    
-      router.push(`/dashboard/properties/${room._id}`);
 
-     
-    
+    router.push(`/overview/properties/${room._id}`);
   };
 
   const handleEdit = () => {
-    router.push(`/dashboard/properties/edit/${room._id}`);
+    router.push(`/overview/properties/edit/${room._id}`);
   };
 
-  const handleDelete = async () => {
-    
-    }
-  
+  const handleDelete = async () => {};
 
   return (
     <div className="bg-white rounded-xl shadow-md p-4 relative hover:shadow-lg transition flex flex-col h-full">
@@ -81,7 +74,7 @@ export default function RoomCard({ room, type = "user" }: propertyCardProps) {
         />
         <span
           className={`absolute top-2 left-2 px-3 py-1 text-xs font-medium rounded-full ${getStatusStyle(
-            room?.status
+            room?.status,
           )}`}
         >
           {room?.status.charAt(0).toUpperCase() + room?.status.slice(1)}
@@ -95,14 +88,13 @@ export default function RoomCard({ room, type = "user" }: propertyCardProps) {
               variant="outline"
               className="h-7 w-7"
             >
-              <HugeiconsIcon icon={Edit}  className="w-4 h-4" />
+              <HugeiconsIcon icon={Edit} className="w-4 h-4" />
             </Button>
-          <Button
-  onClick={handleDelete}
-  size="icon"
-  className="h-7 w-7 bg-red-100 hover:bg-red-200 text-red-600 border border-red-200"
->
-
+            <Button
+              onClick={handleDelete}
+              size="icon"
+              className="h-7 w-7 bg-red-100 hover:bg-red-200 text-red-600 border border-red-200"
+            >
               <HugeiconsIcon icon={Trash} className="w-4 h-4" />
             </Button>
           </div>
@@ -140,15 +132,13 @@ export default function RoomCard({ room, type = "user" }: propertyCardProps) {
             </span>
           </span>
 
-          
-            <Button
-              disabled={!room.status.includes("available")&&type==='user'}
-              onClick={handleReadMore}
-              className="text-white text-xs font-medium px-4 py-1"
-            >
-              View & Book
-            </Button>
-          
+          <Button
+            disabled={!room.status.includes("available") && type === "user"}
+            onClick={handleReadMore}
+            className="text-white text-xs font-medium px-4 py-1"
+          >
+            View & Book
+          </Button>
         </div>
       </div>
     </div>

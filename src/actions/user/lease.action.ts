@@ -75,8 +75,8 @@ export async function signLeaseAgreement(
     const updatedLease = await Lease.findOneAndUpdate(
       {
         _id: leaseId,
-        userId: userId, 
-        "signatureAudit.isSigned": { $ne: true }, 
+        userId: userId,
+        "signatureAudit.isSigned": { $ne: true },
       },
       {
         status: "Awaiting_Admin_Approval",
@@ -93,20 +93,32 @@ export async function signLeaseAgreement(
     );
 
     if (!updatedLease) {
-      return { success: false, error: "Lease not found, unauthorized, or already signed." };
+      return {
+        success: false,
+        error: "Lease not found, unauthorized, or already signed.",
+      };
     }
 
     revalidatePath("/user/dashboard");
 
     return { success: true };
   } catch (error: any) {
-    if (error.message === "UNAUTHORIZED") return { success: false, error: "Unauthorized access." };
-    if (error.message === "RATE_LIMIT_EXCEEDED") return { success: false, error: "Too many requests. Please try again later." };
+    if (error.message === "UNAUTHORIZED")
+      return { success: false, error: "Unauthorized access." };
+    if (error.message === "RATE_LIMIT_EXCEEDED")
+      return {
+        success: false,
+        error: "Too many requests. Please try again later.",
+      };
 
-    console.error(`[SECURITY LOG] Signature Error (User: ${userId}, IP: ${ip}):`, error.message);
+    console.error(
+      `[SECURITY LOG] Signature Error (User: ${userId}, IP: ${ip}):`,
+      error.message,
+    );
     return {
       success: false,
-      error: "Failed to apply digital signature. Please check your inputs and try again.",
+      error:
+        "Failed to apply digital signature. Please check your inputs and try again.",
     };
   }
 }
@@ -145,7 +157,10 @@ export async function submitNoticeToVacate(rawLeaseId: string) {
     }
 
     if (lease.intentToVacate) {
-      return { success: false, message: "Notice to vacate has already been submitted." };
+      return {
+        success: false,
+        message: "Notice to vacate has already been submitted.",
+      };
     }
 
     // 5. ATOMIC TRANSACTION: Mongoose Recommended Pattern
@@ -160,7 +175,7 @@ export async function submitNoticeToVacate(rawLeaseId: string) {
       await Listing.findByIdAndUpdate(
         lease.listingId._id,
         { status: "Available" },
-        { session: dbSession }
+        { session: dbSession },
       );
     });
     await dbSession.endSession();
@@ -179,7 +194,7 @@ export async function submitNoticeToVacate(rawLeaseId: string) {
             year: "numeric",
           }),
         }),
-      }).catch(emailError => {
+      }).catch((emailError) => {
         console.error("[NON-FATAL] Move-out email failed to send:", emailError);
       });
     }
@@ -190,14 +205,18 @@ export async function submitNoticeToVacate(rawLeaseId: string) {
 
     return {
       success: true,
-      message: "Notice to vacate submitted. Check your email for move-out instructions.",
+      message:
+        "Notice to vacate submitted. Check your email for move-out instructions.",
     };
-
   } catch (error: any) {
     // 8. Secure Failure & Logging
-    if (error.message === "UNAUTHORIZED") return { success: false, message: "Unauthorized access." };
-    
-    console.error(`[SECURITY LOG] Notice to Vacate Error (User: ${userId}, IP: ${ip}):`, error.message);
+    if (error.message === "UNAUTHORIZED")
+      return { success: false, message: "Unauthorized access." };
+
+    console.error(
+      `[SECURITY LOG] Notice to Vacate Error (User: ${userId}, IP: ${ip}):`,
+      error.message,
+    );
     return { success: false, message: "An unexpected system error occurred." };
   }
 }

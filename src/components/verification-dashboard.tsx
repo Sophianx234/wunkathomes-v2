@@ -17,7 +17,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { AnimatePresence, motion } from "framer-motion";
 import React, { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation"; 
+import { useRouter } from "next/navigation";
 
 export interface CurrentUser {
   id: string;
@@ -32,8 +32,8 @@ export interface CurrentUser {
 
 interface VerificationDashboardProps {
   currentUser?: CurrentUser | null;
-  leaseId: string; 
-  isLeaseSigned: boolean; 
+  leaseId: string;
+  isLeaseSigned: boolean;
 }
 
 export function VerificationDashboard({
@@ -53,7 +53,7 @@ export function VerificationDashboard({
 
   const [step, setStep] = useState(initialStep);
 
-  // Form State 
+  // Form State
   const [fullName, setFullName] = useState(
     currentUser?.legalName || currentUser?.name || "",
   );
@@ -64,7 +64,7 @@ export function VerificationDashboard({
   const [dob, setDob] = useState(initialDob);
 
   // ID State
-  const [idType, setIdType] = useState(currentUser?.idDocumentType || "GHA"); 
+  const [idType, setIdType] = useState(currentUser?.idDocumentType || "GHA");
   const [idNumber, setIdNumber] = useState(currentUser?.idDocumentNumber || "");
 
   // Camera & Image State
@@ -170,14 +170,14 @@ export function VerificationDashboard({
     try {
       const formData = new FormData();
       formData.append("userId", currentUser?.id || "");
-      formData.append("leaseId", leaseId); 
+      formData.append("leaseId", leaseId);
       formData.append("fullName", fullName);
       formData.append("dob", dob);
       formData.append("idType", idType);
       formData.append("idNumber", idNumber);
 
       if (profilePreview) {
-        if (profilePreview.startsWith('data:image')) {
+        if (profilePreview.startsWith("data:image")) {
           formData.append("profilePhotoBase64", profilePreview);
         } else {
           formData.append("existingProfileUrl", profilePreview);
@@ -210,7 +210,6 @@ export function VerificationDashboard({
   return (
     <div className="min-h-screen bg-[#F4F7F9] p-2 md:p-8 font-sans text-slate-800 w-full overflow-x-hidden box-border">
       <div className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-4 md:gap-6 w-full box-border">
-        
         {/* ========================================================= */}
         {/* LEFT SIDEBAR */}
         {/* ========================================================= */}
@@ -272,7 +271,7 @@ export function VerificationDashboard({
             {step === 4 && (
               <span className="mb-2 md:mb-3 px-2 py-0.5 md:px-3 md:py-1 bg-green-50 text-green-600 text-[8px] md:text-[10px] font-bold uppercase tracking-widest rounded-full flex items-center gap-1">
                 <span className="scale-75 md:scale-100 flex items-center">
-                   <HugeiconsIcon icon={Shield02Icon} size={12} />
+                  <HugeiconsIcon icon={Shield02Icon} size={12} />
                 </span>
                 Verified
               </span>
@@ -299,7 +298,8 @@ export function VerificationDashboard({
               Need help?
             </h3>
             <p className="text-[10px] md:text-xs text-slate-500 leading-relaxed mb-3 md:mb-6 px-2 break-words">
-              Have questions or concerns regarding your verification? Our experts are here to help!
+              Have questions or concerns regarding your verification? Our
+              experts are here to help!
             </p>
             <button className="w-full min-w-0 box-border py-2.5 md:py-3 bg-black hover:bg-zinc-800 text-white text-[10px] md:text-xs font-bold uppercase tracking-widest rounded-lg transition-colors shadow-primary/20 truncate px-2">
               Chat With Us
@@ -370,15 +370,27 @@ export function VerificationDashboard({
                 </React.Fragment>
               ))}
             </div>
-            
+
             {/* Dynamic Stepper Labels */}
             <div className="flex justify-between w-full max-w-3xl mt-2 md:mt-3 text-[7px] md:text-xs font-bold text-slate-400 uppercase tracking-widest box-border">
-              <span className={`truncate ${step >= 1 ? "text-primary" : ""}`}>Details</span>
-              <span className={`text-center pl-2 md:pl-4 truncate ${step >= 2 ? "text-primary" : ""}`}>Selfie</span>
-              <span className={`text-center pl-4 md:pl-8 truncate ${step >= 3 ? "text-primary" : ""}`}>
+              <span className={`truncate ${step >= 1 ? "text-primary" : ""}`}>
+                Details
+              </span>
+              <span
+                className={`text-center pl-2 md:pl-4 truncate ${step >= 2 ? "text-primary" : ""}`}
+              >
+                Selfie
+              </span>
+              <span
+                className={`text-center pl-4 md:pl-8 truncate ${step >= 3 ? "text-primary" : ""}`}
+              >
                 {isLeaseSigned ? "Approval" : "Sign Lease"}
               </span>
-              <span className={`text-right truncate ${step >= 4 ? "text-primary" : ""}`}>Verified</span>
+              <span
+                className={`text-right truncate ${step >= 4 ? "text-primary" : ""}`}
+              >
+                Verified
+              </span>
             </div>
           </div>
 
@@ -392,7 +404,6 @@ export function VerificationDashboard({
 
             <div className="p-4 md:p-8 flex-1 w-full min-w-0 box-border">
               <AnimatePresence mode="wait">
-                
                 {/* --- STEP 1: Personal Details --- */}
                 {step === 1 && (
                   <motion.div
@@ -555,7 +566,9 @@ export function VerificationDashboard({
                           Awaiting Admin Approval
                         </h3>
                         <p className="text-[11px] md:text-sm text-slate-500 max-w-sm mb-6 md:mb-8 px-4 break-words">
-                          Your identity documents and tenancy agreement have been successfully submitted. Our team is reviewing them to securely generate your Smart Lock PIN.
+                          Your identity documents and tenancy agreement have
+                          been successfully submitted. Our team is reviewing
+                          them to securely generate your Smart Lock PIN.
                         </p>
 
                         <button
@@ -579,15 +592,20 @@ export function VerificationDashboard({
                           Verification Submitted
                         </h3>
                         <p className="text-[11px] md:text-sm text-slate-500 max-w-sm mb-6 md:mb-8 px-4 break-words">
-                          Your identity documents have been securely transmitted. 
-                          You can now review and legally bind your Tenancy Agreement to finalize your booking.
+                          Your identity documents have been securely
+                          transmitted. You can now review and legally bind your
+                          Tenancy Agreement to finalize your booking.
                         </p>
 
                         <button
-                          onClick={() => router.push(`/user/sign-lease?leaseId=${leaseId}`)}
+                          onClick={() =>
+                            router.push(`/user/sign-lease?leaseId=${leaseId}`)
+                          }
                           className="px-4 md:px-8 py-2.5 md:py-3 bg-zinc-950 hover:bg-zinc-800 text-white text-[9px] md:text-xs font-bold uppercase tracking-widest rounded-lg transition-colors shadow-lg shadow-black/10 flex items-center gap-1.5 md:gap-2 max-w-full truncate"
                         >
-                          <span className="truncate">Sign Tenancy Agreement</span>
+                          <span className="truncate">
+                            Sign Tenancy Agreement
+                          </span>
                           <span className="scale-75 md:scale-100 flex items-center shrink-0">
                             <HugeiconsIcon icon={ArrowRight01Icon} size={16} />
                           </span>
@@ -640,7 +658,7 @@ export function VerificationDashboard({
                     className="px-4 py-2 md:px-6 md:py-3 bg-white border border-slate-200 text-slate-600 text-[9px] md:text-xs font-bold uppercase tracking-widest rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-1.5 md:gap-2 shrink-0 max-w-[45%]"
                   >
                     <span className="scale-75 md:scale-100 flex items-center shrink-0">
-                       <HugeiconsIcon icon={ArrowLeft01Icon} size={16} />
+                      <HugeiconsIcon icon={ArrowLeft01Icon} size={16} />
                     </span>
                     <span className="truncate">Previous</span>
                   </button>
@@ -661,7 +679,9 @@ export function VerificationDashboard({
                   <div className="flex flex-col items-end min-w-0 max-w-[50%]">
                     <button
                       onClick={handleSubmit}
-                      disabled={!photoData || !hasProfilePicture || isSubmitting}
+                      disabled={
+                        !photoData || !hasProfilePicture || isSubmitting
+                      }
                       className="px-4 py-2 md:px-8 md:py-3 bg-black text-white text-[9px] md:text-xs font-bold uppercase tracking-widest rounded-lg hover:bg-black transition-colors disabled:opacity-50 disabled:bg-slate-300 flex items-center gap-1.5 md:gap-2 w-full justify-center shrink-0"
                     >
                       {isSubmitting && (
@@ -673,10 +693,15 @@ export function VerificationDashboard({
                           />
                         </span>
                       )}
-                      <span className="truncate">{isSubmitting ? "Submitting..." : "Submit Verification"}</span>
+                      <span className="truncate">
+                        {isSubmitting ? "Submitting..." : "Submit Verification"}
+                      </span>
                       {!isSubmitting && (
                         <span className="scale-75 md:scale-100 flex items-center shrink-0">
-                          <HugeiconsIcon icon={CheckmarkBadge01Icon} size={16} />
+                          <HugeiconsIcon
+                            icon={CheckmarkBadge01Icon}
+                            size={16}
+                          />
                         </span>
                       )}
                     </button>

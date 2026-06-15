@@ -7,22 +7,23 @@ import { jwtVerify } from "jose"; // <-- Required for Edge JWT decoding
 // ============================================================================
 // 1. ROUTE CONFIGURATIONS & UPSTASH REDIS SETUP
 // ============================================================================
-const protectedRoutes = ["/user", "/checkout"]; 
-const adminRoutes = ["/admin"]; 
-const authRoutes = ["/login", "/signup", "/forgot-password"]; 
-const SESSION_COOKIE_NAME = "auth-token"; 
+const protectedRoutes = ["/user", "/checkout"];
+const adminRoutes = ["/admin"];
+const authRoutes = ["/login", "/signup", "/forgot-password"];
+const SESSION_COOKIE_NAME = "auth-token";
 
 // Initialize Redis safely
-const redis = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
-  ? new Redis({
-      url: process.env.UPSTASH_REDIS_REST_URL,
-      token: process.env.UPSTASH_REDIS_REST_TOKEN,
-    })
-  : null;
+const redis =
+  process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
+    ? new Redis({
+        url: process.env.UPSTASH_REDIS_REST_URL,
+        token: process.env.UPSTASH_REDIS_REST_TOKEN,
+      })
+    : null;
 
 // FIX: Hardened Auth Rate Limit (5 attempts per minute)
-const authRateLimit = redis 
-  ? new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(5, "1 m") }) 
+const authRateLimit = redis
+  ? new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(5, "1 m") })
   : null;
 
 export async function middleware(request: NextRequest) {
@@ -31,11 +32,11 @@ export async function middleware(request: NextRequest) {
   // ============================================================================
   // 2. PROXY HEADER SANITIZATION (Prevent IP Spoofing)
   // ============================================================================
- const forwardedFor = request.headers.get("x-forwarded-for");
-const realIp = request.headers.get("x-real-ip");
+  const forwardedFor = request.headers.get("x-forwarded-for");
+  const realIp = request.headers.get("x-real-ip");
 
-const trueIp = forwardedFor?.split(",")[0].trim() || realIp || "127.0.0.1";
-  const requestId = crypto.randomUUID(); 
+  const trueIp = forwardedFor?.split(",")[0].trim() || realIp || "127.0.0.1";
+  const requestId = crypto.randomUUID();
 
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-trusted-ip", trueIp);
@@ -44,11 +45,19 @@ const trueIp = forwardedFor?.split(",")[0].trim() || realIp || "127.0.0.1";
   // ============================================================================
   // 3. EDGE RATE LIMITING (Anti-Bot / Anti-DDoS)
   // ============================================================================
-  if (authRateLimit && (path.startsWith("/login") || path.startsWith("/signup"))) {
+  if (
+    authRateLimit &&
+    (path.startsWith("/login") || path.startsWith("/signup"))
+  ) {
     const { success } = await authRateLimit.limit(`auth_ratelimit_${trueIp}`);
     if (!success) {
-      console.warn(`[EDGE FIREWALL] Bruteforce attempt blocked for IP: ${trueIp}`);
-      return new NextResponse("Too Many Requests. Please try again in 1 minute.", { status: 429 });
+      console.warn(
+        `[EDGE FIREWALL] Bruteforce attempt blocked for IP: ${trueIp}`,
+      );
+      return new NextResponse(
+        "Too Many Requests. Please try again in 1 minute.",
+        { status: 429 },
+      );
     }
   }
 
@@ -68,18 +77,25 @@ const trueIp = forwardedFor?.split(",")[0].trim() || realIp || "127.0.0.1";
       userRole = payload.role as string;
     } catch (error) {
       // Token is invalid or expired
-      isAuthenticated = false; 
+      isAuthenticated = false;
     }
   }
-  
+
   // A. Protect Auth Routes
   const isAuthRoute = authRoutes.some((route) => path.startsWith(route));
   if (isAuthRoute && isAuthenticated) {
-    return NextResponse.redirect(new URL(userRole === "Admin" ? "/admin/dashboard" : "/user/dashboard", request.url));
+    return NextResponse.redirect(
+      new URL(
+        userRole === "Admin" ? "/admin/overview" : "/user/dashboard",
+        request.url,
+      ),
+    );
   }
 
   // B. Protect Standard User Routes
-  const isProtectedRoute = protectedRoutes.some((route) => path.startsWith(route));
+  const isProtectedRoute = protectedRoutes.some((route) =>
+    path.startsWith(route),
+  );
   if (isProtectedRoute && !isAuthenticated) {
     const redirectUrl = new URL("/login", request.url);
     redirectUrl.searchParams.set("callbackUrl", path);
@@ -94,7 +110,9 @@ const trueIp = forwardedFor?.split(",")[0].trim() || realIp || "127.0.0.1";
     }
     // Block standard users from accessing /admin paths
     if (userRole !== "Admin" && userRole !== "Manager") {
-      console.warn(`[SECURITY] User attempted unauthorized admin access. IP: ${trueIp}`);
+      console.warn(
+        `[SECURITY] User attempted unauthorized admin access. IP: ${trueIp}`,
+      );
       return NextResponse.redirect(new URL("/user/dashboard", request.url));
     }
   }
@@ -105,9 +123,12 @@ const trueIp = forwardedFor?.split(",")[0].trim() || realIp || "127.0.0.1";
   if (["POST", "PUT", "PATCH", "DELETE"].includes(request.method)) {
     const origin = request.headers.get("origin");
     if (process.env.NODE_ENV === "production") {
-      const allowedDomain = process.env.NEXT_PUBLIC_APP_URL || "https://wunkathomes.com"; 
+      const allowedDomain =
+        process.env.NEXT_PUBLIC_APP_URL || "https://wunkathomes.com";
       if (origin && !origin.startsWith(allowedDomain)) {
-        console.error(`[EDGE FIREWALL] Blocked CSRF attempt from ${origin} (IP: ${trueIp})`);
+        console.error(
+          `[EDGE FIREWALL] Blocked CSRF attempt from ${origin} (IP: ${trueIp})`,
+        );
         return new NextResponse("Forbidden: Invalid Origin", { status: 403 });
       }
     }
@@ -129,7 +150,9 @@ const trueIp = forwardedFor?.split(",")[0].trim() || realIp || "127.0.0.1";
     frame-src 'self' https://js.paystack.co;
     frame-ancestors 'none';
     upgrade-insecure-requests;
-  `.replace(/\s{2,}/g, ' ').trim(); 
+  `
+    .replace(/\s{2,}/g, " ")
+    .trim();
 
   const response = NextResponse.next({
     request: {
@@ -141,7 +164,10 @@ const trueIp = forwardedFor?.split(",")[0].trim() || realIp || "127.0.0.1";
   response.headers.set("X-Frame-Options", "DENY");
   response.headers.set("X-Content-Type-Options", "nosniff");
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
-  response.headers.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
+  response.headers.set(
+    "Strict-Transport-Security",
+    "max-age=63072000; includeSubDomains; preload",
+  );
 
   return response;
 }
