@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Heading, Text, Section } from "react-email";
-import { EmailLayout } from "./EmailLayout";
+import { EmailLayout } from "./email-layout";
 
 interface MaintenanceUpdateProps {
   userName?: string;
