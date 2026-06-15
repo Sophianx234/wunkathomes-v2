@@ -206,7 +206,7 @@ export async function cancelInvitation(rawInvitationId: string) {
 export async function acceptInviteAction(prevState: any, formData: FormData) {
   try {
     // 1. IP-Based Rate Limiting (Unauthenticated route protection)
-    const ip = await headers().get("x-forwarded-for") || "unknown";
+    // const ip = await headers().get("x-forwarded-for") || "unknown";
     // const { success } = await ratelimit.limit(`accept_invite_${ip}`);
     // if (!success) throw new Error("Rate limit exceeded.");
 

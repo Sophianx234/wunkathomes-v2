@@ -161,7 +161,7 @@ export async function loginAction(prevState: any, formData: FormData) {
     });
 
     let targetRoute = "/";
-    if (user.role === "Admin") targetRoute = "/admin/dashboard";
+    if (user.role === "Admin") targetRoute = "/admin/overview";
     else if (user.role === "Manager") targetRoute = "/admin/overview";
 
     return { success: true, message: "Welcome back!", redirectUrl: targetRoute };
