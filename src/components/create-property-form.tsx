@@ -40,6 +40,9 @@ export default function CreatePropertyForm() {
   );
   const [isPending, startTransition] = useTransition();
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  
+  // NEW: State to track the Cloudinary upload phase
+  const [isUploadingToCloud, setIsUploadingToCloud] = useState(false);
 
   // Watch for state changes to trigger toasts and client-side redirects
   useEffect(() => {
@@ -54,27 +57,65 @@ export default function CreatePropertyForm() {
     }
   }, [state, router]);
 
-  // 2. Intercept the submission to merge native inputs + custom React state files
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  // 2. Intercept the submission to handle direct uploads first
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
     const formData = new FormData(event.currentTarget);
 
-    // Validate that we have at least one file before pinging the server
     if (uploadedFiles.length === 0) {
       toast.error("Please upload at least one image.");
       return;
     }
 
-    // Append the files stored in React state to the native FormData
-    uploadedFiles.forEach((file) => {
-      formData.append("media", file);
-    });
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
 
-    // Fire the Server Action via transition
-    startTransition(() => {
-      formAction(formData);
-    });
+    if (!cloudName || !uploadPreset) {
+      toast.error("Cloudinary configuration is missing from environment.");
+      return;
+    }
+
+    setIsUploadingToCloud(true);
+    const toastId = toast.loading("Uploading high-res images to cloud...");
+
+    try {
+      // Upload all selected files directly from the browser to Cloudinary
+      const uploadPromises = uploadedFiles.map(async (file) => {
+        const cloudData = new FormData();
+        cloudData.append("file", file);
+        cloudData.append("upload_preset", uploadPreset);
+
+        const response = await fetch(
+          `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+          { method: "POST", body: cloudData }
+        );
+
+        const data = await response.json();
+        if (!data.secure_url) throw new Error("Upload failed for a file");
+        
+        return data.secure_url as string;
+      });
+
+      const uploadedUrls = await Promise.all(uploadPromises);
+
+      // Append only the resulting text URLs to the formData
+      uploadedUrls.forEach((url) => {
+        formData.append("mediaUrls", url);
+      });
+
+      toast.success("Images secured. Saving property data...", { id: toastId });
+
+      // Fire the Server Action via transition
+      startTransition(() => {
+        formAction(formData);
+      });
+
+    } catch (error) {
+      console.error("Cloudinary Error:", error);
+      toast.error("Image upload failed. Please check your network connection.", { id: toastId });
+    } finally {
+      setIsUploadingToCloud(false);
+    }
   };
 
   return (
@@ -388,11 +429,12 @@ export default function CreatePropertyForm() {
             variant="outline"
             className="h-11 px-6 rounded-md text-[14px]"
             onClick={() => router.back()}
+            disabled={isPending || isUploadingToCloud}
           >
             Discard
           </Button>
 
-          <SubmitButton pending={isPending} />
+          <SubmitButton pending={isPending || isUploadingToCloud} />
           <Toaster position="top-right" />
         </div>
       </div>

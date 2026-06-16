@@ -52,13 +52,10 @@ const createPropertySchema = z.object({
   hasSmartLock: z.boolean().default(false),
   accessInstructions: z.string().trim().max(1000).optional().nullable(),
 
-  media: z.array(
-      z.instanceof(File)
-        .refine((file) => file.size <= MAX_FILE_SIZE, "Max file size is 5MB.")
-        .refine((file) => ACCEPTED_IMAGE_TYPES.includes(file.type), "Unsupported image format.")
-    )
+  mediaUrls: z.array(z.string().url("Invalid image URL"))
     .min(1, "At least one image is required")
     .max(10, "Maximum of 10 images allowed"),
+    
 });
 
 // Edit Schema drops media requirement and adds secure JSON parsing for retained images
@@ -131,12 +128,12 @@ export async function createPropertyAction(prevState: ActionState, formData: For
       landmarks: landmarksStr ? landmarksStr.split(",").map(item => item.trim()).filter(Boolean) : [],
       hasSmartLock: formData.get("hasSmartLock") === "on" || formData.get("hasSmartLock") === "true",
       accessInstructions: formData.get("accessInstructions"),
-      media: formData.getAll("media").filter((file: any) => file.size > 0),
+      
+      // 1. THIS IS THE KEY CHANGE: Grab the URLs instead of Files
+      mediaUrls: formData.getAll("mediaUrls"), 
     };
 
     const validData = createPropertySchema.parse(rawData);
-
-    const uploadedImageUrls = await uploadToCloudinary(validData.media, `wunkathomes/properties`); 
 
     await connectToDatabase();
     
@@ -161,7 +158,9 @@ export async function createPropertyAction(prevState: ActionState, formData: For
         features: { bedrooms: validData.bedrooms, bathrooms: validData.bathrooms, sizeSqm: validData.sizeSqm },
         terms: { leaseTerm: validData.leaseTerm || undefined },
         smartLock: { hasSmartLock: validData.hasSmartLock, accessInstructions: validData.accessInstructions },
-        images: uploadedImageUrls,
+        
+        // 2. PASS THE URLS DIRECTLY TO MONGO
+        images: validData.mediaUrls, 
       }], { session: dbSession });
     });
     await dbSession.endSession();
@@ -174,8 +173,16 @@ export async function createPropertyAction(prevState: ActionState, formData: For
     if (error.message === "UNAUTHORIZED") return { success: false, message: "Unauthorized", error: "Unauthorized" };
     if (error.message === "RATE_LIMIT_EXCEEDED") return { success: false, message: "Too many requests.", error: "Please wait." };
     
-    console.error(`[SECURITY LOG] Create Property Error (User: ${userId}, IP: ${ip}):`, error.message);
-    return { success: false, message: "System error occurred.", error: "System error occurred." };
+    // Intercept Zod Validation Errors safely
+    if (error instanceof z.ZodError) {
+      const validationErrors = error.issues.map(issue => `${issue.path[0]}: ${issue.message}`).join(', ');
+      console.warn(`[VALIDATION FAILED]`, validationErrors);
+      return { success: false, message: `Validation failed: ${validationErrors}`, error: validationErrors };
+    }
+
+    // Catch standard errors and MongoDB errors
+    console.error(`[SECURITY LOG] Property Action Error (User: ${userId}, IP: ${ip}):`, error);
+    return { success: false, message: error?.message || "System error occurred.", error: "System error occurred." };
   }
 }
 
