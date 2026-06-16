@@ -470,13 +470,13 @@ export default function EditPropertyForm({ initialData }: { initialData: any }) 
           <AlertDialogFooter>
             <AlertDialogCancel 
               onClick={() => setPendingFormData(null)}
-              className="mt-0"
+              className="mt-0 rounded-md"
             >
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction 
               onClick={executeSubmit} 
-              className="bg-zinc-950 text-white hover:bg-zinc-800 transition-colors"
+              className="bg-zinc-950 rounded-md text-white hover:bg-zinc-800 transition-colors"
             >
               Confirm & Save
             </AlertDialogAction>

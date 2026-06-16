@@ -1,12 +1,14 @@
 // src/lib/session.ts
 import jwt from "jsonwebtoken"
 import { cookies } from "next/headers"
+import { jwtVerify } from "jose";
 
 export interface SessionPayload {
   userId: string | object;
   email: string;
   role: string;
 }
+
 
 export async function getSession() {
   const cookieStore = await cookies();
@@ -15,15 +17,12 @@ export async function getSession() {
   if (!token) return null;
 
   try {
-    // Verify and decode the JWT
-    const decoded = jwt.verify(
-      token, 
-      process.env.JWT_SECRET || "your-secret-key"
-    ) as { userId: string; email: string; role: string; name?: string };
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET || "your-secret-key");
+    const { payload } = await jwtVerify(token, secret);
     
-    return decoded;
+    // Typecast the generic Jose payload to your specific user object
+    return payload as { userId: string; email: string; role: string; name?: string };
   } catch (error) {
-    // If token is expired or invalid, return null
     return null;
   }
 }
