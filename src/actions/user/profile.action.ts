@@ -48,10 +48,6 @@ export async function updateProfileAction(formData: FormData) {
     }
     userId = session.userId;
 
-    // 3. Rate Limiting (Prevent API abuse / spamming uploads)
-    // const { success } = await ratelimit.limit(`profile_update_${userId}`);
-    // if (!success) throw new Error("RATE_LIMIT_EXCEEDED");
-
     // 4. Strict Input Validation (Prevent Mass Assignment)
     const rawData = {
       name: formData.get("name"),

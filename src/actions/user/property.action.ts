@@ -201,8 +201,6 @@ export async function editPropertyAction(prevState: ActionState, formData: FormD
     if (!session || !['Admin', 'Manager'].includes(session.role)) throw new Error("UNAUTHORIZED");
     userId = session.userId;
 
-    // const { success } = await ratelimit.limit(`edit_prop_${userId}`);
-    // if (!success) throw new Error("RATE_LIMIT_EXCEEDED");
 
     const landmarksStr = formData.get("landmarks") as string | null;
     const rawData = {

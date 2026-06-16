@@ -44,9 +44,6 @@ export async function updateMaintenanceStatusAction(
       throw new Error("Unauthorized access attempt.");
     }
 
-    // 2. Rate Limiting (Prevent endpoint spamming)
-    // const { success } = await ratelimit.limit(`maint_update_${session.userId}`);
-    // if (!success) throw new Error("Rate limit exceeded.");
 
     // 3. Strict Input Validation
     const { ticketId, newStatus } = updateMaintenanceSchema.parse({
