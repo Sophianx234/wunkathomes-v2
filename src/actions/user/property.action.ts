@@ -59,21 +59,23 @@ const createPropertySchema = z.object({
 });
 
 // Edit Schema drops media requirement and adds secure JSON parsing for retained images
-const editPropertySchema = createPropertySchema.extend({
-  listingId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid Listing ID"),
-  // WE DO NOT ACCEPT propertyId FROM THE CLIENT. It is derived securely on the server.
-  retainedImages: z.preprocess((val) => {
-    if (typeof val === "string") {
-      try { return JSON.parse(val); } catch { return []; }
-    }
-    return [];
-  }, z.array(z.string().url("Invalid image URL")).max(10)),
-  media: z.array(
-      z.instanceof(File)
-        .refine((file) => file.size <= MAX_FILE_SIZE, "Max file size is 5MB.")
-        .refine((file) => ACCEPTED_IMAGE_TYPES.includes(file.type), "Invalid format.")
-    ).max(10).optional(),
-});
+// Add .omit({ mediaUrls: true }) before .extend()
+const editPropertySchema = createPropertySchema
+  .omit({ mediaUrls: true }) 
+  .extend({
+    listingId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid Listing ID"),
+    
+    // Parse the existing images safely
+    retainedImages: z.preprocess((val) => {
+      if (typeof val === "string") {
+        try { return JSON.parse(val); } catch { return []; }
+      }
+      return [];
+    }, z.array(z.string().url("Invalid image URL")).max(10)),
+    
+    // Accept the new images (optional, because they might just be editing text)
+    newMediaUrls: z.array(z.string().url()).optional().default([]),
+  });
 
 const deleteSchema = z.object({
   listingId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid Listing ID"),
@@ -205,7 +207,7 @@ export async function editPropertyAction(prevState: ActionState, formData: FormD
     const landmarksStr = formData.get("landmarks") as string | null;
     const rawData = {
       listingId: formData.get("listingId"),
-      retainedImages: formData.get("existingImages"), // Will be safely parsed by Zod's preprocess
+      retainedImages: formData.get("existingImages"), 
       title: formData.get("title"),
       listingType: formData.get("listingType"),
       propertyType: formData.get("propertyType"),
@@ -224,28 +226,25 @@ export async function editPropertyAction(prevState: ActionState, formData: FormD
       amenities: formData.getAll("amenities"),
       landmarks: landmarksStr ? landmarksStr.split(",").map(item => item.trim()).filter(Boolean) : [],
       hasSmartLock: formData.get("hasSmartLock") === "on" || formData.get("hasSmartLock") === "true",
-      media: formData.getAll("media").filter((file: any) => file.size > 0), 
+      
+      // Look for the lightweight strings, not files
+      newMediaUrls: formData.getAll("newMediaUrls"), 
     };
 
     const validData = editPropertySchema.parse(rawData);
 
     await connectToDatabase();
 
-    // 1. Source of Truth Extraction (IDOR Prevention)
     const oldListing = await Listing.findById(validData.listingId);
     if (!oldListing) return { success: false, message: "Listing not found", error: "Listing not found" };
     
-    // We derive the linked Property ID directly from the database to prevent cross-document overwrites
     const targetPropertyId = oldListing.propertyId;
 
+    // Diff to find images that were completely removed by the user
     const imagesToDeleteFromCloudinary = oldListing.images.filter((img: string) => !validData.retainedImages.includes(img));
 
-    let newImageUrls: string[] = [];
-    if (validData.media && validData.media.length > 0) {
-      newImageUrls = await uploadToCloudinary(validData.media, `wunkathomes/properties`); 
-    }
-
-    const finalImageUrls = [...validData.retainedImages, ...newImageUrls];
+    // Combine old images kept + new images uploaded directly from browser
+    const finalImageUrls = [...validData.retainedImages, ...validData.newMediaUrls];
 
     const dbSession = await mongoose.startSession();
     await dbSession.withTransaction(async () => {
@@ -266,12 +265,12 @@ export async function editPropertyAction(prevState: ActionState, formData: FormD
         features: { bedrooms: validData.bedrooms, bathrooms: validData.bathrooms, sizeSqm: validData.sizeSqm },
         terms: { leaseTerm: validData.leaseTerm || undefined },
         smartLock: { hasSmartLock: validData.hasSmartLock, accessInstructions: validData.accessInstructions },
-        images: finalImageUrls,
+        images: finalImageUrls, // <-- Directly save the text arrays
       }, { session: dbSession });
     });
     await dbSession.endSession();
 
-    // Cleanup external assets ONLY after DB transaction successfully commits
+    // Still delete orphaned images securely from the server
     for (const oldUrl of imagesToDeleteFromCloudinary) {
       const publicId = extractPublicId(oldUrl);
       deleteFromCloudinary(publicId).catch(err => console.error("Cloudinary cleanup failed:", err));
@@ -281,7 +280,14 @@ export async function editPropertyAction(prevState: ActionState, formData: FormD
     return { success: true, message: "Property updated successfully." };
   } catch (error: any) {
     if (error.message === "UNAUTHORIZED") return { success: false, message: "Unauthorized", error: "Unauthorized" };
-    console.error(`[SECURITY LOG] Edit Property Error (User: ${userId}, IP: ${ip}):`, error.message);
+    
+    if (error instanceof z.ZodError) {
+      const validationErrors = error.issues.map(issue => `${issue.path[0]}: ${issue.message}`).join(', ');
+      console.warn(`[VALIDATION FAILED]`, validationErrors);
+      return { success: false, message: `Validation failed: ${validationErrors}`, error: validationErrors };
+    }
+
+    console.error(`[SECURITY LOG] Edit Property Error (User: ${userId}, IP: ${ip}):`, error);
     return { success: false, message: "System error", error: "System error" };
   }
 }

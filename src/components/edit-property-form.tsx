@@ -48,6 +48,8 @@ export default function EditPropertyForm({ initialData }: { initialData: any }) 
   const [state, formAction] = useActionState(editPropertyAction, initialState);
   const [isPending, startTransition] = useTransition();
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [isUploadingToCloud, setIsUploadingToCloud] = useState(false);
+  
   
   // Track existing images so they aren't lost if the user doesn't upload new ones
   const [existingImages, setExistingImages] = useState<string[]>(initialData.images || []);
@@ -58,6 +60,7 @@ export default function EditPropertyForm({ initialData }: { initialData: any }) 
 
   useEffect(() => {
     if (state.success) {
+      toast.dismiss()
       toast.success(state.message);
       setTimeout(() => {
         router.push("/admin/properties");
@@ -72,35 +75,85 @@ export default function EditPropertyForm({ initialData }: { initialData: any }) 
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
 
-    // Validate that the property has at least one image (old or new)
     if (uploadedFiles.length === 0 && existingImages.length === 0) {
       toast.error("Please ensure the property has at least one image.");
       return;
     }
 
-    // Append new files
-    uploadedFiles.forEach((file) => {
-      formData.append("media", file);
-    });
-
-    // Pass existing images to the server so they aren't overwritten
+    // DO NOT append the raw File objects here. We just append the retained images.
     formData.append("existingImages", JSON.stringify(existingImages));
 
-    // Save the formData and open the confirmation dialog
     setPendingFormData(formData);
     setIsConfirmOpen(true);
   };
 
-  // The actual execution function triggered by the modal's "Confirm" button
-  const executeSubmit = () => {
-    if (pendingFormData) {
+  // 3. REPLACE YOUR executeSubmit WITH THE CLOUDINARY LOGIC
+  const executeSubmit = async () => {
+    if (!pendingFormData) return;
+    
+    // Close modal immediately so the main form UI can show the loading state
+    setIsConfirmOpen(false); 
+
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+
+    if (uploadedFiles.length > 0 && (!cloudName || !uploadPreset)) {
+      toast.error("Cloudinary configuration is missing.");
+      return;
+    }
+
+    setIsUploadingToCloud(true);
+    const toastId = toast.loading("Processing changes...");
+
+    try {
+      // Step A: If there are NEW files, upload them directly to Cloudinary
+      if (uploadedFiles.length > 0) {
+        toast.loading("Uploading new high-res images...", { id: toastId });
+        
+        const uploadPromises = uploadedFiles.map(async (file) => {
+          const cloudData = new FormData();
+          cloudData.append("file", file);
+          cloudData.append("upload_preset", uploadPreset!);
+
+          const response = await fetch(
+            `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+            { method: "POST", body: cloudData }
+          );
+
+          const data = await response.json();
+          if (!data.secure_url) throw new Error("Upload failed for a file");
+          
+          return data.secure_url as string;
+        });
+
+        const newUploadedUrls = await Promise.all(uploadPromises);
+
+        // Step B: Append the lightweight URLs to the formData as "newMediaUrls"
+        newUploadedUrls.forEach((url) => {
+          pendingFormData.append("newMediaUrls", url);
+        });
+      }
+
+      
+
+      // Step C: Now fire the Server Action with the URLs attached
       startTransition(() => {
         formAction(pendingFormData);
       });
+
+    } catch (error) {
+      console.error("Cloudinary Error:", error);
+      if (error instanceof TypeError && error.message.includes("Failed to fetch")) {
+        toast.error("Upload blocked. Please disable your adblocker or shields.", { id: toastId, duration: 5000 });
+      } else {
+        toast.error("Image upload failed. Check your network.", { id: toastId });
+      }
+    } finally {
+      setIsUploadingToCloud(false);
     }
-    // Close the dialog immediately. The main form's SubmitButton will show the loading state.
-    setIsConfirmOpen(false);
   };
+
+  
 
   return (
     <>

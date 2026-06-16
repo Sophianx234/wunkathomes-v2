@@ -395,7 +395,7 @@ export default function PropertyCard({
               <span className="text-rose-600 font-medium">Warning:</span> If there are active leases tied to this asset, they will be orphaned.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="mt-4 md:mt-6 gap-2 sm:gap-0">
+          <AlertDialogFooter className="mt-4 md:mt-6 w-full gap-2 sm:gap-0">
             <AlertDialogCancel 
               disabled={isPending}
               className="bg-white text-slate-700 hover:bg-slate-50 border-slate-200 mt-0 h-8 md:h-10 text-[11px] md:text-sm rounded-lg"

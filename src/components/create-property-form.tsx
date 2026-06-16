@@ -102,7 +102,7 @@ export default function CreatePropertyForm() {
       uploadedUrls.forEach((url) => {
         formData.append("mediaUrls", url);
       });
-
+      toast.dismiss(toastId);
       toast.success("Images secured. Saving property data...", { id: toastId });
 
       // Fire the Server Action via transition
