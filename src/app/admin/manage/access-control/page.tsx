@@ -48,7 +48,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import Image from "next/image";
 
 // --- TYPES & SCHEMAS ---
@@ -835,11 +835,11 @@ export default function AccessControlDashboard() {
       </div>
 
       {/* --- SHEET 1: TENANT CONFIGURATION --- */}
-      <Sheet
+      <Dialog
         open={!!selectedTenantAccess}
         onOpenChange={(open) => !open && setSelectedTenantAccess(null)}
       >
-        <SheetContent className="w-full sm:max-w-[420px] p-0 bg-[#FAFAFA] border-l border-zinc-200/80 flex flex-col font-sans shadow-2xl">
+        <DialogContent className="w-full sm:max-w-xl md:max-w-2xl p-0 bg-[#FAFAFA] border border-slate-200/80 flex flex-col font-sans shadow-2xl rounded-lg max-h-[85vh] overflow-hidden">
           {selectedTenantAccess && (
             <>
               <div className="px-6 pt-10 pb-6 border-b border-zinc-200/80 bg-white">
@@ -1067,15 +1067,15 @@ export default function AccessControlDashboard() {
               </div>
             </>
           )}
-        </SheetContent>
-      </Sheet>
+        </DialogContent>
+      </Dialog>
 
       {/* --- SHEET 2: UNIT CONFIGURATION --- */}
-      <Sheet
+      <Dialog
         open={!!selectedUnitAccess}
         onOpenChange={(open) => !open && setSelectedUnitAccess(null)}
       >
-        <SheetContent className="w-full sm:max-w-[420px] p-0 bg-[#FAFAFA] border-l border-zinc-200/80 flex flex-col font-sans shadow-2xl">
+        <DialogContent className="w-full sm:max-w-xl md:max-w-2xl p-0 bg-[#FAFAFA] border border-slate-200/80 flex flex-col font-sans shadow-2xl rounded-lg max-h-[85vh] overflow-hidden">
           {selectedUnitAccess && (
             <>
               <div className="px-6 pt-10 pb-6 border-b border-zinc-200/80 bg-white">
@@ -1242,8 +1242,8 @@ export default function AccessControlDashboard() {
               </div>
             </>
           )}
-        </SheetContent>
-      </Sheet>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

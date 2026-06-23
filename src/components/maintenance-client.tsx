@@ -32,7 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -439,8 +439,8 @@ export default function MaintenanceClient({ initialTickets }: MaintenanceClientP
       )}
 
       {/* INDUSTRY STANDARD TICKET CRM SHEET */}
-      <Sheet open={!!selectedTicket} onOpenChange={(open) => !open && setSelectedTicket(null)}>
-        <SheetContent className="w-full sm:max-w-[480px] p-0 bg-[#FAFAFA] border-l border-zinc-200/60 flex flex-col font-sans shadow-2xl">
+      <Dialog open={!!selectedTicket} onOpenChange={(open) => !open && setSelectedTicket(null)}>
+        <DialogContent className="w-full sm:max-w-xl md:max-w-2xl p-0 bg-[#FAFAFA] border border-slate-200/80 flex flex-col font-sans shadow-2xl rounded-lg max-h-[85vh] overflow-hidden">
           {selectedTicket && (() => {
             const currentStatusCfg = getStatusConfig(selectedTicket.status);
             return (
@@ -622,8 +622,8 @@ export default function MaintenanceClient({ initialTickets }: MaintenanceClientP
               </>
             );
           })()}
-        </SheetContent>
-      </Sheet>
+        </DialogContent>
+      </Dialog>
 
       {/* SHADCN CONFIRMATION DIALOG FOR STATUS CHANGES */}
       <AlertDialog

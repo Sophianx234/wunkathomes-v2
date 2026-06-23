@@ -149,13 +149,14 @@ export async function proxy(request: NextRequest) {
     default-src 'self';
     script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.paystack.co;
     style-src 'self' 'unsafe-inline';
-    img-src 'self' blob: data: https://images.unsplash.com https://res.cloudinary.com;
+    img-src 'self' blob: data: https://images.unsplash.com https://res.cloudinary.com https://api.maptiler.com https://a.tile.openstreetmap.org https://b.tile.openstreetmap.org https://c.tile.openstreetmap.org;
     font-src 'self' data:;
-    connect-src 'self' https://api.paystack.co https://api.cloudinary.com; 
+    connect-src 'self' https://api.paystack.co https://api.cloudinary.com https://api.maptiler.com; 
+    worker-src 'self' blob:;
     object-src 'none';
     base-uri 'self';
     form-action 'self';
-    frame-src 'self' https://js.paystack.co;
+    frame-src 'self' https://js.paystack.co https://checkout.paystack.com;
     frame-ancestors 'none';
     upgrade-insecure-requests;
   `

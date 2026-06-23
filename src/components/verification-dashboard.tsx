@@ -64,7 +64,15 @@ export function VerificationDashboard({
   const [dob, setDob] = useState(initialDob);
 
   // ID State
-  const [idType, setIdType] = useState(currentUser?.idDocumentType || "GHA");
+  const getInitialIdType = () => {
+    const type = currentUser?.idDocumentType;
+    if (type === "GHA" || type === "Ghana_Card") return "Ghana_Card";
+    if (type === "VOTER" || type === "Voter_ID") return "Voter_ID";
+    if (type === "Passport") return "Passport";
+    if (type === "Driver_License") return "Driver_License";
+    return "Ghana_Card";
+  };
+  const [idType, setIdType] = useState(getInitialIdType());
   const [idNumber, setIdNumber] = useState(currentUser?.idDocumentNumber || "");
 
   // Camera & Image State
@@ -84,7 +92,7 @@ export function VerificationDashboard({
   const handleIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let val = e.target.value.toUpperCase();
 
-    if (idType === "GHA") {
+    if (idType === "Ghana_Card") {
       let chars = val.replace(/[^A-Z0-9]/g, "");
       if (!chars.startsWith("GHA")) chars = "GHA" + chars.replace(/^GHA/, "");
 
@@ -95,8 +103,10 @@ export function VerificationDashboard({
       if (nums.length > 9) formatted += "-" + nums.slice(9, 10);
 
       setIdNumber(formatted);
-    } else if (idType === "VOTER") {
+    } else if (idType === "Voter_ID") {
       setIdNumber(val.replace(/\D/g, "").slice(0, 10));
+    } else {
+      setIdNumber(val);
     }
   };
 
@@ -469,13 +479,15 @@ export function VerificationDashboard({
                           onChange={handleIdTypeChange}
                           className="bg-transparent text-[11px] md:text-sm font-bold text-slate-900 border-none outline-none cursor-pointer pr-2 md:pr-4 shrink-0 m-0 appearance-none md:appearance-auto"
                         >
-                          <option value="GHA">Ghana Card</option>
-                          <option value="VOTER">Voter ID</option>
+                          <option value="Ghana_Card">Ghana Card</option>
+                          <option value="Voter_ID">Voter ID</option>
+                          <option value="Passport">Passport</option>
+                          <option value="Driver_License">Driver's License</option>
                         </select>
                         <input
                           type="text"
                           placeholder={
-                            idType === "GHA" ? "GHA-000000000-0" : "1234567890"
+                            idType === "Ghana_Card" ? "GHA-000000000-0" : "1234567890"
                           }
                           value={idNumber}
                           onChange={handleIdChange}
@@ -583,8 +595,8 @@ export function VerificationDashboard({
                       </>
                     ) : (
                       <>
-                        <div className="w-12 h-12 md:w-20 md:h-20 bg-blue-50 rounded-full flex items-center justify-center mb-4 md:mb-6 shrink-0">
-                          <span className="scale-75 md:scale-100 flex items-center text-blue-500">
+                        <div className="w-12 h-12 md:w-20 md:h-20 bg-slate-100 rounded-full flex items-center justify-center mb-4 md:mb-6 shrink-0">
+                          <span className="scale-75 md:scale-100 flex items-center text-slate-500">
                             <HugeiconsIcon icon={SignatureIcon} size={40} />
                           </span>
                         </div>

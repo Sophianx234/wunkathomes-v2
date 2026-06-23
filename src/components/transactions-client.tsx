@@ -39,7 +39,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -388,8 +388,8 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
       </div>
 
       {/* INDUSTRY STANDARD TRANSACTION DESK (Sheet) */}
-      <Sheet open={!!selectedTx && !isViewingReceipt} onOpenChange={(open) => !open && setSelectedTx(null)}>
-        <SheetContent className="w-[100vw] sm:w-full sm:max-w-[480px] p-0 bg-[#FAFAFA] border-l border-zinc-200/60 flex flex-col font-sans shadow-2xl overflow-x-hidden">
+      <Dialog open={!!selectedTx && !isViewingReceipt} onOpenChange={(open) => !open && setSelectedTx(null)}>
+        <DialogContent className="w-full sm:max-w-xl md:max-w-2xl p-0 bg-[#FAFAFA] border border-slate-200/80 flex flex-col font-sans shadow-2xl rounded-lg max-h-[85vh] overflow-hidden">
           {selectedTx && (
             <>
               {/* Header Context Section */}
@@ -512,8 +512,8 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
               </div>
             </>
           )}
-        </SheetContent>
-      </Sheet>
+        </DialogContent>
+      </Dialog>
 
       {/* SHADCN CONFIRMATION DIALOG (Report Issue Action) */}
       <AlertDialog

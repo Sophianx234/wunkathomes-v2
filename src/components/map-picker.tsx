@@ -16,42 +16,46 @@ export default function MapPicker() {
   const marker = useRef<maptilersdk.Marker | null>(null);
 
   useEffect(() => {
-    if (map.current || !mapContainer.current) return;
+    if (!mapContainer.current) return;
 
     maptilersdk.config.apiKey = process.env.NEXT_PUBLIC_MAPTILER_PUBLIC_KEY || "";
 
-    map.current = new maptilersdk.Map({
+    const mapInstance = new maptilersdk.Map({
       container: mapContainer.current,
       style: maptilersdk.MapStyle.STREETS,
       center: [parseFloat(lng), parseFloat(lat)],
       zoom: 12,
     });
+    
+    map.current = mapInstance;
 
     const gc = new GeocodingControl({
       apiKey: maptilersdk.config.apiKey,
-      mapController: map.current,
+      mapController: mapInstance,
       flyTo: true,
       placeholder: "Search for a location...",
     });
-    map.current.addControl(gc, "top-left");
+    mapInstance.addControl(gc, "top-left");
 
-    marker.current = new maptilersdk.Marker({ color: "#09090b", draggable: true })
+    const markerInstance = new maptilersdk.Marker({ color: "#09090b", draggable: true })
       .setLngLat([parseFloat(lng), parseFloat(lat)])
-      .addTo(map.current);
+      .addTo(mapInstance);
+      
+    marker.current = markerInstance;
 
-    marker.current.on("dragend", () => {
-      const lngLat = marker.current?.getLngLat();
+    markerInstance.on("dragend", () => {
+      const lngLat = markerInstance.getLngLat();
       if (lngLat) {
         setLng(lngLat.lng.toFixed(5));
         setLat(lngLat.lat.toFixed(5));
       }
     });
 
-    map.current.on("click", (e) => {
+    mapInstance.on("click", (e) => {
       const { lng: newLng, lat: newLat } = e.lngLat;
       setLng(newLng.toFixed(5));
       setLat(newLat.toFixed(5));
-      marker.current?.setLngLat([newLng, newLat]);
+      markerInstance.setLngLat([newLng, newLat]);
     });
 
     gc.on("pick", (event: any) => {
@@ -59,10 +63,15 @@ export default function MapPicker() {
         const [pickedLng, pickedLat] = event.center;
         setLng(pickedLng.toFixed(5));
         setLat(pickedLat.toFixed(5));
-        marker.current?.setLngLat([pickedLng, pickedLat]);
+        markerInstance.setLngLat([pickedLng, pickedLat]);
       }
     });
-  }, [lat, lng]);
+    
+    return () => {
+      mapInstance.remove();
+      map.current = null;
+    };
+  }, []); // Run only once on mount
 
   return (
     <>

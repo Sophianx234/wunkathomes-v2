@@ -26,7 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -508,11 +508,11 @@ export default function OnboardingClient({
       )}
 
       {/* COMMAND CENTER SHEET */}
-      <Sheet
+      <Dialog
         open={!!selectedActivation && !isViewingDocument}
         onOpenChange={(open) => !open && setSelectedActivationId(null)}
       >
-        <SheetContent className="w-full sm:max-w-md p-0 bg-white border-l border-zinc-200 flex flex-col font-sans shadow-2xl">
+        <DialogContent className="w-full sm:max-w-xl md:max-w-2xl p-0 bg-[#FAFAFA] border border-slate-200/80 flex flex-col font-sans shadow-2xl rounded-lg max-h-[85vh] overflow-hidden">
           {selectedActivation && (
             <>
               {/* --- 1. CLEAN HEADER --- */}
@@ -704,8 +704,8 @@ export default function OnboardingClient({
               </div>
             </>
           )}
-        </SheetContent>
-      </Sheet>
+        </DialogContent>
+      </Dialog>
 
       {/* =====================================================
         SHADCN UI CONFIRMATION DIALOG 

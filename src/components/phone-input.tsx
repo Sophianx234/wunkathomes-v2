@@ -84,7 +84,7 @@ export function PhoneInput({
         type="tel"
         value={value}
         onChange={handlePhoneChange}
-        className={cn("flex-1 bg-background rounded-md", className)}
+        className={cn("flex-2 bg-background rounded-md", className)}
         placeholder="XX XXX XXXX"
       />
     </div>

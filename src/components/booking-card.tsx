@@ -14,6 +14,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { formatLeaseTerm } from "@/lib/helpers";
 import { createTourAction, TourActionState } from "@/actions/user/tour.action";
 import { toast } from "sonner";
+import { PhoneInput } from "@/components/phone-input";
 
 interface BookingCardProps {
   listing: any;
@@ -36,6 +37,7 @@ export default function BookingCard({ listing, isRent, hasBookedTour, bookedTour
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [countryCode, setCountryCode] = useState("+233");
 
   // Lock navigation if a tour is already booked
   const handleNext = (nextStep: SchedulingStep) => {
@@ -267,25 +269,25 @@ export default function BookingCard({ listing, isRent, hasBookedTour, bookedTour
               </button>
 
               <div className="flex flex-col gap-1 w-full max-w-full box-border">
-                <label className="text-[10px] lg:text-xs font-bold uppercase tracking-widest text-black">
+                <label className="text-[10px] lg:text-xs font-bold uppercase tracking-widest text-black mb-1">
                   Your WhatsApp Number
                 </label>
                 <div className="relative w-full max-w-full box-border">
-                  <span className="absolute left-3 lg:left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none scale-90 lg:scale-100 flex items-center">
-                    <HugeiconsIcon icon={SmartPhone01Icon} size={16} />
-                  </span>
-
                   <input type="hidden" name="listingId" value={listing.id} />
                   <input type="hidden" name="scheduledDate" value={selectedDate} />
                   <input type="hidden" name="scheduledTime" value={selectedTime} />
+                  
+                  {/* Combine the country code with raw digits for the backend */}
+                  <input type="hidden" name="phoneNumber" value={`${countryCode}${phoneNumber.replace(/\D/g, "")}`} />
 
-                  <input
-                    type="tel"
-                    name="phoneNumber"
-                    placeholder="+233 XX XXX XXXX"
+                  <PhoneInput
+                    id="phone"
+                    name="rawPhoneNumber"
                     value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
-                    className="block w-full max-w-full box-border py-3 lg:py-4 pl-9 lg:pl-10 pr-3 lg:pr-4 border-2 border-black rounded-lg text-xs lg:text-sm font-bold focus:outline-none focus:ring-2 focus:ring-black/20 text-black placeholder:text-slate-300 m-0"
+                    onChange={setPhoneNumber}
+                    countryCode={countryCode}
+                    onCountryCodeChange={setCountryCode}
+                    className="block w-full max-w-full box-border py-3 lg:py-4 border-2 border-black rounded-lg text-xs lg:text-sm font-bold focus:outline-none focus:ring-2 focus:ring-black/20 text-black placeholder:text-slate-300 m-0"
                   />
                 </div>
               </div>

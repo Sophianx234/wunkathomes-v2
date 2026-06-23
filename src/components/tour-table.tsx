@@ -36,7 +36,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import {
   AlertDialog,
@@ -488,11 +488,11 @@ export default function TourTable({
       </div>
 
       {/* INDUSTRY STANDARD CRM SHEET */}
-      <Sheet
+      <Dialog
         open={!!selectedTour}
         onOpenChange={(open) => !open && setSelectedTour(null)}
       >
-        <SheetContent className="w-full sm:max-w-[480px] p-0 bg-white border-l border-zinc-200/60 flex flex-col font-sans shadow-2xl">
+        <DialogContent className="w-full sm:max-w-xl md:max-w-2xl p-0 bg-white border border-slate-200/80 flex flex-col font-sans shadow-2xl rounded-lg max-h-[85vh] overflow-hidden">
           {selectedTour && (
             <>
               {/* Header Profile Section */}
@@ -653,8 +653,8 @@ export default function TourTable({
               </div>
             </>
           )}
-        </SheetContent>
-      </Sheet>
+        </DialogContent>
+      </Dialog>
 
       {/* SHADCN CONFIRMATION DIALOG FOR STATUS CHANGES */}
       <AlertDialog
