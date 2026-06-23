@@ -100,11 +100,11 @@ export default function RenewClient({ data }: RenewClientProps) {
   };
 
   return (
-    <main className="min-h-screen bg-slate-50 text-black py-12 md:py-24 px-4 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-zinc-50/50 text-black py-12 md:py-24 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto mb-10">
         <Link
           href={`/user/dashboard`}
-          className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-500 hover:text-black transition-colors"
+          className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-zinc-500 hover:text-black transition-colors"
         >
           <HugeiconsIcon icon={ArrowLeft01Icon} size={16} />
           Back to Dashboard
@@ -115,14 +115,14 @@ export default function RenewClient({ data }: RenewClientProps) {
         <h1 className="text-3xl md:text-4xl font-black uppercase tracking-tight mb-2 text-center">
           Renew Your Lease
         </h1>
-        <p className="text-sm font-medium text-slate-500 mb-10 text-center">
+        <p className="text-sm font-medium text-zinc-500 mb-10 text-center">
           Instantly extend your stay at {data.listing.title}.
         </p>
 
-        <div className="bg-white p-6 md:p-8 rounded-xl border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+        <div className="bg-white p-6 md:p-8 rounded-lg border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
           {/* Property Preview */}
-          <div className="flex gap-4 mb-8 pb-8 border-b border-slate-100">
-            <div className="relative w-24 h-24 rounded-lg overflow-hidden shrink-0 bg-slate-100">
+          <div className="flex gap-4 mb-8 pb-8 border-b border-zinc-200/60">
+            <div className="relative w-24 h-24 rounded-lg overflow-hidden shrink-0 bg-zinc-100/50">
               <Image
                 src={data.listing.image}
                 alt={data.listing.title}
@@ -131,7 +131,7 @@ export default function RenewClient({ data }: RenewClientProps) {
               />
             </div>
             <div className="flex flex-col justify-center">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">
                 {data.listing.propertyType.replace("_", " ")}
               </span>
               <h3 className="text-lg font-black uppercase tracking-tight leading-snug">
@@ -140,7 +140,7 @@ export default function RenewClient({ data }: RenewClientProps) {
             </div>
           </div>
 
-          <div className="bg-slate-50 border border-slate-200 rounded-lg p-5 mb-8 flex items-center justify-between">
+          <div className="bg-zinc-50/50 border border-zinc-200/60 rounded-lg p-5 mb-8 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm">
                 <HugeiconsIcon
@@ -150,10 +150,10 @@ export default function RenewClient({ data }: RenewClientProps) {
                 />
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">
                   Current Expiry
                 </p>
-                <p className="font-bold text-slate-900">
+                <p className="font-bold text-zinc-900">
                   {data.currentEndDate}
                 </p>
               </div>
@@ -161,7 +161,7 @@ export default function RenewClient({ data }: RenewClientProps) {
           </div>
 
           <div className="flex justify-between items-center mb-6">
-            <span className="text-sm font-bold uppercase tracking-widest text-slate-500">
+            <span className="text-sm font-bold uppercase tracking-widest text-zinc-500">
               Renewal Amount
             </span>
             <span className="text-3xl font-black text-black">
@@ -172,7 +172,7 @@ export default function RenewClient({ data }: RenewClientProps) {
           <button
             onClick={handlePayment}
             disabled={isProcessing}
-            className="w-full py-5 bg-zinc-950 text-white font-black uppercase tracking-widest text-sm rounded-xl hover:bg-zinc-800 transition-colors flex items-center justify-center gap-3 disabled:opacity-70"
+            className="w-full py-5 bg-zinc-950 text-white font-black uppercase tracking-widest text-sm rounded-lg hover:bg-zinc-800 transition-colors flex items-center justify-center gap-3 disabled:opacity-70"
           >
             {isProcessing && (
               <HugeiconsIcon
@@ -187,7 +187,7 @@ export default function RenewClient({ data }: RenewClientProps) {
           </button>
 
           <div className="flex flex-col items-center gap-4 mt-6">
-            <div className="flex items-center gap-6 text-slate-400">
+            <div className="flex items-center gap-6 text-zinc-400">
               <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest">
                 <HugeiconsIcon icon={CreditCardIcon} size={16} /> Card
               </span>

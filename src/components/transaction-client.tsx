@@ -83,11 +83,11 @@ const formatDate = (dateString: string) => {
 // REFINED INDUSTRY-STANDARD MONOCHROMATIC BADGES
 const getPurposeBadge = (purpose: string) => {
   const styles: Record<string, string> = {
-    Booking_Deposit: "text-zinc-700 bg-zinc-100 ring-1 ring-zinc-200/80",
-    Upfront_Rent: "text-zinc-900 bg-zinc-100 ring-1 ring-zinc-300/80",
-    Rent_Balance: "text-zinc-700 bg-zinc-100 ring-1 ring-zinc-200/80",
+    Booking_Deposit: "text-zinc-700 bg-zinc-100/50 ring-1 ring-zinc-200/80",
+    Upfront_Rent: "text-zinc-900 bg-zinc-100/50 ring-1 ring-zinc-300/80",
+    Rent_Balance: "text-zinc-700 bg-zinc-100/50 ring-1 ring-zinc-200/80",
     Monthly_Renewal: "text-zinc-600 bg-zinc-50 ring-1 ring-zinc-200/60",
-    Purchase: "text-zinc-900 bg-zinc-100 ring-1 ring-zinc-300/80",
+    Purchase: "text-zinc-900 bg-zinc-100/50 ring-1 ring-zinc-300/80",
   };
   return styles[purpose] || "text-zinc-600 bg-zinc-50 ring-1 ring-zinc-200/60";
 };
@@ -214,7 +214,7 @@ export default function TransactionsClient({
         </div>
 
         {/* INLINE FILTER CHROME */}
-        <section className="flex flex-col xl:flex-row items-center gap-4 bg-white p-1.5 border border-zinc-200/60 rounded-xl shadow-[0_1px_4px_rgba(0,0,0,0.01)] w-full">
+        <section className="flex flex-col xl:flex-row items-center gap-4 bg-white p-1.5 border border-zinc-200/60 rounded-lg shadow-[0_1px_4px_rgba(0,0,0,0.01)] w-full">
           <div className="relative flex-1 w-full">
             <HugeiconsIcon icon={Search01Icon} size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
             <Input
@@ -229,7 +229,7 @@ export default function TransactionsClient({
 
           <div className="flex flex-wrap md:flex-nowrap items-center gap-2 w-full xl:w-auto px-2 pb-1 xl:pb-0">
             <Select value={channelFilter} onValueChange={setChannelFilter}>
-              <SelectTrigger className="w-full md:w-[130px] h-8 border-0 bg-zinc-50/50 hover:bg-zinc-100 text-[12px] font-medium text-zinc-700 shadow-none focus:ring-0 rounded-md">
+              <SelectTrigger className="w-full md:w-[130px] h-8 border-0 bg-zinc-50/50 hover:bg-zinc-100/50 text-[12px] font-medium text-zinc-700 shadow-none focus:ring-0 rounded-md">
                 <SelectValue placeholder="Channel" />
               </SelectTrigger>
               <SelectContent>
@@ -243,7 +243,7 @@ export default function TransactionsClient({
             </Select>
 
             <Select value={purposeFilter} onValueChange={setPurposeFilter}>
-              <SelectTrigger className="w-full md:w-[150px] h-8 border-0 bg-zinc-50/50 hover:bg-zinc-100 text-[12px] font-medium text-zinc-700 shadow-none focus:ring-0 rounded-md">
+              <SelectTrigger className="w-full md:w-[150px] h-8 border-0 bg-zinc-50/50 hover:bg-zinc-100/50 text-[12px] font-medium text-zinc-700 shadow-none focus:ring-0 rounded-md">
                 <SelectValue placeholder="Purpose" />
               </SelectTrigger>
               <SelectContent>
@@ -275,7 +275,7 @@ export default function TransactionsClient({
                 setChannelFilter("all");
                 setPurposeFilter("all");
               }}
-              className="h-8 w-8 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 shrink-0 ml-auto md:ml-0 rounded-md"
+              className="h-8 w-8 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100/50 shrink-0 ml-auto md:ml-0 rounded-md"
             >
               <HugeiconsIcon icon={FilterIcon} size={14} />
             </Button>
@@ -283,7 +283,7 @@ export default function TransactionsClient({
         </section>
 
         {/* DATA TABLE */}
-        <div className="bg-white border border-zinc-200/60 rounded-xl overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.01)]">
+        <div className="bg-white border border-zinc-200/60 rounded-lg overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.01)]">
           <Table>
             <TableHeader className="bg-zinc-50/30">
               <TableRow className="border-zinc-200/60 hover:bg-transparent">
@@ -299,7 +299,7 @@ export default function TransactionsClient({
               {filteredData.map((tx) => (
                 <TableRow
                   key={tx.id}
-                  className="group border-zinc-100 hover:bg-zinc-50/50 transition-colors cursor-pointer"
+                  className="group border-zinc-200/60 hover:bg-zinc-50/50 transition-colors cursor-pointer"
                   onClick={() => setSelectedTx(tx)}
                 >
                   {/* Col 1: ID & Date */}
@@ -319,7 +319,7 @@ export default function TransactionsClient({
                     <div className="flex items-center gap-2.5">
                       <Avatar className="h-7 w-7 border border-zinc-200/60 shadow-sm">
                         <AvatarImage src={tx.user.profilePicture} />
-                        <AvatarFallback className="bg-zinc-100 text-zinc-600 text-[10px] font-medium">
+                        <AvatarFallback className="bg-zinc-100/50 text-zinc-600 text-[10px] font-medium">
                           {tx.user.name.charAt(0)}
                         </AvatarFallback>
                       </Avatar>
@@ -377,11 +377,11 @@ export default function TransactionsClient({
 
       {/* INDUSTRY STANDARD TRANSACTION DESK (Sheet) */}
       <Dialog open={!!selectedTx && !isViewingReceipt} onOpenChange={(open) => !open && setSelectedTx(null)}>
-        <DialogContent className="w-full sm:max-w-xl md:max-w-2xl p-0 bg-[#FAFAFA] border border-slate-200/80 flex flex-col font-sans shadow-2xl rounded-lg max-h-[85vh] overflow-hidden">
+        <DialogContent className="w-full sm:max-w-xl md:max-w-2xl p-0 bg-[#FAFAFA] border border-slate-200/80 flex flex-col font-sans shadow-sm rounded-lg max-h-[85vh] overflow-hidden">
           {selectedTx && (
             <>
               {/* Header Context Section */}
-              <div className="px-6 py-8 border-b border-zinc-100 bg-zinc-50/30">
+              <div className="px-6 py-8 border-b border-zinc-200/60 bg-zinc-50/30">
                 <div className="flex items-center justify-between mb-6">
                   <Badge
                     variant="outline"
@@ -401,7 +401,7 @@ export default function TransactionsClient({
                 <div className="flex items-center gap-4">
                   <Avatar className="h-12 w-12 border border-zinc-200/60 shadow-sm">
                     <AvatarImage src={selectedTx.user.profilePicture} />
-                    <AvatarFallback className="bg-zinc-100 text-zinc-600 font-medium text-sm">
+                    <AvatarFallback className="bg-zinc-100/50 text-zinc-600 font-medium text-sm">
                       {selectedTx.user.name.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
@@ -434,8 +434,8 @@ export default function TransactionsClient({
                     </Link>
                   </div>
 
-                  <div className="rounded-xl border border-zinc-200/60 overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.01)]">
-                    <div className="p-4 bg-zinc-50/50 flex gap-4 border-b border-zinc-100">
+                  <div className="rounded-lg border border-zinc-200/60 overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.01)]">
+                    <div className="p-4 bg-zinc-50/50 flex gap-4 border-b border-zinc-200/60">
                       <div className="h-12 w-12 shrink-0 bg-white rounded-md overflow-hidden border border-zinc-200/60 shadow-sm">
                         {selectedTx.listing.image ? (
                           <img src={selectedTx.listing.image} alt="Property" className="w-full h-full object-cover" />
@@ -491,7 +491,7 @@ export default function TransactionsClient({
                   <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-4">
                     Audit Log
                   </h3>
-                  <div className="bg-white border border-zinc-200/60 rounded-xl overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.01)]">
+                  <div className="bg-white border border-zinc-200/60 rounded-lg overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.01)]">
                     <dl className="divide-y divide-zinc-100 text-[13px]">
                       <div className="flex justify-between py-3 px-4">
                         <dt className="text-zinc-500 font-medium">Reference ID</dt>
@@ -541,7 +541,7 @@ export default function TransactionsClient({
                 <Button
                   variant="outline"
                   onClick={() => setIsViewingReceipt(true)}
-                  className="h-10 w-full text-[12px] font-medium border-zinc-200 hover:bg-zinc-50 rounded-lg flex items-center justify-center gap-2 shadow-none text-zinc-700"
+                  className="h-10 w-full text-[12px] font-medium border-zinc-200/60 hover:bg-zinc-50 rounded-lg flex items-center justify-center gap-2 shadow-none text-zinc-700"
                 >
                   View Official Receipt
                   <HugeiconsIcon icon={ArrowUpRight01Icon} size={14} className="text-zinc-400" />

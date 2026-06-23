@@ -77,7 +77,7 @@ export default function Manifesto() {
                 behavior: "smooth",
               })
             }
-            className="w-full sm:w-auto px-8 py-4 rounded-md bg-white text-black font-black uppercase tracking-widest text-xs hover:bg-zinc-900 hover:text-white border-2 border-transparent hover:border-white transition-all duration-300 flex items-center justify-center sm:justify-start gap-3 group  shadow-xl"
+            className="w-full sm:w-auto px-8 py-4 rounded-md bg-white text-black font-black uppercase tracking-widest text-xs hover:bg-zinc-900 hover:text-white border-2 border-transparent hover:border-white transition-all duration-300 flex items-center justify-center sm:justify-start gap-3 group  shadow-sm"
           >
             How it works
             <HugeiconsIcon

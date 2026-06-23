@@ -31,7 +31,7 @@ export default function UserCommandCenter() {
         <h1 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-black mb-2">
           Welcome back, {user.name}
         </h1>
-        <p className="text-sm font-medium text-slate-500">
+        <p className="text-sm font-medium text-zinc-500">
           Your Wunkat Command Center. Review your active ledgers and asset
           statuses.
         </p>
@@ -41,7 +41,7 @@ export default function UserCommandCenter() {
         {/* === LEFT COLUMN: Priority Action (Span 2) === */}
         <div className="lg:col-span-2 flex flex-col gap-8">
           {/* TASK-FIRST BLOCK: The Contract Signature */}
-          <div className="bg-white border-2 border-black rounded-2xl p-6 md:p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative overflow-hidden">
+          <div className="bg-white border-2 border-black rounded-lg p-6 md:p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative overflow-hidden">
             {/* Warning Strip */}
             <div className="absolute top-0 left-0 w-2 h-full bg-amber-400"></div>
 
@@ -57,7 +57,7 @@ export default function UserCommandCenter() {
             <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight mb-3">
               Execute Digital Ledger
             </h2>
-            <p className="text-sm text-slate-600 font-medium leading-relaxed mb-8 max-w-md">
+            <p className="text-sm text-zinc-600 font-medium leading-relaxed mb-8 max-w-md">
               Your refundable hold for{" "}
               <strong className="text-black">{activeTask.propertyName}</strong>{" "}
               is active. Please review and digitally sign your legally binding
@@ -66,12 +66,12 @@ export default function UserCommandCenter() {
 
             <div className="flex flex-col sm:flex-row gap-4 items-center">
               {/* In production, this opens your PDF signature modal or page */}
-              <button className="w-full sm:w-auto px-8 py-4 bg-black text-white font-black uppercase tracking-widest text-xs rounded-xl hover:bg-slate-800 transition-colors shadow-lg shadow-black/20 flex items-center justify-center gap-2">
+              <button className="w-full sm:w-auto px-8 py-4 bg-black text-white font-black uppercase tracking-widest text-xs rounded-lg hover:bg-zinc-800 transition-colors shadow-sm shadow-black/20 flex items-center justify-center gap-2">
                 <HugeiconsIcon icon={File02Icon} size={16} />
                 Review & Sign Contract
               </button>
 
-              <div className="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-widest">
+              <div className="flex items-center gap-2 text-xs font-bold text-zinc-500 uppercase tracking-widest">
                 <HugeiconsIcon
                   icon={Time02Icon}
                   size={14}
@@ -84,22 +84,22 @@ export default function UserCommandCenter() {
           </div>
 
           {/* Access Infrastructure Panel (Locked State) */}
-          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 md:p-8">
-            <div className="flex items-center justify-between mb-6 border-b border-slate-200 pb-4">
+          <div className="bg-zinc-50/50 border border-zinc-200/60 rounded-lg p-6 md:p-8">
+            <div className="flex items-center justify-between mb-6 border-b border-zinc-200/60 pb-4">
               <h3 className="text-sm font-black uppercase tracking-widest flex items-center gap-2">
                 <HugeiconsIcon
                   icon={Key01Icon}
                   size={18}
-                  className="text-slate-400"
+                  className="text-zinc-400"
                 />
                 Access Infrastructure
               </h3>
-              <span className="text-[10px] font-bold uppercase tracking-widest bg-slate-200 text-slate-500 px-2 py-1 rounded">
+              <span className="text-[10px] font-bold uppercase tracking-widest bg-zinc-200 text-zinc-500 px-2 py-1 rounded">
                 Awaiting Signature
               </span>
             </div>
 
-            <p className="text-xs font-medium text-slate-500 leading-relaxed mb-6">
+            <p className="text-xs font-medium text-zinc-500 leading-relaxed mb-6">
               Your Tuya Smart-Lock credentials are currently locked. Complete
               the digital ledger execution above to generate your temporary
               inspection PIN.
@@ -107,7 +107,7 @@ export default function UserCommandCenter() {
 
             <button
               disabled
-              className="w-full py-4 bg-white text-slate-400 font-black uppercase tracking-widest text-xs border-2 border-slate-200 rounded-xl cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full py-4 bg-white text-zinc-400 font-black uppercase tracking-widest text-xs border-2 border-zinc-200/60 rounded-lg cursor-not-allowed flex items-center justify-center gap-2"
             >
               Generate Temporary PIN
             </button>
@@ -116,10 +116,10 @@ export default function UserCommandCenter() {
 
         {/* === RIGHT COLUMN: Asset Overview === */}
         <div className="lg:col-span-1 flex flex-col gap-6">
-          <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm flex flex-col">
-            <div className="relative h-48 w-full bg-slate-100">
+          <div className="bg-white border border-zinc-200/60 rounded-lg overflow-hidden shadow-sm flex flex-col">
+            <div className="relative h-48 w-full bg-zinc-100/50">
               {/* Fallback styling if image doesn't load immediately */}
-              <div className="absolute inset-0 flex items-center justify-center text-slate-300">
+              <div className="absolute inset-0 flex items-center justify-center text-zinc-300">
                 <HugeiconsIcon icon={Building04Icon} size={32} />
               </div>
               {/* Replace with next/image in production */}
@@ -142,19 +142,19 @@ export default function UserCommandCenter() {
               </h3>
 
               <div className="space-y-3 mb-6">
-                <div className="flex justify-between items-center pb-3 border-b border-slate-100">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                <div className="flex justify-between items-center pb-3 border-b border-zinc-200/60">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">
                     Escrow Hold
                   </span>
                   <span className="text-xs font-black text-green-600">
                     {activeTask.depositPaid}
                   </span>
                 </div>
-                <div className="flex justify-between items-center pb-3 border-b border-slate-100">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                <div className="flex justify-between items-center pb-3 border-b border-zinc-200/60">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">
                     Verification
                   </span>
-                  <span className="text-[10px] font-bold text-slate-700 flex items-center gap-1">
+                  <span className="text-[10px] font-bold text-zinc-700 flex items-center gap-1">
                     <HugeiconsIcon
                       icon={CheckmarkBadge01Icon}
                       size={12}
@@ -167,7 +167,7 @@ export default function UserCommandCenter() {
 
               <Link
                 href={`/properties/glasshouse-villa`}
-                className="w-full flex items-center justify-between text-xs font-bold uppercase tracking-widest text-slate-500 hover:text-black transition-colors group"
+                className="w-full flex items-center justify-between text-xs font-bold uppercase tracking-widest text-zinc-500 hover:text-black transition-colors group"
               >
                 View Digital Twin
                 <HugeiconsIcon
@@ -179,15 +179,15 @@ export default function UserCommandCenter() {
             </div>
           </div>
 
-          <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200">
-            <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
+          <div className="bg-zinc-50/50 rounded-lg p-6 border border-zinc-200/60">
+            <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2">
               Need Assistance?
             </h4>
-            <p className="text-xs font-medium text-slate-600 mb-4">
+            <p className="text-xs font-medium text-zinc-600 mb-4">
               Your dedicated Portfolio Manager is available to assist with your
               ledger execution.
             </p>
-            <button className="text-[10px] font-bold uppercase tracking-widest border-b-[1.5px] border-black pb-0.5 hover:text-slate-500 hover:border-slate-500 transition-colors">
+            <button className="text-[10px] font-bold uppercase tracking-widest border-b-[1.5px] border-black pb-0.5 hover:text-zinc-500 hover:border-slate-500 transition-colors">
               Contact Concierge
             </button>
           </div>

@@ -52,16 +52,16 @@ export default async function SavedPropertiesPage() {
   return (
     <div className="min-h-screen bg-slate-50/50 pb-24">
       {/* --- PAGE HEADER --- */}
-      <section className="bg-white border-b border-slate-200 pt-12 pb-12 px-4">
+      <section className="bg-white border-b border-zinc-200/60 pt-12 pb-12 px-4">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl md:text-3xl uppercase font-black  text-slate-900 flex items-center gap-3">
+            <h1 className="text-2xl md:text-3xl uppercase font-black  text-zinc-900 flex items-center gap-3">
               {/* <HugeiconsIcon icon={FavouriteIcon} size={28} className="text-red-500 fill-red-500" /> */}
               My Saved Homes
             </h1>
            
           </div>
-          <p className="text-sm font-medium text-slate-500 bg-slate-100 px-4 py-2 rounded-full w-fit">
+          <p className="text-sm font-medium text-zinc-500 bg-zinc-100/50 px-4 py-2 rounded-full w-fit">
             {savedProperties.length} {savedProperties.length === 1 ? "Property" : "Properties"} Saved
           </p>
         </div>
@@ -92,16 +92,16 @@ export default async function SavedPropertiesPage() {
         ) : (
           /* EMPTY STATE */
           <div className="flex flex-col items-center justify-center py-20 px-4 text-center bg-white    mx-auto mt-8">
-            <div className="h-20 w-20 bg-slate-50 rounded-full flex items-center justify-center mb-6 border border-slate-100">
-              <HugeiconsIcon icon={Home09Icon} size={32} className="text-slate-300" />
+            <div className="h-20 w-20 bg-zinc-50/50 rounded-full flex items-center justify-center mb-6 border border-zinc-200/60">
+              <HugeiconsIcon icon={Home09Icon} size={32} className="text-zinc-300" />
             </div>
-            <h2 className="text-xl font-bold text-slate-900 mb-2">No saved homes yet</h2>
-            <p className="text-slate-500 max-w-md mb-8">
+            <h2 className="text-xl font-bold text-zinc-900 mb-2">No saved homes yet</h2>
+            <p className="text-zinc-500 max-w-md mb-8">
               You haven't added any properties to your favorites. Start exploring to find your perfect next home or office space.
             </p>
             <Link 
               href="/explore" 
-              className="bg-zinc-950 hover:bg-zinc-800 text-white px-8 py-3.5 rounded-xl font-medium transition-colors flex items-center gap-2"
+              className="bg-zinc-950 hover:bg-zinc-800 text-white px-8 py-3.5 rounded-lg font-medium transition-colors flex items-center gap-2"
             >
               Explore Properties
               <HugeiconsIcon icon={ArrowRight01Icon} size={18} />

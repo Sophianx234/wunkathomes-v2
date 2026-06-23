@@ -95,7 +95,7 @@ export default function PropertiesFilterBar({
             className={`whitespace-nowrap px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${
               currentAssetType === "all"
                 ? "bg-black text-white"
-                : "bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-900"
+                : "bg-zinc-100/50 text-zinc-500 hover:bg-zinc-200 hover:text-zinc-900"
             }`}
           >
             All Assets
@@ -107,7 +107,7 @@ export default function PropertiesFilterBar({
             className={`whitespace-nowrap px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${
               currentAssetType === "Apartment_Building"
                 ? "bg-black text-white"
-                : "bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-900"
+                : "bg-zinc-100/50 text-zinc-500 hover:bg-zinc-200 hover:text-zinc-900"
             }`}
           >
             Apartments
@@ -117,7 +117,7 @@ export default function PropertiesFilterBar({
             className={`whitespace-nowrap px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${
               currentAssetType === "Commercial"
                 ? "bg-black text-white"
-                : "bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-900"
+                : "bg-zinc-100/50 text-zinc-500 hover:bg-zinc-200 hover:text-zinc-900"
             }`}
           >
             Commercial
@@ -127,7 +127,7 @@ export default function PropertiesFilterBar({
             className={`whitespace-nowrap px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${
               currentAssetType === "House"
                 ? "bg-black text-white"
-                : "bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-900"
+                : "bg-zinc-100/50 text-zinc-500 hover:bg-zinc-200 hover:text-zinc-900"
             }`}
           >
             Houses
@@ -137,7 +137,7 @@ export default function PropertiesFilterBar({
         {/* Create Property Button */}
         <Link
           href="/admin/properties/create"
-          className="text-white flex items-center bg-black hover:bg-slate-800 rounded-lg h-10 px-5 text-[14px] font-medium shrink-0 w-full md:w-auto transition-colors"
+          className="text-white flex items-center bg-black hover:bg-zinc-800 rounded-lg h-10 px-5 text-[14px] font-medium shrink-0 w-full md:w-auto transition-colors"
         >
           <HugeiconsIcon
             icon={PlusSignIcon}
@@ -150,14 +150,14 @@ export default function PropertiesFilterBar({
       </div>
 
       {/* --- BOTTOM ROW: Unified Search & Filter Chrome --- */}
-      <section className="flex flex-col xl:flex-row items-center gap-4 bg-white p-2 border border-slate-200 rounded-xl w-full">
+      <section className="flex flex-col xl:flex-row items-center gap-4 bg-white p-2 border border-zinc-200/60 rounded-lg w-full">
         {/* Search Input */}
         <div className="relative flex-1 w-full">
           <HugeiconsIcon
             icon={Search01Icon}
             size={18}
             strokeWidth={2}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"
           />
           <Input
             value={searchTerm} // Now controlled
@@ -167,7 +167,7 @@ export default function PropertiesFilterBar({
           />
         </div>
 
-        <div className="h-6 w-px bg-slate-200 hidden xl:block" />
+        <div className="h-6 w-px bg-zinc-200 hidden xl:block" />
 
         {/* Dropdowns & Counter Section */}
         <div className="flex flex-wrap md:flex-nowrap items-center gap-2 w-full xl:w-auto px-2 pb-2 xl:pb-0">
@@ -176,7 +176,7 @@ export default function PropertiesFilterBar({
             value={searchParams.get("location") || "all"}
             onValueChange={(val) => handleFilterChange("location", val)}
           >
-            <SelectTrigger className="w-full md:w-[140px] h-9 border-0 bg-slate-50 hover:bg-slate-100 text-[13px] font-medium text-slate-700 shadow-none focus:ring-0">
+            <SelectTrigger className="w-full md:w-[140px] h-9 border-0 bg-zinc-50/50 hover:bg-zinc-100/50 text-[13px] font-medium text-zinc-700 shadow-none focus:ring-0">
               <SelectValue placeholder="Location" />
             </SelectTrigger>
             <SelectContent>
@@ -192,7 +192,7 @@ export default function PropertiesFilterBar({
             value={searchParams.get("listingType") || "all"}
             onValueChange={(val) => handleFilterChange("listingType", val)}
           >
-            <SelectTrigger className="w-full md:w-[130px] h-9 border-0 bg-slate-50 hover:bg-slate-100 text-[13px] font-medium text-slate-700 shadow-none focus:ring-0">
+            <SelectTrigger className="w-full md:w-[130px] h-9 border-0 bg-zinc-50/50 hover:bg-zinc-100/50 text-[13px] font-medium text-zinc-700 shadow-none focus:ring-0">
               <SelectValue placeholder="Listing Type" />
             </SelectTrigger>
             <SelectContent>
@@ -207,7 +207,7 @@ export default function PropertiesFilterBar({
             value={searchParams.get("status") || "all"}
             onValueChange={(val) => handleFilterChange("status", val)}
           >
-            <SelectTrigger className="w-full md:w-[130px] h-9 border-0 bg-slate-50 hover:bg-slate-100 text-[13px] font-medium text-slate-700 shadow-none focus:ring-0">
+            <SelectTrigger className="w-full md:w-[130px] h-9 border-0 bg-zinc-50/50 hover:bg-zinc-100/50 text-[13px] font-medium text-zinc-700 shadow-none focus:ring-0">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
@@ -220,16 +220,16 @@ export default function PropertiesFilterBar({
           </Select>
 
           {/* Vertical Separator */}
-          <div className="h-6 w-px bg-slate-200 hidden md:block mx-1" />
+          <div className="h-6 w-px bg-zinc-200 hidden md:block mx-1" />
 
           {/* 4. Results Counter */}
           <div
             className={`hidden md:flex items-center gap-2 pl-1 pr-2 transition-opacity ${isPending ? "opacity-50" : "opacity-100"}`}
           >
-            <span className="text-[22px] font-black text-slate-900 leading-none">
+            <span className="text-[22px] font-black text-zinc-900 leading-none">
               {totalAssets}
             </span>
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-tight">
+            <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest leading-tight">
               Assets
               <br />
               Found
@@ -251,7 +251,7 @@ export default function PropertiesFilterBar({
           <Button
             variant="ghost"
             size="icon"
-            className="h-9 w-9 text-slate-500 hover:text-slate-900 hover:bg-slate-100 shrink-0 ml-auto md:ml-0"
+            className="h-9 w-9 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100/50 shrink-0 ml-auto md:ml-0"
           >
             <HugeiconsIcon icon={FilterIcon} size={18} strokeWidth={2} />
           </Button>

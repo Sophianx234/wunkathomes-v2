@@ -32,7 +32,7 @@ export default function PasswordChangedEmail({
       </Text>
 
       {/* SECURITY WARNING */}
-      <Section className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-xl p-6 mb-10">
+      <Section className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg p-6 mb-10">
         <Text className="text-[14px] leading-[24px] text-[#111827] font-semibold m-0 mb-2">
           Didn't do this?
         </Text>

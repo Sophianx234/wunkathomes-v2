@@ -44,7 +44,7 @@ export default function ExploreClientLayout({ mode, highlights }: ExploreClientL
   return (
     <div className="bg-white min-h-screen">
       {/* === Mode Toggle Switcher === */}
-      <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50 bg-black/80 backdrop-blur-md p-1.5 rounded-xl border border-white/10 flex gap-2">
+      <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50 bg-black/80 backdrop-blur-md p-1.5 rounded-lg border border-white/10 flex gap-2">
         <Link 
           href="/explore?status=rent"
           scroll={false}
@@ -118,7 +118,7 @@ export default function ExploreClientLayout({ mode, highlights }: ExploreClientL
               {content.description}
             </p>
             <Link href={`/properties?listingType=For_${mode === "sale" ? "Sale" : "Rent"}`}>
-              <button className="px-8 py-4 bg-white text-black font-bold uppercase tracking-widest text-xs hover:bg-zinc-900 hover:text-white border-2 border-white transition-all duration-300 flex items-center gap-3 group rounded-lg shadow-lg">
+              <button className="px-8 py-4 bg-white text-black font-bold uppercase tracking-widest text-xs hover:bg-zinc-900 hover:text-white border-2 border-white transition-all duration-300 flex items-center gap-3 group rounded-lg shadow-sm">
                 Explore All
                 {/* FIXED: Wrapped raw array reference into functional components */}
                 <HugeiconsIcon icon={ArrowRight01Icon} size={16} className="group-hover:translate-x-1 transition-transform" />
@@ -147,7 +147,7 @@ export default function ExploreClientLayout({ mode, highlights }: ExploreClientL
               <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors" />
               <div className="absolute bottom-8 left-8 flex items-center justify-between w-[calc(100%-4rem)]">
                 <h3 className="text-2xl md:text-3xl font-black text-white uppercase">{content.collections[0].title}</h3>
-                <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-black shadow-md">
+                <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-black shadow-sm">
                   <HugeiconsIcon icon={ArrowRight01Icon} size={20} />
                 </div>
               </div>
@@ -168,7 +168,7 @@ export default function ExploreClientLayout({ mode, highlights }: ExploreClientL
                   <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors" />
                   <div className="absolute bottom-6 left-6 flex items-center justify-between w-[calc(100%-3rem)]">
                     <h3 className="text-xl font-black text-white uppercase">{content.collections[idx].title}</h3>
-                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-black shadow-md">
+                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-black shadow-sm">
                       <HugeiconsIcon icon={ArrowRight01Icon} size={16} />
                     </div>
                   </div>
@@ -180,7 +180,7 @@ export default function ExploreClientLayout({ mode, highlights }: ExploreClientL
       </section> */}
 
       {/* === 3. Spotlight Assets === */}
-      <section className="py-24 bg-zinc-50 border-t border-zinc-200">
+      <section className="py-24 bg-zinc-50 border-t border-zinc-200/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
             <div>

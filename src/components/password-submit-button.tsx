@@ -9,7 +9,7 @@ export function PasswordSubmitButton() {
   
   return (
     <Button 
-      className="flex-1 bg-zinc-950 hover:bg-zinc-800 text-white rounded-xl h-12 font-medium" 
+      className="flex-1 bg-zinc-950 hover:bg-zinc-800 text-white rounded-lg h-12 font-medium" 
       type="submit"
       disabled={pending}
     >

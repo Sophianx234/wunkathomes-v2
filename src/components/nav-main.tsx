@@ -47,7 +47,7 @@ export function NavMain({
                       className={`transition-all duration-200 ${
                         isActive
                           ? "bg-zinc-950 text-white hover:bg-black hover:text-white"
-                          : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+                          : "text-zinc-600 hover:bg-zinc-100/50 hover:text-zinc-900"
                       }`}
                     >
                       <Link href={item.url}>

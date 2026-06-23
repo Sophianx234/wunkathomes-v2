@@ -94,11 +94,11 @@ export function TransactionReceipt({ transaction, onBack }: TransactionReceiptPr
       <div className="max-w-2xl mx-auto mt-4 md:mt-10 print:mt-0 p-3 md:p-0 w-full box-border">
         
         {/* The Receipt "Slip" */}
-        <div className="bg-white border border-zinc-200/80 rounded-xl md:rounded-2xl shadow-[0_2px_12px_-4px_rgba(0,0,0,0.06)] overflow-hidden print:border-none print:shadow-none print:rounded-none w-full box-border">
+        <div className="bg-white border border-zinc-200/80 rounded-lg md:rounded-lg shadow-[0_2px_12px_-4px_rgba(0,0,0,0.06)] overflow-hidden print:border-none print:shadow-none print:rounded-none w-full box-border">
           
           {/* Header */}
           <div className="p-4 md:p-10 md:pb-4 border-b border-zinc-200/80 flex flex-col items-center text-center bg-zinc-50/50 print:bg-white w-full box-border">
-            <div className="h-8 w-8 md:h-12 md:w-12 relative rounded-lg md:rounded-xl flex items-center justify-center mb-3 md:mb-6">
+            <div className="h-8 w-8 md:h-12 md:w-12 relative rounded-lg md:rounded-lg flex items-center justify-center mb-3 md:mb-6">
               <Image src={'/images/home.png'} alt="WunkatHomes" fill className="text-white object-cover" />
             </div>
             <h1 className="text-base md:text-xl font-bold tracking-tight text-zinc-900">
@@ -135,25 +135,25 @@ export function TransactionReceipt({ transaction, onBack }: TransactionReceiptPr
                 Transaction Details
               </h3>
               <dl className="space-y-2 md:space-y-4 text-[11px] md:text-[14px] w-full min-w-0">
-                <div className="flex justify-between items-start border-b border-zinc-100 pb-2 md:pb-4 w-full min-w-0">
+                <div className="flex justify-between items-start border-b border-zinc-200/60 pb-2 md:pb-4 w-full min-w-0">
                   <dt className="text-zinc-500 font-medium shrink-0 pr-2">Reference ID</dt>
                   <dd className="font-mono text-zinc-900 font-medium text-right break-all max-w-[140px] md:max-w-[200px]">
                     {transaction.reference}
                   </dd>
                 </div>
-                <div className="flex justify-between items-center border-b border-zinc-100 pb-2 md:pb-4 w-full min-w-0">
+                <div className="flex justify-between items-center border-b border-zinc-200/60 pb-2 md:pb-4 w-full min-w-0">
                   <dt className="text-zinc-500 font-medium shrink-0 pr-2">Date & Time</dt>
                   <dd className="text-zinc-900 font-medium text-right font-tabular-nums truncate">
                     {formatDateFull(transaction.paidAt || transaction.createdAt)}
                   </dd>
                 </div>
-                <div className="flex justify-between items-center border-b border-zinc-100 pb-2 md:pb-4 w-full min-w-0">
+                <div className="flex justify-between items-center border-b border-zinc-200/60 pb-2 md:pb-4 w-full min-w-0">
                   <dt className="text-zinc-500 font-medium shrink-0 pr-2">Payment Method</dt>
                   <dd className="text-zinc-900 font-medium text-right capitalize truncate">
                     {transaction.channel.replace("_", " ")}
                   </dd>
                 </div>
-                <div className="flex justify-between items-center border-b border-zinc-100 pb-2 md:pb-4 w-full min-w-0">
+                <div className="flex justify-between items-center border-b border-zinc-200/60 pb-2 md:pb-4 w-full min-w-0">
                   <dt className="text-zinc-500 font-medium shrink-0 pr-2">Payment Purpose</dt>
                   <dd className="text-zinc-900 font-medium text-right capitalize truncate">
                     {transaction.paymentPurpose.replace(/_/g, " ")}
@@ -166,7 +166,7 @@ export function TransactionReceipt({ transaction, onBack }: TransactionReceiptPr
               <h3 className="text-[9px] md:text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-2 md:mb-4 mt-4 md:mt-8">
                 Billed To
               </h3>
-              <div className="bg-zinc-50/80 p-3 md:p-5 rounded-lg md:rounded-xl border border-zinc-200/60 print:border-none print:p-0 print:bg-white w-full min-w-0">
+              <div className="bg-zinc-50/80 p-3 md:p-5 rounded-lg md:rounded-lg border border-zinc-200/60 print:border-none print:p-0 print:bg-white w-full min-w-0">
                 <p className="text-[11px] md:text-[14px] font-semibold text-zinc-900 mb-0.5 md:mb-1 truncate">
                   {transaction.user.name}
                 </p>
@@ -180,7 +180,7 @@ export function TransactionReceipt({ transaction, onBack }: TransactionReceiptPr
               <h3 className="text-[9px] md:text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-2 md:mb-4 mt-4 md:mt-8">
                 Associated Property
               </h3>
-              <div className="flex items-start justify-between bg-zinc-50/80 p-3 md:p-5 rounded-lg md:rounded-xl border border-zinc-200/60 print:border-none print:p-0 print:bg-white w-full min-w-0">
+              <div className="flex items-start justify-between bg-zinc-50/80 p-3 md:p-5 rounded-lg md:rounded-lg border border-zinc-200/60 print:border-none print:p-0 print:bg-white w-full min-w-0">
                 <div className="flex-1 pr-2 md:pr-4 min-w-0">
                   <p className="text-[11px] md:text-[14px] font-semibold text-zinc-900 mb-0.5 md:mb-1 truncate">
                     {transaction.listing.title}

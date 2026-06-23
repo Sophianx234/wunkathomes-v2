@@ -78,18 +78,18 @@ export default function MaintenanceRequestForm({
       className="space-y-4 md:space-y-6 max-w-4xl mx-auto w-full overflow-x-hidden box-border px-2 md:px-0"
     >
       {/* --- SECTION: PROPERTY SELECTION --- */}
-      <div className="bg-white rounded-lg md:rounded-xl border border-slate-200 p-4 md:p-8 w-full box-border">
-        <h2 className="text-[14px] md:text-[18px] font-medium text-slate-900 mb-3 md:mb-6 pb-2 md:pb-3 border-b border-slate-200 truncate">
+      <div className="bg-white rounded-lg md:rounded-lg border border-zinc-200/60 p-4 md:p-8 w-full box-border">
+        <h2 className="text-[14px] md:text-[18px] font-medium text-zinc-900 mb-3 md:mb-6 pb-2 md:pb-3 border-b border-zinc-200/60 truncate">
           Property Details
         </h2>
         <div className="space-y-1.5 md:space-y-2 max-w-md w-full min-w-0 box-border">
-          <Label className="text-[10px] md:text-[13px] font-medium text-slate-700">
+          <Label className="text-[10px] md:text-[13px] font-medium text-zinc-700">
             Affected Property *
           </Label>
 
           {properties.length === 1 ? (
             // SINGLE PROPERTY: Locked read-only text
-            <div className="h-9 md:h-10 bg-slate-50 border border-slate-200 rounded-md px-2 md:px-3 flex items-center text-[11px] md:text-sm text-slate-700 font-medium w-full min-w-0 box-border truncate">
+            <div className="h-9 md:h-10 bg-zinc-50/50 border border-zinc-200/60 rounded-md px-2 md:px-3 flex items-center text-[11px] md:text-sm text-zinc-700 font-medium w-full min-w-0 box-border truncate">
               {properties[0].title}
             </div>
           ) : (
@@ -99,7 +99,7 @@ export default function MaintenanceRequestForm({
               onValueChange={setSelectedLeaseId}
               required
             >
-              <SelectTrigger className="h-9 md:h-10 bg-slate-50 focus:ring-zinc-950 border-slate-200 text-[11px] md:text-sm w-full min-w-0 max-w-full box-border m-0">
+              <SelectTrigger className="h-9 md:h-10 bg-zinc-50/50 focus:ring-zinc-950 border-zinc-200/60 text-[11px] md:text-sm w-full min-w-0 max-w-full box-border m-0">
                 <SelectValue
                   placeholder="Select a property"
                   className="truncate"
@@ -122,18 +122,18 @@ export default function MaintenanceRequestForm({
       </div>
 
       {/* --- SECTION: ISSUE CLASSIFICATION --- */}
-      <div className="bg-white rounded-lg md:rounded-xl border border-slate-200 p-4 md:p-8 w-full box-border">
-        <h2 className="text-[14px] md:text-[18px] font-medium text-slate-900 mb-3 md:mb-6 pb-2 md:pb-3 border-b border-slate-200 truncate">
+      <div className="bg-white rounded-lg md:rounded-lg border border-zinc-200/60 p-4 md:p-8 w-full box-border">
+        <h2 className="text-[14px] md:text-[18px] font-medium text-zinc-900 mb-3 md:mb-6 pb-2 md:pb-3 border-b border-zinc-200/60 truncate">
           Issue Classification
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-5 w-full box-border">
           <div className="space-y-1.5 md:space-y-2 w-full min-w-0 box-border">
-            <Label className="text-[10px] md:text-[13px] font-medium text-slate-700">
+            <Label className="text-[10px] md:text-[13px] font-medium text-zinc-700">
               Service Category *
             </Label>
             <Select name="category" required>
-              <SelectTrigger className="h-9 md:h-10 bg-slate-50 focus:ring-zinc-950 border-slate-200 text-[11px] md:text-sm w-full min-w-0 max-w-full box-border m-0">
+              <SelectTrigger className="h-9 md:h-10 bg-zinc-50/50 focus:ring-zinc-950 border-zinc-200/60 text-[11px] md:text-sm w-full min-w-0 max-w-full box-border m-0">
                 <SelectValue
                   placeholder="Select the affected area"
                   className="truncate"
@@ -178,11 +178,11 @@ export default function MaintenanceRequestForm({
           </div>
 
           <div className="space-y-1.5 md:space-y-2 w-full min-w-0 box-border">
-            <Label className="text-[10px] md:text-[13px] font-medium text-slate-700">
+            <Label className="text-[10px] md:text-[13px] font-medium text-zinc-700">
               Priority Level *
             </Label>
             <Select name="priority" defaultValue="Routine">
-              <SelectTrigger className="h-9 md:h-10 bg-slate-50 focus:ring-zinc-950 border-slate-200 text-[11px] md:text-sm w-full min-w-0 max-w-full box-border m-0">
+              <SelectTrigger className="h-9 md:h-10 bg-zinc-50/50 focus:ring-zinc-950 border-zinc-200/60 text-[11px] md:text-sm w-full min-w-0 max-w-full box-border m-0">
                 <SelectValue
                   placeholder="Assess the urgency"
                   className="truncate"
@@ -211,8 +211,8 @@ export default function MaintenanceRequestForm({
       </div>
 
       {/* --- SECTION: REQUEST DETAILS --- */}
-      <div className="bg-white rounded-lg md:rounded-xl border border-slate-200 p-4 md:p-8 w-full box-border">
-        <h2 className="text-[14px] md:text-[18px] font-medium text-slate-900 mb-3 md:mb-6 pb-2 md:pb-3 border-b border-slate-200 truncate">
+      <div className="bg-white rounded-lg md:rounded-lg border border-zinc-200/60 p-4 md:p-8 w-full box-border">
+        <h2 className="text-[14px] md:text-[18px] font-medium text-zinc-900 mb-3 md:mb-6 pb-2 md:pb-3 border-b border-zinc-200/60 truncate">
           Request Details
         </h2>
 
@@ -220,7 +220,7 @@ export default function MaintenanceRequestForm({
           <div className="space-y-1.5 md:space-y-2 w-full min-w-0 box-border">
             <Label
               htmlFor="title"
-              className="text-[10px] md:text-[13px] font-medium text-slate-700"
+              className="text-[10px] md:text-[13px] font-medium text-zinc-700"
             >
               Subject *
             </Label>
@@ -228,7 +228,7 @@ export default function MaintenanceRequestForm({
               id="title"
               name="title"
               placeholder="e.g. Master bathroom sink is draining slowly"
-              className="h-9 md:h-10 bg-slate-50 focus:ring-zinc-950 border-slate-200 text-[11px] md:text-sm block w-full min-w-0 max-w-full box-border appearance-none m-0 px-3"
+              className="h-9 md:h-10 bg-zinc-50/50 focus:ring-zinc-950 border-zinc-200/60 text-[11px] md:text-sm block w-full min-w-0 max-w-full box-border appearance-none m-0 px-3"
               required
             />
           </div>
@@ -236,7 +236,7 @@ export default function MaintenanceRequestForm({
           <div className="space-y-1.5 md:space-y-2 w-full min-w-0 box-border">
             <Label
               htmlFor="description"
-              className="text-[10px] md:text-[13px] font-medium text-slate-700"
+              className="text-[10px] md:text-[13px] font-medium text-zinc-700"
             >
               Detailed Context *
             </Label>
@@ -244,7 +244,7 @@ export default function MaintenanceRequestForm({
               id="description"
               name="description"
               placeholder="Please describe the issue in detail. When did it start? Are there any specific error codes?"
-              className="min-h-[80px] md:min-h-[120px] bg-slate-50 focus:ring-zinc-950 border-slate-200 resize-y text-[11px] md:text-sm block w-full min-w-0 max-w-full box-border appearance-none m-0 p-3"
+              className="min-h-[80px] md:min-h-[120px] bg-zinc-50/50 focus:ring-zinc-950 border-zinc-200/60 resize-y text-[11px] md:text-sm block w-full min-w-0 max-w-full box-border appearance-none m-0 p-3"
               required
             />
           </div>
@@ -255,8 +255,8 @@ export default function MaintenanceRequestForm({
       <MediaUpload files={uploadedFiles} setFiles={setUploadedFiles} />
 
       {/* --- SECTION: ACTIONS --- */}
-      <div className="bg-white rounded-lg md:rounded-xl border border-slate-200 p-4 md:p-8 flex flex-col sm:flex-row items-center justify-between gap-4 w-full box-border">
-        <p className="text-[10px] md:text-[13px] text-slate-500 max-w-md break-words text-center sm:text-left leading-relaxed">
+      <div className="bg-white rounded-lg md:rounded-lg border border-zinc-200/60 p-4 md:p-8 flex flex-col sm:flex-row items-center justify-between gap-4 w-full box-border">
+        <p className="text-[10px] md:text-[13px] text-zinc-500 max-w-md break-words text-center sm:text-left leading-relaxed">
           Upon submission, our dispatch team will review your request and
           schedule a technician. You can track the status of this ticket in your
           dashboard.
@@ -265,7 +265,7 @@ export default function MaintenanceRequestForm({
           <Button
             type="button"
             variant="outline"
-            className="h-9 md:h-11 px-4 md:px-6 rounded-md text-[11px] md:text-[14px] w-full sm:w-auto border-slate-200 hover:bg-slate-50 shrink-0"
+            className="h-9 md:h-11 px-4 md:px-6 rounded-md text-[11px] md:text-[14px] w-full sm:w-auto border-zinc-200/60 hover:bg-zinc-50/50 shrink-0"
             onClick={() => router.back()}
           >
             Cancel

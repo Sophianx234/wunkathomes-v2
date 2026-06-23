@@ -125,8 +125,8 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                 className="object-contain size-10 transition-transform"
               />
             </div>
-            <span className="pt-2 text-primary  sm:block tracking-tight text-slate-800">
-              Wunkat<span className="text-slate-500">Homes</span>
+            <span className="pt-2 text-primary  sm:block tracking-tight text-zinc-800">
+              Wunkat<span className="text-zinc-500">Homes</span>
             </span>
           </Link>
 
@@ -134,7 +134,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
           <nav className="hidden md:flex items-center gap-8 font-medium text-sm h-full">
             <Link
               href="/"
-              className="text-slate-600 flex items-center gap-1.5 justify-center hover:text-slate-900 transition"
+              className="text-zinc-600 flex items-center gap-1.5 justify-center hover:text-zinc-900 transition"
             >
               <HugeiconsIcon icon={Home09Icon} size={18} /> Home
             </Link>
@@ -147,7 +147,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
             >
               <Link
                 href="/properties"
-                className="text-slate-600 flex items-center gap-1.5 justify-center hover:text-slate-900 transition py-6"
+                className="text-zinc-600 flex items-center gap-1.5 justify-center hover:text-zinc-900 transition py-6"
               >
                 <HugeiconsIcon icon={House02FreeIcons} size={18} />
                 <span className="flex items-center gap-1">
@@ -167,60 +167,60 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 10 }}
                     transition={{ duration: 0.2 }}
-                    className="absolute top-[70px] left-1/2 -translate-x-1/2 w-64 bg-white border border-slate-200 shadow-xl rounded-xl overflow-hidden flex flex-col divide-y z-50"
+                    className="absolute top-[70px] left-1/2 -translate-x-1/2 w-64 bg-white border border-zinc-200/60 shadow-sm rounded-lg overflow-hidden flex flex-col divide-y z-50"
                   >
                     <Link
                       href="/properties?type=house"
-                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition"
+                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-zinc-700 hover:bg-zinc-50/50 hover:text-zinc-900 transition"
                     >
                       <HugeiconsIcon
                         icon={House03Icon}
                         size={18}
-                        className="text-slate-400"
+                        className="text-zinc-400"
                       />{" "}
                       House
                     </Link>
                     <Link
                       href="/properties?type=apartment"
-                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition"
+                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-zinc-700 hover:bg-zinc-50/50 hover:text-zinc-900 transition"
                     >
                       <HugeiconsIcon
                         icon={Building05Icon}
                         size={18}
-                        className="text-slate-400"
+                        className="text-zinc-400"
                       />{" "}
                       Apartment
                     </Link>
                     <Link
                       href="/properties?type=land"
-                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition"
+                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-zinc-700 hover:bg-zinc-50/50 hover:text-zinc-900 transition"
                     >
                       <HugeiconsIcon
                         icon={Map}
                         size={18}
-                        className="text-slate-400"
+                        className="text-zinc-400"
                       />{" "}
                       Land
                     </Link>
                     <Link
                       href="/properties?type=commercial"
-                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition"
+                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-zinc-700 hover:bg-zinc-50/50 hover:text-zinc-900 transition"
                     >
                       <HugeiconsIcon
                         icon={Store01Icon}
                         size={18}
-                        className="text-slate-400"
+                        className="text-zinc-400"
                       />{" "}
                       Commercial Property
                     </Link>
                     <Link
                       href="/properties?type=office"
-                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition"
+                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-zinc-700 hover:bg-zinc-50/50 hover:text-zinc-900 transition"
                     >
                       <HugeiconsIcon
                         icon={OfficeChairIcon}
                         size={18}
-                        className="text-slate-400"
+                        className="text-zinc-400"
                       />{" "}
                       Office Spaces
                     </Link>
@@ -237,7 +237,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
             >
               <Link
                 href="/explore"
-                className="text-slate-600 flex items-center gap-1.5 justify-center hover:text-slate-900 transition py-6"
+                className="text-zinc-600 flex items-center gap-1.5 justify-center hover:text-zinc-900 transition py-6"
               >
                 <HugeiconsIcon icon={GlobalSearchIcon} size={18} />
                 <span className="flex items-center gap-1">
@@ -257,27 +257,27 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 10 }}
                     transition={{ duration: 0.2 }}
-                    className="absolute top-[70px] left-1/2 -translate-x-1/2 w-48 bg-white border border-slate-200 shadow-xl rounded-xl overflow-hidden flex flex-col divide-y z-50"
+                    className="absolute top-[70px] left-1/2 -translate-x-1/2 w-48 bg-white border border-zinc-200/60 shadow-sm rounded-lg overflow-hidden flex flex-col divide-y z-50"
                   >
                     <Link
                       href="/explore?status=rent"
-                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition"
+                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-zinc-700 hover:bg-zinc-50/50 hover:text-zinc-900 transition"
                     >
                       <HugeiconsIcon
                         icon={Key02Icon}
                         size={18}
-                        className="text-slate-400"
+                        className="text-zinc-400"
                       />{" "}
                       For Rent
                     </Link>
                     <Link
                       href="/explore?status=sale"
-                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition"
+                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-zinc-700 hover:bg-zinc-50/50 hover:text-zinc-900 transition"
                     >
                       <HugeiconsIcon
                         icon={BitcoinTagIcon}
                         size={18}
-                        className="text-slate-400"
+                        className="text-zinc-400"
                       />{" "}
                       For Sale
                     </Link>
@@ -288,7 +288,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
 
             <Link
               href="/about"
-              className="text-slate-600 flex items-center gap-1.5 justify-center hover:text-slate-900 transition"
+              className="text-zinc-600 flex items-center gap-1.5 justify-center hover:text-zinc-900 transition"
             >
               <HugeiconsIcon icon={UserGroupIcon} size={18} /> About
             </Link>
@@ -303,11 +303,11 @@ export default function NavbarClient({ user }: NavbarClientProps) {
               <>
                 <button
                   onClick={toggleProfile}
-                  className="flex items-center gap-2 border pr-6 border-slate-200 rounded-full p-1.5 transition-all bg-white focus:outline-none hover:shadow-xs relative"
+                  className="flex items-center gap-2 border pr-6 border-zinc-200/60 rounded-full p-1.5 transition-all bg-white focus:outline-none hover:shadow-xs relative"
                 >
                   <div className="relative">
                     {user.profilePicture ? (
-                      <div className="relative size-8 rounded-full overflow-hidden border border-slate-200">
+                      <div className="relative size-8 rounded-full overflow-hidden border border-zinc-200/60">
                         <Image
                           src={user.profilePicture}
                           alt={user.name}
@@ -316,7 +316,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                         />
                       </div>
                     ) : (
-                      <div className="bg-slate-100 p-1 rounded-full text-slate-600">
+                      <div className="bg-zinc-100/50 p-1 rounded-full text-zinc-600">
                         <HugeiconsIcon icon={UserCircleIcon} size={24} />
                       </div>
                     )}
@@ -327,10 +327,10 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                   </div>
 
                   <div className="flex flex-col ">
-                    <div className="text-left text-[12px] font-medium text-slate-900">
+                    <div className="text-left text-[12px] font-medium text-zinc-900">
                       {user.name}
                     </div>
-                    <div className="text-[10px] text-slate-500">
+                    <div className="text-[10px] text-zinc-500">
                       {user.email}
                     </div>
                   </div>
@@ -344,10 +344,10 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 10, scale: 0.95 }}
                       transition={{ duration: 0.2 }}
-                      className="absolute right-0 top-14 w-64 bg-white border border-slate-200 shadow-xl rounded-xl overflow-hidden flex flex-col py-2"
+                      className="absolute right-0 top-14 w-64 bg-white border border-zinc-200/60 shadow-sm rounded-lg overflow-hidden flex flex-col py-2"
                     >
-                      <div className="px-4 py-3 border-b border-slate-100 flex items-center gap-3">
-                        <div className="relative size-10 rounded-full overflow-hidden border border-slate-200 shrink-0">
+                      <div className="px-4 py-3 border-b border-zinc-200/60 flex items-center gap-3">
+                        <div className="relative size-10 rounded-full overflow-hidden border border-zinc-200/60 shrink-0">
                           {user.profilePicture ? (
                             <Image
                               src={user.profilePicture}
@@ -356,33 +356,33 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                               className="object-cover"
                             />
                           ) : (
-                            <div className="bg-slate-100 w-full h-full flex items-center justify-center text-slate-600">
+                            <div className="bg-zinc-100/50 w-full h-full flex items-center justify-center text-zinc-600">
                               <HugeiconsIcon icon={UserCircleIcon} size={24} />
                             </div>
                           )}
                         </div>
                         <div className="overflow-hidden">
-                          <p className="font-semibold text-slate-800 truncate">
+                          <p className="font-semibold text-zinc-800 truncate">
                             {user.name}
                           </p>
-                          <p className="text-sm text-slate-500 truncate">
+                          <p className="text-sm text-zinc-500 truncate">
                             {user.email}
                           </p>
                         </div>
                       </div>
 
-                      <div className="py-2 border-b border-slate-100">
+                      <div className="py-2 border-b border-zinc-200/60">
                         {/* SIGNATURE INDICATOR */}
                         <Link
                           href="/user/dashboard"
                           onClick={() => setProfileOpen(false)}
-                          className="flex items-center justify-between px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition"
+                          className="flex items-center justify-between px-4 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50/50 transition"
                         >
                           <div className="flex items-center gap-3">
                             <HugeiconsIcon
                               icon={DashboardSquare01Icon}
                               size={18}
-                              className="text-slate-400"
+                              className="text-zinc-400"
                             />{" "}
                             My Dashboard
                           </div>
@@ -395,13 +395,13 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                         <Link
                           href="/user/saved"
                           onClick={() => setProfileOpen(false)}
-                          className="flex items-center justify-between px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition"
+                          className="flex items-center justify-between px-4 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50/50 transition"
                         >
                           <div className="flex items-center gap-3">
                             <HugeiconsIcon
                               icon={FavouriteIcon}
                               size={18}
-                              className="text-slate-400"
+                              className="text-zinc-400"
                             />{" "}
                             My Saved Homes
                           </div>
@@ -414,13 +414,13 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                         <Link
                           href="/user/leases"
                           onClick={() => setProfileOpen(false)}
-                          className="flex items-center justify-between px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition"
+                          className="flex items-center justify-between px-4 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50/50 transition"
                         >
                           <div className="flex items-center gap-3">
                             <HugeiconsIcon
                               icon={File01Icon}
                               size={18}
-                              className="text-slate-400"
+                              className="text-zinc-400"
                             />{" "}
                             Verify Identity
                           </div>
@@ -432,39 +432,39 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                         <Link
                           href="/user/transactions"
                           onClick={() => setProfileOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition"
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50/50 transition"
                         >
                           <HugeiconsIcon
                             icon={CreditCardPosIcon}
                             size={18}
-                            className="text-slate-400"
+                            className="text-zinc-400"
                           />{" "}
                           Payment History
                         </Link>
                       </div>
 
-                      <div className="py-2 border-b border-slate-100">
+                      <div className="py-2 border-b border-zinc-200/60">
                         <Link
                           href="/user/settings"
                           onClick={() => setProfileOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition"
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50/50 transition"
                         >
                           <HugeiconsIcon
                             icon={Settings01Icon}
                             size={18}
-                            className="text-slate-400"
+                            className="text-zinc-400"
                           />{" "}
                           Account Settings
                         </Link>
                         <Link
                           href="/user/maintenance"
                           onClick={() => setProfileOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition"
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50/50 transition"
                         >
                           <HugeiconsIcon
                             icon={CustomerSupportIcon}
                             size={18}
-                            className="text-slate-400"
+                            className="text-zinc-400"
                           />{" "}
                           Help & Support
                         </Link>
@@ -500,7 +500,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
             <motion.button
               onClick={toggleMenu}
               whileTap={{ scale: 0.9 }}
-              className="text-slate-800 focus:outline-none p-2 bg-slate-100 rounded-full"
+              className="text-zinc-800 focus:outline-none p-2 bg-zinc-100/50 rounded-full"
             >
               {menuOpen ? (
                 <HugeiconsIcon icon={Cancel01Icon} size={20} />
@@ -520,14 +520,14 @@ export default function NavbarClient({ user }: NavbarClientProps) {
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="md:hidden bg-white border-t border-slate-100 shadow-xl overflow-hidden absolute w-full top-20 left-0"
+            className="md:hidden bg-white border-t border-zinc-200/60 shadow-sm overflow-hidden absolute w-full top-20 left-0"
           >
             <div className="flex flex-col px-6 py-6 overflow-y-auto max-h-[calc(100vh-5rem)]">
               {isLoggedIn && (
-                <div className="flex items-center gap-4 mb-6 pb-6 border-b border-slate-100">
+                <div className="flex items-center gap-4 mb-6 pb-6 border-b border-zinc-200/60">
                   <div className="relative">
                     {user.profilePicture ? (
-                      <div className="relative size-14 rounded-full overflow-hidden border border-slate-200 shrink-0">
+                      <div className="relative size-14 rounded-full overflow-hidden border border-zinc-200/60 shrink-0">
                         <Image
                           src={user.profilePicture}
                           alt={user.name}
@@ -536,16 +536,16 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                         />
                       </div>
                     ) : (
-                      <div className="bg-slate-100 p-2 rounded-full text-slate-600 shrink-0">
+                      <div className="bg-zinc-100/50 p-2 rounded-full text-zinc-600 shrink-0">
                         <HugeiconsIcon icon={UserCircleIcon} size={32} />
                       </div>
                     )}
                   </div>
                   <div className="overflow-hidden">
-                    <p className="font-semibold text-slate-800 text-lg truncate">
+                    <p className="font-semibold text-zinc-800 text-lg truncate">
                       {user.name}
                     </p>
-                    <p className="text-sm text-slate-500 truncate">
+                    <p className="text-sm text-zinc-500 truncate">
                       {user.email}
                     </p>
                   </div>
@@ -553,11 +553,11 @@ export default function NavbarClient({ user }: NavbarClientProps) {
               )}
 
               {/* Main Site Links */}
-              <nav className="flex flex-col gap-4 mb-6 pb-6 border-b border-slate-100">
+              <nav className="flex flex-col gap-4 mb-6 pb-6 border-b border-zinc-200/60">
                 <Link
                   href="/"
                   onClick={toggleMenu}
-                  className="flex items-center gap-3 text-lg font-medium text-slate-700 hover:text-slate-900 transition"
+                  className="flex items-center gap-3 text-lg font-medium text-zinc-700 hover:text-zinc-900 transition"
                 >
                   <HugeiconsIcon icon={Home09Icon} size={20} /> Home
                 </Link>
@@ -565,7 +565,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                   <Link
                     href="/properties"
                     onClick={toggleMenu}
-                    className="flex items-center gap-3 text-lg font-medium text-slate-700 hover:text-slate-900 transition"
+                    className="flex items-center gap-3 text-lg font-medium text-zinc-700 hover:text-zinc-900 transition"
                   >
                     <HugeiconsIcon icon={House02FreeIcons} size={20} />{" "}
                     Properties
@@ -575,7 +575,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                   <Link
                     href="/explore"
                     onClick={toggleMenu}
-                    className="flex items-center gap-3 text-lg font-medium text-slate-700 hover:text-slate-900 transition"
+                    className="flex items-center gap-3 text-lg font-medium text-zinc-700 hover:text-zinc-900 transition"
                   >
                     <HugeiconsIcon icon={GlobalSearchIcon} size={20} /> Explore
                   </Link>
@@ -585,12 +585,12 @@ export default function NavbarClient({ user }: NavbarClientProps) {
               {/* Conditional Mobile Auth Links */}
               {isLoggedIn ? (
                 <>
-                  <nav className="flex flex-col gap-4 mb-6 pb-6 border-b border-slate-100">
+                  <nav className="flex flex-col gap-4 mb-6 pb-6 border-b border-zinc-200/60">
                     {/* Dashboard (Signature Pending) */}
                     <Link
                       href="/user/dashboard"
                       onClick={toggleMenu}
-                      className="flex items-center justify-between text-lg font-medium text-slate-700 hover:text-slate-900 transition"
+                      className="flex items-center justify-between text-lg font-medium text-zinc-700 hover:text-zinc-900 transition"
                     >
                       <span className="flex items-center gap-3">
                         <HugeiconsIcon icon={DashboardSquare01Icon} size={20} />{" "}
@@ -607,7 +607,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                     <Link
                       href="/user/saved"
                       onClick={toggleMenu}
-                      className="flex items-center justify-between text-lg font-medium text-slate-700 hover:text-slate-900 transition"
+                      className="flex items-center justify-between text-lg font-medium text-zinc-700 hover:text-zinc-900 transition"
                     >
                       <span className="flex items-center gap-3">
                         <HugeiconsIcon icon={FavouriteIcon} size={20} /> My
@@ -622,7 +622,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                     <Link
                       href="/user/leases"
                       onClick={toggleMenu}
-                      className="flex items-center justify-between text-lg font-medium text-slate-700 hover:text-slate-900 transition"
+                      className="flex items-center justify-between text-lg font-medium text-zinc-700 hover:text-zinc-900 transition"
                     >
                       <span className="flex items-center gap-3">
                         <HugeiconsIcon icon={File01Icon} size={20} /> KYC &
@@ -638,7 +638,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                     <Link
                       href="/user/transactions"
                       onClick={toggleMenu}
-                      className="flex items-center gap-3 text-lg font-medium text-slate-700 hover:text-slate-900 transition"
+                      className="flex items-center gap-3 text-lg font-medium text-zinc-700 hover:text-zinc-900 transition"
                     >
                       <HugeiconsIcon icon={CreditCardPosIcon} size={20} />{" "}
                       Payment History
@@ -649,7 +649,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                     <Link
                       href="/user/settings"
                       onClick={toggleMenu}
-                      className="flex items-center gap-3 text-lg font-medium text-slate-700 hover:text-slate-900 transition"
+                      className="flex items-center gap-3 text-lg font-medium text-zinc-700 hover:text-zinc-900 transition"
                     >
                       <HugeiconsIcon icon={Settings01Icon} size={20} /> Account
                       Settings
@@ -657,7 +657,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                     <Link
                       href="/user/maintenance"
                       onClick={toggleMenu}
-                      className="flex items-center gap-3 text-lg font-medium text-slate-700 hover:text-slate-900 transition"
+                      className="flex items-center gap-3 text-lg font-medium text-zinc-700 hover:text-zinc-900 transition"
                     >
                       <HugeiconsIcon icon={CustomerSupportIcon} size={20} />{" "}
                       Help & Support
@@ -674,7 +674,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
               ) : (
                 <div className="pt-2">
                   <LoginModal>
-                    <Button className="w-full h-12 text-lg font-medium bg-zinc-950 hover:bg-zinc-800 text-white rounded-xl">
+                    <Button className="w-full h-12 text-lg font-medium bg-zinc-950 hover:bg-zinc-800 text-white rounded-lg">
                       Sign In
                     </Button>
                   </LoginModal>

@@ -61,14 +61,14 @@ export default function NewsLetter() {
             viewport={{ once: true }}
           >
             <h3 className="text-2xl font-semibold">Luxury Meets Lifestyle</h3>
-            <p className="text-sm text-gray-200">
+            <p className="text-sm text-zinc-200">
               Curated spaces, crafted for comfort.
             </p>
           </motion.div>
         </motion.div>
 
         {/* Right Content Section */}
-        <div className="flex items-center justify-center px-8 md:px-16 py-20 bg-gray-50 relative overflow-hidden">
+        <div className="flex items-center justify-center px-8 md:px-16 py-20 bg-zinc-50/50 relative overflow-hidden">
           <motion.div
             className="max-w-md text-center md:text-left space-y-8 relative z-10"
             initial={{ opacity: 0, y: 40 }}
@@ -90,21 +90,21 @@ export default function NewsLetter() {
 
             {/* Heading */}
             <motion.h2
-              className="text-4xl md:text-5xl font-semibold leading-tight text-gray-900"
+              className="text-4xl md:text-5xl font-semibold leading-tight text-zinc-900"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
               viewport={{ once: true }}
             >
               Get Exclusive <br />
-              <span className="font-light text-gray-700">
+              <span className="font-light text-zinc-700">
                 Real Estate Insights
               </span>
             </motion.h2>
 
             {/* Description */}
             <motion.p
-              className="text-gray-600 text-lg leading-relaxed"
+              className="text-zinc-600 text-lg leading-relaxed"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
@@ -134,7 +134,7 @@ export default function NewsLetter() {
               <button
                 type="submit"
                 disabled={loading}
-                className="group inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-black text-white font-medium hover:bg-gray-900 transition-all duration-300"
+                className="group inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-black text-white font-medium hover:bg-zinc-900 transition-all duration-300"
               >
                 {loading ? "Subscribing..." : "Subscribe"}
                 <HugeiconsIcon
@@ -160,7 +160,7 @@ export default function NewsLetter() {
 
             {/* Note */}
             <motion.p
-              className="text-xs text-gray-500"
+              className="text-xs text-zinc-500"
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}

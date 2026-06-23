@@ -75,10 +75,10 @@ export default function GlobalConcierge() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed top-0 right-0 h-[100dvh] w-full max-w-[400px] bg-slate-50 border-l-2 border-black z-[120] flex flex-col shadow-[-20px_0px_40px_rgba(0,0,0,0.1)] overflow-y-auto"
+              className="fixed top-0 right-0 h-[100dvh] w-full max-w-[400px] bg-zinc-50/50 border-l-2 border-black z-[120] flex flex-col shadow-[-20px_0px_40px_rgba(0,0,0,0.1)] overflow-y-auto"
             >
               {/* Drawer Header */}
-              <div className="bg-white px-6 py-6 border-b border-slate-200 flex items-center justify-between sticky top-0 z-10">
+              <div className="bg-white px-6 py-6 border-b border-zinc-200/60 flex items-center justify-between sticky top-0 z-10">
                 <div className="flex items-center gap-2">
                   <HugeiconsIcon
                     icon={CustomerSupportIcon}
@@ -91,7 +91,7 @@ export default function GlobalConcierge() {
                 </div>
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="p-2 bg-slate-100 text-slate-500 hover:text-black hover:bg-slate-200 rounded-full transition-colors"
+                  className="p-2 bg-zinc-100/50 text-zinc-500 hover:text-black hover:bg-zinc-200 rounded-full transition-colors"
                 >
                   <HugeiconsIcon icon={Cancel01Icon} size={18} />
                 </button>
@@ -100,32 +100,32 @@ export default function GlobalConcierge() {
               {/* Drawer Content */}
               <div className="p-6 flex flex-col gap-8">
                 {/* The Manager Profile */}
-                <div className="bg-white border-2 border-black rounded-xl p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-center flex flex-col items-center">
-                  <div className="w-20 h-20 bg-slate-100 rounded-full mb-3 border-2 border-slate-200 flex items-center justify-center overflow-hidden relative">
+                <div className="bg-white border-2 border-black rounded-lg p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-center flex flex-col items-center">
+                  <div className="w-20 h-20 bg-zinc-100/50 rounded-full mb-3 border-2 border-zinc-200/60 flex items-center justify-center overflow-hidden relative">
                     {/* Fallback Icon / Add Next Image here */}
                     <HugeiconsIcon
                       icon={CustomerSupportIcon}
                       size={32}
-                      className="text-slate-400"
+                      className="text-zinc-400"
                     />
                   </div>
                   <h3 className="text-lg font-black uppercase tracking-tight text-black">
                     {portfolioManager.name}
                   </h3>
-                  <p className="text-[9px] font-bold uppercase tracking-widest text-slate-500 mt-1 mb-6">
+                  <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-500 mt-1 mb-6">
                     {portfolioManager.title}
                   </p>
 
                   <div className="w-full flex flex-col gap-3">
-                    <button className="w-full py-3.5 bg-green-600 text-white font-black uppercase tracking-widest text-[11px] rounded-lg hover:bg-green-700 transition-colors shadow-lg shadow-green-600/20 flex items-center justify-center gap-2">
+                    <button className="w-full py-3.5 bg-green-600 text-white font-black uppercase tracking-widest text-[11px] rounded-lg hover:bg-green-700 transition-colors shadow-sm shadow-green-600/20 flex items-center justify-center gap-2">
                       <HugeiconsIcon icon={MessageMultiple01Icon} size={16} />
                       WhatsApp Message
                     </button>
                     <div className="grid grid-cols-2 gap-3">
-                      <button className="w-full py-3 bg-slate-50 text-black font-black uppercase tracking-widest text-[10px] border border-slate-200 rounded-lg hover:bg-slate-100 transition-colors flex items-center justify-center gap-1.5">
+                      <button className="w-full py-3 bg-zinc-50/50 text-black font-black uppercase tracking-widest text-[10px] border border-zinc-200/60 rounded-lg hover:bg-zinc-100/50 transition-colors flex items-center justify-center gap-1.5">
                         <HugeiconsIcon icon={SmartPhone01Icon} size={14} /> Call
                       </button>
-                      <button className="w-full py-3 bg-slate-50 text-black font-black uppercase tracking-widest text-[10px] border border-slate-200 rounded-lg hover:bg-slate-100 transition-colors flex items-center justify-center gap-1.5">
+                      <button className="w-full py-3 bg-zinc-50/50 text-black font-black uppercase tracking-widest text-[10px] border border-zinc-200/60 rounded-lg hover:bg-zinc-100/50 transition-colors flex items-center justify-center gap-1.5">
                         <HugeiconsIcon icon={Mail01Icon} size={14} /> Email
                       </button>
                     </div>
@@ -133,7 +133,7 @@ export default function GlobalConcierge() {
                 </div>
 
                 {/* The Emergency Block */}
-                <div className="bg-red-50 border border-red-200 rounded-xl p-5">
+                <div className="bg-red-50 border border-red-200 rounded-lg p-5">
                   <h4 className="text-[11px] font-black uppercase tracking-widest text-red-800 mb-3 flex items-center gap-1.5">
                     <HugeiconsIcon icon={Alert02Icon} size={14} />
                     Active Asset Emergency
@@ -151,7 +151,7 @@ export default function GlobalConcierge() {
                   </button>
                 </div>
 
-                <p className="text-[9px] text-center font-bold text-slate-400 uppercase tracking-widest leading-relaxed mt-auto pt-8">
+                <p className="text-[9px] text-center font-bold text-zinc-400 uppercase tracking-widest leading-relaxed mt-auto pt-8">
                   Wunkat Homes Hub • Accra, Ghana <br /> Always at your service.
                 </p>
               </div>

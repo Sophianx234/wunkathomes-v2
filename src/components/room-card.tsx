@@ -46,7 +46,7 @@ export default function RoomCard({ room, type = "user" }: propertyCardProps) {
       case "pending":
         return "bg-yellow-100 text-yellow-700";
       default:
-        return "bg-gray-100 text-gray-600";
+        return "bg-zinc-100/50 text-zinc-600";
     }
   };
 
@@ -63,7 +63,7 @@ export default function RoomCard({ room, type = "user" }: propertyCardProps) {
   const handleDelete = async () => {};
 
   return (
-    <div className="bg-white rounded-xl shadow-md p-4 relative hover:shadow-lg transition flex flex-col h-full">
+    <div className="bg-white rounded-lg shadow-sm p-4 relative hover:shadow-sm transition flex flex-col h-full">
       {/* Image + Badge */}
       <div className="relative w-full h-32 mb-4 rounded-lg overflow-hidden">
         <Image
@@ -104,30 +104,30 @@ export default function RoomCard({ room, type = "user" }: propertyCardProps) {
       {/* Content */}
       <div className="flex flex-col flex-grow">
         <h3 className="font-semibold text-sm mb-1">{room.name}</h3>
-        <p className="text-xs text-gray-500 mb-2">
+        <p className="text-xs text-zinc-500 mb-2">
           {room?.houseId?.location?.city} - {room?.houseId?.location?.region}
         </p>
-        <p className="text-xs text-gray-500 mb-2 line-clamp-3">
+        <p className="text-xs text-zinc-500 mb-2 line-clamp-3">
           {room?.description}
         </p>
 
         {/* Beds & Baths */}
-        <div className="flex items-center justify-between gap-4 text-gray-600 text-xs mb-4">
+        <div className="flex items-center justify-between gap-4 text-zinc-600 text-xs mb-4">
           <div className="flex items-center gap-1">
-            <HugeiconsIcon icon={BedDouble} className="size-4 text-gray-500" />
+            <HugeiconsIcon icon={BedDouble} className="size-4 text-zinc-500" />
             <span>{room.beds} Beds</span>
           </div>
           <div className="flex items-center gap-1">
-            <HugeiconsIcon icon={Bath} className="size-4 text-gray-500" />
+            <HugeiconsIcon icon={Bath} className="size-4 text-zinc-500" />
             <span>{room.baths} Baths</span>
           </div>
         </div>
 
         {/* Footer pinned at bottom */}
         <div className="mt-auto flex justify-between items-center text-sm pt-2">
-          <span className="font-semibold text-gray-800 flex flex-col leading-tight">
+          <span className="font-semibold text-zinc-800 flex flex-col leading-tight">
             {room.price}
-            <span className="italic text-xs font-medium text-gray-500">
+            <span className="italic text-xs font-medium text-zinc-500">
               {room?.planType.includes("m") ? "/month" : "/year"}
             </span>
           </span>

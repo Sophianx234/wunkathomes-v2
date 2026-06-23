@@ -86,7 +86,7 @@ export default function TheVoices() {
           {/* Header */}
           <div className="flex items-center gap-3">
             <div className="h-[2px] w-8 bg-black" />
-            <span className="uppercase tracking-[0.3em] text-[10px] font-bold text-slate-400">
+            <span className="uppercase tracking-[0.3em] text-[10px] font-bold text-zinc-400">
               The Voices
             </span>
           </div>
@@ -98,7 +98,7 @@ export default function TheVoices() {
               {testimonials.map((_, index) => (
                 <div
                   key={index}
-                  className={`h-1 transition-all duration-500 rounded-full ${index === currentIndex ? "w-8 bg-black" : "w-3 bg-slate-200"}`}
+                  className={`h-1 transition-all duration-500 rounded-full ${index === currentIndex ? "w-8 bg-black" : "w-3 bg-zinc-200"}`}
                 />
               ))}
             </div>
@@ -154,7 +154,7 @@ export default function TheVoices() {
 
               {/* Author Details & Image */}
               <div className="flex items-center gap-4 md:gap-5">
-                <div className="relative w-12 h-12 md:w-16 md:h-16 rounded-full overflow-hidden shrink-0 border border-slate-200 shadow-sm">
+                <div className="relative w-12 h-12 md:w-16 md:h-16 rounded-full overflow-hidden shrink-0 border border-zinc-200/60 shadow-sm">
                   <Image
                     src={currentTestimonial.image}
                     alt={currentTestimonial.author}
@@ -163,15 +163,15 @@ export default function TheVoices() {
                   />
                 </div>
 
-                <div className="hidden md:block w-6 h-[2px] bg-slate-200" />
+                <div className="hidden md:block w-6 h-[2px] bg-zinc-200" />
 
                 <div>
                   <div className="text-base md:text-lg font-black uppercase tracking-tight text-black">
                     {currentTestimonial.author}
                   </div>
-                  <div className="text-xs md:text-sm font-medium text-slate-500 mt-0.5">
+                  <div className="text-xs md:text-sm font-medium text-zinc-500 mt-0.5">
                     {currentTestimonial.role}{" "}
-                    <span className="text-slate-300 mx-1.5">|</span>{" "}
+                    <span className="text-zinc-300 mx-1.5">|</span>{" "}
                     {currentTestimonial.location}
                   </div>
                 </div>

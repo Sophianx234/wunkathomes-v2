@@ -13,8 +13,8 @@ function Logo() {
                 className="object-contain size-10 transition-transform" 
               />
             </div>
-            <span className="pt-2 text-primary hidden sm:block tracking-tight text-slate-800">
-              Wunkat<span className="text-slate-500">Homes</span>
+            <span className="pt-2 text-primary hidden sm:block tracking-tight text-zinc-800">
+              Wunkat<span className="text-zinc-500">Homes</span>
             </span>
           </Link>
   )

@@ -33,11 +33,11 @@ export default function WhyChooseUs() {
             transition={{ duration: 0.6, delay: 0.2 }}
             viewport={{ once: true }}
           >
-            Why Choose <span className="text-gray-300">WunkatHomes?</span>
+            Why Choose <span className="text-zinc-300">WunkatHomes?</span>
           </motion.h2>
 
           <motion.p
-            className="text-gray-400 text-lg max-w-md leading-relaxed"
+            className="text-zinc-400 text-lg max-w-md leading-relaxed"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
@@ -64,7 +64,7 @@ export default function WhyChooseUs() {
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold">{f.title}</h3>
-                    <p className="text-gray-400 text-sm leading-relaxed">{f.desc}</p>
+                    <p className="text-zinc-400 text-sm leading-relaxed">{f.desc}</p>
                   </div>
                 </motion.div>
               )
@@ -84,7 +84,7 @@ export default function WhyChooseUs() {
           <img
             src="/c-3.jpg"
             alt="Luxury Apartment"
-            className="relative z-10 w-full rounded-3xl shadow-2xl object-cover"
+            className="relative z-10 w-full rounded-lg shadow-sm object-cover"
           />
         </motion.div>
       </div>

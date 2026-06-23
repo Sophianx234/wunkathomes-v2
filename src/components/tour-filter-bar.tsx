@@ -28,7 +28,7 @@ export default function FilterBar({
   resultsCount,
 }: FilterBarProps) {
   return (
-    <section className="flex flex-col xl:flex-row items-center gap-4 bg-white p-1.5 border border-zinc-200/60 rounded-xl shadow-[0_1px_4px_rgba(0,0,0,0.01)] w-full">
+    <section className="flex flex-col xl:flex-row items-center gap-4 bg-white p-1.5 border border-zinc-200/60 rounded-lg shadow-[0_1px_4px_rgba(0,0,0,0.01)] w-full">
       {/* Search Input */}
       <div className="relative flex-1 w-full">
         <HugeiconsIcon icon={Search01Icon} size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
@@ -47,7 +47,7 @@ export default function FilterBar({
         
         {/* View Filter */}
         <Select value={filterView} onValueChange={setFilterView}>
-          <SelectTrigger className="w-full md:w-[140px] h-8 border-0 bg-zinc-50/50 hover:bg-zinc-100 text-[12px] font-medium text-zinc-700 shadow-none focus:ring-0 rounded-md">
+          <SelectTrigger className="w-full md:w-[140px] h-8 border-0 bg-zinc-50/50 hover:bg-zinc-100/50 text-[12px] font-medium text-zinc-700 shadow-none focus:ring-0 rounded-md">
             <SelectValue placeholder="View" />
           </SelectTrigger>
           <SelectContent>
@@ -60,7 +60,7 @@ export default function FilterBar({
 
         {/* Location Dropdown (Placeholder for future dynamic locations) */}
         <Select defaultValue="all">
-          <SelectTrigger className="w-full md:w-[140px] h-8 border-0 bg-zinc-50/50 hover:bg-zinc-100 text-[12px] font-medium text-zinc-700 shadow-none focus:ring-0 rounded-md">
+          <SelectTrigger className="w-full md:w-[140px] h-8 border-0 bg-zinc-50/50 hover:bg-zinc-100/50 text-[12px] font-medium text-zinc-700 shadow-none focus:ring-0 rounded-md">
             <SelectValue placeholder="Location" />
           </SelectTrigger>
           <SelectContent>
@@ -80,7 +80,7 @@ export default function FilterBar({
           </span>
         </div>
 
-        <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 shrink-0 ml-auto md:ml-0 rounded-md">
+        <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100/50 shrink-0 ml-auto md:ml-0 rounded-md">
           <HugeiconsIcon icon={FilterIcon} size={14} />
         </Button>
       </div>

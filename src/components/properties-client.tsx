@@ -112,7 +112,7 @@ export default function PropertiesClient({ inventory, availableAreas }: Properti
   return (
     <div className="bg-white min-h-screen pb-12 md:pb-24 w-full overflow-x-hidden box-border">
       {/* === Sticky Glassmorphism Filter Bar === */}
-      <div className=" top-20 fixed md:top-20 z-40 bg-white/95 backdrop-blur-xl border-y border-slate-200 shadow-sm mb-6 md:mb-12 transition-all w-full box-border">
+      <div className=" top-20 fixed md:top-20 z-40 bg-white/95 backdrop-blur-xl border-y border-zinc-200/60 shadow-sm mb-6 md:mb-12 transition-all w-full box-border">
         <div className="max-w-7xl mx-auto px-2 md:px-4 sm:px-6 lg:px-8 py-2 md:py-4 flex flex-col xl:flex-row xl:items-center justify-between gap-3 md:gap-4 w-full box-border">
           
           {/* Left: Property Type Pills */}
@@ -124,7 +124,7 @@ export default function PropertiesClient({ inventory, availableAreas }: Properti
                 className={`whitespace-nowrap px-3 py-1.5 md:px-6 md:py-2.5 rounded-full text-[9px] md:text-xs font-bold uppercase tracking-widest transition-all duration-300 shrink-0 ${
                   typeFilter === type
                     ? "bg-black text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] md:shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)] -translate-y-[1px]"
-                    : "bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-black"
+                    : "bg-zinc-100/50 text-zinc-500 hover:bg-zinc-200 hover:text-black"
                 }`}
               >
                 {type}
@@ -144,17 +144,17 @@ export default function PropertiesClient({ inventory, availableAreas }: Properti
                 }}
                 value={statusFilter}
               >
-                <SelectTrigger className="w-full bg-slate-50 border-slate-200 rounded-full h-8 md:h-11 text-[9px] md:text-xs font-bold uppercase tracking-widest focus:ring-0 focus:ring-offset-0 [&_.dropdown-icon]:hidden min-w-0 box-border px-2 md:px-3">
+                <SelectTrigger className="w-full bg-zinc-50/50 border-zinc-200/60 rounded-full h-8 md:h-11 text-[9px] md:text-xs font-bold uppercase tracking-widest focus:ring-0 focus:ring-offset-0 [&_.dropdown-icon]:hidden min-w-0 box-border px-2 md:px-3">
                   <span className="scale-75 md:scale-100 flex items-center shrink-0">
                     <HugeiconsIcon
                       icon={Tag01Icon}
                       size={16}
-                      className="text-slate-400 mr-1 md:mr-2 dropdown-icon"
+                      className="text-zinc-400 mr-1 md:mr-2 dropdown-icon"
                     />
                   </span>
                   <SelectValue placeholder="Status" className="truncate" />
                 </SelectTrigger>
-                <SelectContent className="bg-white rounded-lg md:rounded-xl">
+                <SelectContent className="bg-white rounded-lg md:rounded-lg">
                   <SelectItem value="all" className="text-[9px] md:text-xs font-bold uppercase tracking-wider py-2 md:py-3 cursor-pointer">
                     All Statuses
                   </SelectItem>
@@ -177,17 +177,17 @@ export default function PropertiesClient({ inventory, availableAreas }: Properti
                 }}
                 value={locationFilter}
               >
-                <SelectTrigger className="w-full bg-slate-50 border-slate-200 rounded-full h-8 md:h-11 text-[9px] md:text-xs font-bold uppercase tracking-widest focus:ring-0 focus:ring-offset-0 [&_.dropdown-icon]:hidden min-w-0 box-border px-2 md:px-3">
+                <SelectTrigger className="w-full bg-zinc-50/50 border-zinc-200/60 rounded-full h-8 md:h-11 text-[9px] md:text-xs font-bold uppercase tracking-widest focus:ring-0 focus:ring-offset-0 [&_.dropdown-icon]:hidden min-w-0 box-border px-2 md:px-3">
                   <span className="scale-75 md:scale-100 flex items-center shrink-0">
                     <HugeiconsIcon
                       icon={Location01Icon}
                       size={16}
-                      className="text-slate-400 mr-1 md:mr-2 dropdown-icon"
+                      className="text-zinc-400 mr-1 md:mr-2 dropdown-icon"
                     />
                   </span>
                   <SelectValue placeholder="Location" className="truncate" />
                 </SelectTrigger>
-                <SelectContent className="bg-white rounded-lg md:rounded-xl w-[calc(100vw-1rem)] sm:w-auto">
+                <SelectContent className="bg-white rounded-lg md:rounded-lg w-[calc(100vw-1rem)] sm:w-auto">
                   <SelectItem value="all" className="text-[9px] md:text-xs font-bold uppercase tracking-wider py-2 md:py-3 cursor-pointer">
                     All Areas
                   </SelectItem>
@@ -204,11 +204,11 @@ export default function PropertiesClient({ inventory, availableAreas }: Properti
             </div>
 
             {/* Results Count Counter */}
-            <div className="hidden sm:flex items-center pl-2 md:pl-4 border-l-2 border-slate-200 shrink-0">
+            <div className="hidden sm:flex items-center pl-2 md:pl-4 border-l-2 border-zinc-200/60 shrink-0">
               <span className="text-sm md:text-2xl font-black text-black leading-none">
                 {filteredProperties.length}
               </span>
-              <span className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 md:ml-2 leading-tight">
+              <span className="text-[8px] md:text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1 md:ml-2 leading-tight">
                 Assets
                 <br />
                 Found
@@ -276,19 +276,19 @@ export default function PropertiesClient({ inventory, availableAreas }: Properti
             animate={{ opacity: 1 }}
             className="flex flex-col items-center justify-center text-center py-16 md:py-32 w-full box-border"
           >
-            <div className="w-12 h-12 md:w-20 md:h-20 bg-slate-50 rounded-full flex items-center justify-center mb-3 md:mb-6 border border-slate-100 shrink-0">
+            <div className="w-12 h-12 md:w-20 md:h-20 bg-zinc-50/50 rounded-full flex items-center justify-center mb-3 md:mb-6 border border-zinc-200/60 shrink-0">
               <span className="scale-75 md:scale-100 flex items-center">
                 <HugeiconsIcon
                   icon={Search01Icon}
                   size={32}
-                  className="text-slate-300"
+                  className="text-zinc-300"
                 />
               </span>
             </div>
             <h3 className="text-lg md:text-2xl font-black text-black uppercase tracking-tight mb-1 md:mb-2 break-words">
               No Assets Found
             </h3>
-            <p className="text-[10px] md:text-sm text-slate-500 font-medium mb-4 md:mb-8 max-w-xs md:max-w-sm px-2 break-words leading-relaxed">
+            <p className="text-[10px] md:text-sm text-zinc-500 font-medium mb-4 md:mb-8 max-w-xs md:max-w-sm px-2 break-words leading-relaxed">
               We currently do not have any properties matching your exact
               specifications in our portfolio.
             </p>
@@ -299,7 +299,7 @@ export default function PropertiesClient({ inventory, availableAreas }: Properti
                 setLocationFilter("all");
                 router.push("/properties", { scroll: false });
               }}
-              className="px-4 py-2.5 md:px-8 md:py-4 bg-black text-white font-bold uppercase tracking-widest text-[9px] md:text-xs hover:bg-slate-800 transition-colors duration-300 shrink-0"
+              className="px-4 py-2.5 md:px-8 md:py-4 bg-black text-white font-bold uppercase tracking-widest text-[9px] md:text-xs hover:bg-zinc-800 transition-colors duration-300 shrink-0"
             >
               Clear All Filters
             </button>

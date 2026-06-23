@@ -32,7 +32,7 @@ export default async function DashboardPage() {
 
   if (!dbLeases || dbLeases.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-500 font-bold uppercase tracking-widest text-sm">
+      <div className="min-h-screen flex items-center justify-center bg-zinc-50/50 text-zinc-500 font-bold uppercase tracking-widest text-sm">
         <div className="text-center space-y-4">
           <p>No active leases found. Please explore properties.</p>
           <Link href="/" className="bg-black hover:bg-zinc-900 text-white font-bold py-3 px-4 rounded">

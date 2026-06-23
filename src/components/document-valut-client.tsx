@@ -94,11 +94,11 @@ export default function DocumentVaultClient({
         {/* ========================================================= */}
         {/* APP HEADER - HIDDEN DURING PRINT */}
         {/* ========================================================= */}
-        <header className="h-10 md:h-16 bg-white border-b border-zinc-200 flex items-center justify-between px-2 md:px-8 sticky top-0 z-20 shrink-0 print:hidden shadow-sm w-full box-border">
+        <header className="h-10 md:h-16 bg-white border-b border-zinc-200/60 flex items-center justify-between px-2 md:px-8 sticky top-0 z-20 shrink-0 print:hidden shadow-sm w-full box-border">
           <div className="flex items-center gap-2 md:gap-4 min-w-0">
             <Link
               href="/user/dashboard"
-              className="w-6 h-6 md:w-8 md:h-8 flex items-center justify-center rounded-md hover:bg-zinc-100 transition-colors text-zinc-500 hover:text-zinc-900 shrink-0"
+              className="w-6 h-6 md:w-8 md:h-8 flex items-center justify-center rounded-md hover:bg-zinc-100/50 transition-colors text-zinc-500 hover:text-zinc-900 shrink-0"
             >
               <span className="scale-75 md:scale-100 flex items-center">
                 <HugeiconsIcon icon={ArrowLeft01Icon} size={18} />
@@ -157,7 +157,7 @@ function AuditRow({
   isMono?: boolean;
 }) {
   return (
-    <div className="flex flex-col border-b border-zinc-100 pb-2 md:pb-3 w-full box-border min-w-0">
+    <div className="flex flex-col border-b border-zinc-200/60 pb-2 md:pb-3 w-full box-border min-w-0">
       <span className="text-[7px] md:text-[11px] font-semibold text-zinc-400 uppercase tracking-widest mb-1 md:mb-1.5 truncate">
         {label}
       </span>

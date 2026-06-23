@@ -40,18 +40,18 @@ export default async function MaintenancePage() {
   }));
 
   return (
-    <div className="flex flex-col flex-1 w-full min-h-screen bg-slate-50 font-sans">
+    <div className="flex flex-col flex-1 w-full min-h-screen bg-zinc-50/50 font-sans">
       <div className="max-w-4xl w-full mx-auto p-6 md:p-8 space-y-8 pb-20 pt-12 md:pt-16">
         {/* --- NAVIGATION & HEADER --- */}
         <div className="space-y-6">
           <div className="pb-6">
-            <h1 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-slate-900 flex items-center gap-3 mb-2">
+            <h1 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-zinc-900 flex items-center gap-3 mb-2">
               Service & Maintenance
             </h1>
           </div>
           <Link
             href="/user/dashboard"
-            className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-slate-500 hover:text-slate-900 transition-colors w-fit"
+            className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-zinc-500 hover:text-zinc-900 transition-colors w-fit"
           >
             <HugeiconsIcon icon={ArrowLeft01Icon} size={16} />
             Return to Dashboard

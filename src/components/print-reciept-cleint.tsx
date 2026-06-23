@@ -83,7 +83,7 @@ export default function PrintReceipt({
         id={isPrintView ? "isolated-print-receipt" : undefined}
         className={`${wrapperClasses} w-full max-w-2xl mx-auto font-sans text-zinc-900 bg-white`}
       >
-        <div className={`p-8 md:p-12 ${!isPrintView ? "border border-zinc-200 rounded-xl shadow-sm" : ""}`}>
+        <div className={`p-8 md:p-12 ${!isPrintView ? "border border-zinc-200/60 rounded-lg shadow-sm" : ""}`}>
           
           {/* HEADER: Logo & Status */}
           <div className="flex justify-between items-start mb-16">
@@ -123,7 +123,7 @@ export default function PrintReceipt({
               <ReceiptRow label="Date Paid" value={`${formattedDate} at ${formattedTime}`} />
               <ReceiptRow label="Payment Method" value={`Paystack (${transaction.channel || "Gateway"})`} />
               
-              <div className="flex items-start justify-between gap-4 border-b border-zinc-100 pb-3">
+              <div className="flex items-start justify-between gap-4 border-b border-zinc-200/60 pb-3">
                 <span className="text-[12px] font-semibold text-zinc-500 mt-0.5 uppercase tracking-wider">Channel</span>
                 <div className="flex items-center gap-2">
                   {transaction.channel === "mobile_money" ? (
@@ -166,7 +166,7 @@ export default function PrintReceipt({
           </div>
 
           {/* FOOTER */}
-          <div className="mt-16 pt-8 border-t border-zinc-100 text-center">
+          <div className="mt-16 pt-8 border-t border-zinc-200/60 text-center">
             <p className="text-[10px] uppercase tracking-widest text-zinc-400 font-medium">
               This receipt is computer generated and serves as official proof of payment.
             </p>
@@ -181,7 +181,7 @@ export default function PrintReceipt({
 // Internal Helper Component for clean, aligned rows
 function ReceiptRow({ label, value, isMono = false }: { label: string; value: string; isMono?: boolean }) {
   return (
-    <div className="flex items-start justify-between gap-4 border-b border-zinc-100 pb-3">
+    <div className="flex items-start justify-between gap-4 border-b border-zinc-200/60 pb-3">
       <span className="text-[12px] font-semibold text-zinc-500 mt-0.5 uppercase tracking-wider">{label}</span>
       <span className={`text-[13px] font-medium text-zinc-900 text-right ${isMono ? 'font-mono tracking-tight text-[12px]' : ''}`}>
         {value}

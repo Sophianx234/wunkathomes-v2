@@ -278,7 +278,7 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
         </Tabs>
 
         {/* SEARCH & FILTER CHROME */}
-        <section className="flex flex-col sm:flex-row items-center gap-4 bg-white p-2 border border-zinc-200/80 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.02)] w-full">
+        <section className="flex flex-col sm:flex-row items-center gap-4 bg-white p-2 border border-zinc-200/80 rounded-lg shadow-[0_2px_8px_rgba(0,0,0,0.02)] w-full">
           <div className="relative flex-1 w-full">
             <HugeiconsIcon
               icon={Search01Icon}
@@ -298,7 +298,7 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
 
           <div className="flex items-center gap-2 w-full sm:w-auto px-2 pb-2 sm:pb-0">
             <Select value={roleFilter} onValueChange={setRoleFilter}>
-              <SelectTrigger className="w-full sm:w-[160px] h-9 border-0 bg-zinc-50 hover:bg-zinc-100 text-[13px] font-medium text-zinc-700 shadow-none focus:ring-0">
+              <SelectTrigger className="w-full sm:w-[160px] h-9 border-0 bg-zinc-50 hover:bg-zinc-100/50 text-[13px] font-medium text-zinc-700 shadow-none focus:ring-0">
                 <SelectValue placeholder="All Roles" />
               </SelectTrigger>
               <SelectContent>
@@ -315,7 +315,7 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
                 setSearchQuery("");
                 setRoleFilter("all");
               }}
-              className="h-9 w-9 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 shrink-0 ml-auto sm:ml-0"
+              className="h-9 w-9 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100/50 shrink-0 ml-auto sm:ml-0"
               title="Clear Filters"
             >
               <HugeiconsIcon icon={FilterIcon} size={16} strokeWidth={2} />
@@ -324,7 +324,7 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
         </section>
 
         {/* TEAM TABLE */}
-        <div className="bg-white border border-zinc-200/80 rounded-xl overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+        <div className="bg-white border border-zinc-200/80 rounded-lg overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
           <Table>
             <TableHeader className="bg-zinc-50/50">
               <TableRow className="border-zinc-200/80 hover:bg-transparent">
@@ -347,16 +347,16 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
               {filteredData.map((member) => (
                 <TableRow
                   key={member.id}
-                  className="group border-zinc-100 hover:bg-zinc-50/80 transition-colors"
+                  className="group border-zinc-200/60 hover:bg-zinc-50/80 transition-colors"
                 >
                   {/* MEMBER PROFILE */}
                   <TableCell className="py-4">
                     <div className="flex items-center gap-3">
                       <Avatar
-                        className={`h-10 w-10 border ${member.accountStatus === "Suspended" ? "opacity-50 grayscale border-zinc-200" : "border-zinc-200"}`}
+                        className={`h-10 w-10 border ${member.accountStatus === "Suspended" ? "opacity-50 grayscale border-zinc-200/60" : "border-zinc-200/60"}`}
                       >
                         <AvatarImage src={member.profilePicture} />
-                        <AvatarFallback className="bg-zinc-100 text-zinc-600 text-xs">
+                        <AvatarFallback className="bg-zinc-100/50 text-zinc-600 text-xs">
                           {member.name ? (
                             member.name.charAt(0)
                           ) : (
@@ -418,7 +418,7 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 text-zinc-400 hover:text-zinc-900 data-[state=open]:bg-zinc-100 data-[state=open]:text-zinc-900"
+                          className="h-8 w-8 text-zinc-400 hover:text-zinc-900 data-[state=open]:bg-zinc-100/50 data-[state=open]:text-zinc-900"
                         >
                           <HugeiconsIcon
                             icon={MoreHorizontalIcon}
@@ -429,7 +429,7 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent
                         align="end"
-                        className="w-48 rounded-xl shadow-lg border-zinc-200 font-sans p-1"
+                        className="w-48 rounded-lg shadow-sm border-zinc-200/60 font-sans p-1"
                       >
                         {member.accountStatus === "Pending_Invite" ? (
                           <>
@@ -441,7 +441,7 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
                             >
                               Resend Invitation
                             </DropdownMenuItem>
-                            <DropdownMenuSeparator className="bg-zinc-100 mx-2" />
+                            <DropdownMenuSeparator className="bg-zinc-100/50 mx-2" />
                             <DropdownMenuItem
                               onClick={() =>
                                 openConfirm({
@@ -467,7 +467,7 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
                               Edit Role
                             </DropdownMenuItem>
 
-                            <DropdownMenuSeparator className="bg-zinc-100 mx-2" />
+                            <DropdownMenuSeparator className="bg-zinc-100/50 mx-2" />
 
                             {member.accountStatus === "Active" ? (
                               <DropdownMenuItem
@@ -555,7 +555,7 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
           setConfirmDialog((prev) => ({ ...prev, isOpen: open }))
         }
       >
-        <AlertDialogContent className="font-sans border-zinc-200 rounded-2xl p-0 overflow-hidden sm:max-w-[400px]">
+        <AlertDialogContent className="font-sans border-zinc-200/60 rounded-lg p-0 overflow-hidden sm:max-w-[400px]">
           <div className="p-6 pb-4">
             <AlertDialogHeader>
               <AlertDialogTitle className="text-xl font-bold text-zinc-900">
@@ -566,7 +566,7 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
               </AlertDialogDescription>
             </AlertDialogHeader>
           </div>
-          <AlertDialogFooter className="px-6 py-4 bg-zinc-50 border-t border-zinc-100 sm:justify-between items-center">
+          <AlertDialogFooter className="px-6 py-4 bg-zinc-50 border-t border-zinc-200/60 sm:justify-between items-center">
             <AlertDialogCancel className="mt-0 border-0 shadow-none hover:bg-zinc-200/50 text-zinc-500 font-medium">
               Cancel
             </AlertDialogCancel>
@@ -590,9 +590,9 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
 
       {/* INVITE DIALOG */}
       <Dialog open={isInviteOpen} onOpenChange={setIsInviteOpen}>
-        <DialogContent className="sm:max-w-[425px] p-0 overflow-hidden bg-white rounded-2xl border border-zinc-200 font-sans">
+        <DialogContent className="sm:max-w-[425px] p-0 overflow-hidden bg-white rounded-lg border border-zinc-200/60 font-sans">
           <form onSubmit={handleInviteUser}>
-            <div className="px-6 pt-6 pb-4 border-b border-zinc-100">
+            <div className="px-6 pt-6 pb-4 border-b border-zinc-200/60">
               <DialogTitle className="text-xl font-bold text-zinc-900">
                 Invite Team Member
               </DialogTitle>
@@ -620,7 +620,7 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
                     placeholder="colleague@wunkathomes.com"
                     value={inviteEmail}
                     onChange={(e) => setInviteEmail(e.target.value)}
-                    className="pl-9 h-11 border-zinc-200 bg-zinc-50 focus-visible:ring-1 focus-visible:ring-zinc-900 focus-visible:bg-white transition-all shadow-none"
+                    className="pl-9 h-11 border-zinc-200/60 bg-zinc-50 focus-visible:ring-1 focus-visible:ring-zinc-900 focus-visible:bg-white transition-all shadow-none"
                   />
                 </div>
               </div>
@@ -632,7 +632,7 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
                 </label>
                 <div className="grid gap-3">
                   <label
-                    className={`relative flex cursor-pointer rounded-xl border p-4 transition-all hover:bg-zinc-50 ${inviteRole === "Manager" ? "border-zinc-900 bg-zinc-50 ring-1 ring-zinc-900" : "border-zinc-200 bg-white"}`}
+                    className={`relative flex cursor-pointer rounded-lg border p-4 transition-all hover:bg-zinc-50 ${inviteRole === "Manager" ? "border-zinc-900 bg-zinc-50 ring-1 ring-zinc-900" : "border-zinc-200/60 bg-white"}`}
                   >
                     <input
                       type="radio"
@@ -667,7 +667,7 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
                   </label>
 
                   <label
-                    className={`relative flex cursor-pointer rounded-xl border p-4 transition-all hover:bg-zinc-50 ${inviteRole === "Admin" ? "border-zinc-900 bg-zinc-50 ring-1 ring-zinc-900" : "border-zinc-200 bg-white"}`}
+                    className={`relative flex cursor-pointer rounded-lg border p-4 transition-all hover:bg-zinc-50 ${inviteRole === "Admin" ? "border-zinc-900 bg-zinc-50 ring-1 ring-zinc-900" : "border-zinc-200/60 bg-white"}`}
                   >
                     <input
                       type="radio"
@@ -704,7 +704,7 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
               </div>
             </div>
 
-            <DialogFooter className="px-6 py-4 bg-zinc-50 border-t border-zinc-100 sm:justify-between items-center">
+            <DialogFooter className="px-6 py-4 bg-zinc-50 border-t border-zinc-200/60 sm:justify-between items-center">
               <Button
                 type="button"
                 variant="ghost"
@@ -735,9 +735,9 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
 
       {/* EDIT ROLE DIALOG */}
       <Dialog open={isEditRoleOpen} onOpenChange={setIsEditRoleOpen}>
-        <DialogContent className="sm:max-w-[425px] p-0 overflow-hidden bg-white rounded-2xl border border-zinc-200 font-sans">
+        <DialogContent className="sm:max-w-[425px] p-0 overflow-hidden bg-white rounded-lg border border-zinc-200/60 font-sans">
           <form onSubmit={handleUpdateRole}>
-            <div className="px-6 pt-6 pb-4 border-b border-zinc-100">
+            <div className="px-6 pt-6 pb-4 border-b border-zinc-200/60">
               <DialogTitle className="text-xl font-bold text-zinc-900">
                 Edit System Role
               </DialogTitle>
@@ -757,7 +757,7 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
                 </label>
                 <div className="grid gap-3">
                   <label
-                    className={`relative flex cursor-pointer rounded-xl border p-4 transition-all hover:bg-zinc-50 ${newRole === "Manager" ? "border-zinc-900 bg-zinc-50 ring-1 ring-zinc-900" : "border-zinc-200 bg-white"}`}
+                    className={`relative flex cursor-pointer rounded-lg border p-4 transition-all hover:bg-zinc-50 ${newRole === "Manager" ? "border-zinc-900 bg-zinc-50 ring-1 ring-zinc-900" : "border-zinc-200/60 bg-white"}`}
                   >
                     <input
                       type="radio"
@@ -792,7 +792,7 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
                   </label>
 
                   <label
-                    className={`relative flex cursor-pointer rounded-xl border p-4 transition-all hover:bg-zinc-50 ${newRole === "Admin" ? "border-zinc-900 bg-zinc-50 ring-1 ring-zinc-900" : "border-zinc-200 bg-white"}`}
+                    className={`relative flex cursor-pointer rounded-lg border p-4 transition-all hover:bg-zinc-50 ${newRole === "Admin" ? "border-zinc-900 bg-zinc-50 ring-1 ring-zinc-900" : "border-zinc-200/60 bg-white"}`}
                   >
                     <input
                       type="radio"
@@ -829,7 +829,7 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
               </div>
             </div>
 
-            <DialogFooter className="px-6 py-4 bg-zinc-50 border-t border-zinc-100 sm:justify-between items-center">
+            <DialogFooter className="px-6 py-4 bg-zinc-50 border-t border-zinc-200/60 sm:justify-between items-center">
               <Button
                 type="button"
                 variant="ghost"

@@ -85,7 +85,7 @@ export default function History() {
         >
           <div className="flex justify-center items-center gap-3 mb-6">
             <div className="h-[2px] w-8 bg-[#1a1a1a]" />
-            <span className="uppercase tracking-[0.3em] text-[10px] md:text-xs font-bold text-slate-400">
+            <span className="uppercase tracking-[0.3em] text-[10px] md:text-xs font-bold text-zinc-400">
               Our Journey
             </span>
             <div className="h-[2px] w-8 bg-[#1a1a1a]" />
@@ -104,7 +104,7 @@ export default function History() {
         {/* Timeline */}
         <div className="relative">
           {/* Subtle background line */}
-          <div className="absolute left-[27px] md:left-1/2 md:-translate-x-1/2 top-0 bottom-0 w-[2px] bg-slate-100" />
+          <div className="absolute left-[27px] md:left-1/2 md:-translate-x-1/2 top-0 bottom-0 w-[2px] bg-zinc-100/50" />
           
           {/* Animated progress line */}
           <motion.div 
@@ -144,13 +144,13 @@ export default function History() {
                   
                   {/* Content Container */}
                   <div className={`pl-20 md:pl-0 w-full md:w-[45%] ${isEven ? "md:pr-16" : "md:pl-16"}`}>
-                    <span className="inline-block px-3 py-1 mb-4 text-xs font-black uppercase tracking-widest text-[#1a1a1a] bg-slate-50 rounded-full">
+                    <span className="inline-block px-3 py-1 mb-4 text-xs font-black uppercase tracking-widest text-[#1a1a1a] bg-zinc-50/50 rounded-full">
                       {milestone.year}
                     </span>
                     <h3 className="text-2xl md:text-3xl font-black text-[#1a1a1a] tracking-tight mb-4">
                       {milestone.title}
                     </h3>
-                    <p className="text-slate-500 leading-relaxed font-medium text-sm md:text-base">
+                    <p className="text-zinc-500 leading-relaxed font-medium text-sm md:text-base">
                       {milestone.desc}
                     </p>
                   </div>

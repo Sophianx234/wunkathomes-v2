@@ -142,10 +142,10 @@ export default function SuccessReceipt({ transaction }: SuccessReceiptProps) {
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.3 }}
-        className="bg-white border border-zinc-200/80 rounded-xl md:rounded-2xl"
+        className="bg-white border border-zinc-200/80 rounded-lg md:rounded-lg"
       >
         {/* Top Amount Banner */}
-        <div className="p-5 md:p-10 border-b border-zinc-100 flex flex-col items-center justify-center">
+        <div className="p-5 md:p-10 border-b border-zinc-200/60 flex flex-col items-center justify-center">
           <p className="text-[8px] md:text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 md:mb-3">
             Total Amount Paid
           </p>
@@ -182,7 +182,7 @@ export default function SuccessReceipt({ transaction }: SuccessReceiptProps) {
             />
           </div>
 
-          <div className="w-full h-px bg-zinc-100" />
+          <div className="w-full h-px bg-zinc-100/50" />
 
           {/* Section: Property & User Specs */}
           <div className="space-y-3 md:space-y-4">
@@ -201,7 +201,7 @@ export default function SuccessReceipt({ transaction }: SuccessReceiptProps) {
             />
           </div>
 
-          <div className="w-full h-px bg-zinc-100" />
+          <div className="w-full h-px bg-zinc-100/50" />
 
           {/* Section: Breakdown */}
           <div className="space-y-3 md:space-y-4">
@@ -227,7 +227,7 @@ export default function SuccessReceipt({ transaction }: SuccessReceiptProps) {
       >
         <button
           onClick={() => setIsViewingReceipt(true)}
-          className="w-full sm:flex-1 min-w-0 box-border h-10 md:h-12 px-2 bg-white border border-zinc-200 text-zinc-700 text-[10px] md:text-[13px] font-semibold rounded-lg md:rounded-xl hover:bg-zinc-50 transition-colors flex items-center justify-center gap-1.5 md:gap-2 truncate"
+          className="w-full sm:flex-1 min-w-0 box-border h-10 md:h-12 px-2 bg-white border border-zinc-200/60 text-zinc-700 text-[10px] md:text-[13px] font-semibold rounded-lg md:rounded-lg hover:bg-zinc-50 transition-colors flex items-center justify-center gap-1.5 md:gap-2 truncate"
         >
           <span className="scale-75 md:scale-100 flex items-center shrink-0">
             <HugeiconsIcon icon={PrinterIcon} size={16} />
@@ -237,7 +237,7 @@ export default function SuccessReceipt({ transaction }: SuccessReceiptProps) {
 
         <Link
           href={continueUrl}
-          className="w-full sm:flex-1 min-w-0 box-border h-10 md:h-12 px-2 bg-zinc-900 text-white text-[10px] md:text-[13px] font-semibold rounded-lg md:rounded-xl hover:bg-zinc-800 transition-colors flex items-center justify-center gap-1.5 md:gap-2 shadow-sm truncate"
+          className="w-full sm:flex-1 min-w-0 box-border h-10 md:h-12 px-2 bg-zinc-900 text-white text-[10px] md:text-[13px] font-semibold rounded-lg md:rounded-lg hover:bg-zinc-800 transition-colors flex items-center justify-center gap-1.5 md:gap-2 shadow-sm truncate"
         >
           <span className="truncate">{buttonText}</span>
           <span className="scale-75 md:scale-100 flex items-center shrink-0">

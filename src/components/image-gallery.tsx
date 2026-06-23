@@ -40,7 +40,7 @@ export default function ImageGallery({ images, title }: ImageGalleryProps) {
     <>
       {/* === Cinematic Grid === */}
       <section className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mb-10 md:mb-16">
-        <div className="grid grid-cols-1 md:grid-cols-4 grid-rows-2 gap-2 md:gap-4 h-[40vh] md:h-[60vh] rounded-2xl md:rounded-[2rem] overflow-hidden">
+        <div className="grid grid-cols-1 md:grid-cols-4 grid-rows-2 gap-2 md:gap-4 h-[40vh] md:h-[60vh] rounded-lg md:rounded-[2rem] overflow-hidden">
           <div
             onClick={() => {
               setCurrentIndex(0);

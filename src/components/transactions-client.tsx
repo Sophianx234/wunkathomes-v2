@@ -213,7 +213,7 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
               <TabsTrigger value="pending" className="text-[10px] md:text-[13px] font-medium data-[state=active]:bg-white rounded-md px-2 md:px-4 shrink-0">
                 Pending
                 {pendingCount > 0 && (
-                  <span className="ml-1 md:ml-2 inline-flex items-center justify-center bg-zinc-100 text-[8px] md:text-[10px] font-bold h-3 w-3 md:h-4 md:w-4 rounded-full text-zinc-600">
+                  <span className="ml-1 md:ml-2 inline-flex items-center justify-center bg-zinc-100/50 text-[8px] md:text-[10px] font-bold h-3 w-3 md:h-4 md:w-4 rounded-full text-zinc-600">
                     {pendingCount}
                   </span>
                 )}
@@ -223,7 +223,7 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
         </div>
 
         {/* INLINE FILTER CHROME */}
-        <section className="flex flex-col xl:flex-row items-center gap-2 md:gap-4 bg-white p-1 md:p-1.5 border border-zinc-200/60 rounded-lg md:rounded-xl shadow-[0_1px_4px_rgba(0,0,0,0.01)] w-full box-border">
+        <section className="flex flex-col xl:flex-row items-center gap-2 md:gap-4 bg-white p-1 md:p-1.5 border border-zinc-200/60 rounded-lg md:rounded-lg shadow-[0_1px_4px_rgba(0,0,0,0.01)] w-full box-border">
           <div className="relative flex-1 w-full min-w-0 box-border">
             <span className="absolute left-2 md:left-3 top-1/2 -translate-y-1/2 text-zinc-400 scale-75 md:scale-100 flex items-center">
               <HugeiconsIcon icon={Search01Icon} size={16} />
@@ -240,7 +240,7 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
 
           <div className="flex flex-wrap sm:flex-nowrap items-center gap-1.5 md:gap-2 w-full xl:w-auto px-1 md:px-2 pb-1 xl:pb-0 box-border">
             <Select value={channelFilter} onValueChange={setChannelFilter}>
-              <SelectTrigger className="w-full sm:w-[100px] md:w-[130px] h-7 md:h-8 border-0 bg-zinc-50/50 hover:bg-zinc-100 text-[10px] md:text-[12px] font-medium text-zinc-700 shadow-none focus:ring-0 rounded-md box-border m-0">
+              <SelectTrigger className="w-full sm:w-[100px] md:w-[130px] h-7 md:h-8 border-0 bg-zinc-50/50 hover:bg-zinc-100/50 text-[10px] md:text-[12px] font-medium text-zinc-700 shadow-none focus:ring-0 rounded-md box-border m-0">
                 <SelectValue placeholder="Channel" />
               </SelectTrigger>
               <SelectContent>
@@ -254,7 +254,7 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
             </Select>
 
             <Select value={purposeFilter} onValueChange={setPurposeFilter}>
-              <SelectTrigger className="w-full sm:w-[110px] md:w-[150px] h-7 md:h-8 border-0 bg-zinc-50/50 hover:bg-zinc-100 text-[10px] md:text-[12px] font-medium text-zinc-700 shadow-none focus:ring-0 rounded-md box-border m-0">
+              <SelectTrigger className="w-full sm:w-[110px] md:w-[150px] h-7 md:h-8 border-0 bg-zinc-50/50 hover:bg-zinc-100/50 text-[10px] md:text-[12px] font-medium text-zinc-700 shadow-none focus:ring-0 rounded-md box-border m-0">
                 <SelectValue placeholder="Purpose" />
               </SelectTrigger>
               <SelectContent>
@@ -286,7 +286,7 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
                 setChannelFilter("all");
                 setPurposeFilter("all");
               }}
-              className="h-7 w-7 md:h-8 md:w-8 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 shrink-0 ml-auto sm:ml-0 rounded-md m-0 p-0"
+              className="h-7 w-7 md:h-8 md:w-8 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100/50 shrink-0 ml-auto sm:ml-0 rounded-md m-0 p-0"
             >
               <span className="scale-75 md:scale-100 flex items-center">
                 <HugeiconsIcon icon={FilterIcon} size={14} />
@@ -296,7 +296,7 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
         </section>
 
         {/* EDGE-TO-EDGE FINANCIAL TABLE */}
-        <div className="bg-white border border-zinc-200/60 rounded-lg md:rounded-xl shadow-[0_1px_4px_rgba(0,0,0,0.01)] w-full overflow-hidden box-border">
+        <div className="bg-white border border-zinc-200/60 rounded-lg md:rounded-lg shadow-[0_1px_4px_rgba(0,0,0,0.01)] w-full overflow-hidden box-border">
           <div className="w-full overflow-x-auto box-border scrollbar-hide">
             <Table className="w-full min-w-full">
               <TableHeader className="bg-zinc-50/30">
@@ -313,7 +313,7 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
                 {filteredData.map((tx) => (
                   <TableRow
                     key={tx.id}
-                    className="group border-zinc-100 hover:bg-zinc-50/50 transition-colors cursor-pointer"
+                    className="group border-zinc-200/60 hover:bg-zinc-50/50 transition-colors cursor-pointer"
                     onClick={() => setSelectedTx(tx)}
                   >
                     <TableCell className="py-2 md:py-3 align-middle px-2 md:px-4">
@@ -329,7 +329,7 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
 
                     <TableCell className="py-2 md:py-3 align-middle px-2 md:px-4">
                       <div className="flex items-center gap-1.5 md:gap-3 min-w-0">
-                        <div className="w-5 h-5 md:w-8 md:h-8 rounded md:rounded-md overflow-hidden bg-zinc-100 shrink-0 border border-zinc-200/60 flex items-center justify-center">
+                        <div className="w-5 h-5 md:w-8 md:h-8 rounded md:rounded-md overflow-hidden bg-zinc-100/50 shrink-0 border border-zinc-200/60 flex items-center justify-center">
                           {tx.listing.image ? (
                             <img src={tx.listing.image} alt={tx.listing.title} className="w-full h-full object-cover" />
                           ) : (
@@ -389,11 +389,11 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
 
       {/* INDUSTRY STANDARD TRANSACTION DESK (Sheet) */}
       <Dialog open={!!selectedTx && !isViewingReceipt} onOpenChange={(open) => !open && setSelectedTx(null)}>
-        <DialogContent className="w-full sm:max-w-xl md:max-w-2xl p-0 bg-[#FAFAFA] border border-slate-200/80 flex flex-col font-sans shadow-2xl rounded-lg max-h-[85vh] overflow-hidden">
+        <DialogContent className="w-full sm:max-w-xl md:max-w-2xl p-0 bg-[#FAFAFA] border border-slate-200/80 flex flex-col font-sans shadow-sm rounded-lg max-h-[85vh] overflow-hidden">
           {selectedTx && (
             <>
               {/* Header Context Section */}
-              <div className="px-4 md:px-6 py-6 md:py-8 border-b border-zinc-100 bg-zinc-50/30 w-full box-border">
+              <div className="px-4 md:px-6 py-6 md:py-8 border-b border-zinc-200/60 bg-zinc-50/30 w-full box-border">
                 <div className="flex items-center justify-between mb-3 md:mb-5">
                   <Badge
                     variant="outline"
@@ -419,7 +419,7 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
                   <h3 className="text-[9px] md:text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-2 md:mb-4">
                     Transaction Details
                   </h3>
-                  <div className="bg-white border border-zinc-200/60 rounded-lg md:rounded-xl overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.01)] w-full box-border">
+                  <div className="bg-white border border-zinc-200/60 rounded-lg md:rounded-lg overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.01)] w-full box-border">
                     <dl className="divide-y divide-zinc-100 text-[10px] md:text-[13px] w-full">
                       <div className="flex justify-between py-2 md:py-3 px-3 md:px-4 w-full">
                         <dt className="text-zinc-500 font-medium shrink-0">Reference ID</dt>
@@ -467,9 +467,9 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
                     </Link>
                   </div>
 
-                  <div className="rounded-lg md:rounded-xl border border-zinc-200/60 overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.01)] bg-white w-full box-border">
+                  <div className="rounded-lg md:rounded-lg border border-zinc-200/60 overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.01)] bg-white w-full box-border">
                     <div className="p-3 md:p-4 flex gap-2 md:gap-4 w-full min-w-0">
-                      <div className="h-10 w-10 md:h-12 md:w-12 shrink-0 bg-zinc-100 rounded-md overflow-hidden border border-zinc-200/60 shadow-sm">
+                      <div className="h-10 w-10 md:h-12 md:w-12 shrink-0 bg-zinc-100/50 rounded-md overflow-hidden border border-zinc-200/60 shadow-sm">
                         {selectedTx.listing.image ? (
                           <img src={selectedTx.listing.image} alt="Property" className="w-full h-full object-cover" />
                         ) : (
@@ -496,7 +496,7 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
                 <Button
                   variant="outline"
                   onClick={() => setIsReportingIssue(true)}
-                  className="h-8 md:h-10 w-full text-[10px] md:text-[12px] font-medium border-zinc-200 hover:bg-zinc-50 text-zinc-700 rounded-md md:rounded-lg shadow-none truncate px-1"
+                  className="h-8 md:h-10 w-full text-[10px] md:text-[12px] font-medium border-zinc-200/60 hover:bg-zinc-50 text-zinc-700 rounded-md md:rounded-lg shadow-none truncate px-1"
                 >
                   <span className="scale-75 md:scale-100 flex items-center md:mr-2 shrink-0"><HugeiconsIcon icon={Alert01Icon} size={14} /></span>
                   Report Issue
@@ -520,7 +520,7 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
         open={isReportingIssue}
         onOpenChange={setIsReportingIssue}
       >
-        <AlertDialogContent className="font-sans w-[90vw] md:max-w-[400px] rounded-xl md:rounded-2xl p-4 md:p-6">
+        <AlertDialogContent className="font-sans w-[90vw] md:max-w-[400px] rounded-lg md:rounded-lg p-4 md:p-6">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-base md:text-lg font-semibold tracking-tight text-zinc-900">
               Report Transaction Issue
@@ -534,7 +534,7 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
           <AlertDialogFooter className="mt-4 md:mt-6 gap-2 sm:gap-0">
             <AlertDialogCancel
               disabled={isPending}
-              className="h-8 md:h-9 px-3 md:px-4 text-[10px] md:text-[12px] font-medium border-zinc-200 hover:bg-zinc-50 rounded-md md:rounded-lg m-0"
+              className="h-8 md:h-9 px-3 md:px-4 text-[10px] md:text-[12px] font-medium border-zinc-200/60 hover:bg-zinc-50 rounded-md md:rounded-lg m-0"
             >
               Cancel
             </AlertDialogCancel>

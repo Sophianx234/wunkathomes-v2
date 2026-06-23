@@ -186,7 +186,7 @@ export default async function PropertyDetailsPage({
               {listing.title}
             </h1>
             <div className="flex items-center justify-between">
-              <div className="flex flex-wrap items-center gap-4 text-sm font-bold uppercase tracking-widest text-slate-500">
+              <div className="flex flex-wrap items-center gap-4 text-sm font-bold uppercase tracking-widest text-zinc-500">
                 <span className="flex items-center gap-1.5 text-black">
                   <HugeiconsIcon
                     icon={StarIcon}
@@ -220,7 +220,7 @@ export default async function PropertyDetailsPage({
                 <h3 className="text-lg font-black uppercase tracking-tight">
                   Managed by WunkatHomes
                 </h3>
-                <p className="text-sm font-medium text-slate-500">
+                <p className="text-sm font-medium text-zinc-500">
                   Verified Property • No Agent Fees
                 </p>
               </div>
@@ -264,7 +264,7 @@ export default async function PropertyDetailsPage({
                 <HugeiconsIcon
                   icon={metric.icon}
                   size={20}
-                  className="text-slate-400"
+                  className="text-zinc-400"
                 />
                 {metric.label}
               </div>
@@ -275,7 +275,7 @@ export default async function PropertyDetailsPage({
             <h2 className="text-xl font-black uppercase tracking-widest mb-4">
               About This Property
             </h2>
-            <p className="text-slate-600 text-base md:text-lg leading-relaxed font-medium whitespace-pre-wrap">
+            <p className="text-zinc-600 text-base md:text-lg leading-relaxed font-medium whitespace-pre-wrap">
               {listing.description}
             </p>
           </div>
@@ -293,12 +293,12 @@ export default async function PropertyDetailsPage({
                     return (
                       <div
                         key={idx}
-                        className="flex items-center gap-2 px-4 py-2.5 rounded-full border border-slate-200 text-sm font-bold text-slate-700 bg-slate-50"
+                        className="flex items-center gap-2 px-4 py-2.5 rounded-full border border-zinc-200/60 text-sm font-bold text-zinc-700 bg-zinc-50/50"
                       >
                         <HugeiconsIcon
                           icon={IconComponent}
                           size={16}
-                          className="text-slate-400"
+                          className="text-zinc-400"
                         />
                         {amenity}
                       </div>
@@ -319,7 +319,7 @@ export default async function PropertyDetailsPage({
             <h3 className="font-bold text-lg mb-2">
               {listing.property.location}
             </h3>
-            <p className="text-slate-600 font-medium">
+            <p className="text-zinc-600 font-medium">
               {getNeighborhoodDescription(listing.property)}
             </p>
           </div>
@@ -351,7 +351,7 @@ export default async function PropertyDetailsPage({
                 {reviews.map((review) => (
                   <div key={review.id} className="flex flex-col">
                     <div className="flex items-center gap-3 mb-3">
-                      <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center font-black text-slate-500">
+                      <div className="w-10 h-10 rounded-full bg-zinc-200 flex items-center justify-center font-black text-zinc-500">
                         {review.userName.charAt(0)}
                       </div>
                       <div>
@@ -368,7 +368,7 @@ export default async function PropertyDetailsPage({
                             </span>
                           </span>
                         </div>
-                        <div className="text-xs text-slate-500 font-medium">
+                        <div className="text-xs text-zinc-500 font-medium">
                           {new Date(review.date).toLocaleDateString("en-US", {
                             month: "short",
                             year: "numeric",
@@ -377,7 +377,7 @@ export default async function PropertyDetailsPage({
                       </div>
                     </div>
                     {review.comment && (
-                      <p className="text-slate-700 text-sm leading-relaxed">
+                      <p className="text-zinc-700 text-sm leading-relaxed">
                         {review.comment}
                       </p>
                     )}
@@ -385,7 +385,7 @@ export default async function PropertyDetailsPage({
                 ))}
               </div>
             ) : (
-              <p className="text-slate-500 text-sm">
+              <p className="text-zinc-500 text-sm">
                 Be the first to review this property!
               </p>
             )}
@@ -412,17 +412,17 @@ export default async function PropertyDetailsPage({
         <div>
           <div className="text-xl font-black">
             ${listing.price.toLocaleString()}
-            <span className="text-sm font-medium text-slate-500">
+            <span className="text-sm font-medium text-zinc-500">
               {" "}
               {formatLeaseTerm(listing.terms.leaseTerm)}
             </span>
           </div>
-          <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+          <div className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
             {isRent ? "Monthly Rent" : "Purchase Price"}
           </div>
         </div>
         <Link href={`/checkout/${listing.slug}?type=deposit`}>
-          <button className="px-6 py-3 bg-black text-white font-black uppercase tracking-widest text-[10px] rounded hover:bg-slate-800 transition-colors">
+          <button className="px-6 py-3 bg-black text-white font-black uppercase tracking-widest text-[10px] rounded hover:bg-zinc-800 transition-colors">
             {isRent ? "Reserve Now" : "Reserve to Buy"}
           </button>
         </Link>

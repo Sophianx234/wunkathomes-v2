@@ -86,10 +86,10 @@ export default function SearchBarClient({ availableAreas, availableTypes }: Sear
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, ease: "easeOut" }}
         viewport={{ once: true }}
-        className="max-w-5xl mx-auto w-full min-w-0 max-w-full box-border bg-white shadow-[0_6px_20px_rgba(0,0,0,0.06)] md:shadow-[0_12px_40px_rgba(0,0,0,0.06)] rounded-2xl md:rounded-full p-1.5 md:p-2 flex flex-col md:flex-row md:items-center border border-zinc-100 md:divide-x md:divide-zinc-100"
+        className="max-w-5xl mx-auto w-full min-w-0 max-w-full box-border bg-white shadow-[0_6px_20px_rgba(0,0,0,0.06)] md:shadow-[0_12px_40px_rgba(0,0,0,0.06)] rounded-lg md:rounded-full p-1.5 md:p-2 flex flex-col md:flex-row md:items-center border border-zinc-200/60 md:divide-x md:divide-zinc-100"
       >
         {/* 1. Property Type Dropdown */}
-        <div className="flex items-center gap-2 md:gap-3 flex-1 w-full min-w-0 max-w-full box-border px-3 py-2 md:px-5 md:py-3 hover:bg-zinc-50/80 rounded-t-xl md:rounded-r-none md:rounded-l-full transition-colors group cursor-pointer border-b md:border-b-0 border-zinc-100">
+        <div className="flex items-center gap-2 md:gap-3 flex-1 w-full min-w-0 max-w-full box-border px-3 py-2 md:px-5 md:py-3 hover:bg-zinc-50/80 rounded-t-xl md:rounded-r-none md:rounded-l-full transition-colors group cursor-pointer border-b md:border-b-0 border-zinc-200/60">
           <span className="scale-75 md:scale-100 flex items-center shrink-0">
             <HugeiconsIcon
               icon={House03Icon}
@@ -108,7 +108,7 @@ export default function SearchBarClient({ availableAreas, availableTypes }: Sear
               <SelectTrigger className="w-full min-w-0 max-w-full box-border border-0 p-0 h-auto bg-transparent shadow-none focus:ring-0 focus:ring-offset-0 text-zinc-800 font-semibold text-xs md:text-sm outline-none [&_.dropdown-icon]:hidden truncate">
                 <SelectValue placeholder="What type?" />
               </SelectTrigger>
-              <SelectContent className="bg-white border border-zinc-200/80 shadow-xl rounded-xl p-0 w-[calc(100vw-2rem)] md:w-full min-w-[var(--radix-select-trigger-width)]">
+              <SelectContent className="bg-white border border-zinc-200/80 shadow-sm rounded-lg p-0 w-[calc(100vw-2rem)] md:w-full min-w-[var(--radix-select-trigger-width)]">
                 <div className="divide-y divide-zinc-100 flex flex-col w-full box-border">
                   <SelectItem value="all" className="cursor-pointer w-full [&>span]:w-full text-[10px] md:text-xs font-medium py-2 md:py-2.5 focus:bg-zinc-50 box-border">
                     <div className="flex w-full text-zinc-700 justify-between items-center pr-1 min-w-0 box-border">
@@ -136,7 +136,7 @@ export default function SearchBarClient({ availableAreas, availableTypes }: Sear
         </div>
 
         {/* 2. Location Dropdown */}
-        <div className="flex items-center gap-2 md:gap-3 flex-1 w-full min-w-0 max-w-full box-border px-3 py-2 md:px-5 md:py-3 hover:bg-zinc-50/80 rounded-none transition-colors group cursor-pointer border-b md:border-b-0 border-zinc-100">
+        <div className="flex items-center gap-2 md:gap-3 flex-1 w-full min-w-0 max-w-full box-border px-3 py-2 md:px-5 md:py-3 hover:bg-zinc-50/80 rounded-none transition-colors group cursor-pointer border-b md:border-b-0 border-zinc-200/60">
           <span className="scale-75 md:scale-100 flex items-center shrink-0">
             <HugeiconsIcon
               icon={MapingIcon}
@@ -155,7 +155,7 @@ export default function SearchBarClient({ availableAreas, availableTypes }: Sear
               <SelectTrigger className="w-full min-w-0 max-w-full box-border border-0 p-0 h-auto bg-transparent shadow-none focus:ring-0 focus:ring-offset-0 text-zinc-800 font-semibold text-xs md:text-sm outline-none [&_.dropdown-icon]:hidden truncate">
                 <SelectValue placeholder="Select Area" />
               </SelectTrigger>
-              <SelectContent className="bg-white border border-zinc-200/80 shadow-xl rounded-xl p-0 w-[calc(100vw-2rem)] md:w-full min-w-[var(--radix-select-trigger-width)]">
+              <SelectContent className="bg-white border border-zinc-200/80 shadow-sm rounded-lg p-0 w-[calc(100vw-2rem)] md:w-full min-w-[var(--radix-select-trigger-width)]">
                 <div className="divide-y divide-zinc-100 flex flex-col w-full box-border">
                   <SelectGroup className="w-full divide-y divide-zinc-100 flex flex-col box-border">
                     <SelectItem value="all" className="cursor-pointer w-full [&>span]:w-full text-[10px] md:text-xs font-medium py-2 md:py-2.5 focus:bg-zinc-50 box-border">
@@ -189,7 +189,7 @@ export default function SearchBarClient({ availableAreas, availableTypes }: Sear
         </div>
 
         {/* 3. Status Dropdown (Rent/Sale) */}
-        <div className="flex items-center gap-2 md:gap-3 flex-1 w-full min-w-0 max-w-full box-border px-3 py-2 md:px-5 md:py-3 hover:bg-zinc-50/80 rounded-none md:rounded-r-full transition-colors group cursor-pointer border-b md:border-b-0 border-zinc-100">
+        <div className="flex items-center gap-2 md:gap-3 flex-1 w-full min-w-0 max-w-full box-border px-3 py-2 md:px-5 md:py-3 hover:bg-zinc-50/80 rounded-none md:rounded-r-full transition-colors group cursor-pointer border-b md:border-b-0 border-zinc-200/60">
           <span className="scale-75 md:scale-100 flex items-center shrink-0">
             <HugeiconsIcon
               icon={TagsIcon}
@@ -208,7 +208,7 @@ export default function SearchBarClient({ availableAreas, availableTypes }: Sear
               <SelectTrigger className="w-full min-w-0 max-w-full box-border border-0 p-0 h-auto bg-transparent shadow-none focus:ring-0 focus:ring-offset-0 text-zinc-800 font-semibold text-xs md:text-sm outline-none [&_.dropdown-icon]:hidden truncate">
                 <SelectValue placeholder="Rent or Sale?" />
               </SelectTrigger>
-              <SelectContent className="bg-white border border-zinc-200/80 shadow-xl rounded-xl p-0 w-[calc(100vw-2rem)] md:w-full min-w-[var(--radix-select-trigger-width)]">
+              <SelectContent className="bg-white border border-zinc-200/80 shadow-sm rounded-lg p-0 w-[calc(100vw-2rem)] md:w-full min-w-[var(--radix-select-trigger-width)]">
                 <div className="divide-y divide-zinc-100 flex flex-col w-full box-border">
                   <SelectItem value="all" className="cursor-pointer w-full [&>span]:w-full text-[10px] md:text-xs font-medium py-2 md:py-2.5 focus:bg-zinc-50 box-border">
                     <div className="flex w-full justify-between items-center pr-1 text-zinc-700 min-w-0 box-border">

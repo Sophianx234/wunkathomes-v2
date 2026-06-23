@@ -80,7 +80,7 @@ export default function MapComponent({ coordinates, setCoords }: MapComponentPro
   }, []);
 
   return (
-    <div className="h-[400px] w-full rounded-xl overflow-hidden border border-slate-200 shadow-inner bg-slate-100 z-0 relative leaflet-custom-search">
+    <div className="h-[400px] w-full rounded-lg overflow-hidden border border-zinc-200/60 shadow-inner bg-zinc-100/50 z-0 relative leaflet-custom-search">
       <MapContainer
         center={ACCRA_CENTROID}
         zoom={13}

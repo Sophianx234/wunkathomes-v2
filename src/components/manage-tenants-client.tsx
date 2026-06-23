@@ -102,8 +102,8 @@ const formatCurrency = (amount: number) => `GHS ${amount.toLocaleString()}`;
 const getLeaseBadgeStyle = (status: string) => {
   const styles: Record<string, string> = {
     Active: "bg-zinc-900 text-zinc-50 ring-1 ring-zinc-950",
-    Pending_Balance: "bg-zinc-100 text-zinc-700 ring-1 ring-zinc-200/80",
-    Pending_Deposit: "bg-zinc-100 text-zinc-700 ring-1 ring-zinc-200/80",
+    Pending_Balance: "bg-zinc-100/50 text-zinc-700 ring-1 ring-zinc-200/80",
+    Pending_Deposit: "bg-zinc-100/50 text-zinc-700 ring-1 ring-zinc-200/80",
     Expired: "bg-rose-50 text-rose-700 ring-1 ring-rose-200/50",
     Cancelled: "bg-zinc-50 text-zinc-500 ring-1 ring-zinc-200",
   };
@@ -185,7 +185,7 @@ export default function ManageTenantsClient({
         </div>
 
         {/* SEARCH & FILTER CHROME */}
-        <section className="flex flex-col xl:flex-row items-center gap-4 bg-white p-1.5 border border-zinc-200/60 rounded-xl shadow-[0_1px_4px_rgba(0,0,0,0.01)] w-full">
+        <section className="flex flex-col xl:flex-row items-center gap-4 bg-white p-1.5 border border-zinc-200/60 rounded-lg shadow-[0_1px_4px_rgba(0,0,0,0.01)] w-full">
           <div className="relative flex-1 w-full">
             <HugeiconsIcon
               icon={Search01Icon}
@@ -202,7 +202,7 @@ export default function ManageTenantsClient({
           <div className="h-4 w-px bg-zinc-200 hidden xl:block" />
           <div className="flex flex-wrap md:flex-nowrap items-center gap-2 w-full xl:w-auto px-2 pb-1 xl:pb-0">
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full md:w-[160px] h-8 border-0 bg-zinc-50/50 hover:bg-zinc-100 text-[12px] font-medium text-zinc-700 shadow-none focus:ring-0 rounded-md">
+              <SelectTrigger className="w-full md:w-[160px] h-8 border-0 bg-zinc-50/50 hover:bg-zinc-100/50 text-[12px] font-medium text-zinc-700 shadow-none focus:ring-0 rounded-md">
                 <SelectValue placeholder="Lease Status" />
               </SelectTrigger>
               <SelectContent>
@@ -216,7 +216,7 @@ export default function ManageTenantsClient({
             </Select>
 
             <Select value={regionFilter} onValueChange={setRegionFilter}>
-              <SelectTrigger className="w-full md:w-[160px] h-8 border-0 bg-zinc-50/50 hover:bg-zinc-100 text-[12px] font-medium text-zinc-700 shadow-none focus:ring-0 rounded-md">
+              <SelectTrigger className="w-full md:w-[160px] h-8 border-0 bg-zinc-50/50 hover:bg-zinc-100/50 text-[12px] font-medium text-zinc-700 shadow-none focus:ring-0 rounded-md">
                 <SelectValue placeholder="Location" />
               </SelectTrigger>
               <SelectContent>
@@ -248,7 +248,7 @@ export default function ManageTenantsClient({
                 setStatusFilter("all");
                 setRegionFilter("all");
               }}
-              className="h-8 w-8 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 shrink-0 ml-auto md:ml-0 rounded-md"
+              className="h-8 w-8 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100/50 shrink-0 ml-auto md:ml-0 rounded-md"
             >
               <HugeiconsIcon icon={FilterIcon} size={14} />
             </Button>
@@ -256,7 +256,7 @@ export default function ManageTenantsClient({
         </section>
 
         {/* TENANTS TABLE */}
-        <div className="bg-white border border-zinc-200/60 rounded-xl overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.01)]">
+        <div className="bg-white border border-zinc-200/60 rounded-lg overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.01)]">
           <Table>
             <TableHeader className="bg-zinc-50/30">
               <TableRow className="border-zinc-200/60 hover:bg-transparent">
@@ -279,16 +279,16 @@ export default function ManageTenantsClient({
               {filteredData.map((tenant) => (
                 <TableRow
                   key={tenant.id}
-                  className="group border-zinc-100 hover:bg-zinc-50/50 transition-colors cursor-pointer"
+                  className="group border-zinc-200/60 hover:bg-zinc-50/50 transition-colors cursor-pointer"
                   onClick={() => setSelectedTenant(tenant)}
                 >
                   <TableCell className="py-3">
                     <div className="flex items-center gap-3">
                       <Avatar
-                        className={`h-9 w-9 border shadow-sm ${tenant.user.accountStatus !== "Active" ? "opacity-50 grayscale border-zinc-200" : "border-zinc-200/60"}`}
+                        className={`h-9 w-9 border shadow-sm ${tenant.user.accountStatus !== "Active" ? "opacity-50 grayscale border-zinc-200/60" : "border-zinc-200/60"}`}
                       >
                         <AvatarImage src={tenant.user.profilePicture} />
-                        <AvatarFallback className="bg-zinc-100 text-zinc-600 text-xs font-medium">
+                        <AvatarFallback className="bg-zinc-100/50 text-zinc-600 text-xs font-medium">
                           {tenant.user.name.charAt(0)}
                         </AvatarFallback>
                       </Avatar>
@@ -354,14 +354,14 @@ export default function ManageTenantsClient({
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 text-zinc-400 hover:text-zinc-900 data-[state=open]:bg-zinc-100 data-[state=open]:text-zinc-900 rounded-md"
+                          className="h-8 w-8 text-zinc-400 hover:text-zinc-900 data-[state=open]:bg-zinc-100/50 data-[state=open]:text-zinc-900 rounded-md"
                         >
                           <HugeiconsIcon icon={MoreHorizontalIcon} size={16} />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent
                         align="end"
-                        className="w-48 rounded-xl shadow-lg border-zinc-200/80 font-sans p-1"
+                        className="w-48 rounded-lg shadow-sm border-zinc-200/80 font-sans p-1"
                       >
                         <DropdownMenuItem
                           onClick={() => setSelectedTenant(tenant)}
@@ -370,7 +370,7 @@ export default function ManageTenantsClient({
                           View Full Profile
                         </DropdownMenuItem>
 
-                        <div className="h-px bg-zinc-100 my-1 mx-2" />
+                        <div className="h-px bg-zinc-100/50 my-1 mx-2" />
 
                         {tenant.user.accountStatus === "Active" ? (
                           <DropdownMenuItem
@@ -382,7 +382,7 @@ export default function ManageTenantsClient({
                         ) : (
                           <DropdownMenuItem
                             onClick={() => requestStatusToggle(tenant.user.id, tenant.user.accountStatus)}
-                            className="text-[12px] font-medium cursor-pointer text-zinc-900 focus:bg-zinc-100 focus:text-zinc-900 rounded-lg h-8 flex items-center justify-between"
+                            className="text-[12px] font-medium cursor-pointer text-zinc-900 focus:bg-zinc-100/50 focus:text-zinc-900 rounded-lg h-8 flex items-center justify-between"
                           >
                             Restore Account
                           </DropdownMenuItem>
@@ -413,11 +413,11 @@ export default function ManageTenantsClient({
         open={!!selectedTenant}
         onOpenChange={(open) => !open && setSelectedTenant(null)}
       >
-        <DialogContent className="w-full sm:max-w-xl md:max-w-2xl p-0 bg-white border border-slate-200/80 flex flex-col font-sans shadow-2xl rounded-lg max-h-[85vh] overflow-hidden">
+        <DialogContent className="w-full sm:max-w-xl md:max-w-2xl p-0 bg-white border border-slate-200/80 flex flex-col font-sans shadow-sm rounded-lg max-h-[85vh] overflow-hidden">
           {selectedTenant && (
             <>
               {/* Header Profile Section */}
-              <div className="px-6 py-8 border-b border-zinc-100 bg-zinc-50/30">
+              <div className="px-6 py-8 border-b border-zinc-200/60 bg-zinc-50/30">
                 {selectedTenant.user.accountStatus !== "Active" && (
                   <div className="mb-6 w-full p-3 rounded-lg flex items-center gap-2 text-xs font-medium bg-rose-50/50 text-rose-700 border border-rose-100">
                     <HugeiconsIcon icon={Cancel01Icon} size={14} />
@@ -430,7 +430,7 @@ export default function ManageTenantsClient({
                     className={`h-14 w-14 border border-zinc-200/60 shadow-sm ${selectedTenant.user.accountStatus !== "Active" ? "opacity-50 grayscale" : ""}`}
                   >
                     <AvatarImage src={selectedTenant.user.profilePicture} />
-                    <AvatarFallback className="bg-zinc-100 text-zinc-600 font-medium text-lg">
+                    <AvatarFallback className="bg-zinc-100/50 text-zinc-600 font-medium text-lg">
                       {selectedTenant.user.name.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
@@ -461,8 +461,8 @@ export default function ManageTenantsClient({
                     </Badge>
                   </div>
                   
-                  <div className="rounded-xl border border-zinc-200/60 overflow-hidden">
-                    <div className="p-4 bg-zinc-50/50 flex gap-4 border-b border-zinc-100">
+                  <div className="rounded-lg border border-zinc-200/60 overflow-hidden">
+                    <div className="p-4 bg-zinc-50/50 flex gap-4 border-b border-zinc-200/60">
                       <div className="h-12 w-12 shrink-0 bg-white rounded-md overflow-hidden border border-zinc-200/60 shadow-sm">
                         {selectedTenant.lease.propertyImage ? (
                           <img src={selectedTenant.lease.propertyImage} alt="Property" className="w-full h-full object-cover" />
@@ -494,7 +494,7 @@ export default function ManageTenantsClient({
                       </div>
                       <div>
                         <dt className="text-zinc-500 mb-1">Total Rent</dt>
-                        <dd className="font-medium text-zinc-900">{formatCurrency(selectedTenant.lease.totalRentAmount)}</dd>
+                        <dd className="font-medium text-zinc-900 font-tabular-nums">{formatCurrency(selectedTenant.lease.totalRentAmount)}</dd>
                       </div>
                       <div>
                         <dt className="text-zinc-500 mb-1">Access PIN</dt>
@@ -517,7 +517,7 @@ export default function ManageTenantsClient({
                     )}
                   </div>
                   
-                  <div className="rounded-xl border border-zinc-200/60 p-4 flex items-center justify-between">
+                  <div className="rounded-lg border border-zinc-200/60 p-4 flex items-center justify-between">
                     <div>
                       <p className="text-[12px] text-zinc-500 mb-0.5">National ID (Ghana Card)</p>
                       <p className="font-mono text-sm font-medium text-zinc-900 tracking-tight">
@@ -527,7 +527,7 @@ export default function ManageTenantsClient({
                     {selectedTenant.user.ghanaCardUrl ? (
                       <button
                         onClick={() => setExpandedImage(selectedTenant.user.ghanaCardUrl)}
-                        className="relative h-12 w-20 bg-zinc-100 rounded-md border border-zinc-200 overflow-hidden group transition-all hover:border-zinc-300 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:ring-offset-2 shrink-0"
+                        className="relative h-12 w-20 bg-zinc-100/50 rounded-md border border-zinc-200/60 overflow-hidden group transition-all hover:border-zinc-300 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:ring-offset-2 shrink-0"
                       >
                         <img
                           src={selectedTenant.user.ghanaCardUrl}
@@ -554,7 +554,7 @@ export default function ManageTenantsClient({
                       selectedTenant.transactions.map((tx) => (
                         <div key={tx.id} className="flex items-center justify-between py-2.5 px-3 -mx-3 rounded-lg hover:bg-zinc-50 transition-colors">
                           <div className="flex items-center gap-3">
-                            <div className="h-8 w-8 rounded-full bg-zinc-100 flex items-center justify-center border border-zinc-200/60">
+                            <div className="h-8 w-8 rounded-full bg-zinc-100/50 flex items-center justify-center border border-zinc-200/60">
                               <HugeiconsIcon icon={File01Icon} size={14} className="text-zinc-500" />
                             </div>
                             <div>
@@ -567,7 +567,7 @@ export default function ManageTenantsClient({
                             </div>
                           </div>
                           <div className="text-right">
-                            <p className="text-[13px] font-medium text-zinc-900">
+                            <p className="text-[13px] font-medium text-zinc-900 font-tabular-nums">
                               {formatCurrency(tx.amount)}
                             </p>
                             <span className={`text-[10px] font-semibold tracking-wider ${tx.status === "Success" ? "text-teal-600" : tx.status === "Failed" ? "text-rose-600" : "text-amber-600"}`}>
@@ -577,7 +577,7 @@ export default function ManageTenantsClient({
                         </div>
                       ))
                     ) : (
-                      <p className="text-[13px] text-zinc-500 py-4 text-center border border-dashed border-zinc-200 rounded-xl">
+                      <p className="text-[13px] text-zinc-500 py-4 text-center border border-dashed border-zinc-200/60 rounded-lg">
                         No transactions recorded.
                       </p>
                     )}
@@ -589,7 +589,7 @@ export default function ManageTenantsClient({
               <div className="p-4 border-t border-zinc-200/60 bg-white grid grid-cols-2 gap-3">
                 <Button
                   variant="outline"
-                  className="h-9 w-full text-[12px] font-medium border-zinc-200 hover:bg-zinc-50 rounded-lg"
+                  className="h-9 w-full text-[12px] font-medium border-zinc-200/60 hover:bg-zinc-50 rounded-lg"
                 >
                   Tenancy Agreement
                 </Button>
@@ -636,7 +636,7 @@ export default function ManageTenantsClient({
             <img
               src={expandedImage}
               alt="Expanded Document View"
-              className="max-w-full max-h-full object-contain rounded-lg shadow-2xl relative z-0"
+              className="max-w-full max-h-full object-contain rounded-lg shadow-sm relative z-0"
             />
           </div>
         </div>
@@ -647,7 +647,7 @@ export default function ManageTenantsClient({
         open={!!pendingAction}
         onOpenChange={(open) => !open && setPendingAction(null)}
       >
-        <AlertDialogContent className="font-sans max-w-[400px] rounded-2xl p-6">
+        <AlertDialogContent className="font-sans max-w-[400px] rounded-lg p-6">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-lg font-semibold tracking-tight text-zinc-900">
               {pendingAction?.actionType === "Suspend" ? "Suspend Account?" : "Restore Account?"}
@@ -661,7 +661,7 @@ export default function ManageTenantsClient({
           <AlertDialogFooter className="mt-6 gap-2 sm:gap-0">
             <AlertDialogCancel
               disabled={isPending}
-              className="h-9 px-4 text-[12px] font-medium border-zinc-200 hover:bg-zinc-50 rounded-lg m-0"
+              className="h-9 px-4 text-[12px] font-medium border-zinc-200/60 hover:bg-zinc-50 rounded-lg m-0"
             >
               Cancel
             </AlertDialogCancel>

@@ -37,7 +37,7 @@ export default function FeaturedSalesClient({ properties }: FeaturedSalesClientP
           >
             <div className="flex items-center gap-3 mb-3">
               <div className="h-[2px] w-8 bg-black" />
-              <span className="uppercase tracking-[0.2em] text-[10px] md:text-xs font-bold text-slate-500">
+              <span className="uppercase tracking-[0.2em] text-[10px] md:text-xs font-bold text-zinc-500">
                 Latest Listings
               </span>
             </div>
@@ -57,7 +57,7 @@ export default function FeaturedSalesClient({ properties }: FeaturedSalesClientP
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
-            className="text-sm md:text-base text-slate-500 font-medium max-w-sm "
+            className="text-sm md:text-base text-zinc-500 font-medium max-w-sm "
           >
             Explore a handpicked selection of our finest properties. 
             Each one is 100% verified and ready for you to move in.

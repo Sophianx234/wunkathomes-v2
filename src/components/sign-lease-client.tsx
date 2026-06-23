@@ -66,10 +66,10 @@ export default function SignLeaseClient({ data }: SignLeaseClientProps) {
       {/* ========================================================= */}
       {/* LEFT PANE: Document Reader */}
       {/* ========================================================= */}
-      <div className="flex-1 flex flex-col h-[55vh] md:h-[60vh] lg:h-screen relative border-b lg:border-b-0 lg:border-r border-zinc-200 z-0 w-full min-w-0">
+      <div className="flex-1 flex flex-col h-[55vh] md:h-[60vh] lg:h-screen relative border-b lg:border-b-0 lg:border-r border-zinc-200/60 z-0 w-full min-w-0">
         
         {/* Document Header Bar */}
-        <header className="h-10 md:h-14 bg-white border-b border-zinc-200 flex items-center justify-between px-3 md:px-6 shrink-0 z-10 w-full box-border">
+        <header className="h-10 md:h-14 bg-white border-b border-zinc-200/60 flex items-center justify-between px-3 md:px-6 shrink-0 z-10 w-full box-border">
           <div className="flex items-center gap-1.5 md:gap-2 text-zinc-900 min-w-0">
             <span className="text-[10px] md:text-[13px] font-medium tracking-tight truncate">Tenancy Agreement</span>
           </div>
@@ -86,7 +86,7 @@ export default function SignLeaseClient({ data }: SignLeaseClientProps) {
           <div className="max-w-3xl mx-auto bg-white border border-zinc-200/80 p-5 md:p-10 lg:p-16 shadow-[0_2px_12px_-4px_rgba(0,0,0,0.04)] rounded-sm w-full box-border">
             
             <div className="text-center mb-6 md:mb-12 w-full box-border">
-              <h1 className="text-[11px] md:text-xl font-bold text-zinc-900 uppercase tracking-widest border-b border-zinc-200 pb-2 md:pb-4 inline-block break-words max-w-full">
+              <h1 className="text-[11px] md:text-xl font-bold text-zinc-900 uppercase tracking-widest border-b border-zinc-200/60 pb-2 md:pb-4 inline-block break-words max-w-full">
                 Standard Tenancy Agreement
               </h1>
               <p className="mt-2 md:mt-4 text-[7px] md:text-[11px] uppercase tracking-widest text-zinc-400 font-medium break-words">
@@ -121,7 +121,7 @@ export default function SignLeaseClient({ data }: SignLeaseClientProps) {
             </div>
 
             {/* Visual Signature Placeholder */}
-            <div className="mt-8 md:mt-16 pt-4 md:pt-8 border-t border-zinc-100 flex justify-between w-full box-border gap-2">
+            <div className="mt-8 md:mt-16 pt-4 md:pt-8 border-t border-zinc-200/60 flex justify-between w-full box-border gap-2">
               <div className="w-24 md:w-48 min-w-0">
                 <p className="text-[7px] md:text-[10px] uppercase tracking-widest text-zinc-400 font-bold mb-2 md:mb-4 truncate">Landlord Signature</p>
                 <div className="h-6 md:h-10 border-b border-zinc-300 flex items-end pb-0.5 md:pb-1">
@@ -151,7 +151,7 @@ export default function SignLeaseClient({ data }: SignLeaseClientProps) {
           className="flex flex-col h-full p-4 md:p-6 lg:p-8 overflow-y-auto w-full box-border"
         >
           <div className="mb-6 md:mb-10 w-full box-border">
-            <div className="w-8 h-8 md:w-10 md:h-10 bg-zinc-100 rounded-lg flex items-center justify-center mb-3 md:mb-5 border border-zinc-200">
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-zinc-100/50 rounded-lg flex items-center justify-center mb-3 md:mb-5 border border-zinc-200/60">
               <span className="scale-75 md:scale-100 flex items-center">
                 <HugeiconsIcon icon={SignatureIcon} size={20} className="text-zinc-700" />
               </span>
@@ -165,7 +165,7 @@ export default function SignLeaseClient({ data }: SignLeaseClientProps) {
           <form onSubmit={handleSign} className="space-y-4 md:space-y-6 mt-auto lg:mt-0 w-full box-border">
             
             {/* Standard SaaS Checkbox Row */}
-            <div className="flex items-start gap-2 md:gap-3 p-3 md:p-4 rounded-xl border border-zinc-200 bg-zinc-50/50 hover:bg-zinc-50 transition-colors w-full box-border">
+            <div className="flex items-start gap-2 md:gap-3 p-3 md:p-4 rounded-lg border border-zinc-200/60 bg-zinc-50/50 hover:bg-zinc-50 transition-colors w-full box-border">
               <div className="flex items-center h-4 md:h-5 mt-0.5 md:mt-0 shrink-0">
                 <input
                   id="consent"
@@ -203,7 +203,7 @@ export default function SignLeaseClient({ data }: SignLeaseClientProps) {
               </div>
             </div>
 
-            <div className="pt-3 md:pt-4 space-y-3 md:space-y-4 border-t border-zinc-100 w-full box-border">
+            <div className="pt-3 md:pt-4 space-y-3 md:space-y-4 border-t border-zinc-200/60 w-full box-border">
               <button
                 type="submit"
                 disabled={!agreed || !typedName || isSigning}

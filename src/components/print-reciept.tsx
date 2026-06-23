@@ -107,7 +107,7 @@ export default function PrintReceipt({ transaction }: PrintReceiptProps) {
       >
         {/* Inner Wrapper: Controls the actual width of the ticket */}
         <div className="w-full max-w-md px-4">
-          <div className="w-full bg-white border-2 border-slate-200 rounded-t-3xl relative overflow-hidden print:break-inside-avoid ">
+          <div className="w-full bg-white border-2 border-zinc-200/60 rounded-t-3xl relative overflow-hidden print:break-inside-avoid ">
             {/* Top Section */}
             <div className="pt-8 pb-6 px-8 text-center flex flex-col items-center">
               <div className="w-14 h-14 bg-green-50 rounded-full flex items-center justify-center mb-4">
@@ -117,10 +117,10 @@ export default function PrintReceipt({ transaction }: PrintReceiptProps) {
                   className="text-green-500"
                 />
               </div>
-              <h1 className="text-2xl font-black text-slate-900 mb-2">
+              <h1 className="text-2xl font-black text-zinc-900 mb-2">
                 Thank you
               </h1>
-              <p className="text-sm font-medium text-slate-500">
+              <p className="text-sm font-medium text-zinc-500">
                 Your payment has been processed
                 <br />
                 successfully.
@@ -129,67 +129,67 @@ export default function PrintReceipt({ transaction }: PrintReceiptProps) {
 
             {/* The Tear Line & Side Notches */}
             <div className="relative w-full h-8 flex items-center justify-center my-1">
-              <div className="absolute left-0 -ml-4 w-8 h-8 bg-white border-r-2 border-slate-200 rounded-full" />
-              <div className="absolute right-0 -mr-4 w-8 h-8 bg-white border-l-2 border-slate-200 rounded-full" />
-              <div className="w-[85%] border-b-2 border-dashed border-slate-200" />
+              <div className="absolute left-0 -ml-4 w-8 h-8 bg-white border-r-2 border-zinc-200/60 rounded-full" />
+              <div className="absolute right-0 -mr-4 w-8 h-8 bg-white border-l-2 border-zinc-200/60 rounded-full" />
+              <div className="w-[85%] border-b-2 border-dashed border-zinc-200/60" />
             </div>
 
             {/* Details Section */}
             <div className="pt-4 pb-8 px-8">
               <div className="flex justify-between items-start mb-5">
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-1">
                     Ticket ID
                   </p>
-                  <p className="font-mono font-bold text-sm text-slate-900">
+                  <p className="font-mono font-bold text-sm text-zinc-900">
                     {transaction.reference}
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-1">
                     Amount
                   </p>
-                  <p className="font-black text-lg text-slate-900">
+                  <p className="font-black text-lg text-zinc-900">
                     ${transaction.amount?.toLocaleString()}
                   </p>
                 </div>
               </div>
 
               <div className="mb-5">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-1">
                   Date & Time
                 </p>
-                <p className="font-bold text-sm text-slate-900">
+                <p className="font-bold text-sm text-zinc-900">
                   {formattedDateShort} | {formattedTimeShort}
                 </p>
               </div>
 
               <div className="mb-5">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-1">
                   Property
                 </p>
-                <p className="font-bold text-sm text-slate-900 flex items-center gap-2">
+                <p className="font-bold text-sm text-zinc-900 flex items-center gap-2">
                   {transaction.listingId?.title || "WunkatHomes Property"}
                 </p>
-                <p className="text-xs font-medium text-slate-500 mt-1">
+                <p className="text-xs font-medium text-zinc-500 mt-1">
                   {locationString}
                 </p>
               </div>
 
               <div className="mb-6">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-1">
                   Tenant
                 </p>
-                <p className="font-bold text-sm text-slate-900 flex items-center gap-2">
+                <p className="font-bold text-sm text-zinc-900 flex items-center gap-2">
                   {transaction.userId?.name || "Verified User"}
                 </p>
-                <p className="text-xs font-medium text-slate-500 mt-1">
+                <p className="text-xs font-medium text-zinc-500 mt-1">
                   {transaction.userId?.email || "N/A"}
                 </p>
               </div>
 
               {/* Payment Method Badge */}
-              <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 flex items-center gap-3 mb-6">
+              <div className="bg-zinc-50/50 border border-zinc-200/60 rounded-lg p-4 flex items-center gap-3 mb-6">
                 <div className="w-8 h-8 bg-white rounded-full  flex items-center justify-center shrink-0">
                   {transaction.channel === "mobile_money" ? (
                     <HugeiconsIcon
@@ -206,21 +206,21 @@ export default function PrintReceipt({ transaction }: PrintReceiptProps) {
                   )}
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-slate-900 capitalize">
+                  <p className="text-sm font-bold text-zinc-900 capitalize">
                     {transaction.channel?.replace("_", " ") || "Secure Gateway"}
                   </p>
-                  <p className="text-[10px] font-medium text-slate-500 uppercase tracking-widest">
+                  <p className="text-[10px] font-medium text-zinc-500 uppercase tracking-widest">
                     Paid via Paystack
                   </p>
                 </div>
               </div>
 
               {/* Simulated Barcode */}
-              <div className="w-full flex flex-col items-center border-t border-dashed border-slate-200 pt-6">
+              <div className="w-full flex flex-col items-center border-t border-dashed border-zinc-200/60 pt-6">
                 <div className="flex items-center justify-center w-full overflow-hidden">
                   {generateBarcodeLines()}
                 </div>
-                <p className="text-[9px] font-mono text-slate-400 tracking-[0.2em] mt-2">
+                <p className="text-[9px] font-mono text-zinc-400 tracking-[0.2em] mt-2">
                   {transaction._id}
                 </p>
               </div>
@@ -232,7 +232,7 @@ export default function PrintReceipt({ transaction }: PrintReceiptProps) {
             {[...Array(6)].map((_, i) => (
               <div
                 key={i}
-                className="w-8 h-8 bg-white border-t-2 border-slate-200 rounded-full"
+                className="w-8 h-8 bg-white border-t-2 border-zinc-200/60 rounded-full"
               />
             ))}
           </div>

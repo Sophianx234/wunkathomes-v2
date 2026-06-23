@@ -37,7 +37,7 @@ const testimonials = [
 
 export default function Testimonials() {
   return (
-    <section id="testimonials" className="py-16 md:py-24 px-6 bg-gray-50">
+    <section id="testimonials" className="py-16 md:py-24 px-6 bg-zinc-50/50">
       <div className="max-w-6xl mx-auto">
         <motion.div
           className="text-center mb-16"
@@ -47,14 +47,14 @@ export default function Testimonials() {
           viewport={{ once: true, amount: 0.2 }}
         >
           <h2 className="text-3xl md:text-5xl font-bold mb-4">What Our Users Say</h2>
-          <p className="text-gray-600 text-lg">Thousands of happy renters trust HomesWunkat.</p>
+          <p className="text-zinc-600 text-lg">Thousands of happy renters trust HomesWunkat.</p>
         </motion.div>
 
         <div className="grid md:grid-cols-3 gap-8">
           {testimonials.map((testimonial, index) => (
            <motion.div
   key={testimonial.id}
-  className="bg-white p-8 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col justify-between min-h-[320px]" // 👈 key line
+  className="bg-white p-8 rounded-lg shadow-sm hover:shadow-sm transition-shadow duration-300 flex flex-col justify-between min-h-[320px]" // 👈 key line
   initial={{ opacity: 0, y: 30 }}
   whileInView={{ opacity: 1, y: 0 }}
   transition={{ duration: 0.6, delay: index * 0.2 }}
@@ -63,25 +63,25 @@ export default function Testimonials() {
   <div>
     <div className="flex items-center gap-1 mb-4">
       {[...Array(testimonial.rating)].map((_, i) => (
-        <HugeiconsIcon icon={Star} key={i} className="w-4 h-4 text-gray-800" />
+        <HugeiconsIcon icon={Star} key={i} className="w-4 h-4 text-zinc-800" />
       ))}
     </div>
 
     <div className="flex items-start gap-3 mb-6">
-      <HugeiconsIcon icon={Quote} className="w-5 h-5 text-gray-300 flex-shrink-0 mt-1" />
-      <p className="text-gray-700 leading-relaxed">{testimonial.quote}</p>
+      <HugeiconsIcon icon={Quote} className="w-5 h-5 text-zinc-300 flex-shrink-0 mt-1" />
+      <p className="text-zinc-700 leading-relaxed">{testimonial.quote}</p>
     </div>
   </div>
 
-  <div className="flex items-center gap-3 border-t border-gray-200 pt-6 mt-auto">
+  <div className="flex items-center gap-3 border-t border-zinc-200/60 pt-6 mt-auto">
     <img
       src={`/images/${testimonial.avatar}` || "/placeholder.svg"}
       alt={testimonial.name}
       className="w-12 h-12 rounded-full object-cover"
     />
     <div>
-      <p className="font-semibold text-gray-900">{testimonial.name}</p>
-      <p className="text-sm text-gray-600">{testimonial.role}</p>
+      <p className="font-semibold text-zinc-900">{testimonial.name}</p>
+      <p className="text-sm text-zinc-600">{testimonial.role}</p>
     </div>
   </div>
 </motion.div>

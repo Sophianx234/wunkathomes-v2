@@ -20,7 +20,7 @@ export default function PopularLocations() {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
-          className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4"
+          className="text-4xl md:text-5xl font-extrabold text-zinc-900 mb-4"
         >
           Explore Popular Locations
         </motion.h2>
@@ -30,7 +30,7 @@ export default function PopularLocations() {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.1 }}
           viewport={{ once: true }}
-          className="text-gray-500 mb-14 max-w-2xl mx-auto leading-relaxed"
+          className="text-zinc-500 mb-14 max-w-2xl mx-auto leading-relaxed"
         >
          Explore the cities our community loves most, and find a stay that feels just right for your</motion.p>
 
@@ -42,7 +42,7 @@ export default function PopularLocations() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.15 }}
               viewport={{ once: true }}
-              className="relative group overflow-hidden rounded-3xl bg-gray-900"
+              className="relative group overflow-hidden rounded-lg bg-zinc-900"
             >
               {/* Image with elegant gradient overlay */}
               <div className="relative w-full h-80">
@@ -61,18 +61,18 @@ export default function PopularLocations() {
                 <motion.h3
                   whileHover={{ y: -3 }}
                   transition={{ type: "spring", stiffness: 300 }}
-                  className="text-2xl font-semibold drop-shadow-lg"
+                  className="text-2xl font-semibold drop-shadow-sm"
                 >
                   {loc.city}
                 </motion.h3>
-                <p className="mt-2 flex items-center gap-2 text-sm text-gray-200">
+                <p className="mt-2 flex items-center gap-2 text-sm text-zinc-200">
                   <HugeiconsIcon icon={MapPin} className="text-white/90" />
                   <span>{loc.listings} listings</span>
                 </p>
               </div>
 
               {/* Subtle border glow on hover */}
-              <div className="absolute inset-0 rounded-3xl ring-1 ring-gray-900/10 group-hover:ring-gray-900/20 transition-all duration-500" />
+              <div className="absolute inset-0 rounded-lg ring-1 ring-gray-900/10 group-hover:ring-gray-900/20 transition-all duration-500" />
             </motion.div>
           ))}
         </div>

@@ -194,21 +194,21 @@ export default function AccountSettingsForm({
 
   return (
     <div className="max-w-6xl mx-auto p-2 md:p-8 w-full overflow-x-hidden box-border">
-      <h1 className="text-xl md:text-2xl font-bold text-slate-900 mb-4 md:mb-8 truncate px-2 md:px-0">
+      <h1 className="text-xl md:text-2xl font-bold text-zinc-900 mb-4 md:mb-8 truncate px-2 md:px-0">
         Account settings
       </h1>
 
       <div className="flex flex-col md:flex-row gap-4 md:gap-8 items-start w-full box-border">
         {/* --- NAVIGATION (Mobile Horizontal Scroll / Desktop Sidebar) --- */}
-        <aside className="w-full md:w-64 shrink-0 bg-white border border-slate-200 rounded-lg md:rounded-xl overflow-x-auto md:overflow-hidden box-border scrollbar-hide">
+        <aside className="w-full md:w-64 shrink-0 bg-white border border-zinc-200/60 rounded-lg md:rounded-lg overflow-x-auto md:overflow-hidden box-border scrollbar-hide">
           <nav className="flex flex-row md:flex-col min-w-max md:min-w-0">
             <button
               type="button"
               onClick={() => setActiveTab("profile")}
               className={`flex items-center gap-1.5 md:gap-3 px-3 py-2.5 md:px-5 md:py-4 text-[11px] md:text-sm font-medium transition-colors border-b-2 md:border-b-0 md:border-l-4 shrink-0 md:shrink-none ${
                 activeTab === "profile"
-                  ? "border-zinc-950 bg-slate-50 text-zinc-950"
-                  : "border-transparent text-slate-600 hover:bg-slate-50"
+                  ? "border-zinc-950 bg-zinc-50/50 text-zinc-950"
+                  : "border-transparent text-zinc-600 hover:bg-zinc-50/50"
               }`}
             >
               <span className="scale-75 md:scale-100 flex items-center shrink-0">
@@ -221,8 +221,8 @@ export default function AccountSettingsForm({
               onClick={() => setActiveTab("password")}
               className={`flex items-center gap-1.5 md:gap-3 px-3 py-2.5 md:px-5 md:py-4 text-[11px] md:text-sm font-medium transition-colors border-b-2 md:border-b-0 md:border-l-4 shrink-0 md:shrink-none ${
                 activeTab === "password"
-                  ? "border-zinc-950 bg-slate-50 text-zinc-950"
-                  : "border-transparent text-slate-600 hover:bg-slate-50"
+                  ? "border-zinc-950 bg-zinc-50/50 text-zinc-950"
+                  : "border-transparent text-zinc-600 hover:bg-zinc-50/50"
               }`}
             >
               <span className="scale-75 md:scale-100 flex items-center shrink-0">
@@ -235,8 +235,8 @@ export default function AccountSettingsForm({
               onClick={() => setActiveTab("verification")}
               className={`flex items-center gap-1.5 md:gap-3 px-3 py-2.5 md:px-5 md:py-4 text-[11px] md:text-sm font-medium transition-colors border-b-2 md:border-b-0 md:border-l-4 shrink-0 md:shrink-none ${
                 activeTab === "verification"
-                  ? "border-zinc-950 bg-slate-50 text-zinc-950"
-                  : "border-transparent text-slate-600 hover:bg-slate-50"
+                  ? "border-zinc-950 bg-zinc-50/50 text-zinc-950"
+                  : "border-transparent text-zinc-600 hover:bg-zinc-50/50"
               }`}
             >
               <span className="scale-75 md:scale-100 flex items-center shrink-0">
@@ -248,7 +248,7 @@ export default function AccountSettingsForm({
         </aside>
 
         {/* --- MAIN CONTENT AREA --- */}
-        <main className="flex-1 w-full min-w-0 max-w-full box-border bg-white border border-slate-200 rounded-lg md:rounded-xl p-4 md:p-10 min-h-[300px] md:min-h-[500px]">
+        <main className="flex-1 w-full min-w-0 max-w-full box-border bg-white border border-zinc-200/60 rounded-lg md:rounded-lg p-4 md:p-10 min-h-[300px] md:min-h-[500px]">
           {activeTab === "profile" && (
             <form
               onSubmit={handleProfileSubmit}
@@ -260,8 +260,8 @@ export default function AccountSettingsForm({
                   {...getRootProps()}
                   className={`relative h-16 w-16 md:h-28 md:w-28 rounded-full flex items-center justify-center border-2 border-dashed overflow-hidden cursor-pointer group transition-colors shrink-0 ${
                     isDragActive
-                      ? "border-zinc-950 bg-slate-50"
-                      : "border-slate-300 hover:bg-slate-50"
+                      ? "border-zinc-950 bg-zinc-50/50"
+                      : "border-slate-300 hover:bg-zinc-50/50"
                   }`}
                 >
                   <input {...getInputProps()} className="hidden" />
@@ -277,7 +277,7 @@ export default function AccountSettingsForm({
                       <HugeiconsIcon
                         icon={UserCircleIcon}
                         size={40}
-                        className="text-slate-400"
+                        className="text-zinc-400"
                       />
                     </span>
                   )}
@@ -311,12 +311,12 @@ export default function AccountSettingsForm({
                       variant="outline"
                       onClick={removeAvatar}
                       disabled={!avatarPreview}
-                      className="text-slate-600 hover:bg-red-50 rounded-md hover:text-red-600 hover:border-red-200 transition-colors text-[10px] md:text-sm h-8 md:h-10 px-3 md:px-4 w-full sm:w-auto truncate shrink-0"
+                      className="text-zinc-600 hover:bg-red-50 rounded-md hover:text-red-600 hover:border-red-200 transition-colors text-[10px] md:text-sm h-8 md:h-10 px-3 md:px-4 w-full sm:w-auto truncate shrink-0"
                     >
                       Delete avatar
                     </Button>
                   </div>
-                  <p className="text-[9px] md:text-[13px] text-slate-500 text-center sm:text-left break-words w-full px-2 sm:px-0">
+                  <p className="text-[9px] md:text-[13px] text-zinc-500 text-center sm:text-left break-words w-full px-2 sm:px-0">
                     Recommended: Square JPG, PNG, or WebP. Max 5MB.
                   </p>
                 </div>
@@ -327,7 +327,7 @@ export default function AccountSettingsForm({
                 <Field className="w-full min-w-0 max-w-full box-border">
                   <FieldLabel
                     htmlFor="name"
-                    className="text-[11px] md:text-sm font-medium text-slate-700"
+                    className="text-[11px] md:text-sm font-medium text-zinc-700"
                   >
                     Full Name *
                   </FieldLabel>
@@ -336,7 +336,7 @@ export default function AccountSettingsForm({
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Enter your full name"
-                    className="h-9 md:h-11 bg-slate-50/50 rounded-lg md:rounded-xl border-slate-200 focus:ring-zinc-950 text-[11px] md:text-sm block w-full min-w-0 max-w-full box-border appearance-none m-0 px-3"
+                    className="h-9 md:h-11 bg-slate-50/50 rounded-lg md:rounded-lg border-zinc-200/60 focus:ring-zinc-950 text-[11px] md:text-sm block w-full min-w-0 max-w-full box-border appearance-none m-0 px-3"
                     required
                   />
                 </Field>
@@ -344,7 +344,7 @@ export default function AccountSettingsForm({
                 <Field className="w-full min-w-0 max-w-full box-border">
                   <FieldLabel
                     htmlFor="email"
-                    className="text-[11px] md:text-sm font-medium text-slate-700"
+                    className="text-[11px] md:text-sm font-medium text-zinc-700"
                   >
                     Email Address *
                   </FieldLabel>
@@ -353,7 +353,7 @@ export default function AccountSettingsForm({
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="h-9 md:h-11 bg-slate-50/50 rounded-lg md:rounded-xl border-slate-200 focus:ring-zinc-950 disabled:opacity-60 text-[11px] md:text-sm block w-full min-w-0 max-w-full box-border appearance-none m-0 px-3"
+                    className="h-9 md:h-11 bg-slate-50/50 rounded-lg md:rounded-lg border-zinc-200/60 focus:ring-zinc-950 disabled:opacity-60 text-[11px] md:text-sm block w-full min-w-0 max-w-full box-border appearance-none m-0 px-3"
                     required
                     disabled
                   />
@@ -362,7 +362,7 @@ export default function AccountSettingsForm({
                 <Field className="w-full min-w-0 max-w-full box-border md:col-span-2 lg:col-span-1">
                   <FieldLabel
                     htmlFor="phone"
-                    className="text-[11px] md:text-sm font-medium text-slate-700"
+                    className="text-[11px] md:text-sm font-medium text-zinc-700"
                   >
                     Mobile Number *
                   </FieldLabel>
@@ -381,7 +381,7 @@ export default function AccountSettingsForm({
                 </Field>
               </div>
 
-              <div className="pt-3 md:pt-4 border-t border-slate-100 w-full box-border">
+              <div className="pt-3 md:pt-4 border-t border-zinc-200/60 w-full box-border">
                 <Button
                   type="submit"
                   disabled={!isProfileDirty || isProfileSubmitting}
@@ -408,28 +408,28 @@ export default function AccountSettingsForm({
               className="max-w-md animate-in fade-in duration-300 w-full min-w-0 box-border"
             >
               <div className="flex items-start gap-2 md:gap-4 mb-4 md:mb-6 w-full box-border min-w-0">
-                <div className="p-2 md:p-3 border border-slate-200 rounded-full text-slate-700 bg-white shrink-0">
+                <div className="p-2 md:p-3 border border-zinc-200/60 rounded-full text-zinc-700 bg-white shrink-0">
                   <span className="scale-75 md:scale-100 flex items-center">
                     <HugeiconsIcon icon={LockPasswordIcon} size={24} />
                   </span>
                 </div>
                 <div className="min-w-0">
-                  <h2 className="text-base md:text-xl font-semibold text-slate-900 truncate">
+                  <h2 className="text-base md:text-xl font-semibold text-zinc-900 truncate">
                     Change Password
                   </h2>
-                  <p className="text-[10px] md:text-[14px] text-slate-500 mt-0.5 md:mt-1 break-words">
+                  <p className="text-[10px] md:text-[14px] text-zinc-500 mt-0.5 md:mt-1 break-words">
                     Update password for enhanced account security.
                   </p>
                 </div>
               </div>
 
-              <hr className="border-slate-100 mb-4 md:mb-6" />
+              <hr className="border-zinc-200/60 mb-4 md:mb-6" />
 
               <div className="space-y-3 md:space-y-5 w-full min-w-0 box-border">
                 <Field className="w-full min-w-0 box-border">
                   <FieldLabel
                     htmlFor="currentPassword"
-                    className="text-[11px] md:text-sm font-medium text-slate-900"
+                    className="text-[11px] md:text-sm font-medium text-zinc-900"
                   >
                     Current Password *
                   </FieldLabel>
@@ -442,12 +442,12 @@ export default function AccountSettingsForm({
                       onChange={(e) => setCurrentPassword(e.target.value)}
                       required
                       placeholder="••••••••"
-                      className="bg-white rounded-lg md:rounded-xl h-9 md:h-12 border-slate-200 focus:ring-zinc-950 pr-8 md:pr-10 text-[11px] md:text-sm block w-full min-w-0 box-border appearance-none m-0 px-3"
+                      className="bg-white rounded-lg md:rounded-lg h-9 md:h-12 border-zinc-200/60 focus:ring-zinc-950 pr-8 md:pr-10 text-[11px] md:text-sm block w-full min-w-0 box-border appearance-none m-0 px-3"
                     />
                     <button
                       type="button"
                       onClick={() => setShowCurrent(!showCurrent)}
-                      className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 shrink-0"
+                      className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 shrink-0"
                     >
                       <span className="scale-75 md:scale-100 flex items-center">
                         {!showCurrent ? (
@@ -463,7 +463,7 @@ export default function AccountSettingsForm({
                 <Field className="w-full min-w-0 box-border">
                   <FieldLabel
                     htmlFor="newPassword"
-                    className="text-[11px] md:text-sm font-medium text-slate-900"
+                    className="text-[11px] md:text-sm font-medium text-zinc-900"
                   >
                     New Password *
                   </FieldLabel>
@@ -475,13 +475,13 @@ export default function AccountSettingsForm({
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
                       required
-                      className="bg-white rounded-lg md:rounded-xl h-9 md:h-12 border-slate-200 focus:ring-zinc-950 pr-8 md:pr-10 text-[11px] md:text-sm block w-full min-w-0 box-border appearance-none m-0 px-3"
+                      className="bg-white rounded-lg md:rounded-lg h-9 md:h-12 border-zinc-200/60 focus:ring-zinc-950 pr-8 md:pr-10 text-[11px] md:text-sm block w-full min-w-0 box-border appearance-none m-0 px-3"
                       placeholder="••••••••"
                     />
                     <button
                       type="button"
                       onClick={() => setShowNew(!showNew)}
-                      className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 shrink-0"
+                      className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 shrink-0"
                     >
                       <span className="scale-75 md:scale-100 flex items-center">
                         {!showNew ? (
@@ -501,7 +501,7 @@ export default function AccountSettingsForm({
                       <div className="flex items-center justify-between w-full box-border">
                         <FieldLabel
                           htmlFor="confirmPassword"
-                          className="text-[11px] md:text-sm font-medium text-slate-900 truncate"
+                          className="text-[11px] md:text-sm font-medium text-zinc-900 truncate"
                         >
                           Confirm New Password *
                         </FieldLabel>
@@ -514,13 +514,13 @@ export default function AccountSettingsForm({
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
                           required
-                          className="bg-white rounded-lg md:rounded-xl h-9 md:h-12 border-slate-200 focus:ring-zinc-950 pr-8 md:pr-10 text-[11px] md:text-sm block w-full min-w-0 box-border appearance-none m-0 px-3"
+                          className="bg-white rounded-lg md:rounded-lg h-9 md:h-12 border-zinc-200/60 focus:ring-zinc-950 pr-8 md:pr-10 text-[11px] md:text-sm block w-full min-w-0 box-border appearance-none m-0 px-3"
                           placeholder="••••••••"
                         />
                         <button
                           type="button"
                           onClick={() => setShowConfirm(!showConfirm)}
-                          className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 shrink-0"
+                          className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 shrink-0"
                         >
                           <span className="scale-75 md:scale-100 flex items-center">
                             {showConfirm ? (
@@ -544,21 +544,21 @@ export default function AccountSettingsForm({
                 <div className="pt-1 md:pt-2 pb-1 md:pb-2 w-full box-border">
                   <div className="flex gap-1 md:gap-2 h-1 md:h-1.5 w-full box-border">
                     <div
-                      className={`flex-1 rounded-full transition-colors duration-300 ${newPassword.length === 0 ? "bg-slate-200" : strengthCount >= 1 ? (strengthCount === 1 ? "bg-red-500" : strengthCount === 2 ? "bg-amber-400" : "bg-green-500") : "bg-red-500"}`}
+                      className={`flex-1 rounded-full transition-colors duration-300 ${newPassword.length === 0 ? "bg-zinc-200" : strengthCount >= 1 ? (strengthCount === 1 ? "bg-red-500" : strengthCount === 2 ? "bg-amber-400" : "bg-green-500") : "bg-red-500"}`}
                     />
                     <div
-                      className={`flex-1 rounded-full transition-colors duration-300 ${newPassword.length === 0 ? "bg-slate-200" : strengthCount >= 2 ? (strengthCount === 2 ? "bg-amber-400" : "bg-green-500") : "bg-slate-200"}`}
+                      className={`flex-1 rounded-full transition-colors duration-300 ${newPassword.length === 0 ? "bg-zinc-200" : strengthCount >= 2 ? (strengthCount === 2 ? "bg-amber-400" : "bg-green-500") : "bg-zinc-200"}`}
                     />
                     <div
-                      className={`flex-1 rounded-full transition-colors duration-300 ${newPassword.length === 0 ? "bg-slate-200" : strengthCount >= 3 ? "bg-green-500" : "bg-slate-200"}`}
+                      className={`flex-1 rounded-full transition-colors duration-300 ${newPassword.length === 0 ? "bg-zinc-200" : strengthCount >= 3 ? "bg-green-500" : "bg-zinc-200"}`}
                     />
                   </div>
-                  <p className="text-[10px] md:text-[13px] text-slate-500 mt-2 md:mt-3 font-medium break-words px-1">
+                  <p className="text-[10px] md:text-[13px] text-zinc-500 mt-2 md:mt-3 font-medium break-words px-1">
                     <span
                       className={
                         strengthCount === 3
                           ? "text-green-600"
-                          : "text-slate-700"
+                          : "text-zinc-700"
                       }
                     >
                       {strengthLabel}.
@@ -567,7 +567,7 @@ export default function AccountSettingsForm({
                   </p>
                   <ul className="text-[10px] md:text-[13px] space-y-1 md:space-y-2 mt-2 md:mt-3 px-1">
                     <li
-                      className={`flex items-center gap-1.5 md:gap-2 ${hasUppercase ? "text-slate-900" : "text-slate-500"}`}
+                      className={`flex items-center gap-1.5 md:gap-2 ${hasUppercase ? "text-zinc-900" : "text-zinc-500"}`}
                     >
                       <span className="scale-75 md:scale-100 flex items-center shrink-0">
                         {hasUppercase ? (
@@ -578,14 +578,14 @@ export default function AccountSettingsForm({
                         ) : (
                           <HugeiconsIcon
                             icon={Cancel01Icon}
-                            className="w-4 h-4 md:w-5 md:h-5 text-slate-400"
+                            className="w-4 h-4 md:w-5 md:h-5 text-zinc-400"
                           />
                         )}
                       </span>
                       At least 1 uppercase
                     </li>
                     <li
-                      className={`flex items-center gap-1.5 md:gap-2 ${hasNumber ? "text-slate-900" : "text-slate-500"}`}
+                      className={`flex items-center gap-1.5 md:gap-2 ${hasNumber ? "text-zinc-900" : "text-zinc-500"}`}
                     >
                       <span className="scale-75 md:scale-100 flex items-center shrink-0">
                         {hasNumber ? (
@@ -596,14 +596,14 @@ export default function AccountSettingsForm({
                         ) : (
                           <HugeiconsIcon
                             icon={Cancel01Icon}
-                            className="w-4 h-4 md:w-5 md:h-5 text-slate-400"
+                            className="w-4 h-4 md:w-5 md:h-5 text-zinc-400"
                           />
                         )}
                       </span>
                       At least 1 number
                     </li>
                     <li
-                      className={`flex items-center gap-1.5 md:gap-2 ${hasMinLength ? "text-slate-900" : "text-slate-500"}`}
+                      className={`flex items-center gap-1.5 md:gap-2 ${hasMinLength ? "text-zinc-900" : "text-zinc-500"}`}
                     >
                       <span className="scale-75 md:scale-100 flex items-center shrink-0">
                         {hasMinLength ? (
@@ -614,7 +614,7 @@ export default function AccountSettingsForm({
                         ) : (
                           <HugeiconsIcon
                             icon={Cancel01Icon}
-                            className="w-4 h-4 md:w-5 md:h-5 text-slate-400"
+                            className="w-4 h-4 md:w-5 md:h-5 text-zinc-400"
                           />
                         )}
                       </span>
@@ -628,7 +628,7 @@ export default function AccountSettingsForm({
                     type="button"
                     variant="outline"
                     onClick={handleDiscard}
-                    className="w-full sm:flex-1 rounded-sm py-2 md:py-3 px-4 md:px-8 h-9 md:h-11 md:mt-2 text-[10px] md:text-sm text-slate-700 font-medium shrink-0 truncate"
+                    className="w-full sm:flex-1 rounded-sm py-2 md:py-3 px-4 md:px-8 h-9 md:h-11 md:mt-2 text-[10px] md:text-sm text-zinc-700 font-medium shrink-0 truncate"
                   >
                     Discard
                   </Button>
@@ -639,7 +639,7 @@ export default function AccountSettingsForm({
           )}
 
           {activeTab !== "profile" && activeTab !== "password" && (
-            <div className="h-40 md:h-64 flex items-center justify-center text-slate-500 font-medium animate-in fade-in text-[10px] md:text-sm break-words text-center px-4 w-full box-border">
+            <div className="h-40 md:h-64 flex items-center justify-center text-zinc-500 font-medium animate-in fade-in text-[10px] md:text-sm break-words text-center px-4 w-full box-border">
               {activeTab === "verification"
                 ? "Identity Verification (Ghana Card) Flow goes here."
                 : "This section is under construction."}

@@ -463,7 +463,7 @@ export default function AccessControlDashboard() {
               }}
               className="w-full md:w-auto inline-block"
             >
-              <TabsList className="h-10 bg-zinc-100/80 border border-zinc-200/60 p-1 rounded-xl w-full flex">
+              <TabsList className="h-10 bg-zinc-100/80 border border-zinc-200/60 p-1 rounded-lg w-full flex">
                 <TabsTrigger
                   value="tenant"
                   className="text-[13px] font-semibold data-[state=active]:bg-white  rounded-lg px-6 flex items-center justify-center gap-2 flex-1"
@@ -486,7 +486,7 @@ export default function AccessControlDashboard() {
 
         {/* SHARED TOP FILTER CHROME */}
         <div className="flex flex-col gap-5 w-full">
-          <section className="flex flex-col xl:flex-row items-center gap-4 bg-white p-2 border border-zinc-200/80 rounded-xl shadow-[0_1px_4px_rgba(0,0,0,0.01)] w-full">
+          <section className="flex flex-col xl:flex-row items-center gap-4 bg-white p-2 border border-zinc-200/80 rounded-lg shadow-[0_1px_4px_rgba(0,0,0,0.01)] w-full">
             <div className="relative flex-1 w-full">
               <HugeiconsIcon
                 icon={Search01Icon}
@@ -510,7 +510,7 @@ export default function AccessControlDashboard() {
 
             <div className="flex flex-wrap md:flex-nowrap items-center gap-2 w-full xl:w-auto px-2 pb-1 xl:pb-0">
               <Select value={locationFilter} onValueChange={setLocationFilter}>
-                <SelectTrigger className="w-full md:w-[140px] h-8 border-0 bg-zinc-50/80 hover:bg-zinc-100 text-[12px] font-medium text-zinc-700 shadow-none focus:ring-0 rounded-md">
+                <SelectTrigger className="w-full md:w-[140px] h-8 border-0 bg-zinc-50/80 hover:bg-zinc-100/50 text-[12px] font-medium text-zinc-700 shadow-none focus:ring-0 rounded-md">
                   <SelectValue placeholder="Location" />
                 </SelectTrigger>
                 <SelectContent>
@@ -526,7 +526,7 @@ export default function AccessControlDashboard() {
                   value={tenantStatusFilter}
                   onValueChange={setTenantStatusFilter}
                 >
-                  <SelectTrigger className="w-full md:w-[145px] h-8 border-0 bg-zinc-50/80 hover:bg-zinc-100 text-[12px] font-medium text-zinc-700 shadow-none focus:ring-0 rounded-md">
+                  <SelectTrigger className="w-full md:w-[145px] h-8 border-0 bg-zinc-50/80 hover:bg-zinc-100/50 text-[12px] font-medium text-zinc-700 shadow-none focus:ring-0 rounded-md">
                     <SelectValue placeholder="Access Status" />
                   </SelectTrigger>
                   <SelectContent>
@@ -560,7 +560,7 @@ export default function AccessControlDashboard() {
 
         {/* --- PERSPECTIVE 1: VIEW BY TENANT --- */}
         {perspective === "tenant" && (
-          <div className="bg-white border border-zinc-200/80 rounded-xl overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.01)] animate-in fade-in duration-300">
+          <div className="bg-white border border-zinc-200/80 rounded-lg overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.01)] animate-in fade-in duration-300">
             <Table>
               <TableHeader className="bg-zinc-50/50">
                 <TableRow className="border-zinc-200/80 hover:bg-transparent">
@@ -585,14 +585,14 @@ export default function AccessControlDashboard() {
                 {filteredTenantData.map((record) => (
                   <TableRow
                     key={record.id}
-                    className="group border-zinc-100 hover:bg-zinc-50/80 transition-colors cursor-pointer"
+                    className="group border-zinc-200/60 hover:bg-zinc-50/80 transition-colors cursor-pointer"
                     onClick={() => handleConfigureTenant(record)}
                   >
                     <TableCell className="py-3 align-middle">
                       <div className="flex items-center gap-3">
                         <Avatar className="h-9 w-9 border border-zinc-200/60 shadow-sm">
                           <AvatarImage src={record.user.profilePicture} />
-                          <AvatarFallback className="bg-zinc-100 text-zinc-600 text-xs">
+                          <AvatarFallback className="bg-zinc-100/50 text-zinc-600 text-xs">
                             {record.user.name.charAt(0)}
                           </AvatarFallback>
                         </Avatar>
@@ -637,7 +637,7 @@ export default function AccessControlDashboard() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-6 w-6 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-md shrink-0"
+                          className="h-6 w-6 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100/50 rounded-md shrink-0"
                           onClick={(e) =>
                             togglePinVisibility(record.id, "tenant", e)
                           }
@@ -654,7 +654,7 @@ export default function AccessControlDashboard() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="h-8 text-[11px] font-semibold border-zinc-200 text-zinc-700  rounded-lg group-hover:bg-black group-hover:text-white group-hover:border-zinc-900 transition-all duration-200"
+                        className="h-8 text-[11px] font-semibold border-zinc-200/60 text-zinc-700  rounded-lg group-hover:bg-black group-hover:text-white group-hover:border-zinc-900 transition-all duration-200"
                       >
                         Configure Access
                       </Button>
@@ -678,7 +678,7 @@ export default function AccessControlDashboard() {
 
         {/* --- PERSPECTIVE 2: VIEW BY UNIT --- */}
         {perspective === "unit" && (
-          <div className="bg-white border border-zinc-200/80 rounded-xl overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.01)] animate-in fade-in duration-300">
+          <div className="bg-white border border-zinc-200/80 rounded-lg overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.01)] animate-in fade-in duration-300">
             <Table>
               <TableHeader className="bg-zinc-50/50">
                 <TableRow className="border-zinc-200/80 hover:bg-transparent">
@@ -703,12 +703,12 @@ export default function AccessControlDashboard() {
                 {filteredUnitData.map((unit) => (
                   <TableRow
                     key={unit.id}
-                    className="group border-zinc-100 hover:bg-zinc-50/80 transition-colors cursor-pointer"
+                    className="group border-zinc-200/60 hover:bg-zinc-50/80 transition-colors cursor-pointer"
                     onClick={() => handleConfigureUnit(unit)}
                   >
                     <TableCell className="py-3 align-middle">
                       <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-lg relative bg-zinc-100 border border-zinc-200/80 flex items-center justify-center text-zinc-500">
+                        <div className="h-9 w-9 rounded-lg relative bg-zinc-100/50 border border-zinc-200/80 flex items-center justify-center text-zinc-500">
                           <Image
                             src={unit.listingDetails.image}
                             alt={unit.listingDetails.title}
@@ -739,7 +739,7 @@ export default function AccessControlDashboard() {
                       ) : (
                         <Badge
                           variant="outline"
-                          className="bg-zinc-100 text-zinc-600 border-zinc-200 text-[10px] uppercase tracking-wider h-5 rounded-md"
+                          className="bg-zinc-100/50 text-zinc-600 border-zinc-200/60 text-[10px] uppercase tracking-wider h-5 rounded-md"
                         >
                           Vacant
                         </Badge>
@@ -794,7 +794,7 @@ export default function AccessControlDashboard() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-6 w-6 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-md shrink-0"
+                          className="h-6 w-6 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100/50 rounded-md shrink-0"
                           onClick={(e) =>
                             togglePinVisibility(unit.id, "unit", e)
                           }
@@ -811,7 +811,7 @@ export default function AccessControlDashboard() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="h-8 text-[11px] font-semibold border-zinc-200 text-zinc-700  rounded-lg group-hover:bg-black group-hover:text-white group-hover:border-zinc-900 transition-all duration-200"
+                        className="h-8 text-[11px] font-semibold border-zinc-200/60 text-zinc-700  rounded-lg group-hover:bg-black group-hover:text-white group-hover:border-zinc-900 transition-all duration-200"
                       >
                         Manage Lock
                       </Button>
@@ -839,7 +839,7 @@ export default function AccessControlDashboard() {
         open={!!selectedTenantAccess}
         onOpenChange={(open) => !open && setSelectedTenantAccess(null)}
       >
-        <DialogContent className="w-full sm:max-w-xl md:max-w-2xl p-0 bg-[#FAFAFA] border border-slate-200/80 flex flex-col font-sans shadow-2xl rounded-lg max-h-[85vh] overflow-hidden">
+        <DialogContent className="w-full sm:max-w-xl md:max-w-2xl p-0 bg-[#FAFAFA] border border-slate-200/80 flex flex-col font-sans shadow-sm rounded-lg max-h-[85vh] overflow-hidden">
           {selectedTenantAccess && (
             <>
               <div className="px-6 pt-10 pb-6 border-b border-zinc-200/80 bg-white">
@@ -848,7 +848,7 @@ export default function AccessControlDashboard() {
                     <AvatarImage
                       src={selectedTenantAccess.user.profilePicture}
                     />
-                    <AvatarFallback className="bg-zinc-100 text-zinc-600 text-lg">
+                    <AvatarFallback className="bg-zinc-100/50 text-zinc-600 text-lg">
                       {selectedTenantAccess.user.name.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
@@ -868,14 +868,14 @@ export default function AccessControlDashboard() {
 
               <div className="flex-1 overflow-y-auto p-6 space-y-6">
                 {/* --- ADDED: Property Context Card --- */}
-                <section className="bg-white border border-zinc-200/80 rounded-xl overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.01)] group relative">
+                <section className="bg-white border border-zinc-200/80 rounded-lg overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.01)] group relative">
                   <Link
                     href={`/admin/properties/${selectedTenantAccess.unit.listingDetails.id}`}
                     className="absolute top-3 right-3 z-10 bg-white/90 backdrop-blur-sm p-1.5 rounded-md text-zinc-500 hover:text-zinc-900 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
                   >
                     <HugeiconsIcon icon={LinkSquare01Icon} size={14} />
                   </Link>
-                  <div className="h-32 w-full bg-zinc-100 relative">
+                  <div className="h-32 w-full bg-zinc-100/50 relative">
                     <img
                       src={selectedTenantAccess.unit.listingDetails.image}
                       alt={selectedTenantAccess.unit.listingDetails.title}
@@ -922,7 +922,7 @@ export default function AccessControlDashboard() {
                   </div>
                 </section>
 
-                <section className="bg-white border border-zinc-200/80 rounded-xl p-4 shadow-[0_1px_3px_rgba(0,0,0,0.01)] space-y-4">
+                <section className="bg-white border border-zinc-200/80 rounded-lg p-4 shadow-[0_1px_3px_rgba(0,0,0,0.01)] space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <h3 className="text-[12px] font-bold text-zinc-900 uppercase tracking-tight flex items-center gap-1.5">
@@ -965,7 +965,7 @@ export default function AccessControlDashboard() {
                   )}
                 </section>
 
-                <section className="bg-white border border-zinc-200/80 rounded-xl p-4 shadow-[0_1px_3px_rgba(0,0,0,0.01)] space-y-4">
+                <section className="bg-white border border-zinc-200/80 rounded-lg p-4 shadow-[0_1px_3px_rgba(0,0,0,0.01)] space-y-4">
                   <div className="space-y-0.5">
                     <h3 className="text-[12px] font-bold text-zinc-900 uppercase tracking-tight flex items-center gap-1.5">
                       <HugeiconsIcon
@@ -993,14 +993,14 @@ export default function AccessControlDashboard() {
                         autoFocus
                       />
                     ) : (
-                      <div className="flex-1 bg-zinc-50 border border-zinc-200 text-center font-mono text-base tracking-[0.2em] font-bold text-zinc-800 h-9 flex items-center justify-center rounded-md">
+                      <div className="flex-1 bg-zinc-50 border border-zinc-200/60 text-center font-mono text-base tracking-[0.2em] font-bold text-zinc-800 h-9 flex items-center justify-center rounded-md">
                         {tenantPinInput}
                       </div>
                     )}
                     <Button
                       variant="outline"
                       size="sm"
-                      className="h-9 px-3 border-zinc-200 text-zinc-700 shrink-0 font-medium text-xs transition-colors hover:bg-zinc-100"
+                      className="h-9 px-3 border-zinc-200/60 text-zinc-700 shrink-0 font-medium text-xs transition-colors hover:bg-zinc-100/50"
                       onClick={() => setIsTenantPinEditing(!isTenantPinEditing)}
                     >
                       {isTenantPinEditing ? (
@@ -1023,7 +1023,7 @@ export default function AccessControlDashboard() {
                   <h3 className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
                     Access Authorization History
                   </h3>
-                  <div className="bg-white border border-zinc-200/80 rounded-xl p-4 shadow-[0_1px_3px_rgba(0,0,0,0.01)] space-y-4">
+                  <div className="bg-white border border-zinc-200/80 rounded-lg p-4 shadow-[0_1px_3px_rgba(0,0,0,0.01)] space-y-4">
                     {selectedTenantAccess.logs.map((log) => (
                       <div key={log.id} className="flex gap-3 text-[12px]">
                         <div className="mt-0.5 shrink-0">
@@ -1075,18 +1075,18 @@ export default function AccessControlDashboard() {
         open={!!selectedUnitAccess}
         onOpenChange={(open) => !open && setSelectedUnitAccess(null)}
       >
-        <DialogContent className="w-full sm:max-w-xl md:max-w-2xl p-0 bg-[#FAFAFA] border border-slate-200/80 flex flex-col font-sans shadow-2xl rounded-lg max-h-[85vh] overflow-hidden">
+        <DialogContent className="w-full sm:max-w-xl md:max-w-2xl p-0 bg-[#FAFAFA] border border-slate-200/80 flex flex-col font-sans shadow-sm rounded-lg max-h-[85vh] overflow-hidden">
           {selectedUnitAccess && (
             <>
               <div className="px-6 pt-10 pb-6 border-b border-zinc-200/80 bg-white">
                 <div className="flex items-center gap-4">
-                  <div className="h-14 w-14 rounded-xl bg-zinc-100 border border-zinc-200/80 flex items-center justify-center text-zinc-600 shadow-sm">
+                  <div className="h-14 w-14 rounded-lg bg-zinc-100/50 border border-zinc-200/80 flex items-center justify-center text-zinc-600 shadow-sm">
                     <HugeiconsIcon icon={Door01Icon} size={24} />
                   </div>
                   <div>
                     <Badge
                       variant="outline"
-                      className="bg-zinc-50 mb-1 border-zinc-200 text-zinc-600 text-[10px] uppercase tracking-wider"
+                      className="bg-zinc-50 mb-1 border-zinc-200/60 text-zinc-600 text-[10px] uppercase tracking-wider"
                     >
                       {selectedUnitAccess.occupancy}
                     </Badge>
@@ -1102,14 +1102,14 @@ export default function AccessControlDashboard() {
 
               <div className="flex-1 overflow-y-auto p-6 space-y-6">
                 {/* --- ADDED: Property Context Card --- */}
-                <section className="bg-white border border-zinc-200/80 rounded-xl overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.01)] group relative">
+                <section className="bg-white border border-zinc-200/80 rounded-lg overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.01)] group relative">
                   <Link
                     href={`/admin/properties/${selectedUnitAccess.listingDetails.id}`}
                     className="absolute top-3 right-3 z-10 bg-white/90 backdrop-blur-sm p-1.5 rounded-md text-zinc-500 hover:text-zinc-900 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
                   >
                     <HugeiconsIcon icon={LinkSquare01Icon} size={14} />
                   </Link>
-                  <div className="h-32 w-full bg-zinc-100 relative">
+                  <div className="h-32 w-full bg-zinc-100/50 relative">
                     <img
                       src={selectedUnitAccess.listingDetails.image}
                       alt={selectedUnitAccess.listingDetails.title}
@@ -1147,7 +1147,7 @@ export default function AccessControlDashboard() {
                 </section>
 
                 {/* Hardware Telemetry */}
-                <section className="bg-white border border-zinc-200/80 rounded-xl p-4 shadow-[0_1px_3px_rgba(0,0,0,0.01)] flex divide-x divide-zinc-100">
+                <section className="bg-white border border-zinc-200/80 rounded-lg p-4 shadow-[0_1px_3px_rgba(0,0,0,0.01)] flex divide-x divide-zinc-100">
                   <div className="flex-1 px-2 text-center space-y-1">
                     <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
                       Network
@@ -1196,7 +1196,7 @@ export default function AccessControlDashboard() {
 
                 {/* Vacant Unit Temporary Access */}
                 {selectedUnitAccess.occupancy === "Vacant" && (
-                  <section className="bg-white border border-zinc-200/80 rounded-xl p-5 shadow-[0_1px_3px_rgba(0,0,0,0.01)] space-y-4">
+                  <section className="bg-white border border-zinc-200/80 rounded-lg p-5 shadow-[0_1px_3px_rgba(0,0,0,0.01)] space-y-4">
                     <div className="space-y-0.5">
                       <h3 className="text-[13px] font-bold text-zinc-900 tracking-tight">
                         Temporary Access Code
@@ -1208,7 +1208,7 @@ export default function AccessControlDashboard() {
                     </div>
                     <Button
                       variant="outline"
-                      className="w-full h-10 text-[12px] font-semibold border-zinc-200 hover:bg-zinc-50 text-zinc-800"
+                      className="w-full h-10 text-[12px] font-semibold border-zinc-200/60 hover:bg-zinc-50 text-zinc-800"
                     >
                       Generate 24h Vendor PIN
                     </Button>
@@ -1220,7 +1220,7 @@ export default function AccessControlDashboard() {
                   <h3 className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">
                     Hardware Commands
                   </h3>
-                  <div className="bg-white border border-zinc-200/80 rounded-xl overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.01)] divide-y divide-zinc-100">
+                  <div className="bg-white border border-zinc-200/80 rounded-lg overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.01)] divide-y divide-zinc-100">
                     <button className="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-zinc-50 transition-colors">
                       <div className="flex items-center gap-3 text-zinc-700">
                         <HugeiconsIcon icon={Refresh01Icon} size={16} />

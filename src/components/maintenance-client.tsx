@@ -17,6 +17,7 @@ import {
   Building03Icon,
   SmartPhone01Icon,
   Mail01Icon,
+  Loading03Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { toast } from "sonner";
@@ -214,19 +215,19 @@ export default function MaintenanceClient({ initialTickets }: MaintenanceClientP
           </h1>
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-white p-5 rounded-xl border border-zinc-200/60 shadow-[0_1px_4px_rgba(0,0,0,0.01)] flex flex-col justify-between">
+            <div className="bg-white p-5 rounded-lg border border-zinc-200/60 shadow-[0_1px_4px_rgba(0,0,0,0.01)] flex flex-col justify-between">
               <span className="text-[12px] font-medium text-zinc-500 uppercase tracking-widest">Open tickets</span>
               <span className="text-3xl font-bold tracking-tighter text-zinc-900 mt-2 font-tabular-nums">{metrics.open.toString().padStart(2, '0')}</span>
             </div>
-            <div className="bg-white p-5 rounded-xl border border-zinc-200/60 shadow-[0_1px_4px_rgba(0,0,0,0.01)] flex flex-col justify-between">
+            <div className="bg-white p-5 rounded-lg border border-zinc-200/60 shadow-[0_1px_4px_rgba(0,0,0,0.01)] flex flex-col justify-between">
               <span className="text-[12px] font-medium text-zinc-500 uppercase tracking-widest">Active tickets</span>
               <span className="text-3xl font-bold tracking-tighter text-zinc-900 mt-2 font-tabular-nums">{metrics.active.toString().padStart(2, '0')}</span>
             </div>
-            <div className="bg-white p-5 rounded-xl border border-zinc-200/60 shadow-[0_1px_4px_rgba(0,0,0,0.01)] flex flex-col justify-between">
+            <div className="bg-white p-5 rounded-lg border border-zinc-200/60 shadow-[0_1px_4px_rgba(0,0,0,0.01)] flex flex-col justify-between">
               <span className="text-[12px] font-medium text-zinc-500 uppercase tracking-widest">Resolved</span>
               <span className="text-3xl font-bold tracking-tighter text-zinc-900 mt-2 font-tabular-nums">{metrics.resolved.toString().padStart(2, '0')}</span>
             </div>
-            <div className="bg-white p-5 rounded-xl border border-zinc-200/60 shadow-[0_1px_4px_rgba(0,0,0,0.01)] flex flex-col justify-between">
+            <div className="bg-white p-5 rounded-lg border border-zinc-200/60 shadow-[0_1px_4px_rgba(0,0,0,0.01)] flex flex-col justify-between">
               <span className="text-[12px] font-medium text-zinc-500 uppercase tracking-widest">Total volume</span>
               <span className="text-3xl font-bold tracking-tighter text-zinc-900 mt-2 font-tabular-nums">{metrics.total.toString().padStart(2, '0')}</span>
             </div>
@@ -234,7 +235,7 @@ export default function MaintenanceClient({ initialTickets }: MaintenanceClientP
         </div>
 
         {/* FILTER BAR */}
-        <section className="flex flex-col md:flex-row items-center gap-3 bg-white p-1.5 border border-zinc-200/60 shadow-[0_1px_4px_rgba(0,0,0,0.01)] rounded-xl w-full ">
+        <section className="flex flex-col md:flex-row items-center gap-3 bg-white p-1.5 border border-zinc-200/60 shadow-[0_1px_4px_rgba(0,0,0,0.01)] rounded-lg w-full ">
           <div className="relative w-full md:flex-1">
             <HugeiconsIcon icon={Search01Icon} size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
             <Input
@@ -249,7 +250,7 @@ export default function MaintenanceClient({ initialTickets }: MaintenanceClientP
 
           <div className="flex flex-wrap md:flex-nowrap items-center gap-2 w-full md:w-auto px-2 pb-1 md:pb-0">
             <Select value={statusFilter} onValueChange={(val) => setStatusFilter(val as any)}>
-              <SelectTrigger className="w-full md:w-[130px] h-8 border-0 bg-zinc-50/50 hover:bg-zinc-100 text-[12px] font-medium text-zinc-700 shadow-none focus:ring-0 rounded-md">
+              <SelectTrigger className="w-full md:w-[130px] h-8 border-0 bg-zinc-50/50 hover:bg-zinc-100/50 text-[12px] font-medium text-zinc-700 shadow-none focus:ring-0 rounded-md">
                 <SelectValue placeholder="All Statuses" />
               </SelectTrigger>
               <SelectContent>
@@ -262,7 +263,7 @@ export default function MaintenanceClient({ initialTickets }: MaintenanceClientP
             </Select>
 
             <Select value={priorityFilter} onValueChange={(val) => setPriorityFilter(val as any)}>
-              <SelectTrigger className="w-full md:w-[130px] h-8 border-0 bg-zinc-50/50 hover:bg-zinc-100 text-[12px] font-medium text-zinc-700 shadow-none focus:ring-0 rounded-md">
+              <SelectTrigger className="w-full md:w-[130px] h-8 border-0 bg-zinc-50/50 hover:bg-zinc-100/50 text-[12px] font-medium text-zinc-700 shadow-none focus:ring-0 rounded-md">
                 <SelectValue placeholder="All Priorities" />
               </SelectTrigger>
               <SelectContent>
@@ -274,7 +275,7 @@ export default function MaintenanceClient({ initialTickets }: MaintenanceClientP
             </Select>
 
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger className="w-full md:w-[140px] h-8 border-0 bg-zinc-50/50 hover:bg-zinc-100 text-[12px] font-medium text-zinc-700 shadow-none focus:ring-0 rounded-md">
+              <SelectTrigger className="w-full md:w-[140px] h-8 border-0 bg-zinc-50/50 hover:bg-zinc-100/50 text-[12px] font-medium text-zinc-700 shadow-none focus:ring-0 rounded-md">
                 <SelectValue placeholder="All Categories" />
               </SelectTrigger>
               <SelectContent>
@@ -296,7 +297,7 @@ export default function MaintenanceClient({ initialTickets }: MaintenanceClientP
                 setPriorityFilter("all");
                 setCategoryFilter("all");
               }}
-              className="h-8 w-8 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 shrink-0 ml-auto md:ml-0 rounded-md"
+              className="h-8 w-8 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100/50 shrink-0 ml-auto md:ml-0 rounded-md"
             >
               <HugeiconsIcon icon={FilterIcon} size={14} />
             </Button>
@@ -304,7 +305,7 @@ export default function MaintenanceClient({ initialTickets }: MaintenanceClientP
         </section>
 
         {/* TICKET LIST */}
-        <div className="bg-white border border-zinc-200/60 shadow-[0_1px_4px_rgba(0,0,0,0.01)] rounded-xl overflow-hidden">
+        <div className="bg-white border border-zinc-200/60 shadow-[0_1px_4px_rgba(0,0,0,0.01)] rounded-lg overflow-hidden">
           <div className="grid grid-cols-12 gap-4 px-6 py-4 border-b border-zinc-200/60 bg-zinc-50/30 text-[12px] font-medium text-zinc-500">
             <div className="col-span-12 md:col-span-5">Ticket Title & Details</div>
             <div className="hidden md:block col-span-2">Status</div>
@@ -327,7 +328,7 @@ export default function MaintenanceClient({ initialTickets }: MaintenanceClientP
                   <div className="col-span-12 md:col-span-5 flex items-start gap-3">
                     <Avatar className="h-10 w-10 mt-0.5 shrink-0 border border-zinc-200/60 shadow-sm">
                       <AvatarImage src={ticket.user.profilePicture} />
-                      <AvatarFallback className="bg-zinc-100 text-zinc-600 text-xs font-medium">
+                      <AvatarFallback className="bg-zinc-100/50 text-zinc-600 text-xs font-medium">
                         {ticket.user.name.charAt(0)}
                       </AvatarFallback>
                     </Avatar>
@@ -347,7 +348,7 @@ export default function MaintenanceClient({ initialTickets }: MaintenanceClientP
                         <span className="text-[11px] font-medium text-zinc-700">
                           {ticket.user.name}
                         </span>
-                        <span className="text-[10px] font-medium text-zinc-500 bg-zinc-100 px-1.5 py-0.5 rounded uppercase tracking-wider">
+                        <span className="text-[10px] font-medium text-zinc-500 bg-zinc-100/50 px-1.5 py-0.5 rounded uppercase tracking-wider">
                           {ticket.listing.title}
                         </span>
                       </div>
@@ -363,7 +364,7 @@ export default function MaintenanceClient({ initialTickets }: MaintenanceClientP
                         requestStatusChange(val as MaintenanceStatus);
                       }}
                     >
-                      <SelectTrigger className="h-8 border-0 bg-transparent hover:bg-zinc-100 focus:ring-0 p-0 px-2 w-auto gap-2 rounded-md">
+                      <SelectTrigger className="h-8 border-0 bg-transparent hover:bg-zinc-100/50 focus:ring-0 p-0 px-2 w-auto gap-2 rounded-md">
                         <div className="flex items-center gap-1.5">
                           <HugeiconsIcon icon={statusCfg.icon} size={14} className={statusCfg.color} />
                           <span className="text-[12px] font-medium text-zinc-700">{statusCfg.label}</span>
@@ -432,7 +433,7 @@ export default function MaintenanceClient({ initialTickets }: MaintenanceClientP
             <img 
               src={expandedImage} 
               alt="Issue attachment" 
-              className="max-w-full max-h-full object-contain rounded-lg shadow-2xl" 
+              className="max-w-full max-h-full object-contain rounded-lg shadow-sm" 
             />
           </div>
         </div>
@@ -440,13 +441,13 @@ export default function MaintenanceClient({ initialTickets }: MaintenanceClientP
 
       {/* INDUSTRY STANDARD TICKET CRM SHEET */}
       <Dialog open={!!selectedTicket} onOpenChange={(open) => !open && setSelectedTicket(null)}>
-        <DialogContent className="w-full sm:max-w-xl md:max-w-2xl p-0 bg-[#FAFAFA] border border-slate-200/80 flex flex-col font-sans shadow-2xl rounded-lg max-h-[85vh] overflow-hidden">
+        <DialogContent className="w-full sm:max-w-xl md:max-w-2xl p-0 bg-[#FAFAFA] border border-slate-200/80 flex flex-col font-sans shadow-sm rounded-lg max-h-[85vh] overflow-hidden">
           {selectedTicket && (() => {
             const currentStatusCfg = getStatusConfig(selectedTicket.status);
             return (
               <>
                 {/* Header Context Section */}
-                <div className="px-6 py-8 border-b border-zinc-100 bg-zinc-50/30">
+                <div className="px-6 py-8 border-b border-zinc-200/60 bg-zinc-50/30">
                   <div className="flex items-center justify-between mb-6">
                     <Badge
                       variant="outline"
@@ -478,7 +479,7 @@ export default function MaintenanceClient({ initialTickets }: MaintenanceClientP
                     <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-3 flex items-center gap-2">
                        Description Context
                     </h3>
-                    <div className="bg-white border border-zinc-200/60 p-4 rounded-xl text-[13px] text-zinc-700 leading-relaxed whitespace-pre-wrap shadow-[0_1px_4px_rgba(0,0,0,0.01)]">
+                    <div className="bg-white border border-zinc-200/60 p-4 rounded-lg text-[13px] text-zinc-700 leading-relaxed whitespace-pre-wrap shadow-[0_1px_4px_rgba(0,0,0,0.01)]">
                       {selectedTicket.description}
                     </div>
                   </section>
@@ -488,11 +489,11 @@ export default function MaintenanceClient({ initialTickets }: MaintenanceClientP
                     <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-3">
                       Reporter Info
                     </h3>
-                    <div className="rounded-xl border border-zinc-200/60 overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.01)]">
-                      <div className="p-4 bg-zinc-50/50 flex gap-4 border-b border-zinc-100">
+                    <div className="rounded-lg border border-zinc-200/60 overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.01)]">
+                      <div className="p-4 bg-zinc-50/50 flex gap-4 border-b border-zinc-200/60">
                         <Avatar className="h-12 w-12 border border-zinc-200/60 shadow-sm shrink-0">
                           <AvatarImage src={selectedTicket.user.profilePicture} />
-                          <AvatarFallback className="bg-zinc-100 text-zinc-600 font-medium text-sm">
+                          <AvatarFallback className="bg-zinc-100/50 text-zinc-600 font-medium text-sm">
                             {selectedTicket.user.name.charAt(0)}
                           </AvatarFallback>
                         </Avatar>
@@ -532,9 +533,9 @@ export default function MaintenanceClient({ initialTickets }: MaintenanceClientP
                         View Asset <HugeiconsIcon icon={LinkSquare01Icon} size={12} />
                       </Link>
                     </div>
-                    <div className="rounded-xl border border-zinc-200/60 overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.01)] bg-white">
+                    <div className="rounded-lg border border-zinc-200/60 overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.01)] bg-white">
                       <div className="p-4 flex gap-4">
-                        <div className="h-12 w-12 shrink-0 bg-zinc-100 rounded-md overflow-hidden border border-zinc-200/60 shadow-sm">
+                        <div className="h-12 w-12 shrink-0 bg-zinc-100/50 rounded-md overflow-hidden border border-zinc-200/60 shadow-sm">
                           {selectedTicket.listing.image ? (
                             <img src={selectedTicket.listing.image} alt="Property" className="w-full h-full object-cover" />
                           ) : (
@@ -566,7 +567,7 @@ export default function MaintenanceClient({ initialTickets }: MaintenanceClientP
                           <button 
                             key={idx} 
                             onClick={() => setExpandedImage(imgUrl)}
-                            className="aspect-square rounded-xl border border-zinc-200/80 overflow-hidden group relative bg-zinc-100 shadow-[0_1px_4px_rgba(0,0,0,0.01)] focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:ring-offset-2"
+                            className="aspect-square rounded-lg border border-zinc-200/80 overflow-hidden group relative bg-zinc-100/50 shadow-[0_1px_4px_rgba(0,0,0,0.01)] focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:ring-offset-2"
                           >
                             <img src={imgUrl} alt={`Evidence ${idx + 1}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
@@ -583,7 +584,7 @@ export default function MaintenanceClient({ initialTickets }: MaintenanceClientP
                     <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-3">
                       Maintenance Status
                     </h3>
-                    <div className="bg-zinc-100/60 border border-zinc-200/60 p-1 rounded-xl flex flex-wrap gap-1">
+                    <div className="bg-zinc-100/60 border border-zinc-200/60 p-1 rounded-lg flex flex-wrap gap-1">
                       {(["Pending", "In_Progress", "Resolved", "Cancelled"] as MaintenanceStatus[]).map((status) => {
                         const isActive = selectedTicket.status === status;
                         return (
@@ -593,7 +594,7 @@ export default function MaintenanceClient({ initialTickets }: MaintenanceClientP
                             onClick={() => requestStatusChange(status)}
                             className={`flex-1 min-w-[45%] py-2.5 text-[11px] font-bold uppercase tracking-wider rounded-lg transition-all duration-200 ${
                               isActive
-                                ? "bg-white text-zinc-900 border border-zinc-200 shadow-sm"
+                                ? "bg-white text-zinc-900 border border-zinc-200/60 shadow-sm"
                                 : "text-zinc-500 hover:bg-zinc-200/50 hover:text-zinc-700 disabled:opacity-50"
                             }`}
                           >
@@ -609,7 +610,7 @@ export default function MaintenanceClient({ initialTickets }: MaintenanceClientP
                 {/* Fixed Bottom Action Bar */}
                 <div className="p-4 border-t border-zinc-200/60 bg-white flex gap-3">
                   <a href={`tel:${selectedTicket.user.phone}`} className="flex-1">
-                    <Button variant="outline" className="w-full h-10 rounded-lg border-zinc-200 text-zinc-900 hover:bg-zinc-50 font-medium transition-all shadow-none">
+                    <Button variant="outline" className="w-full h-10 rounded-lg border-zinc-200/60 text-zinc-900 hover:bg-zinc-50 font-medium transition-all shadow-none">
                       Call Tenant
                     </Button>
                   </a>
@@ -630,7 +631,7 @@ export default function MaintenanceClient({ initialTickets }: MaintenanceClientP
         open={!!pendingStatusChange}
         onOpenChange={(open) => !open && setPendingStatusChange(null)}
       >
-        <AlertDialogContent className="font-sans max-w-[400px] rounded-2xl p-6">
+        <AlertDialogContent className="font-sans max-w-[400px] rounded-lg p-6">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-lg font-semibold tracking-tight text-zinc-900">
               Confirm Status Update
@@ -646,7 +647,7 @@ export default function MaintenanceClient({ initialTickets }: MaintenanceClientP
           <AlertDialogFooter className="mt-6 gap-2 sm:gap-0">
             <AlertDialogCancel
               disabled={isPending}
-              className="h-9 px-4 text-[12px] font-medium border-zinc-200 hover:bg-zinc-50 rounded-lg m-0"
+              className="h-9 px-4 text-[12px] font-medium border-zinc-200/60 hover:bg-zinc-50 rounded-lg m-0"
             >
               Cancel
             </AlertDialogCancel>

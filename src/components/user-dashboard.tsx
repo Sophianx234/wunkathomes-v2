@@ -171,13 +171,13 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
   };
 
   return (
-    <main className="min-h-screen bg-slate-50 font-sans text-slate-800 pb-12 md:pb-24 w-full overflow-x-hidden box-border">
+    <main className="min-h-screen bg-zinc-50/50 font-sans text-zinc-800 pb-12 md:pb-24 w-full overflow-x-hidden box-border">
       {/* HEADER */}
       <header className="bg-zinc-950 text-white pt-12 pb-20 md:pt-24 md:pb-32 px-4 sm:px-6 lg:px-8 w-full box-border">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-end gap-4 md:gap-6 w-full box-border">
           <div className="w-full min-w-0">
             <h1 className="text-xl md:text-4xl font-black uppercase tracking-tight mb-1 md:mb-2 truncate">Tenant Dashboard</h1>
-            <p className="text-[10px] md:text-sm font-medium text-slate-400 truncate">Welcome home, {user.name.split(" ")[0]}.</p>
+            <p className="text-[10px] md:text-sm font-medium text-zinc-400 truncate">Welcome home, {user.name.split(" ")[0]}.</p>
           </div>
 
           <div className="hidden md:flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full border border-white/10 shrink-0">
@@ -193,7 +193,7 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
                 key={item.lease.id}
                 onClick={() => setSelectedIndex(idx)}
                 className={`whitespace-nowrap px-3 py-1.5 md:px-5 md:py-2.5 rounded-md text-[9px] md:text-xs font-bold uppercase tracking-widest transition-all border flex items-center gap-1.5 md:gap-2 shrink-0 ${
-                  selectedIndex === idx ? "bg-white text-black border-white shadow-lg" : "bg-white/5 text-white/60 border-white/10 hover:bg-white/10 hover:text-white"
+                  selectedIndex === idx ? "bg-white text-black border-white shadow-sm" : "bg-white/5 text-white/60 border-white/10 hover:bg-white/10 hover:text-white"
                 }`}
               >
                 <span className="scale-75 md:scale-100 flex items-center">
@@ -214,20 +214,20 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
         
         {/* 1. KYC BANNER */}
         {needsKyc && (
-          <div className="bg-white border border-slate-200 p-4 md:p-6 rounded-lg md:rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 md:gap-6 relative overflow-hidden w-full box-border">
-            <div className="absolute left-0 top-0 bottom-0 w-1 bg-slate-900" />
+          <div className="bg-white border border-zinc-200/60 p-4 md:p-6 rounded-lg md:rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3 md:gap-6 relative overflow-hidden w-full box-border">
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-zinc-900" />
             <div className="flex items-start sm:items-center gap-3 md:gap-4 pl-1 md:pl-2 min-w-0">
-              <div className="w-8 h-8 md:w-10 md:h-10 bg-slate-50 border border-slate-100 rounded-full flex items-center justify-center shrink-0">
+              <div className="w-8 h-8 md:w-10 md:h-10 bg-zinc-50/50 border border-zinc-200/60 rounded-full flex items-center justify-center shrink-0">
                 <span className="scale-75 md:scale-100 flex items-center">
-                   <HugeiconsIcon icon={Shield02Icon} className="text-slate-900" size={20} />
+                   <HugeiconsIcon icon={Shield02Icon} className="text-zinc-900" size={20} />
                 </span>
               </div>
               <div className="min-w-0">
-                <h4 className="text-[11px] md:text-sm font-bold text-slate-900 mb-0.5 md:mb-1 tracking-tight truncate">Identity Verification Required</h4>
-                <p className="text-[9px] md:text-sm text-slate-500 font-medium break-words leading-tight">Please verify your identity to generate your Smart Lock access credentials.</p>
+                <h4 className="text-[11px] md:text-sm font-bold text-zinc-900 mb-0.5 md:mb-1 tracking-tight truncate">Identity Verification Required</h4>
+                <p className="text-[9px] md:text-sm text-zinc-500 font-medium break-words leading-tight">Please verify your identity to generate your Smart Lock access credentials.</p>
               </div>
             </div>
-            <Link href="/user/leases" className="shrink-0 w-full sm:w-auto px-4 py-2 md:px-6 md:py-2.5 bg-slate-900 hover:bg-black text-white text-[10px] md:text-sm font-semibold rounded-md md:rounded-lg transition-colors flex items-center justify-center">
+            <Link href="/user/leases" className="shrink-0 w-full sm:w-auto px-4 py-2 md:px-6 md:py-2.5 bg-zinc-900 hover:bg-black text-white text-[10px] md:text-sm font-semibold rounded-md md:rounded-lg transition-colors flex items-center justify-center">
               Verify Identity
             </Link>
           </div>
@@ -235,20 +235,20 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
 
         {/* 2. SIGNATURE BANNER */}
         {needsSignature && (
-          <div className="bg-white border border-slate-200 p-4 md:p-6 rounded-lg md:rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 md:gap-6 relative overflow-hidden w-full box-border">
-            <div className="absolute left-0 top-0 bottom-0 w-1 bg-slate-900" />
+          <div className="bg-white border border-zinc-200/60 p-4 md:p-6 rounded-lg md:rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3 md:gap-6 relative overflow-hidden w-full box-border">
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-zinc-900" />
             <div className="flex items-start sm:items-center gap-3 md:gap-4 pl-1 md:pl-2 min-w-0">
-              <div className="w-8 h-8 md:w-10 md:h-10 bg-slate-50 border border-slate-100 rounded-full flex items-center justify-center shrink-0">
+              <div className="w-8 h-8 md:w-10 md:h-10 bg-zinc-50/50 border border-zinc-200/60 rounded-full flex items-center justify-center shrink-0">
                 <span className="scale-75 md:scale-100 flex items-center">
-                   <HugeiconsIcon icon={SignatureIcon} className="text-slate-900" size={20} />
+                   <HugeiconsIcon icon={SignatureIcon} className="text-zinc-900" size={20} />
                 </span>
               </div>
               <div className="min-w-0">
-                <h4 className="text-[11px] md:text-sm font-bold text-slate-900 mb-0.5 md:mb-1 tracking-tight truncate">Digital Signature Required</h4>
-                <p className="text-[9px] md:text-sm text-slate-500 font-medium break-words leading-tight">Please review and sign your digital Tenancy Agreement to finalize your application.</p>
+                <h4 className="text-[11px] md:text-sm font-bold text-zinc-900 mb-0.5 md:mb-1 tracking-tight truncate">Digital Signature Required</h4>
+                <p className="text-[9px] md:text-sm text-zinc-500 font-medium break-words leading-tight">Please review and sign your digital Tenancy Agreement to finalize your application.</p>
               </div>
             </div>
-            <Link href={`/user/sign-lease?leaseId=${lease.id}`} className="shrink-0 w-full sm:w-auto px-4 py-2 md:px-6 md:py-2.5 bg-slate-900 hover:bg-black text-white text-[10px] md:text-sm font-semibold rounded-md md:rounded-lg transition-colors flex items-center justify-center">
+            <Link href={`/user/sign-lease?leaseId=${lease.id}`} className="shrink-0 w-full sm:w-auto px-4 py-2 md:px-6 md:py-2.5 bg-zinc-900 hover:bg-black text-white text-[10px] md:text-sm font-semibold rounded-md md:rounded-lg transition-colors flex items-center justify-center">
               Sign Document
             </Link>
           </div>
@@ -256,17 +256,17 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
 
         {/* 3. ADMIN REVIEW BANNER */}
         {isPendingAdmin && (
-          <div className="bg-white border border-slate-200 p-4 md:p-6 rounded-lg md:rounded-xl flex flex-col sm:flex-row sm:items-center gap-3 md:gap-4 shadow-sm relative overflow-hidden w-full box-border">
-            <div className="absolute left-0 top-0 bottom-0 w-1 bg-slate-300" />
+          <div className="bg-white border border-zinc-200/60 p-4 md:p-6 rounded-lg md:rounded-lg flex flex-col sm:flex-row sm:items-center gap-3 md:gap-4 shadow-sm relative overflow-hidden w-full box-border">
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-zinc-300" />
             <div className="flex items-start sm:items-center gap-3 md:gap-4 pl-1 md:pl-2 min-w-0">
-              <div className="w-8 h-8 md:w-10 md:h-10 bg-slate-50 border border-slate-100 rounded-full flex items-center justify-center shrink-0">
+              <div className="w-8 h-8 md:w-10 md:h-10 bg-zinc-50/50 border border-zinc-200/60 rounded-full flex items-center justify-center shrink-0">
                 <span className="scale-75 md:scale-100 flex items-center">
-                   <HugeiconsIcon icon={Time01Icon} className="text-slate-900" size={20} />
+                   <HugeiconsIcon icon={Time01Icon} className="text-zinc-900" size={20} />
                 </span>
               </div>
               <div className="min-w-0">
-                <h4 className="text-[11px] md:text-sm font-bold text-slate-900 mb-0.5 md:mb-1 tracking-tight truncate">Application Under Review</h4>
-                <p className="text-[9px] md:text-sm text-slate-500 font-medium break-words leading-tight">Your documents have been submitted. Our team is finalizing your verification.</p>
+                <h4 className="text-[11px] md:text-sm font-bold text-zinc-900 mb-0.5 md:mb-1 tracking-tight truncate">Application Under Review</h4>
+                <p className="text-[9px] md:text-sm text-zinc-500 font-medium break-words leading-tight">Your documents have been submitted. Our team is finalizing your verification.</p>
               </div>
             </div>
           </div>
@@ -274,21 +274,21 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
 
         {/* 4. RENEWAL & VACATE ACTION CARD */}
         {isExpiringSoon && !isRestricted && (
-          <div className="bg-white border border-slate-200 p-4 md:p-6 rounded-lg md:rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6 relative overflow-hidden w-full box-border">
-            <div className="absolute left-0 top-0 bottom-0 w-1 bg-slate-900" />
+          <div className="bg-white border border-zinc-200/60 p-4 md:p-6 rounded-lg md:rounded-lg flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6 relative overflow-hidden w-full box-border">
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-zinc-900" />
             
             <div className="flex items-start gap-3 md:gap-4 pl-1 md:pl-2 min-w-0">
-              <div className="w-8 h-8 md:w-10 md:h-10 bg-slate-50 border border-slate-100 rounded-full flex items-center justify-center shrink-0 mt-0.5">
+              <div className="w-8 h-8 md:w-10 md:h-10 bg-zinc-50/50 border border-zinc-200/60 rounded-full flex items-center justify-center shrink-0 mt-0.5">
                 <span className="scale-75 md:scale-100 flex items-center">
                   <HugeiconsIcon 
                     icon={lease.intentToVacate ? Logout01Icon : isExpired ? Alert01Icon : Calendar01Icon} 
-                    className="text-slate-900" 
+                    className="text-zinc-900" 
                     size={20} 
                   />
                 </span>
               </div>
               <div className="min-w-0">
-                <h4 className="text-[11px] md:text-base font-bold text-slate-900 tracking-tight truncate">
+                <h4 className="text-[11px] md:text-base font-bold text-zinc-900 tracking-tight truncate">
                   {lease.intentToVacate 
                     ? "Move-Out Scheduled" 
                     : isExpired 
@@ -296,7 +296,7 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
                       : "Lease Renewal Due"
                   }
                 </h4>
-                <p className="text-[9px] md:text-sm text-slate-500 font-medium mt-0.5 md:mt-1 max-w-xl break-words leading-tight">
+                <p className="text-[9px] md:text-sm text-zinc-500 font-medium mt-0.5 md:mt-1 max-w-xl break-words leading-tight">
                   {lease.intentToVacate
                     ? `Your notice to vacate is confirmed for ${endDate.toLocaleDateString()}. Please prepare for the final property inspection.`
                     : isExpired
@@ -316,7 +316,7 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
                   <AlertDialogTrigger asChild>
                     <button
                       disabled={isRenewing || isVacating}
-                      className="w-full sm:w-auto px-4 py-2 md:px-5 md:py-2.5 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold text-[10px] md:text-sm rounded-md md:rounded-lg transition-all flex items-center justify-center gap-1.5 md:gap-2 disabled:opacity-50 shrink-0"
+                      className="w-full sm:w-auto px-4 py-2 md:px-5 md:py-2.5 bg-white border border-zinc-200/60 hover:border-slate-300 hover:bg-zinc-50/50 text-zinc-700 font-semibold text-[10px] md:text-sm rounded-md md:rounded-lg transition-all flex items-center justify-center gap-1.5 md:gap-2 disabled:opacity-50 shrink-0"
                     >
                       {isVacating ? (
                         <>
@@ -327,7 +327,7 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
                       )}
                     </button>
                   </AlertDialogTrigger>
-                  <AlertDialogContent className="max-w-[90%] md:max-w-lg rounded-xl">
+                  <AlertDialogContent className="max-w-[90%] md:max-w-lg rounded-lg">
                     <AlertDialogHeader>
                       <AlertDialogTitle className="text-sm md:text-lg">Are you absolutely sure?</AlertDialogTitle>
                       <AlertDialogDescription className="text-[11px] md:text-sm">
@@ -338,7 +338,7 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
                       <AlertDialogCancel className="text-[11px] md:text-sm h-8 md:h-10">Cancel</AlertDialogCancel>
                       <AlertDialogAction 
                         onClick={handleVacate}
-                        className="bg-slate-900 text-white hover:bg-slate-800 text-[11px] md:text-sm h-8 md:h-10"
+                        className="bg-zinc-900 text-white hover:bg-zinc-800 text-[11px] md:text-sm h-8 md:h-10"
                       >
                         Confirm Move-Out
                       </AlertDialogAction>
@@ -349,7 +349,7 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
                 <button
                   onClick={handleRenewal}
                   disabled={isRenewing || isVacating}
-                  className="w-full sm:w-auto px-4 py-2 md:px-6 md:py-2.5 bg-slate-900 hover:bg-black text-white font-semibold text-[10px] md:text-sm rounded-md md:rounded-lg transition-colors flex items-center justify-center gap-1.5 md:gap-2 disabled:opacity-70 shadow-sm shrink-0"
+                  className="w-full sm:w-auto px-4 py-2 md:px-6 md:py-2.5 bg-zinc-900 hover:bg-black text-white font-semibold text-[10px] md:text-sm rounded-md md:rounded-lg transition-colors flex items-center justify-center gap-1.5 md:gap-2 disabled:opacity-70 shadow-sm shrink-0"
                 >
                   {isRenewing ? (
                     <>
@@ -367,34 +367,34 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
         {/* ========================================================= */}
         {/* SUBSCRIPTION STATS TRACKER */}
         {/* ========================================================= */}
-        <div className="bg-white rounded-lg md:rounded-xl border border-slate-200 p-4 md:p-8 w-full box-border">
+        <div className="bg-white rounded-lg md:rounded-lg border border-zinc-200/60 p-4 md:p-8 w-full box-border">
           <div className="flex flex-row justify-between md:items-end gap-4 md:gap-6 mb-4 md:mb-6 w-full box-border">
             <div className="min-w-0">
-              <h3 className="text-[9px] md:text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1 md:gap-2 mb-0.5 md:mb-1 truncate">
+              <h3 className="text-[9px] md:text-xs font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-1 md:gap-2 mb-0.5 md:mb-1 truncate">
                 Lease Timeline
               </h3>
-              <p className="text-[10px] md:text-sm text-slate-900 font-medium truncate">
+              <p className="text-[10px] md:text-sm text-zinc-900 font-medium truncate">
                 {startDate.toLocaleDateString()} — {endDate.toLocaleDateString()}
               </p>
             </div>
 
             <div className="text-right shrink-0">
-              <p className="text-xl md:text-3xl font-black text-slate-900 tracking-tight flex flex-col items-end">
+              <p className="text-xl md:text-3xl font-black text-zinc-900 tracking-tight flex flex-col items-end">
                 {daysLeft}
-                <span className="text-[8px] md:text-xs font-bold uppercase tracking-widest text-slate-400 mt-0.5 md:mt-1">
+                <span className="text-[8px] md:text-xs font-bold uppercase tracking-widest text-zinc-400 mt-0.5 md:mt-1">
                   {statusText}
                 </span>
               </p>
             </div>
           </div>
 
-          <div className="w-full bg-slate-100 rounded-full h-1.5 md:h-2.5 overflow-hidden box-border">
+          <div className="w-full bg-zinc-100/50 rounded-full h-1.5 md:h-2.5 overflow-hidden box-border">
             <div
-              className={`h-full rounded-full transition-all duration-1000 ${isRestricted ? "bg-slate-300" : "bg-slate-900"}`}
+              className={`h-full rounded-full transition-all duration-1000 ${isRestricted ? "bg-zinc-300" : "bg-zinc-900"}`}
               style={{ width: `${progressPercentage}%` }}
             />
           </div>
-          <div className="flex justify-between text-[7px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2 md:mt-4 w-full box-border">
+          <div className="flex justify-between text-[7px] md:text-[10px] font-bold text-zinc-400 uppercase tracking-widest mt-2 md:mt-4 w-full box-border">
             <span className="truncate">Move-In</span>
             <span className="truncate px-1 text-center">{isRestricted ? "Action Required" : today < startDate ? "Pending" : `${Math.round(progressPercentage)}% Completed`}</span>
             <span className="truncate">{lease.intentToVacate ? "Move-Out Date" : "Expiration"}</span>
@@ -403,45 +403,45 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
 
         {/* HERO: Property & Smart Lock Controls */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8 w-full box-border">
-          <div className="lg:col-span-2 bg-white rounded-xl md:rounded-2xl border border-slate-200 overflow-hidden flex flex-col sm:flex-row w-full box-border">
-            <div className="w-full sm:w-2/5 h-32 md:h-48 sm:h-auto relative bg-slate-100 shrink-0">
+          <div className="lg:col-span-2 bg-white rounded-lg md:rounded-lg border border-zinc-200/60 overflow-hidden flex flex-col sm:flex-row w-full box-border">
+            <div className="w-full sm:w-2/5 h-32 md:h-48 sm:h-auto relative bg-zinc-100/50 shrink-0">
               <Image src={listing.images[0] || "/placeholder.jpg"} alt="Property" fill className="object-cover" />
             </div>
             <div className="p-4 md:p-8 flex flex-col justify-center flex-1 min-w-0">
               <div className="flex flex-wrap items-center gap-1.5 md:gap-2 mb-2 md:mb-3">
-                <span className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-slate-900 bg-slate-100 px-1.5 md:px-2 py-0.5 md:py-1 rounded truncate">{listing.propertyType}</span>
+                <span className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-zinc-900 bg-zinc-100/50 px-1.5 md:px-2 py-0.5 md:py-1 rounded truncate">{listing.propertyType}</span>
                 
                 {isRestricted ? (
-                  <span className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-slate-600 bg-slate-100 px-1.5 md:px-2 py-0.5 md:py-1 rounded flex items-center gap-1 truncate">
+                  <span className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-zinc-600 bg-zinc-100/50 px-1.5 md:px-2 py-0.5 md:py-1 rounded flex items-center gap-1 truncate">
                     <span className="scale-75 md:scale-100 flex items-center"><HugeiconsIcon icon={Time01Icon} size={10} /></span> Action Required
                   </span>
                 ) : isExpired ? (
-                  <span className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-slate-900 bg-slate-200 px-1.5 md:px-2 py-0.5 md:py-1 rounded flex items-center gap-1 truncate">
+                  <span className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-zinc-900 bg-zinc-200 px-1.5 md:px-2 py-0.5 md:py-1 rounded flex items-center gap-1 truncate">
                     <span className="scale-75 md:scale-100 flex items-center"><HugeiconsIcon icon={Alert01Icon} size={10} /></span> Overdue
                   </span>
                 ) : (
-                  <span className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-slate-700 bg-slate-100 px-1.5 md:px-2 py-0.5 md:py-1 rounded flex items-center gap-1 truncate">
+                  <span className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-zinc-700 bg-zinc-100/50 px-1.5 md:px-2 py-0.5 md:py-1 rounded flex items-center gap-1 truncate">
                     <span className="w-1 md:w-1.5 h-1 md:h-1.5 rounded-full bg-green-500 shrink-0" /> Active
                   </span>
                 )}
               </div>
 
-              <h2 className="text-lg md:text-2xl font-black text-slate-900 tracking-tight mb-1 md:mb-2 truncate w-full">{listing.title}</h2>
-              <p className="text-[10px] md:text-sm font-medium text-slate-500 mb-3 md:mb-6 flex items-center gap-1 md:gap-2 truncate w-full">
+              <h2 className="text-lg md:text-2xl font-black text-zinc-900 tracking-tight mb-1 md:mb-2 truncate w-full">{listing.title}</h2>
+              <p className="text-[10px] md:text-sm font-medium text-zinc-500 mb-3 md:mb-6 flex items-center gap-1 md:gap-2 truncate w-full">
                 <span className="scale-75 md:scale-100 flex items-center shrink-0"><HugeiconsIcon icon={MapPinIcon} size={16} /></span> <span className="truncate">{listing.location}</span>
               </p>
 
-              <div className="grid grid-cols-3 gap-2 md:gap-4 border-t border-slate-100 pt-3 md:pt-6 w-full box-border">
-                <div className="flex flex-col items-start gap-0.5 md:gap-1 text-slate-700 min-w-0">
-                  <span className="scale-75 md:scale-100 flex items-center"><HugeiconsIcon icon={BedDoubleIcon} size={18} className="text-slate-400" /></span>
+              <div className="grid grid-cols-3 gap-2 md:gap-4 border-t border-zinc-200/60 pt-3 md:pt-6 w-full box-border">
+                <div className="flex flex-col items-start gap-0.5 md:gap-1 text-zinc-700 min-w-0">
+                  <span className="scale-75 md:scale-100 flex items-center"><HugeiconsIcon icon={BedDoubleIcon} size={18} className="text-zinc-400" /></span>
                   <span className="text-[10px] md:text-sm font-bold truncate">{listing.bedrooms} Beds</span>
                 </div>
-                <div className="flex flex-col items-start gap-0.5 md:gap-1 text-slate-700 min-w-0">
-                  <span className="scale-75 md:scale-100 flex items-center"><HugeiconsIcon icon={Bathtub01Icon} size={18} className="text-slate-400" /></span>
+                <div className="flex flex-col items-start gap-0.5 md:gap-1 text-zinc-700 min-w-0">
+                  <span className="scale-75 md:scale-100 flex items-center"><HugeiconsIcon icon={Bathtub01Icon} size={18} className="text-zinc-400" /></span>
                   <span className="text-[10px] md:text-sm font-bold truncate">{listing.bathrooms} Baths</span>
                 </div>
-                <div className="flex flex-col items-start gap-0.5 md:gap-1 text-slate-700 min-w-0">
-                  <span className="scale-75 md:scale-100 flex items-center"><HugeiconsIcon icon={MaximizeIcon} size={18} className="text-slate-400" /></span>
+                <div className="flex flex-col items-start gap-0.5 md:gap-1 text-zinc-700 min-w-0">
+                  <span className="scale-75 md:scale-100 flex items-center"><HugeiconsIcon icon={MaximizeIcon} size={18} className="text-zinc-400" /></span>
                   <span className="text-[10px] md:text-sm font-bold truncate">{listing.sizeSqm || "--"} Sqm</span>
                 </div>
               </div>
@@ -449,7 +449,7 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
           </div>
 
           {/* DIGITAL KEYS BLOCK */}
-          <div className={`rounded-xl md:rounded-2xl p-5 md:p-8 flex flex-col justify-center relative overflow-hidden transition-colors duration-500 w-full box-border ${isRestricted ? "bg-zinc-900 border border-zinc-800" : lockStatus === "UNLOCKED" ? "bg-zinc-800 border border-zinc-700" : "bg-zinc-950 border border-black"}`}>
+          <div className={`rounded-lg md:rounded-lg p-5 md:p-8 flex flex-col justify-center relative overflow-hidden transition-colors duration-500 w-full box-border ${isRestricted ? "bg-zinc-900 border border-zinc-800" : lockStatus === "UNLOCKED" ? "bg-zinc-800 border border-zinc-700" : "bg-zinc-950 border border-black"}`}>
             <div className="absolute top-0 right-0 p-3 md:p-6 opacity-5 pointer-events-none">
               <span className="scale-[0.5] md:scale-100 flex items-center origin-top-right"><HugeiconsIcon icon={Key01Icon} size={150} /></span>
             </div>
@@ -458,7 +458,7 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
               <div className="flex justify-between items-start mb-3 md:mb-6 w-full box-border">
                 <div className="w-8 h-8 md:w-12 md:h-12 bg-white/10 rounded-full flex items-center justify-center border border-white/20 shrink-0">
                   <span className="scale-75 md:scale-100 flex items-center">
-                    <HugeiconsIcon icon={isRestricted ? Time01Icon : Key01Icon} size={24} className={isRestricted ? "text-slate-400" : "text-white"} />
+                    <HugeiconsIcon icon={isRestricted ? Time01Icon : Key01Icon} size={24} className={isRestricted ? "text-zinc-400" : "text-white"} />
                   </span>
                 </div>
                 {!isRestricted && (
@@ -468,15 +468,15 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
                 )}
               </div>
 
-              <h3 className="text-[8px] md:text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-1 md:mb-2 truncate">Smart Lock Access</h3>
+              <h3 className="text-[8px] md:text-[11px] font-bold uppercase tracking-widest text-zinc-400 mb-1 md:mb-2 truncate">Smart Lock Access</h3>
 
               <div className="flex items-center justify-between gap-2 md:gap-4 mb-3 md:mb-6 pb-3 md:pb-6 border-b border-white/10 w-full box-border min-w-0">
                 {isRestricted ? (
-                  <div className="font-mono text-sm md:text-xl font-bold text-slate-500 uppercase tracking-[0.1em] truncate">Pending</div>
+                  <div className="font-mono text-sm md:text-xl font-bold text-zinc-500 uppercase tracking-[0.1em] truncate">Pending</div>
                 ) : (
                   <>
                     <div className="font-mono text-xl md:text-3xl font-black text-white tracking-[0.2em] truncate">{showPin ? lease.smartLockPin || "849201" : "••••••"}</div>
-                    <button onClick={() => setShowPin(!showPin)} className="p-1.5 md:p-2 hover:bg-white/10 rounded-full transition-colors text-slate-400 hover:text-white shrink-0" title={showPin ? "Hide PIN" : "Reveal PIN"}>
+                    <button onClick={() => setShowPin(!showPin)} className="p-1.5 md:p-2 hover:bg-white/10 rounded-full transition-colors text-zinc-400 hover:text-white shrink-0" title={showPin ? "Hide PIN" : "Reveal PIN"}>
                       <span className="scale-75 md:scale-100 flex items-center"><HugeiconsIcon icon={showPin ? ViewOffIcon : ViewIcon} size={20} /></span>
                     </button>
                   </>
@@ -486,8 +486,8 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
               <button
                 onClick={toggleSmartLock}
                 disabled={lockStatus === "LOADING" || today < startDate || isRestricted}
-                className={`w-full py-2.5 md:py-4 rounded-lg md:rounded-xl flex items-center justify-center gap-1.5 md:gap-3 font-bold uppercase tracking-widest text-[9px] md:text-xs transition-all shadow-lg mt-auto min-w-0 box-border px-2 truncate ${
-                  isRestricted ? "bg-white/5 text-slate-500 cursor-not-allowed border border-white/5" : today < startDate ? "bg-white/5 text-slate-600 cursor-not-allowed border border-white/10" : lockStatus === "LOADING" ? "bg-white/10 text-slate-400 cursor-wait" : lockStatus === "LOCKED" ? "bg-white text-black hover:bg-slate-200" : "bg-red-500 text-white hover:bg-red-600"
+                className={`w-full py-2.5 md:py-4 rounded-lg md:rounded-lg flex items-center justify-center gap-1.5 md:gap-3 font-bold uppercase tracking-widest text-[9px] md:text-xs transition-all shadow-sm mt-auto min-w-0 box-border px-2 truncate ${
+                  isRestricted ? "bg-white/5 text-zinc-500 cursor-not-allowed border border-white/5" : today < startDate ? "bg-white/5 text-zinc-600 cursor-not-allowed border border-white/10" : lockStatus === "LOADING" ? "bg-white/10 text-zinc-400 cursor-wait" : lockStatus === "LOCKED" ? "bg-white text-black hover:bg-zinc-200" : "bg-red-500 text-white hover:bg-red-600"
                 }`}
               >
                 {needsKyc ? (
@@ -513,35 +513,35 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
         {/* UTILITIES & ACTIONS */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 w-full box-border">
           {!isRestricted && (
-            <Link href={`/user/maintenance`} className="bg-white p-4 md:p-6 rounded-xl md:rounded-2xl border border-slate-200 hover:border-slate-300 transition-all text-left flex flex-col gap-2 md:gap-4 group w-full min-w-0 box-border">
-              <div className="w-8 h-8 md:w-10 md:h-10 bg-slate-50 text-slate-900 border border-slate-100 rounded-full flex items-center justify-center group-hover:bg-slate-100 transition-colors shrink-0">
+            <Link href={`/user/maintenance`} className="bg-white p-4 md:p-6 rounded-lg md:rounded-lg border border-zinc-200/60 hover:border-slate-300 transition-all text-left flex flex-col gap-2 md:gap-4 group w-full min-w-0 box-border">
+              <div className="w-8 h-8 md:w-10 md:h-10 bg-zinc-50/50 text-zinc-900 border border-zinc-200/60 rounded-full flex items-center justify-center group-hover:bg-zinc-100/50 transition-colors shrink-0">
                 <span className="scale-75 md:scale-100 flex items-center"><HugeiconsIcon icon={Wrench01Icon} size={20} /></span>
               </div>
               <div className="min-w-0">
-                <h4 className="text-[11px] md:text-base font-bold text-slate-900 mb-0.5 md:mb-1 truncate">Report an Issue</h4>
-                <p className="text-[10px] md:text-xs text-slate-500 leading-relaxed font-medium break-words">Create a maintenance ticket for plumbing, AC, or smart lock issues.</p>
+                <h4 className="text-[11px] md:text-base font-bold text-zinc-900 mb-0.5 md:mb-1 truncate">Report an Issue</h4>
+                <p className="text-[10px] md:text-xs text-zinc-500 leading-relaxed font-medium break-words">Create a maintenance ticket for plumbing, AC, or smart lock issues.</p>
               </div>
             </Link>
           )}
 
-          <Link href={`/user/transactions`} className="bg-white p-4 md:p-6 rounded-xl md:rounded-2xl border border-slate-200 hover:border-slate-300 transition-all text-left flex flex-col gap-2 md:gap-4 group w-full min-w-0 box-border">
-            <div className="w-8 h-8 md:w-10 md:h-10 bg-slate-50 text-slate-900 border border-slate-100 rounded-full flex items-center justify-center group-hover:bg-slate-100 transition-colors shrink-0">
+          <Link href={`/user/transactions`} className="bg-white p-4 md:p-6 rounded-lg md:rounded-lg border border-zinc-200/60 hover:border-slate-300 transition-all text-left flex flex-col gap-2 md:gap-4 group w-full min-w-0 box-border">
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-zinc-50/50 text-zinc-900 border border-zinc-200/60 rounded-full flex items-center justify-center group-hover:bg-zinc-100/50 transition-colors shrink-0">
               <span className="scale-75 md:scale-100 flex items-center"><HugeiconsIcon icon={CreditCardIcon} size={20} /></span>
             </div>
             <div className="min-w-0">
-              <h4 className="text-[11px] md:text-base font-bold text-slate-900 mb-0.5 md:mb-1 truncate">Payment History</h4>
-              <p className="text-[10px] md:text-xs text-slate-500 leading-relaxed font-medium break-words">View your transaction history and download official receipts.</p>
+              <h4 className="text-[11px] md:text-base font-bold text-zinc-900 mb-0.5 md:mb-1 truncate">Payment History</h4>
+              <p className="text-[10px] md:text-xs text-zinc-500 leading-relaxed font-medium break-words">View your transaction history and download official receipts.</p>
             </div>
           </Link>
 
           {!needsSignature && (
-            <Link href={`/user/lease-document/${lease.id}`} className="bg-white p-4 md:p-6 rounded-xl md:rounded-2xl border border-slate-200 hover:border-slate-300 transition-all text-left flex flex-col gap-2 md:gap-4 group w-full min-w-0 box-border">
-              <div className="w-8 h-8 md:w-10 md:h-10 bg-slate-50 text-slate-900 border border-slate-100 rounded-full flex items-center justify-center group-hover:bg-slate-100 transition-colors shrink-0">
+            <Link href={`/user/lease-document/${lease.id}`} className="bg-white p-4 md:p-6 rounded-lg md:rounded-lg border border-zinc-200/60 hover:border-slate-300 transition-all text-left flex flex-col gap-2 md:gap-4 group w-full min-w-0 box-border">
+              <div className="w-8 h-8 md:w-10 md:h-10 bg-zinc-50/50 text-zinc-900 border border-zinc-200/60 rounded-full flex items-center justify-center group-hover:bg-zinc-100/50 transition-colors shrink-0">
                 <span className="scale-75 md:scale-100 flex items-center"><HugeiconsIcon icon={SignatureIcon} size={20} /></span>
               </div>
               <div className="min-w-0">
-                <h4 className="text-[11px] md:text-base font-bold text-slate-900 mb-0.5 md:mb-1 truncate">Lease Document</h4>
-                <p className="text-[10px] md:text-xs text-slate-500 leading-relaxed font-medium break-words">Download a PDF copy of your signed tenancy agreement document.</p>
+                <h4 className="text-[11px] md:text-base font-bold text-zinc-900 mb-0.5 md:mb-1 truncate">Lease Document</h4>
+                <p className="text-[10px] md:text-xs text-zinc-500 leading-relaxed font-medium break-words">Download a PDF copy of your signed tenancy agreement document.</p>
               </div>
             </Link>
           )}

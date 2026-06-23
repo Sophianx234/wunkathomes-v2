@@ -23,7 +23,7 @@ export default function FeaturedRentalsClient({ properties }: FeaturedRentalsCli
   if (properties.length === 0) return null;
 
   return (
-    <section className="bg-slate-50 py-20 md:py-28 overflow-hidden border-t border-slate-200">
+    <section className="bg-zinc-50/50 py-20 md:py-28 overflow-hidden border-t border-zinc-200/60">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* === Section Header === */}
@@ -37,7 +37,7 @@ export default function FeaturedRentalsClient({ properties }: FeaturedRentalsCli
           >
             <div className="flex items-center gap-3 mb-3">
               <div className="h-[2px] w-8 bg-black" />
-              <span className="uppercase tracking-[0.2em] text-[10px] md:text-xs font-bold text-slate-500">
+              <span className="uppercase tracking-[0.2em] text-[10px] md:text-xs font-bold text-zinc-500">
                 Flexible Living
               </span>
             </div>
@@ -58,7 +58,7 @@ export default function FeaturedRentalsClient({ properties }: FeaturedRentalsCli
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
-            className="text-sm md:text-base text-slate-500 font-medium max-w-sm "
+            className="text-sm md:text-base text-zinc-500 font-medium max-w-sm "
           >
             Discover subscription-based living. High-end, fully managed rentals 
             with digital lease signing and instant smart-lock access.

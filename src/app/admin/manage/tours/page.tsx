@@ -9,17 +9,17 @@ export const dynamic = "force-dynamic";
 
 function TourTableSkeleton() {
   return (
-    <div className="w-full bg-white border border-slate-100 rounded-lg overflow-hidden animate-[pulse_1.8s_ease-in-out_infinite]">
-      <div className="h-14 border-b border-slate-100 bg-slate-50/50" />
+    <div className="w-full bg-white border border-zinc-200/60 rounded-lg overflow-hidden animate-[pulse_1.8s_ease-in-out_infinite]">
+      <div className="h-14 border-b border-zinc-200/60 bg-slate-50/50" />
       {Array.from({ length: 10 }).map((_, i) => (
-        <div key={i} className="h-20 border-b border-slate-100 flex items-center px-4 gap-6">
-          <div className="w-14 h-14 bg-slate-100 rounded-md shrink-0" />
+        <div key={i} className="h-20 border-b border-zinc-200/60 flex items-center px-4 gap-6">
+          <div className="w-14 h-14 bg-zinc-100/50 rounded-md shrink-0" />
           <div className="flex-1 space-y-3">
-            <div className="h-4 bg-slate-100 rounded w-1/3" />
-            <div className="h-3 bg-slate-100 rounded w-1/5" />
+            <div className="h-4 bg-zinc-100/50 rounded w-1/3" />
+            <div className="h-3 bg-zinc-100/50 rounded w-1/5" />
           </div>
-          <div className="w-32 h-4 bg-slate-100 rounded shrink-0 hidden md:block" />
-          <div className="w-24 h-8 bg-slate-100 rounded-md shrink-0" />
+          <div className="w-32 h-4 bg-zinc-100/50 rounded shrink-0 hidden md:block" />
+          <div className="w-24 h-8 bg-zinc-100/50 rounded-md shrink-0" />
         </div>
       ))}
     </div>

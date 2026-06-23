@@ -68,7 +68,7 @@ export default function TheTeam() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7, delay: 0.2 }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-[1px] bg-white/10 rounded-2xl md:rounded-[2rem] overflow-hidden shadow-2xl"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-[1px] bg-white/10 rounded-lg md:rounded-[2rem] overflow-hidden shadow-sm"
         >
           {team.map((member) => (
             <div

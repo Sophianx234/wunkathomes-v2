@@ -7,7 +7,7 @@ interface PropertiesGridProps {
 export default function PropertiesGrid({ listings }: PropertiesGridProps) {
   if (!listings.length) {
     return (
-      <p className="text-slate-500 text-center py-16">
+      <p className="text-zinc-500 text-center py-16">
         No properties found.
       </p>
     );

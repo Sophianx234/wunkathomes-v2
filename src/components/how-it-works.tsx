@@ -69,7 +69,7 @@ export default function HowItWorks() {
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="mb-12 md:mb-24 text-center w-full box-border"
         >
-          <span className="uppercase tracking-[0.2em] text-[8px] md:text-xs font-bold text-slate-400 mb-2 md:mb-4 block truncate">
+          <span className="uppercase tracking-[0.2em] text-[8px] md:text-xs font-bold text-zinc-400 mb-2 md:mb-4 block truncate">
             The Process
           </span>
           <h2 className="text-2xl md:text-5xl font-black text-[#1a1a1a] tracking-tight break-words px-2">
@@ -80,7 +80,7 @@ export default function HowItWorks() {
         {/* Timeline Container */}
         <div className="relative w-full box-border">
           {/* Static Background Line */}
-          <div className="absolute left-5 md:left-1/2 md:-translate-x-1/2 top-0 bottom-0 w-[1px] md:w-[2px] bg-slate-100" />
+          <div className="absolute left-5 md:left-1/2 md:-translate-x-1/2 top-0 bottom-0 w-[1px] md:w-[2px] bg-zinc-100/50" />
 
           {/* Animated Progress Line */}
           <motion.div
@@ -129,7 +129,7 @@ export default function HowItWorks() {
                         <h3 className="text-sm md:text-2xl font-bold text-[#1a1a1a] mb-1.5 md:mb-3 truncate">
                           {step.title}
                         </h3>
-                        <p className="text-slate-500 leading-relaxed text-[10px] md:text-base break-words">
+                        <p className="text-zinc-500 leading-relaxed text-[10px] md:text-base break-words">
                           {step.desc}
                         </p>
                       </motion.div>
@@ -141,7 +141,7 @@ export default function HowItWorks() {
                         transition={{ duration: 0.6, ease: "easeOut" }}
                         className="hidden md:flex justify-end w-full box-border"
                       >
-                        <div className="w-16 h-16 md:w-32 md:h-32 rounded-xl md:rounded-3xl bg-black flex items-center justify-center border border-[#1a1a1a]/5 shrink-0">
+                        <div className="w-16 h-16 md:w-32 md:h-32 rounded-lg md:rounded-lg bg-black flex items-center justify-center border border-[#1a1a1a]/5 shrink-0">
                           <span className="scale-50 md:scale-100 flex items-center">
                             <HugeiconsIcon icon={Icon} size={48} className="text-white" variant="stroke" />
                           </span>
@@ -160,7 +160,7 @@ export default function HowItWorks() {
                         transition={{ duration: 0.6, ease: "easeOut" }}
                         className="flex justify-start w-full box-border"
                       >
-                        <div className="w-12 h-12 md:w-32 md:h-32 rounded-xl md:rounded-3xl bg-black flex items-center justify-center border border-[#1a1a1a]/5 shrink-0">
+                        <div className="w-12 h-12 md:w-32 md:h-32 rounded-lg md:rounded-lg bg-black flex items-center justify-center border border-[#1a1a1a]/5 shrink-0">
                           <span className="scale-50 md:scale-100 flex items-center">
                             <HugeiconsIcon icon={Icon} size={48} className="text-white" variant="stroke" />
                           </span>
@@ -177,7 +177,7 @@ export default function HowItWorks() {
                         <h3 className="text-sm md:text-2xl font-bold text-[#1a1a1a] mb-1.5 md:mb-3 truncate">
                           {step.title}
                         </h3>
-                        <p className="text-slate-500 leading-relaxed text-[10px] md:text-base break-words">
+                        <p className="text-zinc-500 leading-relaxed text-[10px] md:text-base break-words">
                           {step.desc}
                         </p>
                       </motion.div>
@@ -192,7 +192,7 @@ export default function HowItWorks() {
                       viewport={{ once: true }}
                       className="md:hidden w-full pl-14 mt-3 box-border"
                     >
-                       <div className="w-12 h-12 rounded-xl bg-black flex items-center justify-center border border-[#1a1a1a]/5 shrink-0">
+                       <div className="w-12 h-12 rounded-lg bg-black flex items-center justify-center border border-[#1a1a1a]/5 shrink-0">
                           <span className="scale-50 flex items-center">
                             {/* Fixed icon color for mobile visibility */}
                             <HugeiconsIcon icon={Icon} size={48} className="text-white" variant="stroke" />

@@ -42,7 +42,7 @@ export function TenancyDocument({ selectedActivation, onBack,showNav=true }: Ten
   };
 
   return (
-    <div className="min-h-screen bg-zinc-100 font-sans print:bg-white w-full overflow-x-hidden box-border">
+    <div className="min-h-screen bg-zinc-100/50 font-sans print:bg-white w-full overflow-x-hidden box-border">
       {/* Print styles injected via dangerouslySetInnerHTML. 
         This ensures that when the user prints the page, 
         the background is white and the "Back" / "Print" buttons disappear. 
@@ -58,7 +58,7 @@ export function TenancyDocument({ selectedActivation, onBack,showNav=true }: Ten
       />
 
       {/* TOP NAVIGATION BAR (Hidden during printing) */}
-      {showNav&&<div className="print-hide sticky top-0 z-10 flex items-center justify-between p-2 md:p-4 bg-white border-b border-zinc-200 shadow-sm w-full box-border">
+      {showNav&&<div className="print-hide sticky top-0 z-10 flex items-center justify-between p-2 md:p-4 bg-white border-b border-zinc-200/60 shadow-sm w-full box-border">
         <div className="flex items-center gap-2 md:gap-4 min-w-0">
           <Button
             variant="ghost"
@@ -95,7 +95,7 @@ export function TenancyDocument({ selectedActivation, onBack,showNav=true }: Ten
           <div className="p-5 md:p-14 lg:p-20 font-serif text-zinc-800 leading-relaxed md:leading-[1.8] text-[10px] md:text-[14px] text-justify print:p-0 print:text-black w-full box-border">
             
             <div className="text-center mb-8 md:mb-14 w-full box-border">
-              <h2 className="text-sm md:text-xl font-bold uppercase tracking-widest border-b border-zinc-200 pb-2 md:pb-4 inline-block mx-auto text-zinc-900 break-words max-w-full">
+              <h2 className="text-sm md:text-xl font-bold uppercase tracking-widest border-b border-zinc-200/60 pb-2 md:pb-4 inline-block mx-auto text-zinc-900 break-words max-w-full">
                 Standard Tenancy Agreement
               </h2>
               <p className="mt-2 md:mt-4 font-sans text-[7px] md:text-[10px] uppercase tracking-widest text-zinc-400 font-bold truncate px-2">
@@ -130,7 +130,7 @@ export function TenancyDocument({ selectedActivation, onBack,showNav=true }: Ten
             </div>
 
             {/* Document Signatures with "Live Ink" styling */}
-            <div className="mt-10 md:mt-20 pt-6 md:pt-10 border-t border-zinc-100 flex flex-col sm:flex-row justify-between gap-6 md:gap-10 sm:gap-4 print:break-inside-avoid w-full box-border">
+            <div className="mt-10 md:mt-20 pt-6 md:pt-10 border-t border-zinc-200/60 flex flex-col sm:flex-row justify-between gap-6 md:gap-10 sm:gap-4 print:break-inside-avoid w-full box-border">
               
               <div className="w-full sm:w-56 font-sans min-w-0">
                 <p className="text-[8px] md:text-[10px] uppercase tracking-widest text-zinc-400 font-bold mb-3 md:mb-6 truncate">Landlord Signature</p>
@@ -157,7 +157,7 @@ export function TenancyDocument({ selectedActivation, onBack,showNav=true }: Ten
 
             </div>
             
-            <div className="mt-8 md:mt-12 bg-zinc-50 p-2 md:p-4 rounded-md font-mono text-[8px] md:text-[10px] text-zinc-400 break-all border border-zinc-100 print:border-none print:bg-white print:p-0 print:text-black w-full box-border">
+            <div className="mt-8 md:mt-12 bg-zinc-50 p-2 md:p-4 rounded-md font-mono text-[8px] md:text-[10px] text-zinc-400 break-all border border-zinc-200/60 print:border-none print:bg-white print:p-0 print:text-black w-full box-border">
               <strong>SEC-HASH:</strong> {selectedActivation.lease.signatureAudit?.documentHash || "Pending Generation"}
             </div>
 

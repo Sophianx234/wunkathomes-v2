@@ -79,18 +79,18 @@ export default function MapPicker() {
       <input type="hidden" name="lat" value={lat} />
       <input type="hidden" name="lng" value={lng} />
 
-      <div className="w-full h-[350px] relative rounded-lg border border-slate-200 overflow-hidden bg-slate-100 z-0">
+      <div className="w-full h-[350px] relative rounded-lg border border-zinc-200/60 overflow-hidden bg-zinc-100/50 z-0">
         <div ref={mapContainer} className="absolute inset-0 w-full h-full" />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div className="space-y-2">
-          <Label className="text-[13px] font-medium text-slate-700">Latitude</Label>
-          <Input type="number" step="any" value={lat} readOnly className="h-10 bg-slate-100 text-[14px]" />
+          <Label className="text-[13px] font-medium text-zinc-700">Latitude</Label>
+          <Input type="number" step="any" value={lat} readOnly className="h-10 bg-zinc-100/50 text-[14px]" />
         </div>
         <div className="space-y-2">
-          <Label className="text-[13px] font-medium text-slate-700">Longitude</Label>
-          <Input type="number" step="any" value={lng} readOnly className="h-10 bg-slate-100 text-[14px]" />
+          <Label className="text-[13px] font-medium text-zinc-700">Longitude</Label>
+          <Input type="number" step="any" value={lng} readOnly className="h-10 bg-zinc-100/50 text-[14px]" />
         </div>
       </div>
     </>

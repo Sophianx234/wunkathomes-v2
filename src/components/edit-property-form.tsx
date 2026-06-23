@@ -163,14 +163,14 @@ export default function EditPropertyForm({ initialData }: { initialData: any }) 
         <input type="hidden" name="propertyId" value={initialData.propertyId._id} />
 
         {/* --- SECTION: ASSET DETAILS --- */}
-        <div className="bg-white rounded-lg border border-slate-200 p-8">
-          <h2 className="text-[18px] font-medium text-slate-900 mb-6 pb-3 border-b border-slate-200">
+        <div className="bg-white rounded-lg border border-zinc-200/60 p-8">
+          <h2 className="text-[18px] font-medium text-zinc-900 mb-6 pb-3 border-b border-zinc-200/60">
             Primary Details
           </h2>
           <div className="space-y-5">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="space-y-2">
-                <Label htmlFor="title" className="text-[13px] font-medium text-slate-700">
+                <Label htmlFor="title" className="text-[13px] font-medium text-zinc-700">
                   Listing Title *
                 </Label>
                 <Input
@@ -178,17 +178,17 @@ export default function EditPropertyForm({ initialData }: { initialData: any }) 
                   name="title"
                   defaultValue={initialData.title}
                   placeholder="e.g. Master Bedroom with Balcony"
-                  className="h-10 bg-slate-50 focus:ring-zinc-950"
+                  className="h-10 bg-zinc-50/50 focus:ring-zinc-950"
                   required
                 />
               </div>
               <div className="grid grid-cols-2 gap-5">
                 <div className="space-y-2">
-                  <Label className="text-[13px] font-medium text-slate-700">
+                  <Label className="text-[13px] font-medium text-zinc-700">
                     Listing Type *
                   </Label>
                   <Select name="listingType" defaultValue={initialData.listingType}>
-                    <SelectTrigger className="h-10 bg-slate-50 focus:ring-zinc-950">
+                    <SelectTrigger className="h-10 bg-zinc-50/50 focus:ring-zinc-950">
                       <SelectValue placeholder="Select type" />
                     </SelectTrigger>
                     <SelectContent>
@@ -198,11 +198,11 @@ export default function EditPropertyForm({ initialData }: { initialData: any }) 
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-[13px] font-medium text-slate-700">
+                  <Label className="text-[13px] font-medium text-zinc-700">
                     Property Type *
                   </Label>
                   <Select name="propertyType" defaultValue={initialData.propertyId.propertyType}>
-                    <SelectTrigger className="h-10 bg-slate-50 focus:ring-zinc-950">
+                    <SelectTrigger className="h-10 bg-zinc-50/50 focus:ring-zinc-950">
                       <SelectValue placeholder="Select type" />
                     </SelectTrigger>
                     <SelectContent>
@@ -217,7 +217,7 @@ export default function EditPropertyForm({ initialData }: { initialData: any }) 
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description" className="text-[13px] font-medium text-slate-700">
+              <Label htmlFor="description" className="text-[13px] font-medium text-zinc-700">
                 Description *
               </Label>
               <Textarea
@@ -225,14 +225,14 @@ export default function EditPropertyForm({ initialData }: { initialData: any }) 
                 name="description"
                 defaultValue={initialData.description}
                 placeholder="Provide a detailed description..."
-                className="min-h-[120px] bg-slate-50 focus:ring-zinc-950 resize-y"
+                className="min-h-[120px] bg-zinc-50/50 focus:ring-zinc-950 resize-y"
                 required
               />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               <div className="space-y-2">
-                <Label htmlFor="price" className="text-[13px] font-medium text-slate-700">
+                <Label htmlFor="price" className="text-[13px] font-medium text-zinc-700">
                   Price (GHS) *
                 </Label>
                 <Input
@@ -241,16 +241,16 @@ export default function EditPropertyForm({ initialData }: { initialData: any }) 
                   type="number"
                   defaultValue={initialData.price}
                   placeholder="0.00"
-                  className="h-10 bg-slate-50 focus:ring-zinc-950"
+                  className="h-10 bg-zinc-50/50 focus:ring-zinc-950"
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-[13px] font-medium text-slate-700">
+                <Label className="text-[13px] font-medium text-zinc-700">
                   Lease Term
                 </Label>
                 <Select name="leaseTerm" defaultValue={initialData.terms?.leaseTerm || undefined}>
-                  <SelectTrigger className="h-10 bg-slate-50 focus:ring-zinc-950">
+                  <SelectTrigger className="h-10 bg-zinc-50/50 focus:ring-zinc-950">
                     <SelectValue placeholder="Select duration" />
                   </SelectTrigger>
                   <SelectContent>
@@ -262,11 +262,11 @@ export default function EditPropertyForm({ initialData }: { initialData: any }) 
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label className="text-[13px] font-medium text-slate-700">
+                <Label className="text-[13px] font-medium text-zinc-700">
                   Status
                 </Label>
                 <Select name="status" defaultValue={initialData.status}>
-                  <SelectTrigger className="h-10 bg-slate-50 focus:ring-zinc-950">
+                  <SelectTrigger className="h-10 bg-zinc-50/50 focus:ring-zinc-950">
                     <SelectValue placeholder="Status" />
                   </SelectTrigger>
                   <SelectContent>
@@ -282,18 +282,18 @@ export default function EditPropertyForm({ initialData }: { initialData: any }) 
         </div>
 
         {/* --- SECTION: LOCATION --- */}
-        <div className="bg-white rounded-lg border border-slate-200 p-8">
-          <h2 className="text-[18px] font-medium text-slate-900 mb-6 pb-3 border-b border-slate-200">
+        <div className="bg-white rounded-lg border border-zinc-200/60 p-8">
+          <h2 className="text-[18px] font-medium text-zinc-900 mb-6 pb-3 border-b border-zinc-200/60">
             Location & Coordinates
           </h2>
           <div className="space-y-5">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               <div className="space-y-2">
-                <Label className="text-[13px] font-medium text-slate-700">
+                <Label className="text-[13px] font-medium text-zinc-700">
                   Region *
                 </Label>
                 <Select name="region" defaultValue={initialData.propertyId.location?.region}>
-                  <SelectTrigger className="h-10 bg-slate-50 focus:ring-zinc-950">
+                  <SelectTrigger className="h-10 bg-zinc-50/50 focus:ring-zinc-950">
                     <SelectValue placeholder="Select region" />
                   </SelectTrigger>
                   <SelectContent>
@@ -306,7 +306,7 @@ export default function EditPropertyForm({ initialData }: { initialData: any }) 
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="city" className="text-[13px] font-medium text-slate-700">
+                <Label htmlFor="city" className="text-[13px] font-medium text-zinc-700">
                   City
                 </Label>
                 <Input
@@ -314,11 +314,11 @@ export default function EditPropertyForm({ initialData }: { initialData: any }) 
                   name="city"
                   defaultValue={initialData.propertyId.location?.city}
                   placeholder="e.g. Accra"
-                  className="h-10 bg-slate-50 focus:ring-zinc-950"
+                  className="h-10 bg-zinc-50/50 focus:ring-zinc-950"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="area" className="text-[13px] font-medium text-slate-700">
+                <Label htmlFor="area" className="text-[13px] font-medium text-zinc-700">
                   Area / Neighborhood *
                 </Label>
                 <Input
@@ -326,14 +326,14 @@ export default function EditPropertyForm({ initialData }: { initialData: any }) 
                   name="area"
                   defaultValue={initialData.propertyId.location?.area}
                   placeholder="e.g. East Legon"
-                  className="h-10 bg-slate-50 focus:ring-zinc-950"
+                  className="h-10 bg-zinc-50/50 focus:ring-zinc-950"
                   required
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="landmarks" className="text-[13px] font-medium text-slate-700">
+              <Label htmlFor="landmarks" className="text-[13px] font-medium text-zinc-700">
                 Nearby Landmark
               </Label>
               <Input
@@ -341,9 +341,9 @@ export default function EditPropertyForm({ initialData }: { initialData: any }) 
                 name="landmarks"
                 defaultValue={initialData.propertyId.landmarks?.join(", ")}
                 placeholder="e.g. Accra Mall, Kotoka Airport, KFC"
-                className="h-10 bg-slate-50 focus:ring-zinc-950"
+                className="h-10 bg-zinc-50/50 focus:ring-zinc-950"
               />
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="text-xs text-zinc-500 mt-1">
                 Separate multiple landmarks with a comma.
               </p>
             </div>
@@ -355,14 +355,14 @@ export default function EditPropertyForm({ initialData }: { initialData: any }) 
         </div>
 
         {/* --- SECTION: FEATURES --- */}
-        <div className="bg-white rounded-lg border border-slate-200 p-8">
-          <h2 className="text-[18px] font-medium text-slate-900 mb-6 pb-3 border-b border-slate-200">
+        <div className="bg-white rounded-lg border border-zinc-200/60 p-8">
+          <h2 className="text-[18px] font-medium text-zinc-900 mb-6 pb-3 border-b border-zinc-200/60">
             Features & Amenities
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
             <div className="space-y-2">
-              <Label htmlFor="bedrooms" className="text-[13px] font-medium text-slate-700">
+              <Label htmlFor="bedrooms" className="text-[13px] font-medium text-zinc-700">
                 Bedrooms
               </Label>
               <Input
@@ -371,11 +371,11 @@ export default function EditPropertyForm({ initialData }: { initialData: any }) 
                 type="number"
                 min="0"
                 defaultValue={initialData.features?.bedrooms || 0}
-                className="h-10 bg-slate-50 focus:ring-zinc-950"
+                className="h-10 bg-zinc-50/50 focus:ring-zinc-950"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="bathrooms" className="text-[13px] font-medium text-slate-700">
+              <Label htmlFor="bathrooms" className="text-[13px] font-medium text-zinc-700">
                 Bathrooms
               </Label>
               <Input
@@ -384,11 +384,11 @@ export default function EditPropertyForm({ initialData }: { initialData: any }) 
                 type="number"
                 min="0"
                 defaultValue={initialData.features?.bathrooms || 0}
-                className="h-10 bg-slate-50 focus:ring-zinc-950"
+                className="h-10 bg-zinc-50/50 focus:ring-zinc-950"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="sizeSqm" className="text-[13px] font-medium text-slate-700">
+              <Label htmlFor="sizeSqm" className="text-[13px] font-medium text-zinc-700">
                 Size (sqm)
               </Label>
               <Input
@@ -397,16 +397,16 @@ export default function EditPropertyForm({ initialData }: { initialData: any }) 
                 type="number"
                 min="0"
                 defaultValue={initialData.features?.sizeSqm || ""}
-                className="h-10 bg-slate-50 focus:ring-zinc-950"
+                className="h-10 bg-zinc-50/50 focus:ring-zinc-950"
               />
             </div>
           </div>
 
           <div className="space-y-3">
-            <Label className="text-[13px] font-medium text-slate-700">
+            <Label className="text-[13px] font-medium text-zinc-700">
               Select General Amenities
             </Label>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-y-4 p-5 rounded-lg border border-slate-200 bg-slate-50/50">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-y-4 p-5 rounded-lg border border-zinc-200/60 bg-slate-50/50">
               {COMMON_AMENITIES.map((amenity) => (
                 <div key={amenity} className="flex items-center space-x-3">
                   <Checkbox
@@ -416,7 +416,7 @@ export default function EditPropertyForm({ initialData }: { initialData: any }) 
                     defaultChecked={initialData.propertyId.generalAmenities?.includes(amenity)}
                     className="data-[state=checked]:bg-zinc-950"
                   />
-                  <Label htmlFor={`amenity-${amenity}`} className="text-[13px] text-slate-700 cursor-pointer">
+                  <Label htmlFor={`amenity-${amenity}`} className="text-[13px] text-zinc-700 cursor-pointer">
                     {amenity}
                   </Label>
                 </div>
@@ -437,8 +437,8 @@ export default function EditPropertyForm({ initialData }: { initialData: any }) 
         <input type="hidden" name="accessInstructions" value={initialData.smartLock?.accessInstructions || ""} />
         <SmartLockToggle />
 
-        <div className="bg-white rounded-lg border border-slate-200 p-8 flex items-center justify-between">
-          <p className="text-[13px] text-slate-500 max-w-sm">
+        <div className="bg-white rounded-lg border border-zinc-200/60 p-8 flex items-center justify-between">
+          <p className="text-[13px] text-zinc-500 max-w-sm">
             Updating this asset will immediately reflect across the portfolio and live listings.
           </p>
           <div className="flex items-center gap-3">
@@ -460,10 +460,10 @@ export default function EditPropertyForm({ initialData }: { initialData: any }) 
 
       {/* --- NEW: The Confirmation Dialog --- */}
       <AlertDialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
-        <AlertDialogContent className="bg-white border-slate-200">
+        <AlertDialogContent className="bg-white border-zinc-200/60">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-slate-900">Save Property Changes?</AlertDialogTitle>
-            <AlertDialogDescription className="text-slate-500">
+            <AlertDialogTitle className="text-zinc-900">Save Property Changes?</AlertDialogTitle>
+            <AlertDialogDescription className="text-zinc-500">
               You are about to update this property's details. These changes will immediately reflect across your live listings and portfolio. Do you want to proceed?
             </AlertDialogDescription>
           </AlertDialogHeader>

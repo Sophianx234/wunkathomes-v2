@@ -13,14 +13,14 @@ function PropertiesGridSkeleton() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {Array.from({ length: 12 }).map((_, i) => (
-        <div key={i} className="flex flex-col bg-white border border-slate-100 rounded-lg overflow-hidden animate-[pulse_1.8s_ease-in-out_infinite]">
-          <div className="w-full h-56 bg-slate-100" />
+        <div key={i} className="flex flex-col bg-white border border-zinc-200/60 rounded-lg overflow-hidden animate-[pulse_1.8s_ease-in-out_infinite]">
+          <div className="w-full h-56 bg-zinc-100/50" />
           <div className="p-4 space-y-4 border-t border-slate-50">
-            <div className="h-4 bg-slate-100 rounded w-3/4" />
-            <div className="h-3 bg-slate-100 rounded w-1/2" />
+            <div className="h-4 bg-zinc-100/50 rounded w-3/4" />
+            <div className="h-3 bg-zinc-100/50 rounded w-1/2" />
             <div className="flex justify-between pt-2">
-              <div className="h-4 bg-slate-100 rounded w-1/4" />
-              <div className="h-4 bg-slate-100 rounded w-1/4" />
+              <div className="h-4 bg-zinc-100/50 rounded w-1/4" />
+              <div className="h-4 bg-zinc-100/50 rounded w-1/4" />
             </div>
           </div>
         </div>
@@ -141,7 +141,7 @@ export default async function PropertiesPage({
   const currentPage = Math.max(1, parseInt(resolvedParams.page || "1", 10));
 
   return (
-    <div className="flex flex-col flex-1 w-full min-h-screen bg-slate-50">
+    <div className="flex flex-col flex-1 w-full min-h-screen bg-zinc-50/50">
       <div className="max-w-7xl w-full mx-auto p-6 md:p-8 space-y-8">
         <Suspense key={currentPage} fallback={
           <>

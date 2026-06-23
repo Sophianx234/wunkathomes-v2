@@ -225,7 +225,7 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
       title: "Today's Tours",
       message: `You have ${metrics.pendingToursToday} property tour${metrics.pendingToursToday>1?'s':''} happening today.`,
       link: "/admin/manage/tours",
-      containerClass: "bg-zinc-100 border-zinc-200 text-zinc-900",
+      containerClass: "bg-zinc-100/50 border-zinc-200/60 text-zinc-900",
       iconClass: "bg-white text-zinc-600",
       btnClass: "bg-zinc-950 hover:bg-zinc-800 text-white border-transparent shadow-sm",
     });
@@ -243,7 +243,7 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
             {activeAlerts.map((alert) => (
               <div 
                 key={alert.id} 
-                className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl border transition-all ${alert.containerClass}`}
+                className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-lg border transition-all ${alert.containerClass}`}
               >
                 <div className="flex items-center gap-4">
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${alert.iconClass}`}>
@@ -606,7 +606,7 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
                           <Badge variant="secondary" className={`rounded-md px-2 py-0.5 text-[10px] font-medium hover:bg-transparent border-none ${
                             listing.status === "Available" ? "bg-emerald-50 text-emerald-700" :
                             listing.status === "Pending" ? "bg-amber-50 text-amber-700" :
-                            "bg-zinc-100 text-zinc-600"
+                            "bg-zinc-100/50 text-zinc-600"
                           }`}>
                             {listing.status}
                           </Badge>
@@ -664,7 +664,7 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
                           <Badge variant="secondary" className={`rounded-md px-2 py-0.5 text-[10px] font-medium hover:bg-transparent border-none ${
                             rent.status === "Overdue" ? "bg-rose-50 text-rose-700" :
                             rent.status === "Due_Today" ? "bg-amber-50 text-amber-700" :
-                            "bg-zinc-100 text-zinc-600"
+                            "bg-zinc-100/50 text-zinc-600"
                           }`}>
                             {rent.dueDate}
                           </Badge>
@@ -804,7 +804,7 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
                               "{review.comment}"
                             </p>
                             {review.status === "Flagged" && (
-                              <Badge variant="outline" className="w-max px-1.5 py-0 text-[9px] uppercase tracking-wider font-bold bg-zinc-100 text-zinc-700 border-zinc-200">
+                              <Badge variant="outline" className="w-max px-1.5 py-0 text-[9px] uppercase tracking-wider font-bold bg-zinc-100/50 text-zinc-700 border-zinc-200/60">
                                 Requires Attention
                               </Badge>
                             )}
@@ -825,7 +825,7 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
                               <HugeiconsIcon icon={MoreHorizontalIcon} strokeWidth={2} className="size-4" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-32 rounded-xl">
+                          <DropdownMenuContent align="end" className="w-32 rounded-lg">
                             <DropdownMenuItem className="text-xs">View Full</DropdownMenuItem>
                             <DropdownMenuItem className="text-xs">Contact Tenant</DropdownMenuItem>
                             <DropdownMenuSeparator />

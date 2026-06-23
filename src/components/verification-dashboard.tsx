@@ -218,19 +218,19 @@ export function VerificationDashboard({
   const hasProfilePicture = !!(profilePhoto || profilePreview);
 
   return (
-    <div className="min-h-screen bg-[#F4F7F9] p-2 md:p-8 font-sans text-slate-800 w-full overflow-x-hidden box-border">
+    <div className="min-h-screen bg-[#F4F7F9] p-2 md:p-8 font-sans text-zinc-800 w-full overflow-x-hidden box-border">
       <div className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-4 md:gap-6 w-full box-border">
         {/* ========================================================= */}
         {/* LEFT SIDEBAR */}
         {/* ========================================================= */}
         <div className="w-full lg:w-72 flex flex-col gap-4 md:gap-6 shrink-0 box-border">
-          <div className="bg-white rounded-xl shadow-sm p-4 md:p-8 flex flex-col items-center text-center w-full box-border">
-            <p className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 md:mb-6">
+          <div className="bg-white rounded-lg shadow-sm p-4 md:p-8 flex flex-col items-center text-center w-full box-border">
+            <p className="text-[8px] md:text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-3 md:mb-6">
               Profile
             </p>
 
             <div className="relative mb-2 md:mb-4">
-              <div className="w-16 h-16 md:w-24 md:h-24 bg-slate-200 rounded-full border-2 md:border-4 border-white shadow-sm overflow-hidden flex items-center justify-center shrink-0">
+              <div className="w-16 h-16 md:w-24 md:h-24 bg-zinc-200 rounded-full border-2 md:border-4 border-white shadow-sm overflow-hidden flex items-center justify-center shrink-0">
                 {profilePreview ? (
                   <img
                     src={profilePreview}
@@ -242,7 +242,7 @@ export function VerificationDashboard({
                     <HugeiconsIcon
                       icon={UserCircleIcon}
                       size={48}
-                      className="text-slate-400"
+                      className="text-zinc-400"
                     />
                   </span>
                 )}
@@ -286,28 +286,28 @@ export function VerificationDashboard({
                 Verified
               </span>
             )}
-            <h2 className="text-sm md:text-lg font-bold text-slate-900 truncate w-full px-2">
+            <h2 className="text-sm md:text-lg font-bold text-zinc-900 truncate w-full px-2">
               {fullName || "Your Name"}
             </h2>
-            <p className="text-[10px] md:text-xs text-slate-500 mt-0.5 md:mt-1">
+            <p className="text-[10px] md:text-xs text-zinc-500 mt-0.5 md:mt-1">
               Tenant ID: {currentUser?.id?.slice(-5) || "88492"}
             </p>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm p-4 md:p-8 flex flex-col items-center text-center w-full box-border">
+          <div className="bg-white rounded-lg shadow-sm p-4 md:p-8 flex flex-col items-center text-center w-full box-border">
             <div className="mb-3 md:mb-6 opacity-30">
               <span className="scale-75 md:scale-100 flex items-center">
                 <HugeiconsIcon
                   icon={Chat01Icon}
                   size={48}
-                  className="text-slate-400"
+                  className="text-zinc-400"
                 />
               </span>
             </div>
-            <h3 className="text-sm md:text-lg font-bold text-slate-900 mb-1 md:mb-2">
+            <h3 className="text-sm md:text-lg font-bold text-zinc-900 mb-1 md:mb-2">
               Need help?
             </h3>
-            <p className="text-[10px] md:text-xs text-slate-500 leading-relaxed mb-3 md:mb-6 px-2 break-words">
+            <p className="text-[10px] md:text-xs text-zinc-500 leading-relaxed mb-3 md:mb-6 px-2 break-words">
               Have questions or concerns regarding your verification? Our
               experts are here to help!
             </p>
@@ -321,15 +321,15 @@ export function VerificationDashboard({
         {/* MAIN CONTENT AREA */}
         {/* ========================================================= */}
         <div className="flex-1 flex flex-col gap-4 md:gap-6 w-full min-w-0 box-border">
-          <div className="bg-white rounded-xl shadow-sm p-4 md:p-8 w-full box-border">
+          <div className="bg-white rounded-lg shadow-sm p-4 md:p-8 w-full box-border">
             <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 md:mb-8 gap-3 md:gap-4 w-full min-w-0">
               <div className="min-w-0">
-                <h1 className="text-sm md:text-xl font-bold text-slate-900 mb-1 md:mb-2 truncate">
+                <h1 className="text-sm md:text-xl font-bold text-zinc-900 mb-1 md:mb-2 truncate">
                   {step === 4
                     ? "Identity Verification Complete"
                     : "Complete Identity Verification"}
                 </h1>
-                <p className="text-[10px] md:text-sm text-slate-500 break-words">
+                <p className="text-[10px] md:text-sm text-zinc-500 break-words">
                   {step === 4
                     ? "Your identity is secured. You can now access your properties."
                     : "Required to generate your Smart Lock PIN."}
@@ -337,10 +337,10 @@ export function VerificationDashboard({
               </div>
               {step < 3 && (
                 <div className="text-left md:text-right shrink-0">
-                  <p className="text-[8px] md:text-xs font-bold text-slate-400 uppercase tracking-widest">
+                  <p className="text-[8px] md:text-xs font-bold text-zinc-400 uppercase tracking-widest">
                     Estimated time
                   </p>
-                  <p className="text-[11px] md:text-sm font-medium text-slate-900">
+                  <p className="text-[11px] md:text-sm font-medium text-zinc-900">
                     2 mins left
                   </p>
                 </div>
@@ -358,7 +358,7 @@ export function VerificationDashboard({
                           ? "bg-black text-white"
                           : step === s
                             ? "bg-black border-2 md:border-4 border-blue-100 text-transparent"
-                            : "bg-slate-100 border-2 border-slate-200 text-transparent"
+                            : "bg-zinc-100/50 border-2 border-zinc-200/60 text-transparent"
                       }`}
                     >
                       {step >= s && (
@@ -374,7 +374,7 @@ export function VerificationDashboard({
                   </div>
                   {index < 3 && (
                     <div
-                      className={`flex-1 h-0.5 mx-1 md:mx-2 transition-colors ${step > s ? "bg-black" : "bg-slate-200"}`}
+                      className={`flex-1 h-0.5 mx-1 md:mx-2 transition-colors ${step > s ? "bg-black" : "bg-zinc-200"}`}
                     />
                   )}
                 </React.Fragment>
@@ -382,7 +382,7 @@ export function VerificationDashboard({
             </div>
 
             {/* Dynamic Stepper Labels */}
-            <div className="flex justify-between w-full max-w-3xl mt-2 md:mt-3 text-[7px] md:text-xs font-bold text-slate-400 uppercase tracking-widest box-border">
+            <div className="flex justify-between w-full max-w-3xl mt-2 md:mt-3 text-[7px] md:text-xs font-bold text-zinc-400 uppercase tracking-widest box-border">
               <span className={`truncate ${step >= 1 ? "text-primary" : ""}`}>
                 Details
               </span>
@@ -405,9 +405,9 @@ export function VerificationDashboard({
           </div>
 
           {/* Form Area */}
-          <div className="bg-white rounded-xl shadow-sm overflow-hidden flex-1 flex flex-col w-full min-w-0 box-border">
-            <div className="flex border-b border-slate-100 px-4 md:px-8 pt-2 md:pt-4 w-full box-border">
-              <div className="pb-2 md:pb-4 border-b-2 border-primary text-[10px] md:text-sm font-bold text-slate-900 px-1 md:px-2 truncate">
+          <div className="bg-white rounded-lg shadow-sm overflow-hidden flex-1 flex flex-col w-full min-w-0 box-border">
+            <div className="flex border-b border-zinc-200/60 px-4 md:px-8 pt-2 md:pt-4 w-full box-border">
+              <div className="pb-2 md:pb-4 border-b-2 border-primary text-[10px] md:text-sm font-bold text-zinc-900 px-1 md:px-2 truncate">
                 Verification Status
               </div>
             </div>
@@ -438,13 +438,13 @@ export function VerificationDashboard({
                       </div>
                     )}
 
-                    <h3 className="text-[9px] md:text-xs font-bold text-slate-400 uppercase tracking-widest mb-6 md:mb-8">
+                    <h3 className="text-[9px] md:text-xs font-bold text-zinc-400 uppercase tracking-widest mb-6 md:mb-8">
                       Personal Details
                     </h3>
 
                     <div className="mb-6 md:mb-10 w-full min-w-0 box-border mt-4 md:mt-6">
                       <div className="relative w-full min-w-0 box-border">
-                        <label className="text-[9px] md:text-xs font-medium text-slate-500 absolute -top-4 md:-top-5 left-0">
+                        <label className="text-[9px] md:text-xs font-medium text-zinc-500 absolute -top-4 md:-top-5 left-0">
                           Full Name
                         </label>
                         <input
@@ -452,32 +452,32 @@ export function VerificationDashboard({
                           value={fullName}
                           onChange={(e) => setFullName(e.target.value)}
                           placeholder="As it appears on your ID"
-                          className="block w-full min-w-0 max-w-full box-border m-0 appearance-none rounded-none pb-1 md:pb-2 pt-1 text-[11px] md:text-sm font-medium text-slate-900 bg-transparent border-0 border-b border-slate-200 focus:ring-0 focus:border-primary outline-none transition-colors"
+                          className="block w-full min-w-0 max-w-full box-border m-0 appearance-none rounded-none pb-1 md:pb-2 pt-1 text-[11px] md:text-sm font-medium text-zinc-900 bg-transparent border-0 border-b border-zinc-200/60 focus:ring-0 focus:border-primary outline-none transition-colors"
                         />
                       </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 mb-2 w-full min-w-0 box-border mt-4 md:mt-6">
                       <div className="relative w-full min-w-0 box-border">
-                        <label className="text-[9px] md:text-xs font-medium text-slate-500 absolute -top-4 md:-top-5 left-0">
+                        <label className="text-[9px] md:text-xs font-medium text-zinc-500 absolute -top-4 md:-top-5 left-0">
                           Date of Birth
                         </label>
                         <input
                           type="date"
                           value={dob}
                           onChange={(e) => setDob(e.target.value)}
-                          className="block w-full min-w-0 max-w-full box-border m-0 appearance-none rounded-none pb-1 md:pb-2 pt-1 text-[11px] md:text-sm font-medium text-slate-900 bg-transparent border-0 border-b border-slate-200 focus:ring-0 focus:border-primary outline-none transition-colors"
+                          className="block w-full min-w-0 max-w-full box-border m-0 appearance-none rounded-none pb-1 md:pb-2 pt-1 text-[11px] md:text-sm font-medium text-zinc-900 bg-transparent border-0 border-b border-zinc-200/60 focus:ring-0 focus:border-primary outline-none transition-colors"
                         />
                       </div>
 
-                      <div className="relative flex items-end border-b border-slate-200 focus-within:border-primary transition-colors pb-1 w-full min-w-0 box-border mt-4 md:mt-0">
-                        <label className="text-[9px] md:text-xs font-medium text-slate-500 absolute -top-4 md:-top-5 left-0">
+                      <div className="relative flex items-end border-b border-zinc-200/60 focus-within:border-primary transition-colors pb-1 w-full min-w-0 box-border mt-4 md:mt-0">
+                        <label className="text-[9px] md:text-xs font-medium text-zinc-500 absolute -top-4 md:-top-5 left-0">
                           Document Number
                         </label>
                         <select
                           value={idType}
                           onChange={handleIdTypeChange}
-                          className="bg-transparent text-[11px] md:text-sm font-bold text-slate-900 border-none outline-none cursor-pointer pr-2 md:pr-4 shrink-0 m-0 appearance-none md:appearance-auto"
+                          className="bg-transparent text-[11px] md:text-sm font-bold text-zinc-900 border-none outline-none cursor-pointer pr-2 md:pr-4 shrink-0 m-0 appearance-none md:appearance-auto"
                         >
                           <option value="Ghana_Card">Ghana Card</option>
                           <option value="Voter_ID">Voter ID</option>
@@ -491,7 +491,7 @@ export function VerificationDashboard({
                           }
                           value={idNumber}
                           onChange={handleIdChange}
-                          className="block w-full min-w-0 max-w-full box-border m-0 appearance-none rounded-none text-[11px] md:text-sm font-medium text-slate-900 bg-transparent border-none focus:ring-0 outline-none pb-1 pl-2 md:pl-4 uppercase"
+                          className="block w-full min-w-0 max-w-full box-border m-0 appearance-none rounded-none text-[11px] md:text-sm font-medium text-zinc-900 bg-transparent border-none focus:ring-0 outline-none pb-1 pl-2 md:pl-4 uppercase"
                         />
                       </div>
                     </div>
@@ -507,17 +507,17 @@ export function VerificationDashboard({
                     exit={{ opacity: 0, x: 10 }}
                     className="w-full box-border"
                   >
-                    <h3 className="text-[9px] md:text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 md:mb-4">
+                    <h3 className="text-[9px] md:text-xs font-bold text-zinc-400 uppercase tracking-widest mb-2 md:mb-4">
                       Live Verification
                     </h3>
-                    <p className="text-[11px] md:text-sm text-slate-500 mb-4 md:mb-8 max-w-lg break-words">
+                    <p className="text-[11px] md:text-sm text-zinc-500 mb-4 md:mb-8 max-w-lg break-words">
                       Please hold your physical{" "}
                       {idType === "GHA" ? "Ghana Card" : "Voter ID"} next to
                       your face. Ensure the card number is visible, well-lit,
                       and your face is clear.
                     </p>
 
-                    <div className="w-full max-w-lg mx-auto bg-slate-50 border border-slate-200 rounded-xl md:rounded-2xl overflow-hidden aspect-[4/3] relative box-border">
+                    <div className="w-full max-w-lg mx-auto bg-zinc-50/50 border border-zinc-200/60 rounded-lg md:rounded-lg overflow-hidden aspect-[4/3] relative box-border">
                       {!photoData ? (
                         <>
                           <video
@@ -530,7 +530,7 @@ export function VerificationDashboard({
                           <div className="absolute bottom-4 md:bottom-6 inset-x-0 flex justify-center">
                             <button
                               onClick={takePhoto}
-                              className="w-10 h-10 md:w-14 md:h-14 bg-white border-2 md:border-4 border-slate-200 rounded-full hover:border-blue-300 transition-colors shadow-lg"
+                              className="w-10 h-10 md:w-14 md:h-14 bg-white border-2 md:border-4 border-zinc-200/60 rounded-full hover:border-blue-300 transition-colors shadow-sm"
                             />
                           </div>
                         </>
@@ -547,7 +547,7 @@ export function VerificationDashboard({
                                 setPhotoData(null);
                                 startCamera();
                               }}
-                              className="px-4 md:px-6 py-1.5 md:py-2 bg-white text-slate-800 text-[9px] md:text-xs font-bold uppercase tracking-widest rounded-md md:rounded-lg shadow-lg hover:bg-slate-50"
+                              className="px-4 md:px-6 py-1.5 md:py-2 bg-white text-zinc-800 text-[9px] md:text-xs font-bold uppercase tracking-widest rounded-md md:rounded-lg shadow-sm hover:bg-zinc-50/50"
                             >
                               Retake
                             </button>
@@ -574,10 +574,10 @@ export function VerificationDashboard({
                             <HugeiconsIcon icon={Time01Icon} size={40} />
                           </span>
                         </div>
-                        <h3 className="text-lg md:text-2xl font-bold text-slate-900 mb-1 md:mb-2 px-2 break-words w-full">
+                        <h3 className="text-lg md:text-2xl font-bold text-zinc-900 mb-1 md:mb-2 px-2 break-words w-full">
                           Awaiting Admin Approval
                         </h3>
-                        <p className="text-[11px] md:text-sm text-slate-500 max-w-sm mb-6 md:mb-8 px-4 break-words">
+                        <p className="text-[11px] md:text-sm text-zinc-500 max-w-sm mb-6 md:mb-8 px-4 break-words">
                           Your identity documents and tenancy agreement have
                           been successfully submitted. Our team is reviewing
                           them to securely generate your Smart Lock PIN.
@@ -585,7 +585,7 @@ export function VerificationDashboard({
 
                         <button
                           onClick={() => router.push("/user/dashboard")}
-                          className="px-6 py-2.5 md:px-8 md:py-3 bg-zinc-950 hover:bg-zinc-800 text-white text-[9px] md:text-xs font-bold uppercase tracking-widest rounded-lg transition-colors shadow-lg shadow-black/10 flex items-center gap-1.5 md:gap-2 max-w-full truncate"
+                          className="px-6 py-2.5 md:px-8 md:py-3 bg-zinc-950 hover:bg-zinc-800 text-white text-[9px] md:text-xs font-bold uppercase tracking-widest rounded-lg transition-colors shadow-sm shadow-black/10 flex items-center gap-1.5 md:gap-2 max-w-full truncate"
                         >
                           <span className="truncate">Go to Dashboard</span>
                           <span className="scale-75 md:scale-100 flex items-center shrink-0">
@@ -595,15 +595,15 @@ export function VerificationDashboard({
                       </>
                     ) : (
                       <>
-                        <div className="w-12 h-12 md:w-20 md:h-20 bg-slate-100 rounded-full flex items-center justify-center mb-4 md:mb-6 shrink-0">
-                          <span className="scale-75 md:scale-100 flex items-center text-slate-500">
+                        <div className="w-12 h-12 md:w-20 md:h-20 bg-zinc-100/50 rounded-full flex items-center justify-center mb-4 md:mb-6 shrink-0">
+                          <span className="scale-75 md:scale-100 flex items-center text-zinc-500">
                             <HugeiconsIcon icon={SignatureIcon} size={40} />
                           </span>
                         </div>
-                        <h3 className="text-lg md:text-2xl font-bold text-slate-900 mb-1 md:mb-2 px-2 break-words w-full">
+                        <h3 className="text-lg md:text-2xl font-bold text-zinc-900 mb-1 md:mb-2 px-2 break-words w-full">
                           Verification Submitted
                         </h3>
-                        <p className="text-[11px] md:text-sm text-slate-500 max-w-sm mb-6 md:mb-8 px-4 break-words">
+                        <p className="text-[11px] md:text-sm text-zinc-500 max-w-sm mb-6 md:mb-8 px-4 break-words">
                           Your identity documents have been securely
                           transmitted. You can now review and legally bind your
                           Tenancy Agreement to finalize your booking.
@@ -613,7 +613,7 @@ export function VerificationDashboard({
                           onClick={() =>
                             router.push(`/user/sign-lease?leaseId=${leaseId}`)
                           }
-                          className="px-4 md:px-8 py-2.5 md:py-3 bg-zinc-950 hover:bg-zinc-800 text-white text-[9px] md:text-xs font-bold uppercase tracking-widest rounded-lg transition-colors shadow-lg shadow-black/10 flex items-center gap-1.5 md:gap-2 max-w-full truncate"
+                          className="px-4 md:px-8 py-2.5 md:py-3 bg-zinc-950 hover:bg-zinc-800 text-white text-[9px] md:text-xs font-bold uppercase tracking-widest rounded-lg transition-colors shadow-sm shadow-black/10 flex items-center gap-1.5 md:gap-2 max-w-full truncate"
                         >
                           <span className="truncate">
                             Sign Tenancy Agreement
@@ -640,17 +640,17 @@ export function VerificationDashboard({
                         <HugeiconsIcon icon={CheckmarkBadge01Icon} size={40} />
                       </span>
                     </div>
-                    <h3 className="text-lg md:text-2xl font-bold text-slate-900 mb-1 md:mb-2 break-words w-full px-2">
+                    <h3 className="text-lg md:text-2xl font-bold text-zinc-900 mb-1 md:mb-2 break-words w-full px-2">
                       Identity Verified
                     </h3>
-                    <p className="text-[11px] md:text-sm text-slate-500 max-w-sm mb-6 md:mb-8 break-words px-4">
+                    <p className="text-[11px] md:text-sm text-zinc-500 max-w-sm mb-6 md:mb-8 break-words px-4">
                       Your identity documents have been approved. Your account
                       is fully active and you are ready to access your
                       properties.
                     </p>
                     <button
                       onClick={() => router.push("/user/dashboard")}
-                      className="px-6 py-2.5 md:px-8 md:py-3 bg-zinc-950 hover:bg-zinc-800 text-white text-[9px] md:text-xs font-bold uppercase tracking-widest rounded-lg transition-colors shadow-lg shadow-black/10 max-w-full truncate"
+                      className="px-6 py-2.5 md:px-8 md:py-3 bg-zinc-950 hover:bg-zinc-800 text-white text-[9px] md:text-xs font-bold uppercase tracking-widest rounded-lg transition-colors shadow-sm shadow-black/10 max-w-full truncate"
                     >
                       Return to Dashboard
                     </button>
@@ -661,13 +661,13 @@ export function VerificationDashboard({
 
             {/* Footer Navigation Buttons */}
             {step < 3 && (
-              <div className="p-4 md:p-8 border-t border-slate-100 bg-slate-50/50 flex justify-between items-center mt-auto w-full box-border">
+              <div className="p-4 md:p-8 border-t border-zinc-200/60 bg-slate-50/50 flex justify-between items-center mt-auto w-full box-border">
                 {step === 1 ? (
                   <div />
                 ) : (
                   <button
                     onClick={() => setStep(step - 1)}
-                    className="px-4 py-2 md:px-6 md:py-3 bg-white border border-slate-200 text-slate-600 text-[9px] md:text-xs font-bold uppercase tracking-widest rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-1.5 md:gap-2 shrink-0 max-w-[45%]"
+                    className="px-4 py-2 md:px-6 md:py-3 bg-white border border-zinc-200/60 text-zinc-600 text-[9px] md:text-xs font-bold uppercase tracking-widest rounded-lg hover:bg-zinc-50/50 transition-colors flex items-center gap-1.5 md:gap-2 shrink-0 max-w-[45%]"
                   >
                     <span className="scale-75 md:scale-100 flex items-center shrink-0">
                       <HugeiconsIcon icon={ArrowLeft01Icon} size={16} />
@@ -680,7 +680,7 @@ export function VerificationDashboard({
                   <button
                     onClick={() => setStep(2)}
                     disabled={!idNumber || !fullName || !dob}
-                    className="px-6 py-2 md:px-8 md:py-3 bg-black text-white text-[9px] md:text-xs font-bold uppercase tracking-widest rounded-lg hover:bg-black transition-colors disabled:opacity-50 disabled:bg-slate-300 flex items-center gap-1.5 md:gap-2 shrink-0 max-w-[50%]"
+                    className="px-6 py-2 md:px-8 md:py-3 bg-black text-white text-[9px] md:text-xs font-bold uppercase tracking-widest rounded-lg hover:bg-black transition-colors disabled:opacity-50 disabled:bg-zinc-300 flex items-center gap-1.5 md:gap-2 shrink-0 max-w-[50%]"
                   >
                     <span className="truncate">Next Step</span>
                     <span className="scale-75 md:scale-100 flex items-center shrink-0">
@@ -694,7 +694,7 @@ export function VerificationDashboard({
                       disabled={
                         !photoData || !hasProfilePicture || isSubmitting
                       }
-                      className="px-4 py-2 md:px-8 md:py-3 bg-black text-white text-[9px] md:text-xs font-bold uppercase tracking-widest rounded-lg hover:bg-black transition-colors disabled:opacity-50 disabled:bg-slate-300 flex items-center gap-1.5 md:gap-2 w-full justify-center shrink-0"
+                      className="px-4 py-2 md:px-8 md:py-3 bg-black text-white text-[9px] md:text-xs font-bold uppercase tracking-widest rounded-lg hover:bg-black transition-colors disabled:opacity-50 disabled:bg-zinc-300 flex items-center gap-1.5 md:gap-2 w-full justify-center shrink-0"
                     >
                       {isSubmitting && (
                         <span className="scale-75 md:scale-100 flex items-center shrink-0">

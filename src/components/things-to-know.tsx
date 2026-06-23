@@ -174,7 +174,7 @@ export default function ThingsToKnow({
   const accessDetails = getAccessContent();
 
   return (
-    <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14 border-t border-slate-200">
+    <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14 border-t border-zinc-200/60">
       <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight mb-8">
         Things to know before you {isRent ? "Rent" : "Buy"}
       </h2>
@@ -182,16 +182,16 @@ export default function ThingsToKnow({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
         {/* Column 1: Booking & Financial Process */}
         <div className="flex flex-col items-start">
-          <div className="mb-4 text-slate-900">
+          <div className="mb-4 text-zinc-900">
             <HugeiconsIcon icon={File02Icon} size={24} />
           </div>
-          <h3 className="font-bold text-base mb-3 uppercase tracking-tight text-slate-900">
+          <h3 className="font-bold text-base mb-3 uppercase tracking-tight text-zinc-900">
             Booking Process
           </h3>
-          <div className="text-slate-500 text-[13px] md:text-sm leading-relaxed font-medium flex-1 space-y-2">
+          <div className="text-zinc-500 text-[13px] md:text-sm leading-relaxed font-medium flex-1 space-y-2">
             {getBookingContent()}
           </div>
-          <button className="mt-5 text-[10px] font-bold uppercase tracking-widest border-b-[1.5px] border-black pb-0.5 hover:text-slate-500 hover:border-slate-500 transition-colors flex items-center gap-1.5 group">
+          <button className="mt-5 text-[10px] font-bold uppercase tracking-widest border-b-[1.5px] border-black pb-0.5 hover:text-zinc-500 hover:border-slate-500 transition-colors flex items-center gap-1.5 group">
             Booking Guide{" "}
             <HugeiconsIcon
               icon={ArrowRight01Icon}
@@ -203,16 +203,16 @@ export default function ThingsToKnow({
 
         {/* Column 2: Access, Moving, and Inspections */}
         <div className="flex flex-col items-start">
-          <div className="mb-4 text-slate-900">
+          <div className="mb-4 text-zinc-900">
             <HugeiconsIcon icon={accessDetails.icon} size={24} />
           </div>
-          <h3 className="font-bold text-base mb-3 uppercase tracking-tight text-slate-900">
+          <h3 className="font-bold text-base mb-3 uppercase tracking-tight text-zinc-900">
             {accessDetails.title}
           </h3>
-          <div className="text-slate-500 text-[13px] md:text-sm leading-relaxed font-medium flex-1 space-y-2">
+          <div className="text-zinc-500 text-[13px] md:text-sm leading-relaxed font-medium flex-1 space-y-2">
             {accessDetails.text}
           </div>
-          <button className="mt-5 text-[10px] font-bold uppercase tracking-widest border-b-[1.5px] border-black pb-0.5 hover:text-slate-500 hover:border-slate-500 transition-colors flex items-center gap-1.5 group">
+          <button className="mt-5 text-[10px] font-bold uppercase tracking-widest border-b-[1.5px] border-black pb-0.5 hover:text-zinc-500 hover:border-slate-500 transition-colors flex items-center gap-1.5 group">
             {accessDetails.button}{" "}
             <HugeiconsIcon
               icon={ArrowRight01Icon}
@@ -224,16 +224,16 @@ export default function ThingsToKnow({
 
         {/* Column 3: Safety & Guarantees */}
         <div className="flex flex-col items-start">
-          <div className="mb-4 text-slate-900">
+          <div className="mb-4 text-zinc-900">
             <HugeiconsIcon icon={Shield01Icon} size={24} />
           </div>
-          <h3 className="font-bold text-base mb-3 uppercase tracking-tight text-slate-900">
+          <h3 className="font-bold text-base mb-3 uppercase tracking-tight text-zinc-900">
             Our Guarantee
           </h3>
-          <div className="text-slate-500 text-[13px] md:text-sm leading-relaxed font-medium flex-1 space-y-2">
+          <div className="text-zinc-500 text-[13px] md:text-sm leading-relaxed font-medium flex-1 space-y-2">
             {getPromiseContent()}
           </div>
-          <button className="mt-5 text-[10px] font-bold uppercase tracking-widest border-b-[1.5px] border-black pb-0.5 hover:text-slate-500 hover:border-slate-500 transition-colors flex items-center gap-1.5 group">
+          <button className="mt-5 text-[10px] font-bold uppercase tracking-widest border-b-[1.5px] border-black pb-0.5 hover:text-zinc-500 hover:border-slate-500 transition-colors flex items-center gap-1.5 group">
             Our Commitments{" "}
             <HugeiconsIcon
               icon={ArrowRight01Icon}

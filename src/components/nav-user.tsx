@@ -77,7 +77,7 @@ export function NavUser({
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg shadow-lg border-zinc-200"
+            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg shadow-sm border-zinc-200/60"
             side={isMobile ? "bottom" : "right"}
             align="end"
             sideOffset={4}
@@ -97,7 +97,7 @@ export function NavUser({
               </div>
             </DropdownMenuLabel>
             
-            <DropdownMenuSeparator className="bg-zinc-100" />
+            <DropdownMenuSeparator className="bg-zinc-100/50" />
             
             <DropdownMenuGroup>
               <Link href="/admin/settings" className="w-full">
@@ -108,7 +108,7 @@ export function NavUser({
               </Link>
             </DropdownMenuGroup>
             
-            <DropdownMenuSeparator className="bg-zinc-100" />
+            <DropdownMenuSeparator className="bg-zinc-100/50" />
             
             {/* INLINE LOADING LOGOUT BUTTON */}
             <DropdownMenuItem 

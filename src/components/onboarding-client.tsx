@@ -271,7 +271,7 @@ export default function OnboardingClient({
         </div>
 
         {/* INLINE FILTER CHROME */}
-        <section className="flex flex-col xl:flex-row items-center gap-4 bg-white p-1.5 border border-zinc-200/60 rounded-xl shadow-[0_1px_4px_rgba(0,0,0,0.01)] w-full">
+        <section className="flex flex-col xl:flex-row items-center gap-4 bg-white p-1.5 border border-zinc-200/60 rounded-lg shadow-[0_1px_4px_rgba(0,0,0,0.01)] w-full">
           <div className="relative flex-1 w-full">
             <HugeiconsIcon
               icon={Search01Icon}
@@ -288,7 +288,7 @@ export default function OnboardingClient({
           <div className="h-4 w-px bg-zinc-200 hidden xl:block" />
           <div className="flex flex-wrap md:flex-nowrap items-center gap-2 w-full xl:w-auto px-2 pb-1 xl:pb-0">
             <Select value={propertyFilter} onValueChange={setPropertyFilter}>
-              <SelectTrigger className="w-full md:w-[160px] h-8 border-0 bg-zinc-50/50 hover:bg-zinc-100 text-[12px] font-medium text-zinc-700 shadow-none focus:ring-0 rounded-md">
+              <SelectTrigger className="w-full md:w-[160px] h-8 border-0 bg-zinc-50/50 hover:bg-zinc-100/50 text-[12px] font-medium text-zinc-700 shadow-none focus:ring-0 rounded-md">
                 <SelectValue placeholder="Property" />
               </SelectTrigger>
               <SelectContent>
@@ -316,7 +316,7 @@ export default function OnboardingClient({
                 setSearchQuery("");
                 setPropertyFilter("all");
               }}
-              className="h-8 w-8 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 shrink-0 ml-auto md:ml-0 rounded-md"
+              className="h-8 w-8 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100/50 shrink-0 ml-auto md:ml-0 rounded-md"
             >
               <HugeiconsIcon icon={FilterIcon} size={14} />
             </Button>
@@ -324,7 +324,7 @@ export default function OnboardingClient({
         </section>
 
         {/* ACTIVATIONS DATA TABLE */}
-        <div className="bg-white border border-zinc-200/60 rounded-xl overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.01)]">
+        <div className="bg-white border border-zinc-200/60 rounded-lg overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.01)]">
           <Table>
             <TableHeader className="bg-zinc-50/30">
               <TableRow className="border-zinc-200/60 hover:bg-transparent">
@@ -354,14 +354,14 @@ export default function OnboardingClient({
                 return (
                   <TableRow
                     key={record.id}
-                    className="group border-zinc-100 hover:bg-zinc-50/50 transition-colors cursor-pointer"
+                    className="group border-zinc-200/60 hover:bg-zinc-50/50 transition-colors cursor-pointer"
                     onClick={() => setSelectedActivationId(record.id)}
                   >
                     <TableCell className="py-3 align-middle">
                       <div className="flex items-center gap-3">
                         <Avatar className="h-9 w-9 border border-zinc-200/60 shadow-sm">
                           <AvatarImage src={record.user.profilePicture} />
-                          <AvatarFallback className="bg-zinc-100 text-zinc-600 text-xs">
+                          <AvatarFallback className="bg-zinc-100/50 text-zinc-600 text-xs">
                             {record.user.name.charAt(0)}
                           </AvatarFallback>
                         </Avatar>
@@ -397,7 +397,7 @@ export default function OnboardingClient({
                       <div className="flex items-center gap-1.5">
                         <Badge
                           variant="outline"
-                          className={`px-1.5 py-0 border-0 rounded text-[9px] uppercase tracking-wider font-bold h-5 flex items-center gap-1 ${record.checklist.depositPaid ? "bg-emerald-50/50 text-emerald-700 ring-1 ring-emerald-200/60" : "bg-zinc-100 text-zinc-500"}`}
+                          className={`px-1.5 py-0 border-0 rounded text-[9px] uppercase tracking-wider font-bold h-5 flex items-center gap-1 ${record.checklist.depositPaid ? "bg-emerald-50/50 text-emerald-700 ring-1 ring-emerald-200/60" : "bg-zinc-100/50 text-zinc-500"}`}
                         >
                           <HugeiconsIcon
                             icon={CheckmarkCircle01Icon}
@@ -443,7 +443,7 @@ export default function OnboardingClient({
                           variant={
                             recordIsLegalApproved ? "default" : "outline"
                           }
-                          className={`h-8 text-[11px] font-semibold rounded-lg ${recordIsLegalApproved ? "bg-primary text-white hover:bg-zinc-800" : "border-zinc-200 text-zinc-700"}`}
+                          className={`h-8 text-[11px] font-semibold rounded-lg ${recordIsLegalApproved ? "bg-primary text-white hover:bg-zinc-800" : "border-zinc-200/60 text-zinc-700"}`}
                         >
                           {recordIsLegalApproved
                             ? "Activate Key"
@@ -501,7 +501,7 @@ export default function OnboardingClient({
             <img
               src={expandedImage}
               alt="Expanded View"
-              className="max-w-full max-h-full object-contain rounded-lg shadow-2xl relative z-0"
+              className="max-w-full max-h-full object-contain rounded-lg shadow-sm relative z-0"
             />
           </div>
         </div>
@@ -512,15 +512,15 @@ export default function OnboardingClient({
         open={!!selectedActivation && !isViewingDocument}
         onOpenChange={(open) => !open && setSelectedActivationId(null)}
       >
-        <DialogContent className="w-full sm:max-w-xl md:max-w-2xl p-0 bg-[#FAFAFA] border border-slate-200/80 flex flex-col font-sans shadow-2xl rounded-lg max-h-[85vh] overflow-hidden">
+        <DialogContent className="w-full sm:max-w-xl md:max-w-2xl p-0 bg-[#FAFAFA] border border-slate-200/80 flex flex-col font-sans shadow-sm rounded-lg max-h-[85vh] overflow-hidden">
           {selectedActivation && (
             <>
               {/* --- 1. CLEAN HEADER --- */}
-              <div className="px-6 py-6 border-b border-zinc-100 bg-zinc-50/30 flex items-start justify-between">
+              <div className="px-6 py-6 border-b border-zinc-200/60 bg-zinc-50/30 flex items-start justify-between">
                 <div className="flex items-center gap-4">
-                  <Avatar className="h-12 w-12 border border-zinc-200 shadow-sm">
+                  <Avatar className="h-12 w-12 border border-zinc-200/60 shadow-sm">
                     <AvatarImage src={selectedActivation.user.profilePicture} />
-                    <AvatarFallback className="bg-zinc-100 text-zinc-600 font-medium">
+                    <AvatarFallback className="bg-zinc-100/50 text-zinc-600 font-medium">
                       {selectedActivation.user.name.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
@@ -538,7 +538,7 @@ export default function OnboardingClient({
                   className={`px-2.5 py-0.5 border-0 rounded-full text-[10px] uppercase tracking-widest font-bold ${
                     selectedActivation.status === "Active"
                       ? "bg-green-50 text-green-700"
-                      : "bg-zinc-100 text-zinc-600"
+                      : "bg-zinc-100/50 text-zinc-600"
                   }`}
                 >
                   {selectedActivation.status.replace(/_/g, " ")}
@@ -556,13 +556,13 @@ export default function OnboardingClient({
                   
                   <div className="space-y-3">
                     {/* Ghana Card Row */}
-                    <div className="flex items-center justify-between p-3.5 rounded-xl border border-zinc-200 bg-white ">
+                    <div className="flex items-center justify-between p-3.5 rounded-lg border border-zinc-200/60 bg-white ">
                       <div className="flex items-center gap-4">
                         {/* Professional Thumbnail Viewer */}
                         <button
                           onClick={() => selectedActivation.user.ghanaCardUrl && setExpandedImage(selectedActivation.user.ghanaCardUrl)}
                           disabled={!selectedActivation.user.ghanaCardUrl}
-                          className="relative h-12 w-16 bg-zinc-50 rounded-md border border-zinc-200 overflow-hidden group transition-all hover:border-zinc-300 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:ring-offset-2"
+                          className="relative h-12 w-16 bg-zinc-50 rounded-md border border-zinc-200/60 overflow-hidden group transition-all hover:border-zinc-300 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:ring-offset-2"
                         >
                           {selectedActivation.user.ghanaCardUrl ? (
                             <>
@@ -602,9 +602,9 @@ export default function OnboardingClient({
                     </div>
 
                     {/* Lease Agreement Row */}
-                    <div className="flex items-center justify-between p-3.5 rounded-xl border border-zinc-200 bg-white ">
+                    <div className="flex items-center justify-between p-3.5 rounded-lg border border-zinc-200/60 bg-white ">
                       <div className="flex items-center gap-4">
-                        <div className="h-12 w-12 bg-zinc-50 rounded-md border border-zinc-200 flex items-center justify-center">
+                        <div className="h-12 w-12 bg-zinc-50 rounded-md border border-zinc-200/60 flex items-center justify-center">
                           <HugeiconsIcon icon={FileDownloadIcon} size={18} className="text-zinc-400" />
                         </div>
                         <div>
@@ -641,7 +641,7 @@ export default function OnboardingClient({
                       </Button>
                       <Button
                         variant="outline"
-                        className="flex-1 h-9 border-zinc-200 text-zinc-700 hover:bg-zinc-50 text-[12px] font-medium rounded-lg"
+                        className="flex-1 h-9 border-zinc-200/60 text-zinc-700 hover:bg-zinc-50 text-[12px] font-medium rounded-lg"
                         onClick={() => setConfirmAction("reject")}
                       >
                         Request Resubmission
@@ -650,7 +650,7 @@ export default function OnboardingClient({
                   )}
                 </section>
 
-                <div className="h-px w-full bg-zinc-100" />
+                <div className="h-px w-full bg-zinc-100/50" />
 
                 {/* B. Property Access Section */}
                 <section className={`transition-opacity duration-300 ${!isLegalApproved ? "opacity-40 pointer-events-none" : ""}`}>
@@ -661,13 +661,13 @@ export default function OnboardingClient({
                     {!isLegalApproved && <HugeiconsIcon icon={Key01Icon} size={14} className="text-zinc-300" />}
                   </div>
 
-                  <div className="p-5 rounded-xl border border-zinc-200 bg-zinc-50/50">
+                  <div className="p-5 rounded-lg border border-zinc-200/60 bg-zinc-50/50">
                     <p className="text-[13px] text-zinc-600 leading-relaxed mb-5">
                       Provision digital access for <span className="font-semibold text-zinc-900">{selectedActivation.lease.propertyName} ({selectedActivation.lease.unitNumber})</span>. The tenant will receive their entry PIN securely via SMS.
                     </p>
 
                     {selectedActivation.smartLockPin ? (
-                      <div className="flex items-center justify-between p-4 bg-white border border-zinc-200 rounded-lg shadow-sm">
+                      <div className="flex items-center justify-between p-4 bg-white border border-zinc-200/60 rounded-lg shadow-sm">
                         <div>
                           <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">
                             Active PIN Code
@@ -714,7 +714,7 @@ export default function OnboardingClient({
         open={!!confirmAction}
         onOpenChange={(open) => !open && setConfirmAction(null)}
       >
-        <AlertDialogContent className="font-sans max-w-[400px] rounded-2xl">
+        <AlertDialogContent className="font-sans max-w-[400px] rounded-lg">
           {confirmAction && (
             <>
               <AlertDialogHeader>
@@ -728,14 +728,14 @@ export default function OnboardingClient({
               <AlertDialogFooter className="mt-6 gap-2 sm:gap-0">
                 <AlertDialogCancel
                   disabled={isPending}
-                  className="h-10 text-[13px] font-semibold border-zinc-200 hover:bg-zinc-50 rounded-xl"
+                  className="h-10 text-[13px] font-semibold border-zinc-200/60 hover:bg-zinc-50 rounded-lg"
                 >
                   Cancel
                 </AlertDialogCancel>
                 <AlertDialogAction
                   onClick={executeConfirmedAction}
                   disabled={isPending}
-                  className={`h-10 text-[13px] font-semibold rounded-xl ${dialogContent[confirmAction].confirmClass}`}
+                  className={`h-10 text-[13px] font-semibold rounded-lg ${dialogContent[confirmAction].confirmClass}`}
                 >
                   {isPending ? (
                     <>

@@ -64,7 +64,7 @@ export default async function CheckoutSuccessPage(props: SuccessPageProps) {
   };
 
   return (
-    <main className="min-h-screen bg-slate-50 py-12 md:py-20 px-4 sm:px-6">
+    <main className="min-h-screen bg-zinc-50/50 py-12 md:py-20 px-4 sm:px-6">
       <SuccessReceipt transaction={serializedTransaction} />
     </main>
   );

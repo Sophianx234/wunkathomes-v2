@@ -108,13 +108,13 @@ const formatCurrency = (amount: number) => `GHS ${amount.toLocaleString()}`;
 // REFINED INDUSTRY-STANDARD MONOCHROMATIC BADGES
 const getStatusBadge = (status: TourStatus) => {
   const styles = {
-    Pending_Time: "bg-zinc-100 text-zinc-600 ring-1 ring-zinc-200",
+    Pending_Time: "bg-zinc-100/50 text-zinc-600 ring-1 ring-zinc-200",
     Confirmed: "bg-zinc-900 text-zinc-50 ring-1 ring-zinc-950",
     Completed: "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/50",
     No_Show: "bg-rose-50 text-rose-700 ring-1 ring-rose-200/50",
     Converted: "bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200/50",
   };
-  return styles[status] || "bg-zinc-100 text-zinc-600";
+  return styles[status] || "bg-zinc-100/50 text-zinc-600";
 };
 
 // --- ISOLATED NOTES EDITOR ---
@@ -319,7 +319,7 @@ export default function TourTable({
       </div>
 
       {/* DYNAMIC FILTER BAR */}
-      <section className="flex flex-col xl:flex-row items-center gap-4 bg-white p-1.5 border border-zinc-200/60 rounded-xl shadow-[0_1px_4px_rgba(0,0,0,0.01)] w-full">
+      <section className="flex flex-col xl:flex-row items-center gap-4 bg-white p-1.5 border border-zinc-200/60 rounded-lg shadow-[0_1px_4px_rgba(0,0,0,0.01)] w-full">
         <div className="relative flex-1 w-full">
           <HugeiconsIcon
             icon={Search01Icon}
@@ -341,7 +341,7 @@ export default function TourTable({
             value={statusFilter}
             onValueChange={(val) => setStatusFilter(val as any)}
           >
-            <SelectTrigger className="w-full md:w-[160px] h-8 border-0 bg-zinc-50/50 hover:bg-zinc-100 text-[12px] font-medium text-zinc-700 shadow-none focus:ring-0 rounded-md">
+            <SelectTrigger className="w-full md:w-[160px] h-8 border-0 bg-zinc-50/50 hover:bg-zinc-100/50 text-[12px] font-medium text-zinc-700 shadow-none focus:ring-0 rounded-md">
               <SelectValue placeholder="Filter by Status" />
             </SelectTrigger>
             <SelectContent>
@@ -372,7 +372,7 @@ export default function TourTable({
               setSearchQuery("");
               setStatusFilter("all");
             }}
-            className="h-8 w-8 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 shrink-0 ml-auto md:ml-0 rounded-md"
+            className="h-8 w-8 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100/50 shrink-0 ml-auto md:ml-0 rounded-md"
           >
             <HugeiconsIcon icon={FilterIcon} size={14} />
           </Button>
@@ -380,7 +380,7 @@ export default function TourTable({
       </section>
 
       {/* DATA TABLE */}
-      <div className="bg-white border border-zinc-200/60 rounded-xl overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.01)]">
+      <div className="bg-white border border-zinc-200/60 rounded-lg overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.01)]">
         <Table>
           <TableHeader className="bg-zinc-50/30">
             <TableRow className="border-zinc-200/60">
@@ -403,7 +403,7 @@ export default function TourTable({
             {filteredData.map((tour) => (
               <TableRow
                 key={tour.id}
-                className="group border-zinc-100 hover:bg-zinc-50/50 cursor-pointer transition-colors"
+                className="group border-zinc-200/60 hover:bg-zinc-50/50 cursor-pointer transition-colors"
                 onClick={() => handleOpenSheet(tour)}
               >
                 <TableCell className="py-3 align-middle">
@@ -463,7 +463,7 @@ export default function TourTable({
                   <Button
                     variant="outline"
                     size="sm"
-                    className="h-8 text-[11px] font-semibold border-zinc-200 text-zinc-700 rounded-lg"
+                    className="h-8 text-[11px] font-semibold border-zinc-200/60 text-zinc-700 rounded-lg"
                   >
                     {activeTab === "active" ? "View Detail" : "View Details"}
                   </Button>
@@ -492,11 +492,11 @@ export default function TourTable({
         open={!!selectedTour}
         onOpenChange={(open) => !open && setSelectedTour(null)}
       >
-        <DialogContent className="w-full sm:max-w-xl md:max-w-2xl p-0 bg-white border border-slate-200/80 flex flex-col font-sans shadow-2xl rounded-lg max-h-[85vh] overflow-hidden">
+        <DialogContent className="w-full sm:max-w-xl md:max-w-2xl p-0 bg-white border border-slate-200/80 flex flex-col font-sans shadow-sm rounded-lg max-h-[85vh] overflow-hidden">
           {selectedTour && (
             <>
               {/* Header Profile Section */}
-              <div className="px-6 py-8 border-b border-zinc-100 bg-zinc-50/30">
+              <div className="px-6 py-8 border-b border-zinc-200/60 bg-zinc-50/30">
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-4">
                     
@@ -548,8 +548,8 @@ export default function TourTable({
                     </Badge>
                   </div>
                   
-                  <div className="rounded-xl border border-zinc-200/60 overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.01)]">
-                    <div className="p-4 bg-zinc-50/50 flex gap-4 border-b border-zinc-100">
+                  <div className="rounded-lg border border-zinc-200/60 overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.01)]">
+                    <div className="p-4 bg-zinc-50/50 flex gap-4 border-b border-zinc-200/60">
                       <div className="h-12 w-12 shrink-0 bg-white rounded-md overflow-hidden border border-zinc-200/60 shadow-sm">
                         {selectedTour.listing.image ? (
                           <img src={selectedTour.listing.image} alt="Property" className="w-full h-full object-cover" />
@@ -605,7 +605,7 @@ export default function TourTable({
                   <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-4">
                     Tour Status
                   </h3>
-                  <div className="bg-zinc-100/60 border border-zinc-200/60 p-1 rounded-xl flex flex-wrap gap-1">
+                  <div className="bg-zinc-100/60 border border-zinc-200/60 p-1 rounded-lg flex flex-wrap gap-1">
                     {(
                       [
                         "Pending_Time",
@@ -644,7 +644,7 @@ export default function TourTable({
                 <Link href={`/admin/properties/${selectedTour.listing.slug}`} target="_blank">
                   <Button
                     variant="outline"
-                    className="h-10 w-full text-[12px] font-medium border-zinc-200 hover:bg-zinc-50 rounded-lg flex items-center justify-center gap-2"
+                    className="h-10 w-full text-[12px] font-medium border-zinc-200/60 hover:bg-zinc-50 rounded-lg flex items-center justify-center gap-2"
                   >
                     View Property Details
                     <HugeiconsIcon icon={LinkSquare01Icon} size={14} />
@@ -661,7 +661,7 @@ export default function TourTable({
         open={!!pendingStatusChange}
         onOpenChange={(open) => !open && setPendingStatusChange(null)}
       >
-        <AlertDialogContent className="font-sans max-w-[400px] rounded-2xl p-6">
+        <AlertDialogContent className="font-sans max-w-[400px] rounded-lg p-6">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-lg font-semibold tracking-tight text-zinc-900">
               Confirm Status Update
@@ -677,7 +677,7 @@ export default function TourTable({
           <AlertDialogFooter className="mt-6 gap-2 sm:gap-0">
             <AlertDialogCancel
               disabled={isPending}
-              className="h-9 px-4 text-[12px] font-medium border-zinc-200 hover:bg-zinc-50 rounded-lg m-0"
+              className="h-9 px-4 text-[12px] font-medium border-zinc-200/60 hover:bg-zinc-50 rounded-lg m-0"
             >
               Cancel
             </AlertDialogCancel>

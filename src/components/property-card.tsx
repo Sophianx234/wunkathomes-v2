@@ -187,7 +187,7 @@ export default function PropertyCard({
         onMouseLeave={() => setIsHovered(false)}
       >
         {/* === Image Carousel Container === */}
-        <div className="relative w-full aspect-[4/3] sm:aspect-[16/10] overflow-hidden mb-2 md:mb-4 rounded-lg md:rounded-2xl bg-slate-100 box-border">
+        <div className="relative w-full aspect-[4/3] sm:aspect-[16/10] overflow-hidden mb-2 md:mb-4 rounded-lg md:rounded-lg bg-zinc-100/50 box-border">
           <Link href={href} className="absolute inset-0 z-0">
             <AnimatePresence initial={false} custom={direction}>
               <motion.div
@@ -226,14 +226,14 @@ export default function PropertyCard({
                 <DropdownMenuTrigger asChild>
                   <button 
                     onClick={(e) => e.stopPropagation()} 
-                    className="h-6 w-6 md:h-8 md:w-8 rounded-full bg-white/90 hover:bg-white backdrop-blur-sm flex items-center justify-center text-slate-700 shadow-sm transition-colors focus:outline-none"
+                    className="h-6 w-6 md:h-8 md:w-8 rounded-full bg-white/90 hover:bg-white backdrop-blur-sm flex items-center justify-center text-zinc-700 shadow-sm transition-colors focus:outline-none"
                   >
                     <span className="scale-75 md:scale-100 flex items-center">
                       <HugeiconsIcon icon={MoreHorizontalIcon} size={18} />
                     </span>
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-32 md:w-40 rounded-lg md:rounded-xl font-sans">
+                <DropdownMenuContent align="end" className="w-32 md:w-40 rounded-lg md:rounded-lg font-sans">
                   <DropdownMenuItem asChild className="cursor-pointer text-[10px] md:text-sm">
                     <Link href={`/admin/properties/${property.slug}/edit`} className="flex items-center gap-1.5 md:gap-2">
                       <HugeiconsIcon icon={PencilEdit01Icon} size={14} />
@@ -258,9 +258,9 @@ export default function PropertyCard({
           )}
 
           {/* Floating Price Tag */}
-          <div className="absolute bottom-2 md:bottom-3 right-2 md:right-3 z-10 bg-white/95 backdrop-blur-sm px-2 md:px-3 py-1 md:py-1.5 rounded-md md:rounded-lg shadow-sm font-black text-black tracking-tight text-[10px] md:text-sm pointer-events-none truncate max-w-[85%]">
+          <div className="absolute bottom-2 md:bottom-3 right-2 md:right-3 z-10 bg-white/95 backdrop-blur-sm px-2 md:px-3 py-1 md:py-1.5 rounded-md md:rounded-lg shadow-sm font-black text-black tracking-tight text-[10px] md:text-sm font-tabular-nums pointer-events-none truncate max-w-[85%]">
             {formattedPrice}
-            <span className="text-[8px] md:text-xs font-medium text-slate-500 tracking-normal ml-0.5">
+            <span className="text-[8px] md:text-xs font-medium text-zinc-500 tracking-normal ml-0.5">
               {priceSuffix}
             </span>
           </div>
@@ -323,11 +323,11 @@ export default function PropertyCard({
         <div className="flex flex-col flex-1 px-0.5 md:px-1 min-w-0 box-border">
           <div className="mb-1.5 md:mb-3 cursor-pointer min-w-0">
             <Link href={href}>
-              <h3 className="text-sm md:text-lg font-bold text-slate-900 leading-tight mb-0.5 md:mb-1 group-hover:text-black transition-colors truncate">
+              <h3 className="text-sm md:text-lg font-bold text-zinc-900 leading-tight mb-0.5 md:mb-1 group-hover:text-black transition-colors truncate">
                 {property.title}
               </h3>
             </Link>
-            <p className="flex items-center gap-1 md:gap-1.5 text-[10px] md:text-sm font-medium text-slate-500 truncate">
+            <p className="flex items-center gap-1 md:gap-1.5 text-[10px] md:text-sm font-medium text-zinc-500 truncate">
               <span className="scale-75 md:scale-100 flex items-center shrink-0">
                 <HugeiconsIcon icon={Location01Icon} size={14} />
               </span>
@@ -336,24 +336,24 @@ export default function PropertyCard({
           </div>
 
           {/* Elegant Specs Row */}
-          <div className="flex items-center gap-2 md:gap-4 text-slate-700 font-medium text-[10px] md:text-sm mt-auto pt-0.5 md:pt-1 min-w-0 box-border">
+          <div className="flex items-center gap-2 md:gap-4 text-zinc-700 font-medium text-[10px] md:text-sm mt-auto pt-0.5 md:pt-1 min-w-0 box-border">
             <div className="flex items-center gap-1 md:gap-1.5 shrink-0">
               <span className="scale-75 md:scale-100 flex items-center shrink-0">
                 <HugeiconsIcon
                   icon={BedSingle02Icon}
                   size={16}
-                  className="text-slate-400"
+                  className="text-zinc-400"
                 />
               </span>
               <span className="truncate">{property.features.bedrooms}</span>
             </div>
-            <span className="text-slate-300 text-[6px] md:text-[10px] shrink-0">●</span>
+            <span className="text-zinc-300 text-[6px] md:text-[10px] shrink-0">●</span>
             <div className="flex items-center gap-1 md:gap-1.5 shrink-0">
               <span className="scale-75 md:scale-100 flex items-center shrink-0">
                 <HugeiconsIcon
                   icon={Bathtub01Icon}
                   size={16}
-                  className="text-slate-400"
+                  className="text-zinc-400"
                 />
               </span>
               <span className="truncate">{property.features.bathrooms}</span>
@@ -361,13 +361,13 @@ export default function PropertyCard({
 
             {property.features.sizeSqm && (
               <>
-                <span className="text-slate-300 text-[6px] md:text-[10px] shrink-0">●</span>
+                <span className="text-zinc-300 text-[6px] md:text-[10px] shrink-0">●</span>
                 <div className="flex items-center gap-1 md:gap-1.5 shrink-0">
                   <span className="scale-75 md:scale-100 flex items-center shrink-0">
                     <HugeiconsIcon
                       icon={MaximizeIcon}
                       size={16}
-                      className="text-slate-400"
+                      className="text-zinc-400"
                     />
                   </span>
                   <span className="truncate">{property.features.sizeSqm} sqm</span>
@@ -380,16 +380,16 @@ export default function PropertyCard({
 
       {/* --- WARNING MODAL --- */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent className="bg-white border-rose-100 shadow-xl max-w-[90vw] md:max-w-lg rounded-xl md:rounded-2xl p-4 md:p-6 font-sans">
+        <AlertDialogContent className="bg-white border-rose-100 shadow-sm max-w-[90vw] md:max-w-lg rounded-lg md:rounded-lg p-4 md:p-6 font-sans">
           <AlertDialogHeader>
             <div className="flex items-center gap-2 md:gap-3 mb-1 md:mb-2">
-              <AlertDialogTitle className="text-slate-900 text-base md:text-xl font-bold">
+              <AlertDialogTitle className="text-zinc-900 text-base md:text-xl font-bold">
                 Delete Property Asset?
               </AlertDialogTitle>
             </div>
-            <AlertDialogDescription className="text-slate-600 text-[11px] md:text-sm leading-relaxed">
+            <AlertDialogDescription className="text-zinc-600 text-[11px] md:text-sm leading-relaxed">
               This action cannot be undone. This will permanently delete{" "}
-              <span className="font-bold text-slate-900">{property.title}</span>,
+              <span className="font-bold text-zinc-900">{property.title}</span>,
               including all media, smart lock configurations, and listing data from the database. 
               <br/><br/>
               <span className="text-rose-600 font-medium">Warning:</span> If there are active leases tied to this asset, they will be orphaned.
@@ -398,7 +398,7 @@ export default function PropertyCard({
           <AlertDialogFooter className="mt-4 md:mt-6 w-full flex gap-16 sm:gap-0">
             <AlertDialogCancel 
               disabled={isPending}
-              className="bg-white text-slate-700 hover:bg-slate-50 border-slate-200 mt-0 h-8 md:h-10 text-[11px] md:text-sm rounded-lg"
+              className="bg-white text-zinc-700 hover:bg-zinc-50/50 border-zinc-200/60 mt-0 h-8 md:h-10 text-[11px] md:text-sm rounded-lg"
             >
               Cancel
             </AlertDialogCancel>

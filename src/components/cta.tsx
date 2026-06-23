@@ -45,7 +45,7 @@ export default function Cta() {
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row items-center gap-3 md:gap-4">
             <Link href="/explore?status=rent" className="w-full sm:w-auto">
-              <button className="w-full px-6 py-3.5 md:py-4 bg-white text-black font-black uppercase tracking-widest text-[10px] md:text-xs hover:bg-slate-200 transition-colors duration-300 flex items-center justify-center gap-2 md:gap-3 group rounded-md">
+              <button className="w-full px-6 py-3.5 md:py-4 bg-white text-black font-black uppercase tracking-widest text-[10px] md:text-xs hover:bg-zinc-200 transition-colors duration-300 flex items-center justify-center gap-2 md:gap-3 group rounded-md">
                 Explore Rentals
                 <HugeiconsIcon
                   icon={ArrowRight01Icon}

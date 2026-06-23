@@ -44,12 +44,12 @@ export function MediaUpload({ files, setFiles, existingImages = [], setExistingI
   const hasMedia = files.length > 0 || existingImages.length > 0;
 
   return (
-    <div className="bg-white rounded-lg border border-slate-200 p-8">
-      <h2 className="text-[18px] font-medium text-slate-900 mb-6 pb-3 border-b border-slate-200 flex items-center gap-2.5">
+    <div className="bg-white rounded-lg border border-zinc-200/60 p-8">
+      <h2 className="text-[18px] font-medium text-zinc-900 mb-6 pb-3 border-b border-zinc-200/60 flex items-center gap-2.5">
         <HugeiconsIcon
           icon={Upload01Icon}
           size={20}
-          className="text-slate-400"
+          className="text-zinc-400"
           strokeWidth={1.5}
         />
         Media Upload
@@ -57,25 +57,25 @@ export function MediaUpload({ files, setFiles, existingImages = [], setExistingI
 
       <div
         {...getRootProps()}
-        className={`border-2 border-dashed rounded-xl p-10 flex flex-col items-center justify-center text-center cursor-pointer transition-colors ${
+        className={`border-2 border-dashed rounded-lg p-10 flex flex-col items-center justify-center text-center cursor-pointer transition-colors ${
           isDragActive
-            ? "border-zinc-950 bg-slate-100"
-            : "border-slate-200 bg-slate-50 hover:bg-slate-100/50"
+            ? "border-zinc-950 bg-zinc-100/50"
+            : "border-zinc-200/60 bg-zinc-50/50 hover:bg-slate-100/50"
         }`}
       >
         <input {...getInputProps()} />
-        <div className="h-12 w-12 rounded-full bg-white flex items-center justify-center mb-4 border border-slate-100">
+        <div className="h-12 w-12 rounded-full bg-white flex items-center justify-center mb-4 border border-zinc-200/60">
           <HugeiconsIcon
             icon={Upload01Icon}
             size={24}
-            className="text-slate-500"
+            className="text-zinc-500"
             strokeWidth={1.5}
           />
         </div>
-        <p className="text-[14px] font-medium text-slate-900 mb-1">
+        <p className="text-[14px] font-medium text-zinc-900 mb-1">
           Click or drag images to upload
         </p>
-        <p className="text-[13px] text-slate-500">
+        <p className="text-[13px] text-zinc-500">
           PNG, JPG, JPEG or WEBP (max. 5MB)
         </p>
       </div>
@@ -87,7 +87,7 @@ export function MediaUpload({ files, setFiles, existingImages = [], setExistingI
           {existingImages.map((url, index) => (
             <div
               key={`existing-${index}`}
-              className="relative group rounded-lg overflow-hidden border border-slate-200 bg-slate-50 aspect-square flex items-center justify-center"
+              className="relative group rounded-lg overflow-hidden border border-zinc-200/60 bg-zinc-50/50 aspect-square flex items-center justify-center"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -112,7 +112,7 @@ export function MediaUpload({ files, setFiles, existingImages = [], setExistingI
           {files.map((file, index) => (
             <div
               key={`new-${index}`}
-              className="relative group rounded-lg overflow-hidden border border-slate-200 bg-slate-50 aspect-square flex items-center justify-center"
+              className="relative group rounded-lg overflow-hidden border border-zinc-200/60 bg-zinc-50/50 aspect-square flex items-center justify-center"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img

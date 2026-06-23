@@ -103,7 +103,7 @@ export default function ByTheNumbers() {
               <h3 className="text-xl md:text-xl font-black uppercase tracking-tight mb-3 text-[#1a1a1a]">
                 {metric.title}
               </h3>
-              <p className="text-slate-500 font-medium leading-relaxed max-w-xs mx-auto text-sm md:text-base">
+              <p className="text-zinc-500 font-medium leading-relaxed max-w-xs mx-auto text-sm md:text-base">
                 {metric.description}
               </p>
             </motion.div>

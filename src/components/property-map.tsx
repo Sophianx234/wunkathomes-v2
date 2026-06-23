@@ -37,7 +37,7 @@ export default function PropertyMap({ lat, lng }: PropertyMapProps) {
   }, [lat, lng]);
 
   return (
-    <div className="w-full h-[250px] bg-slate-100 rounded-2xl border border-slate-200 overflow-hidden relative z-0 mb-6">
+    <div className="w-full h-[250px] bg-zinc-100/50 rounded-lg border border-zinc-200/60 overflow-hidden relative z-0 mb-6">
       <div ref={mapContainer} className="absolute inset-0 w-full h-full" />
     </div>
   );
