@@ -1,23 +1,43 @@
 import PropertiesFilterBar from "@/components/properties-filter-bar";
 import PropertiesGrid from "@/components/properties-grid";
-import PropertiesGridSkeleton from "@/components/skeletons/properties-grid-skeleton";
 import Listing from "@/models/listing";
 import mongoose from "mongoose";
-import Property from "@/models/property"; // Make sure to import the Property model
+import Property from "@/models/property";
 import { Suspense } from "react";
 import { IProperty } from "@/components/property-card";
 import { connectToDatabase } from "@/config/DbConnect";
 
-export default async function PropertiesPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ [key: string]: string | undefined }>;
+export const dynamic = "force-dynamic";
+
+function PropertiesGridSkeleton() {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {Array.from({ length: 12 }).map((_, i) => (
+        <div key={i} className="flex flex-col bg-white border border-slate-100 rounded-lg overflow-hidden animate-[pulse_1.8s_ease-in-out_infinite]">
+          <div className="w-full h-56 bg-slate-100" />
+          <div className="p-4 space-y-4 border-t border-slate-50">
+            <div className="h-4 bg-slate-100 rounded w-3/4" />
+            <div className="h-3 bg-slate-100 rounded w-1/2" />
+            <div className="flex justify-between pt-2">
+              <div className="h-4 bg-slate-100 rounded w-1/4" />
+              <div className="h-4 bg-slate-100 rounded w-1/4" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+async function DataLoader({ 
+  params, 
+  page 
+}: { 
+  params: { [key: string]: string | undefined }; 
+  page: number 
 }) {
   await connectToDatabase();
-
-  const params = await searchParams;
   
-  // 1. Build Property Query (for Asset Type & Location)
   const propertyQuery: Record<string, any> = {};
   let needsPropertyFetch = false;
 
@@ -27,7 +47,7 @@ export default async function PropertiesPage({
   }
 
   if (params.location && params.location !== "all") {
-    const locStr = params.location.replace("_", " "); // "east_legon" -> "east legon"
+    const locStr = params.location.replace("_", " ");
     propertyQuery.$or = [
       { "location.area": { $regex: locStr, $options: "i" } },
       { "location.city": { $regex: locStr, $options: "i" } },
@@ -36,15 +56,11 @@ export default async function PropertiesPage({
     needsPropertyFetch = true;
   }
 
-  // 2. Build Listing Query
   const listingQuery: Record<string, any> = {};
 
-  // If we applied property filters, fetch matching IDs first
   if (needsPropertyFetch) {
     const matchedProperties = await Property.find(propertyQuery).select("_id").lean();
     const propertyIds = matchedProperties.map((p: any) => p._id);
-    
-    // If no properties match the criteria, force the listing query to return empty
     if (propertyIds.length === 0) {
       listingQuery.propertyId = { $in: [] };
     } else {
@@ -52,7 +68,6 @@ export default async function PropertiesPage({
     }
   }
 
-  // 3. Strict Text Search (Title & Slug only)
   if (params.q) {
     listingQuery.$or = [
       { title: { $regex: params.q, $options: "i" } },
@@ -60,7 +75,6 @@ export default async function PropertiesPage({
     ];
   }
 
-  // 4. Standard Listing Filters
   if (params.listingType && params.listingType !== "all") {
     listingQuery.listingType = params.listingType;
   }
@@ -68,13 +82,18 @@ export default async function PropertiesPage({
     listingQuery.status = params.status;
   }
 
-  // 5. Fetch Final Results
+  const limit = 12;
+  const skipAmount = (page - 1) * limit;
+
   const rawListings = await Listing.find(listingQuery)
     .populate("propertyId")
     .sort({ createdAt: -1 })
+    .skip(skipAmount)
+    .limit(limit)
     .lean();
 
-  // Remap to IProperty shape and serialize securely
+  const totalAssets = await Listing.countDocuments(listingQuery);
+
   const listings: IProperty[] = rawListings.map((doc: any) => ({
     id: doc._id.toString(),
     slug: doc.slug,
@@ -95,7 +114,6 @@ export default async function PropertiesPage({
       hasSmartLock: doc.smartLock?.hasSmartLock ?? false,
     },
     images: doc.images ?? [],
-    // Property Mapping (Updated to match your nested location schema)
     property: {
       propertyType: doc.propertyId?.propertyType ?? "Unknown",
       location: {
@@ -106,15 +124,32 @@ export default async function PropertiesPage({
     },
   }));
 
-  const totalAssets = await Listing.countDocuments(listingQuery);
+  return (
+    <>
+      <PropertiesFilterBar totalAssets={totalAssets} />
+      <PropertiesGrid listings={listings} />
+    </>
+  );
+}
+
+export default async function PropertiesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | undefined; page?: string }>;
+}) {
+  const resolvedParams = await searchParams;
+  const currentPage = Math.max(1, parseInt(resolvedParams.page || "1", 10));
 
   return (
     <div className="flex flex-col flex-1 w-full min-h-screen bg-slate-50">
       <div className="max-w-7xl w-full mx-auto p-6 md:p-8 space-y-8">
-        <PropertiesFilterBar totalAssets={totalAssets} />
-
-        <Suspense fallback={<PropertiesGridSkeleton />}>
-          <PropertiesGrid listings={listings} />
+        <Suspense key={currentPage} fallback={
+          <>
+            <PropertiesFilterBar totalAssets={0} />
+            <PropertiesGridSkeleton />
+          </>
+        }>
+          <DataLoader params={resolvedParams} page={currentPage} />
         </Suspense>
       </div>
     </div>

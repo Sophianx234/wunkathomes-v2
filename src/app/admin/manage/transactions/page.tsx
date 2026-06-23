@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { connectToDatabase } from "@/config/DbConnect";
 import Transaction from "@/models/transaction";
 import User from "@/models/user";
@@ -8,8 +9,31 @@ import TransactionsClient from "@/components/transaction-client";
 
 export const dynamic = "force-dynamic";
 
-async function getTransactions() {
+function TransactionsSkeleton() {
+  return (
+    <div className="w-full bg-white border border-slate-100 rounded-lg overflow-hidden animate-[pulse_1.8s_ease-in-out_infinite]">
+      <div className="h-14 border-b border-slate-100 bg-slate-50/50" />
+      {Array.from({ length: 12 }).map((_, i) => (
+        <div key={i} className="h-20 border-b border-slate-100 flex items-center px-4 gap-6">
+          <div className="w-12 h-12 bg-slate-100 rounded-full shrink-0" />
+          <div className="flex-1 space-y-3">
+            <div className="h-4 bg-slate-100 rounded w-1/3" />
+            <div className="h-3 bg-slate-100 rounded w-1/4" />
+          </div>
+          <div className="w-24 h-4 bg-slate-100 rounded shrink-0 hidden md:block" />
+          <div className="w-24 h-6 bg-slate-100 rounded-md shrink-0" />
+          <div className="w-16 h-8 bg-slate-100 rounded-md shrink-0" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+async function DataLoader({ page }: { page: number }) {
   await connectToDatabase();
+
+  const limit = 12;
+  const skipAmount = (page - 1) * limit;
 
   const rawTransactions = await Transaction.find()
     .populate({ path: "userId", model: User })
@@ -20,10 +44,11 @@ async function getTransactions() {
     })
     .populate({ path: "leaseId", model: Lease })
     .sort({ createdAt: -1 })
+    .skip(skipAmount)
+    .limit(limit)
     .lean();
 
-  // Serialize Mongoose docs into a safe interface for the Client Component
-  return rawTransactions.map((tx: any) => ({
+  const transactions = rawTransactions.map((tx: any) => ({
     id: tx._id.toString(),
     reference: tx.reference || "N/A",
     amount: tx.amount || 0,
@@ -58,10 +83,25 @@ async function getTransactions() {
       },
     },
   }));
-}
-
-export default async function TransactionsPage() {
-  const transactions = await getTransactions();
 
   return <TransactionsClient initialTransactions={transactions} />;
+}
+
+export default async function TransactionsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const resolvedParams = await searchParams;
+  const currentPage = Math.max(1, parseInt(resolvedParams.page || "1", 10));
+
+  return (
+    <div className="min-h-screen bg-[#FAFAFA] p-6 lg:pb-10 font-sans">
+      <div className="max-w-[1400px] mx-auto">
+        <Suspense key={currentPage} fallback={<TransactionsSkeleton />}>
+          <DataLoader page={currentPage} />
+        </Suspense>
+      </div>
+    </div>
+  );
 }

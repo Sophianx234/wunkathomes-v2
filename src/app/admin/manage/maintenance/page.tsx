@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { connectToDatabase } from "@/config/DbConnect";
 import Maintenance from "@/models/maintenance";
 import User from "@/models/user";
@@ -7,8 +8,31 @@ import MaintenanceClient from "@/components/maintenance-client";
 
 export const dynamic = "force-dynamic";
 
-async function getMaintenanceTickets() {
+function MaintenanceSkeleton() {
+  return (
+    <div className="w-full bg-white border border-slate-100 rounded-lg overflow-hidden animate-[pulse_1.8s_ease-in-out_infinite]">
+      <div className="h-14 border-b border-slate-100 bg-slate-50/50" />
+      {Array.from({ length: 12 }).map((_, i) => (
+        <div key={i} className="h-24 border-b border-slate-100 flex items-center px-4 gap-6">
+          <div className="w-12 h-12 bg-slate-100 rounded-full shrink-0" />
+          <div className="flex-1 space-y-3">
+            <div className="h-4 bg-slate-100 rounded w-1/3" />
+            <div className="h-3 bg-slate-100 rounded w-1/4" />
+          </div>
+          <div className="w-24 h-4 bg-slate-100 rounded shrink-0 hidden md:block" />
+          <div className="w-24 h-6 bg-slate-100 rounded-md shrink-0" />
+          <div className="w-16 h-8 bg-slate-100 rounded-md shrink-0" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+async function DataLoader({ page }: { page: number }) {
   await connectToDatabase();
+
+  const limit = 12;
+  const skipAmount = (page - 1) * limit;
 
   const rawTickets = await Maintenance.find()
     .populate({ 
@@ -23,10 +47,11 @@ async function getMaintenanceTickets() {
       populate: { path: "propertyId", model: Property, select: "location propertyType" }
     })
     .sort({ createdAt: -1 })
+    .skip(skipAmount)
+    .limit(limit)
     .lean();
 
-  // Serialize Mongoose docs into safe, plain objects for the Client Component
-  return rawTickets.map((ticket: any) => ({
+  const tickets = rawTickets.map((ticket: any) => ({
     id: ticket._id.toString(),
     ticketNumber: ticket.ticketNumber,
     category: ticket.category,
@@ -52,10 +77,25 @@ async function getMaintenanceTickets() {
         : "Unknown Location",
     }
   }));
-}
-
-export default async function MaintenancePage() {
-  const tickets = await getMaintenanceTickets();
 
   return <MaintenanceClient initialTickets={tickets} />;
+}
+
+export default async function MaintenancePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const resolvedParams = await searchParams;
+  const currentPage = Math.max(1, parseInt(resolvedParams.page || "1", 10));
+
+  return (
+    <div className="min-h-screen bg-[#FAFAFA] p-6 lg:pb-10 font-sans">
+      <div className="max-w-[1400px] mx-auto">
+        <Suspense key={currentPage} fallback={<MaintenanceSkeleton />}>
+          <DataLoader page={currentPage} />
+        </Suspense>
+      </div>
+    </div>
+  );
 }
