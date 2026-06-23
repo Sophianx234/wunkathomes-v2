@@ -23,7 +23,7 @@ const redis =
 
 // FIX: Hardened Auth Rate Limit (5 attempts per minute)
 const authRateLimit = redis
-  ? new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(5, "1 m") })
+  ? new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(50, "1 m") })
   : null;
 
   const globalRateLimit = redis

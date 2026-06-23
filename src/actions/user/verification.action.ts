@@ -94,7 +94,7 @@ export async function submitIdentityVerification(
       return {
         success: false,
         message: "",
-        error: validationResult.error.errors[0].message,
+        error: validationResult.error.issues[0].message,
       };
     }
 

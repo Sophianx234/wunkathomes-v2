@@ -66,7 +66,7 @@ export async function createTourAction(
     const validation = tourSchema.safeParse(rawData);
     
     if (!validation.success) {
-      return { success: false, message: "", error: validation.error.errors[0].message };
+      return { success: false, message: "", error: validation.error.issues[0].message };
     }
 
     const { listingId, phoneNumber, scheduledDate, scheduledTime } = validation.data;

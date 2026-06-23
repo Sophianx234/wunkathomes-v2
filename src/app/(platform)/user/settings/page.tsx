@@ -18,13 +18,25 @@ export default async function AccountSettingsPage() {
     redirect("/login");
   }
 
+  let extractedCountryCode = "+233";
+  let extractedPhone = dbUser.phone || "";
+
+  const knownCodes = ["+233", "+234", "+254", "+44", "+1"];
+  for (const code of knownCodes) {
+    if (extractedPhone.startsWith(code)) {
+      extractedCountryCode = code;
+      extractedPhone = extractedPhone.slice(code.length);
+      break;
+    }
+  }
+
   // Serialize the database fields explicitly for the client
   const initialUserData = {
     name: dbUser.name || "",
     email: dbUser.email || "",
-    phone: dbUser.phone || "",
+    phone: extractedPhone,
     profilePicture: dbUser.profilePicture || null,
-    countryCode: (dbUser as any).countryCode || "+233",
+    countryCode: extractedCountryCode,
   };
 
   return <AccountSettingsForm initialUser={initialUserData} />;

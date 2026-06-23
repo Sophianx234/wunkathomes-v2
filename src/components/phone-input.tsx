@@ -33,22 +33,24 @@ export function PhoneInput({
   onChange,
   countryCode = "+233",
   onCountryCodeChange,
+  name,
   ...props
 }: PhoneInputProps) {
   const formatPhoneNumber = (input: string): string => {
     // Remove all non-digits
     const digits = input.replace(/\D/g, "")
+    // Limit to 15 digits to match Zod schema
+    const limited = digits.slice(0, 15)
     
-    // Limit to 10 digits
-    const limited = digits.slice(0, 10)
-    
-    // Format as XX XXX XXXX
-    if (limited.length <= 2) {
+    // Format dynamically based on length
+    if (limited.length <= 3) {
       return limited
-    } else if (limited.length <= 5) {
-      return `${limited.slice(0, 2)} ${limited.slice(2)}`
+    } else if (limited.length <= 6) {
+      return `${limited.slice(0, 3)} ${limited.slice(3)}`
+    } else if (limited.length <= 10) {
+      return `${limited.slice(0, 3)} ${limited.slice(3, 6)} ${limited.slice(6)}`
     } else {
-      return `${limited.slice(0, 2)} ${limited.slice(2, 5)} ${limited.slice(5)}`
+      return `${limited.slice(0, 3)} ${limited.slice(3, 6)} ${limited.slice(6, 10)} ${limited.slice(10)}`
     }
   }
 
@@ -57,8 +59,11 @@ export function PhoneInput({
     onChange?.(formatted)
   }
 
+  const rawDigits = value.replace(/\D/g, "")
+
   return (
     <div className="flex gap-2">
+      {name && <input type="hidden" name={name} value={rawDigits} />}
       <Select value={countryCode} onValueChange={onCountryCodeChange}>
         <SelectTrigger className="w-[140px] bg-background rounded-md">
           <SelectValue />

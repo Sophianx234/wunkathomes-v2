@@ -57,7 +57,7 @@ export async function updateProfileAction(formData: FormData) {
 
     const validatedFields = updateProfileSchema.safeParse(rawData);
     if (!validatedFields.success) {
-      return { success: false, error: validatedFields.error.errors[0].message };
+      return { success: false, error: validatedFields.error.issues[0].message };
     }
 
     const { name, phoneNumber, countryCode } = validatedFields.data;
@@ -93,8 +93,7 @@ export async function updateProfileAction(formData: FormData) {
     // 6. Explicitly Map Payload (Prevent hidden field tampering)
     const updatePayload: any = {
       name,
-      phoneNumber,
-      countryCode,
+      phone: countryCode + phoneNumber,
     };
 
     if (profilePhotoUrl) {

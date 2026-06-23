@@ -76,7 +76,7 @@ export async function submitMaintenanceRequest(
       return {
         success: false,
         message: "",
-        error: validatedFields.error.errors[0].message,
+        error: validatedFields.error.issues[0].message,
       };
     }
 

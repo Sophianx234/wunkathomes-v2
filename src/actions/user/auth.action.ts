@@ -25,7 +25,7 @@ const signupSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").trim().max(100),
   email: z.string().email("Invalid email address").trim().toLowerCase(),
   countryCode: z.string().trim().max(5),
-  phoneNumber: z.string().min(10, "Phone number must be at least 10 digits").regex(/^\d+$/, "Phone must contain only numbers").trim().max(15),
+  phoneNumber: z.string().min(7, "Phone number must be at least 7 digits").regex(/^\d+$/, "Phone must contain only numbers").trim().max(15),
   password: z.string().min(8, "Password must be at least 8 characters").max(100),
 });
 
@@ -75,7 +75,7 @@ export async function signupAction(prevState: any, formData: FormData) {
     const validatedFields = signupSchema.safeParse(Object.fromEntries(formData));
 
     if (!validatedFields.success) {
-      return { success: false, error: validatedFields.error.errors[0].message };
+      return { success: false, error: validatedFields.error.issues[0].message };
     }
 
     const { name, email, countryCode, phoneNumber, password } = validatedFields.data;
@@ -191,7 +191,7 @@ export async function changePasswordAction(prevState: any, formData: FormData) {
     const validatedFields = passwordSchema.safeParse(Object.fromEntries(formData));
 
     if (!validatedFields.success) {
-      return { success: false, error: validatedFields.error.errors[0]?.message || "Invalid form data." };
+      return { success: false, error: validatedFields.error.issues[0]?.message || "Invalid form data." };
     }
 
     const { currentPassword, newPassword } = validatedFields.data;
@@ -274,7 +274,7 @@ export async function resetPasswordAction(prevState: any, formData: FormData) {
 
     const validatedFields = resetPasswordSchema.safeParse(Object.fromEntries(formData));
     if (!validatedFields.success) {
-      return { success: false, error: validatedFields.error.errors[0]?.message || "Invalid input." };
+      return { success: false, error: validatedFields.error.issues[0]?.message || "Invalid input." };
     }
 
     const { token, password } = validatedFields.data;

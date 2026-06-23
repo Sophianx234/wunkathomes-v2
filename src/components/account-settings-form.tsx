@@ -70,10 +70,19 @@ export default function AccountSettingsForm({
 }) {
   const [activeTab, setActiveTab] = useState("profile");
 
+  const formatPhoneNumber = (input: string): string => {
+    const digits = (input || "").replace(/\D/g, "");
+    const limited = digits.slice(0, 15);
+    if (limited.length <= 3) return limited;
+    if (limited.length <= 6) return `${limited.slice(0, 3)} ${limited.slice(3)}`;
+    if (limited.length <= 10) return `${limited.slice(0, 3)} ${limited.slice(3, 6)} ${limited.slice(6)}`;
+    return `${limited.slice(0, 3)} ${limited.slice(3, 6)} ${limited.slice(6, 10)} ${limited.slice(10)}`;
+  };
+
   // --- Profile State ---
   const [name, setName] = useState(initialUser.name);
   const [email, setEmail] = useState(initialUser.email);
-  const [phone, setPhone] = useState(initialUser.phone);
+  const [phone, setPhone] = useState(formatPhoneNumber(initialUser.phone));
   const [countryCode, setCountryCode] = useState(initialUser.countryCode);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(
@@ -116,7 +125,7 @@ export default function AccountSettingsForm({
 
   const isProfileDirty =
     name !== initialUser.name ||
-    phone !== initialUser.phone ||
+    phone.replace(/\D/g, "") !== (initialUser.phone || "").replace(/\D/g, "") ||
     countryCode !== initialUser.countryCode ||
     avatarPreview !== initialUser.profilePicture ||
     avatarFile !== null; 
@@ -166,12 +175,16 @@ export default function AccountSettingsForm({
       const formData = new FormData();
       formData.append("name", name);
       formData.append("email", email);
-      formData.append("phoneNumber", phone);
+      formData.append("phoneNumber", phone.replace(/\D/g, ""));
       formData.append("countryCode", countryCode);
       if (avatarFile) formData.append("profilePicture", avatarFile);
 
       const result = await updateProfileAction(formData);
-      toast.success("Profile updated successfully!");
+      if (result.success) {
+        toast.success(result.message || "Profile updated successfully!");
+      } else {
+        toast.error(result.error || "Failed to update profile.");
+      }
     } catch (error) {
       toast.error("Failed to update profile. Please try again.");
     } finally {
