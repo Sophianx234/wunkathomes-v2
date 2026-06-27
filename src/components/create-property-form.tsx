@@ -258,7 +258,7 @@ export default function CreatePropertyForm() {
               <Label className="text-[13px] font-medium text-zinc-700">
                 Region *
               </Label>
-              <Select name="region">
+              <Select name="region" required>
                 <SelectTrigger className="h-10 bg-zinc-50/50 focus:ring-zinc-950">
                   <SelectValue placeholder="Select region" />
                 </SelectTrigger>

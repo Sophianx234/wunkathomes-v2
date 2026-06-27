@@ -10,6 +10,7 @@ import Property from "@/models/property";
 import Listing from "@/models/listing";
 import { deleteFromCloudinary, uploadToCloudinary } from "@/lib/cloudinary"; 
 import { getSession } from "@/lib/session";
+import { COMMON_AMENITIES } from "@/lib/constants";
 
 // NOTE: In production, import your actual Upstash Redis ratelimit instance
 // import { ratelimit } from "@/lib/redis";
@@ -46,7 +47,7 @@ const createPropertySchema = z.object({
   lat: z.coerce.number().min(-90).max(90),
   lng: z.coerce.number().min(-180).max(180),
   
-  amenities: z.array(z.string().trim().max(50)).max(50),
+  amenities: z.array(z.enum(COMMON_AMENITIES as [string, ...string[]])).max(50),
   landmarks: z.array(z.string().trim().max(100)).max(20).optional(),
   
   hasSmartLock: z.boolean().default(false),

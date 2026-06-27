@@ -647,7 +647,7 @@ export default function ManageTenantsClient({
         open={!!pendingAction}
         onOpenChange={(open) => !open && setPendingAction(null)}
       >
-        <AlertDialogContent className="font-sans max-w-[400px] rounded-lg p-6">
+        <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="text-lg font-semibold tracking-tight text-zinc-900">
               {pendingAction?.actionType === "Suspend" ? "Suspend Account?" : "Restore Account?"}

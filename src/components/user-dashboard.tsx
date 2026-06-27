@@ -327,7 +327,7 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
                       )}
                     </button>
                   </AlertDialogTrigger>
-                  <AlertDialogContent className="max-w-[90%] md:max-w-lg rounded-lg">
+                  <AlertDialogContent>
                     <AlertDialogHeader>
                       <AlertDialogTitle className="text-sm md:text-lg">Are you absolutely sure?</AlertDialogTitle>
                       <AlertDialogDescription className="text-[11px] md:text-sm">

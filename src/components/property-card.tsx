@@ -380,7 +380,7 @@ export default function PropertyCard({
 
       {/* --- WARNING MODAL --- */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent className="bg-white border-rose-100 shadow-sm max-w-[90vw] md:max-w-lg rounded-lg md:rounded-lg p-4 md:p-6 font-sans">
+        <AlertDialogContent>
           <AlertDialogHeader>
             <div className="flex items-center gap-2 md:gap-3 mb-1 md:mb-2">
               <AlertDialogTitle className="text-zinc-900 text-base md:text-xl font-bold">

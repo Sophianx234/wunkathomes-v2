@@ -520,7 +520,7 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
         open={isReportingIssue}
         onOpenChange={setIsReportingIssue}
       >
-        <AlertDialogContent className="font-sans w-[90vw] md:max-w-[400px] rounded-lg md:rounded-lg p-4 md:p-6">
+        <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="text-base md:text-lg font-semibold tracking-tight text-zinc-900">
               Report Transaction Issue

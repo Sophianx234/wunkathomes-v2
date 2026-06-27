@@ -714,7 +714,7 @@ export default function OnboardingClient({
         open={!!confirmAction}
         onOpenChange={(open) => !open && setConfirmAction(null)}
       >
-        <AlertDialogContent className="font-sans max-w-[400px] rounded-lg">
+        <AlertDialogContent>
           {confirmAction && (
             <>
               <AlertDialogHeader>

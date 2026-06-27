@@ -555,7 +555,7 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
           setConfirmDialog((prev) => ({ ...prev, isOpen: open }))
         }
       >
-        <AlertDialogContent className="font-sans border-zinc-200/60 rounded-lg p-0 overflow-hidden sm:max-w-[400px]">
+        <AlertDialogContent className="p-0 overflow-hidden">
           <div className="p-6 pb-4">
             <AlertDialogHeader>
               <AlertDialogTitle className="text-xl font-bold text-zinc-900">
@@ -590,7 +590,7 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
 
       {/* INVITE DIALOG */}
       <Dialog open={isInviteOpen} onOpenChange={setIsInviteOpen}>
-        <DialogContent className="sm:max-w-[425px] p-0 overflow-hidden bg-white rounded-lg border border-zinc-200/60 font-sans">
+        <DialogContent className="sm:max-w-[425px] p-0 overflow-hidden">
           <form onSubmit={handleInviteUser}>
             <div className="px-6 pt-6 pb-4 border-b border-zinc-200/60">
               <DialogTitle className="text-xl font-bold text-zinc-900">

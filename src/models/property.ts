@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { COMMON_AMENITIES } from '@/lib/constants';
 
 const propertySchema = new mongoose.Schema({
   propertyType: {
@@ -19,7 +20,8 @@ const propertySchema = new mongoose.Schema({
     type: String, // e.g., ["Accra Mall", "Kotoka Airport"]
   }],
   generalAmenities: [{
-    type: String, // e.g., ["Pool", "Security Guard", "Backup Generator"]
+    type: String,
+    enum: COMMON_AMENITIES,
   }]
 }, { timestamps: true });
 

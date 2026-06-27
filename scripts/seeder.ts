@@ -18,12 +18,12 @@ const importData = async () => {
     await connectToDatabase();
 
     // 1. Clear database to prevent duplicates
-    await User.deleteMany();
-    await Property.deleteMany();
+    // await User.deleteMany();
+   /*  await Property.deleteMany();
     await Listing.deleteMany();
     await Lease.deleteMany();
     await Transaction.deleteMany();
-    await Review.deleteMany();
+    await Review.deleteMany(); */
 
 
     // 2. Create Base Admin & Users
@@ -32,14 +32,14 @@ const importData = async () => {
         name: 'Admin Owner',
         email: 'admin@wunkathomes.com',
         phone: '+233500000000',
-        password: 'hashed_password_here', // Use bcrypt in real app
+        password: '$2b$12$qiRseGB2gtuvQYYgUSG1vO4XdlGqVryCZhYgWpHX3wrEYT1hjK2AC', // Use bcrypt in real app
         role: 'Admin',
       },
       {
         name: 'Test Tenant',
         email: 'tenant@example.com',
         phone: '+233500000001',
-        password: 'hashed_password_here',
+        password: '$2b$12$qiRseGB2gtuvQYYgUSG1vO4XdlGqVryCZhYgWpHX3wrEYT1hjK2AC', // Use bcrypt in real app
         role: 'User',
       },
     ]);

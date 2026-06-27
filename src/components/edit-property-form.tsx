@@ -292,7 +292,7 @@ export default function EditPropertyForm({ initialData }: { initialData: any }) 
                 <Label className="text-[13px] font-medium text-zinc-700">
                   Region *
                 </Label>
-                <Select name="region" defaultValue={initialData.propertyId.location?.region}>
+                <Select name="region" required defaultValue={initialData.propertyId.location?.region}>
                   <SelectTrigger className="h-10 bg-zinc-50/50 focus:ring-zinc-950">
                     <SelectValue placeholder="Select region" />
                   </SelectTrigger>
@@ -460,7 +460,7 @@ export default function EditPropertyForm({ initialData }: { initialData: any }) 
 
       {/* --- NEW: The Confirmation Dialog --- */}
       <AlertDialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
-        <AlertDialogContent className="bg-white border-zinc-200/60">
+        <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="text-zinc-900">Save Property Changes?</AlertDialogTitle>
             <AlertDialogDescription className="text-zinc-500">

@@ -839,7 +839,7 @@ export default function AccessControlDashboard() {
         open={!!selectedTenantAccess}
         onOpenChange={(open) => !open && setSelectedTenantAccess(null)}
       >
-        <DialogContent className="w-full sm:max-w-xl md:max-w-2xl p-0 bg-[#FAFAFA] border border-slate-200/80 flex flex-col font-sans shadow-sm rounded-lg max-h-[85vh] overflow-hidden">
+        <DialogContent className="sm:max-w-xl md:max-w-2xl p-0 flex flex-col max-h-[85vh] overflow-hidden">
           {selectedTenantAccess && (
             <>
               <div className="px-6 pt-10 pb-6 border-b border-zinc-200/80 bg-white">
@@ -1075,7 +1075,7 @@ export default function AccessControlDashboard() {
         open={!!selectedUnitAccess}
         onOpenChange={(open) => !open && setSelectedUnitAccess(null)}
       >
-        <DialogContent className="w-full sm:max-w-xl md:max-w-2xl p-0 bg-[#FAFAFA] border border-slate-200/80 flex flex-col font-sans shadow-sm rounded-lg max-h-[85vh] overflow-hidden">
+        <DialogContent className="sm:max-w-xl md:max-w-2xl p-0 flex flex-col max-h-[85vh] overflow-hidden">
           {selectedUnitAccess && (
             <>
               <div className="px-6 pt-10 pb-6 border-b border-zinc-200/80 bg-white">

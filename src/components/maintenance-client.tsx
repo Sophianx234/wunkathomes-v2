@@ -631,7 +631,7 @@ export default function MaintenanceClient({ initialTickets }: MaintenanceClientP
         open={!!pendingStatusChange}
         onOpenChange={(open) => !open && setPendingStatusChange(null)}
       >
-        <AlertDialogContent className="font-sans max-w-[400px] rounded-lg p-6">
+        <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="text-lg font-semibold tracking-tight text-zinc-900">
               Confirm Status Update
