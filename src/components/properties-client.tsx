@@ -2,6 +2,7 @@
 
 import {
   ArrowDown01Icon,
+  Loading03FreeIcons,
   Location01Icon,
   Search01Icon,
   Tag01Icon,
@@ -9,7 +10,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   Select,
@@ -20,50 +21,51 @@ import {
 } from "@/components/ui/select";
 
 import PropertyCard from "@/components/property-card";
+import { getPublicProperties } from "@/actions/shared/fetch-properties.action";
 
 // --- Types & Constants ---
 const PROPERTY_TYPES = ["All", "House", "Apartment", "Commercial", "Land"];
-const ITEMS_PER_PAGE = 8; 
 
 interface PropertiesClientProps {
-  inventory: any[]; 
+  initialInventory: any[]; 
+  initialHasMore: boolean;
+  initialTotalAssets: number;
   availableAreas: string[];
+  initialFilters: { typeFilter: string; statusFilter: string; locationFilter: string };
 }
 
-export default function PropertiesClient({ inventory, availableAreas }: PropertiesClientProps) {
+export default function PropertiesClient({ 
+  initialInventory, 
+  initialHasMore,
+  initialTotalAssets,
+  availableAreas,
+  initialFilters
+}: PropertiesClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  // State for items and pagination
+  const [items, setItems] = useState(initialInventory);
+  const [hasMore, setHasMore] = useState(initialHasMore);
+  const [totalAssets, setTotalAssets] = useState(initialTotalAssets);
+  const [page, setPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+
   // State for filters
-  const [typeFilter, setTypeFilter] = useState("All");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [locationFilter, setLocationFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState(initialFilters.typeFilter);
+  const [statusFilter, setStatusFilter] = useState(initialFilters.statusFilter);
+  const [locationFilter, setLocationFilter] = useState(initialFilters.locationFilter);
 
-  // State for pagination
-  const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
-
-  // Sync state with URL on mount and when URL changes
+  // Sync state when props change due to URL/Server Component re-render
   useEffect(() => {
-    const typeFromUrl = searchParams.get("type");
-    const statusFromUrl = searchParams.get("status");
-    const locationFromUrl = searchParams.get("location");
-
-    if (
-      typeFromUrl &&
-      PROPERTY_TYPES.map((t) => t.toLowerCase()).includes(
-        typeFromUrl.toLowerCase(),
-      )
-    ) {
-      setTypeFilter(typeFromUrl.charAt(0).toUpperCase() + typeFromUrl.slice(1));
-    }
-    if (statusFromUrl) setStatusFilter(statusFromUrl);
-    if (locationFromUrl) setLocationFilter(locationFromUrl);
-  }, [searchParams]);
-
-  // Reset pagination to initial count whenever a filter is changed
-  useEffect(() => {
-    setVisibleCount(ITEMS_PER_PAGE);
-  }, [typeFilter, statusFilter, locationFilter]);
+    setItems(initialInventory);
+    setHasMore(initialHasMore);
+    setTotalAssets(initialTotalAssets);
+    setPage(1);
+    setTypeFilter(initialFilters.typeFilter);
+    setStatusFilter(initialFilters.statusFilter);
+    setLocationFilter(initialFilters.locationFilter);
+  }, [initialInventory, initialHasMore, initialTotalAssets, initialFilters]);
 
   // Update URL seamlessly when filters change
   const updateUrl = (key: string, value: string) => {
@@ -77,37 +79,28 @@ export default function PropertiesClient({ inventory, availableAreas }: Properti
   };
 
   const handleTypeChange = (type: string) => {
-    setTypeFilter(type);
     updateUrl("type", type);
   };
 
-  const handleLoadMore = () => {
-    setVisibleCount((prev) => prev + 4); 
+  const handleLoadMore = async () => {
+    setIsLoading(true);
+    try {
+      const nextPage = page + 1;
+      const { properties, hasMore: newHasMore, totalAssets: newTotal } = await getPublicProperties(nextPage, 12, {
+        type: typeFilter,
+        status: statusFilter,
+        location: locationFilter
+      });
+      setItems((prev) => [...prev, ...properties]);
+      setPage(nextPage);
+      setHasMore(newHasMore);
+      setTotalAssets(newTotal);
+    } catch (error) {
+      console.error("Failed to load more properties:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
-
-  // Derived state: Filtered properties (All that match)
-  const filteredProperties = useMemo(() => {
-    return inventory.filter((item) => {
-      // 1. Check Property Type
-      const matchType =
-        typeFilter === "All" ||
-        item.property.propertyType.toLowerCase() === typeFilter.toLowerCase();
-
-      // 2. Check Status (Rent vs Sale)
-      const matchStatus =
-        statusFilter === "all" || item.listingType.toLowerCase() === statusFilter.toLowerCase();
-
-      // 3. Check Location
-      const matchLocation =
-        locationFilter === "all" || item.property.location.toLowerCase() === locationFilter.toLowerCase();
-
-      return matchType && matchStatus && matchLocation;
-    });
-  }, [inventory, typeFilter, statusFilter, locationFilter]);
-
-  // Derived state: Displayed properties (Paginated subset)
-  const displayedProperties = filteredProperties.slice(0, visibleCount);
-  const hasMore = visibleCount < filteredProperties.length;
 
   return (
     <div className="bg-white min-h-screen pb-12 md:pb-24 w-full overflow-x-hidden box-border">
@@ -122,7 +115,7 @@ export default function PropertiesClient({ inventory, availableAreas }: Properti
                 key={type}
                 onClick={() => handleTypeChange(type)}
                 className={`whitespace-nowrap px-3 py-1.5 md:px-6 md:py-2.5 rounded-full text-[9px] md:text-xs font-bold uppercase tracking-widest transition-all duration-300 shrink-0 ${
-                  typeFilter === type
+                  typeFilter.toLowerCase() === type.toLowerCase()
                     ? "bg-black text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] md:shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)] -translate-y-[1px]"
                     : "bg-zinc-100/50 text-zinc-500 hover:bg-zinc-200 hover:text-black"
                 }`}
@@ -139,7 +132,6 @@ export default function PropertiesClient({ inventory, availableAreas }: Properti
             <div className="flex-1 sm:flex-none sm:w-[120px] md:w-[160px] min-w-0 box-border">
               <Select
                 onValueChange={(val) => {
-                  setStatusFilter(val);
                   updateUrl("status", val);
                 }}
                 value={statusFilter}
@@ -172,7 +164,6 @@ export default function PropertiesClient({ inventory, availableAreas }: Properti
             <div className="flex-1 sm:flex-none sm:w-[140px] md:w-[180px] min-w-0 box-border">
               <Select
                 onValueChange={(val) => {
-                  setLocationFilter(val);
                   updateUrl("location", val);
                 }}
                 value={locationFilter}
@@ -206,7 +197,7 @@ export default function PropertiesClient({ inventory, availableAreas }: Properti
             {/* Results Count Counter */}
             <div className="hidden sm:flex items-center pl-2 md:pl-4 border-l-2 border-zinc-200/60 shrink-0">
               <span className="text-sm md:text-2xl font-black text-black leading-none">
-                {filteredProperties.length}
+                {totalAssets}
               </span>
               <span className="text-[8px] md:text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1 md:ml-2 leading-tight">
                 Assets
@@ -220,16 +211,16 @@ export default function PropertiesClient({ inventory, availableAreas }: Properti
 
       {/* === Dynamic Property Grid === */}
       <div className="max-w-7xl mx-auto px-2 md:px-4 pt-28 md:pt-24 sm:px-6 lg:px-8 min-h-[300px] md:min-h-[500px] w-full box-border">
-        {displayedProperties.length > 0 ? (
+        {items.length > 0 ? (
           <>
             <motion.div
               layout
               className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-4 md:gap-x-6 gap-y-6 md:gap-y-12 w-full min-w-0 box-border"
             >
               <AnimatePresence mode="popLayout">
-                {displayedProperties.map((property) => (
+                {items.map((property: any, index: number) => (
                   <motion.div
-                    key={property.id}
+                    key={`${property.id}-${index}`}
                     layout
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -250,20 +241,27 @@ export default function PropertiesClient({ inventory, availableAreas }: Properti
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
-                  className="mt-8 md:mt-24 flex justify-center w-full box-border"
+                  className="mt-16 md:mt-24 flex justify-center"
                 >
                   <button
                     onClick={handleLoadMore}
-                    className="px-5 py-2.5 md:px-10 md:py-4 bg-white text-black font-bold uppercase tracking-widest text-[9px] md:text-xs border-2 border-black hover:bg-black hover:text-white transition-all duration-300 flex items-center justify-center gap-1.5 md:gap-3 group shrink-0"
+                    disabled={isLoading}
+                    className="px-10 py-4 bg-transparent text-primary font-bold uppercase tracking-widest text-xs border-2 border-black hover:bg-black hover:text-white transition-all duration-300 flex items-center justify-center gap-3 group disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Load More
-                    <span className="scale-75 md:scale-100 flex items-center">
-                      <HugeiconsIcon
-                        icon={ArrowDown01Icon}
-                        size={16}
-                        className="group-hover:translate-y-1 transition-transform"
-                      />
-                    </span>
+                    {isLoading ? (
+                       <>
+                <HugeiconsIcon icon={Loading03FreeIcons} className="size-4 animate-spin" /> loading properties
+                </>
+                    ) : (
+                      <>
+                        show more properties
+                        <HugeiconsIcon
+                          icon={ArrowDown01Icon}
+                          size={16}
+                          className="group-hover:translate-y-1 transition-transform"
+                        />
+                      </>
+                    )}
                   </button>
                 </motion.div>
               )}
@@ -294,9 +292,6 @@ export default function PropertiesClient({ inventory, availableAreas }: Properti
             </p>
             <button
               onClick={() => {
-                setTypeFilter("All");
-                setStatusFilter("all");
-                setLocationFilter("all");
                 router.push("/properties", { scroll: false });
               }}
               className="px-4 py-2.5 md:px-8 md:py-4 bg-black text-white font-bold uppercase tracking-widest text-[9px] md:text-xs hover:bg-zinc-800 transition-colors duration-300 shrink-0"
