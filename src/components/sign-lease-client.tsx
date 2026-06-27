@@ -74,10 +74,7 @@ export default function SignLeaseClient({ data }: SignLeaseClientProps) {
             <span className="text-[10px] md:text-[13px] font-medium tracking-tight truncate">Tenancy Agreement</span>
           </div>
           <div className="flex items-center gap-2 shrink-0 pl-2">
-            <span className="flex items-center gap-1 md:gap-1.5 text-[8px] md:text-[11px] font-medium text-amber-700 bg-amber-50 border border-amber-200/60 px-1.5 md:px-2 py-0.5 rounded-full whitespace-nowrap">
-              <span className="w-1 md:w-1.5 h-1 md:h-1.5 rounded-full bg-amber-500 animate-pulse" />
-              Awaiting Signature
-            </span>
+            
           </div>
         </header>
 
@@ -130,8 +127,8 @@ export default function SignLeaseClient({ data }: SignLeaseClientProps) {
               </div>
               <div className="w-24 md:w-48 min-w-0">
                 <p className="text-[7px] md:text-[10px] uppercase tracking-widest text-zinc-400 font-bold mb-2 md:mb-4 truncate">Tenant Signature</p>
-                <div className="h-6 md:h-10 border-b border-amber-300 flex items-end pb-0.5 md:pb-1 bg-amber-50/30 px-1 md:px-2 rounded-t-sm w-full overflow-hidden">
-                  <span className="text-[7px] md:text-[11px] text-amber-600 font-medium truncate">Signature required</span>
+                <div className="h-6 md:h-10 border-b  flex items-end pb-0.5 md:pb-1  px-1 md:px-2 rounded-t-sm w-full overflow-hidden">
+                  <span className="text-[7px] md:text-[11px]  font-medium truncate">Signature required</span>
                 </div>
               </div>
             </div>

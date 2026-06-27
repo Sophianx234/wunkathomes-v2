@@ -6,7 +6,7 @@ import {
   Alert02Icon,
   File02Icon,
   Key01Icon,
-  Time02Icon,
+  Clock01Icon,
   ArrowRight01Icon,
   Building04Icon,
   CheckmarkBadge01Icon,
@@ -73,7 +73,7 @@ export default function UserCommandCenter() {
 
               <div className="flex items-center gap-2 text-xs font-bold text-zinc-500 uppercase tracking-widest">
                 <HugeiconsIcon
-                  icon={Time02Icon}
+                  icon={Clock01Icon}
                   size={14}
                   className="text-amber-500"
                 />

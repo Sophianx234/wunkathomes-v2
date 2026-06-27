@@ -113,7 +113,7 @@ export function TransactionReceipt({ transaction, onBack }: TransactionReceiptPr
                 Amount Paid
               </p>
               <p className={`text-2xl md:text-4xl font-semibold tracking-tighter font-tabular-nums ${isSuccess ? "text-zinc-900" : "text-zinc-400 line-through"}`}>
-                {formatCurrency(transaction.amount, transaction.currency)}
+                {formatCurrency(transaction.amount, transaction.currency).replace("GH", "")}
               </p>
             </div>
 

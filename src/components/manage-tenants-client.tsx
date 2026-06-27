@@ -53,6 +53,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { formatCurrency } from "./transactions-client";
 
 // --- TYPES ---
 interface TenantRecord {
@@ -97,11 +98,10 @@ interface ManageTenantsClientProps {
 }
 
 // --- UTILS ---
-const formatCurrency = (amount: number) => `GHS ${amount.toLocaleString()}`;
 
 const getLeaseBadgeStyle = (status: string) => {
   const styles: Record<string, string> = {
-    Active: "bg-zinc-900 text-zinc-50 ring-1 ring-zinc-950",
+    Active: "bg-zinc-900 text-zinc-50 ",
     Pending_Balance: "bg-zinc-100/50 text-zinc-700 ring-1 ring-zinc-200/80",
     Pending_Deposit: "bg-zinc-100/50 text-zinc-700 ring-1 ring-zinc-200/80",
     Expired: "bg-rose-50 text-rose-700 ring-1 ring-rose-200/50",
@@ -300,12 +300,11 @@ export default function ManageTenantsClient({
                             {tenant.user.name}
                           </span>
                           {tenant.user.accountStatus !== "Active" && (
-                            <Badge
-                              variant="outline"
-                              className={`px-1.5 py-0 border-0 rounded text-[9px] uppercase tracking-wider font-bold h-4 ${getAccountBadgeStyle(tenant.user.accountStatus)}`}
+                            <div
+                              className={` uppercase tracking-wider font-bold h-4 ${getAccountBadgeStyle(tenant.user.accountStatus)}`}
                             >
                               {tenant.user.accountStatus}
-                            </Badge>
+                            </div>
                           )}
                         </div>
                         <span className="text-[11px] text-zinc-500 mt-0.5">
@@ -494,7 +493,7 @@ export default function ManageTenantsClient({
                       </div>
                       <div>
                         <dt className="text-zinc-500 mb-1">Total Rent</dt>
-                        <dd className="font-medium text-zinc-900 font-tabular-nums">{formatCurrency(selectedTenant.lease.totalRentAmount)}</dd>
+                        <dd className="font-medium text-zinc-900 font-tabular-nums">{formatCurrency(selectedTenant.lease.totalRentAmount).replace("GH", "")}</dd>
                       </div>
                       <div>
                         <dt className="text-zinc-500 mb-1">Access PIN</dt>
@@ -568,7 +567,7 @@ export default function ManageTenantsClient({
                           </div>
                           <div className="text-right">
                             <p className="text-[13px] font-medium text-zinc-900 font-tabular-nums">
-                              {formatCurrency(tx.amount)}
+                              {formatCurrency(tx.amount).replace("GH", "")}
                             </p>
                             <span className={`text-[10px] font-semibold tracking-wider ${tx.status === "Success" ? "text-teal-600" : tx.status === "Failed" ? "text-rose-600" : "text-amber-600"}`}>
                               {tx.status}

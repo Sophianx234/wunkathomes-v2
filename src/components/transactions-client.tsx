@@ -10,7 +10,7 @@ import {
   SmartPhone01Icon,
   LinkSquare01Icon,
   CreditCardIcon,
-  Time01Icon,
+  Clock01Icon,
   Building03Icon,
   Download01Icon,
   Alert01Icon,
@@ -85,7 +85,7 @@ interface TransactionsClientProps {
 }
 
 // --- UTILS ---
-const formatCurrency = (amount: number, currency: string = "GHS") =>
+export const formatCurrency = (amount: number, currency: string = "GHS") =>
   new Intl.NumberFormat("en-GH", {
     style: "currency",
     currency: currency,
@@ -120,26 +120,52 @@ const getStatusBadge = (status: string) => {
 const getChannelIcon = (channel: string) => {
   switch (channel) {
     case "card":
-      return <HugeiconsIcon icon={CreditCardIcon} size={14} className="text-zinc-400" />;
+      return (
+        <HugeiconsIcon
+          icon={CreditCardIcon}
+          size={14}
+          className="text-zinc-400"
+        />
+      );
     case "mobile_money":
-      return <HugeiconsIcon icon={SmartPhone01Icon} size={14} className="text-zinc-400" />;
+      return (
+        <HugeiconsIcon
+          icon={SmartPhone01Icon}
+          size={14}
+          className="text-zinc-400"
+        />
+      );
     case "bank":
-      return <HugeiconsIcon icon={UniversityIcon} size={14} className="text-zinc-400" />;
+      return (
+        <HugeiconsIcon
+          icon={UniversityIcon}
+          size={14}
+          className="text-zinc-400"
+        />
+      );
     default:
-      return <HugeiconsIcon icon={ArrowUpRight01Icon} size={14} className="text-zinc-400" />;
+      return (
+        <HugeiconsIcon
+          icon={ArrowUpRight01Icon}
+          size={14}
+          className="text-zinc-400"
+        />
+      );
   }
 };
 
 // --- MAIN CLIENT COMPONENT ---
 export default function TransactionsClient({ data }: TransactionsClientProps) {
-  const [activeTab, setActiveTab] = useState<"all" | "success" | "pending">("all");
+  const [activeTab, setActiveTab] = useState<"all" | "success" | "pending">(
+    "all",
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [channelFilter, setChannelFilter] = useState("all");
   const [purposeFilter, setPurposeFilter] = useState("all");
-  
+
   const [selectedTx, setSelectedTx] = useState<UserTransaction | null>(null);
   const [isViewingReceipt, setIsViewingReceipt] = useState(false);
-  
+
   const [isReportingIssue, setIsReportingIssue] = useState(false);
   const [isPending, startTransition] = useTransition();
 
@@ -148,7 +174,8 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
       if (activeTab === "success" && tx.status !== "Success") return false;
       if (activeTab === "pending" && tx.status !== "Pending") return false;
       if (channelFilter !== "all" && tx.channel !== channelFilter) return false;
-      if (purposeFilter !== "all" && tx.paymentPurpose !== purposeFilter) return false;
+      if (purposeFilter !== "all" && tx.paymentPurpose !== purposeFilter)
+        return false;
 
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
@@ -168,8 +195,10 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
   const handleReportIssue = () => {
     if (!selectedTx) return;
     startTransition(async () => {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      toast.success(`Support ticket created for transaction #${selectedTx.reference.slice(-6)}.`);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      toast.success(
+        `Support ticket created for transaction #${selectedTx.reference.slice(-6)}.`,
+      );
       setIsReportingIssue(false);
     });
   };
@@ -179,9 +208,9 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
   // =====================================================================
   if (isViewingReceipt && selectedTx) {
     return (
-      <TransactionReceipt 
-        transaction={selectedTx} 
-        onBack={() => setIsViewingReceipt(false)} 
+      <TransactionReceipt
+        transaction={selectedTx}
+        onBack={() => setIsViewingReceipt(false)}
       />
     );
   }
@@ -189,7 +218,6 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
   return (
     <div className="min-h-screen bg-[#FAFAFA] p-3 md:p-6 lg:pb-10 font-sans w-full overflow-x-hidden box-border">
       <div className="max-w-[1400px] mx-auto space-y-4 md:space-y-6 pt-6 md:pt-16 w-full box-border">
-        
         {/* PAGE HEADER & TABS */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 md:gap-4 pb-2 border-b border-zinc-200/60 w-full box-border">
           <div>
@@ -204,13 +232,22 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
             className="w-full md:w-auto"
           >
             <TabsList className="h-8 md:h-9 bg-zinc-100/50 border border-zinc-200/60 p-0.5 md:p-0.5 rounded-lg w-full flex overflow-x-auto scrollbar-hide">
-              <TabsTrigger value="all" className="text-[10px] md:text-[13px] font-medium data-[state=active]:bg-white rounded-md px-2 md:px-4 shrink-0">
+              <TabsTrigger
+                value="all"
+                className="text-[10px] md:text-[13px] font-medium data-[state=active]:bg-white rounded-md px-2 md:px-4 shrink-0"
+              >
                 All Payments
               </TabsTrigger>
-              <TabsTrigger value="success" className="text-[10px] md:text-[13px] font-medium data-[state=active]:bg-white rounded-md px-2 md:px-4 shrink-0">
+              <TabsTrigger
+                value="success"
+                className="text-[10px] md:text-[13px] font-medium data-[state=active]:bg-white rounded-md px-2 md:px-4 shrink-0"
+              >
                 Successful
               </TabsTrigger>
-              <TabsTrigger value="pending" className="text-[10px] md:text-[13px] font-medium data-[state=active]:bg-white rounded-md px-2 md:px-4 shrink-0">
+              <TabsTrigger
+                value="pending"
+                className="text-[10px] md:text-[13px] font-medium data-[state=active]:bg-white rounded-md px-2 md:px-4 shrink-0"
+              >
                 Pending
                 {pendingCount > 0 && (
                   <span className="ml-1 md:ml-2 inline-flex items-center justify-center bg-zinc-100/50 text-[8px] md:text-[10px] font-bold h-3 w-3 md:h-4 md:w-4 rounded-full text-zinc-600">
@@ -244,9 +281,15 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
                 <SelectValue placeholder="Channel" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all" className="text-[10px] md:text-[12px]">All Channels</SelectItem>
+                <SelectItem value="all" className="text-[10px] md:text-[12px]">
+                  All Channels
+                </SelectItem>
                 {uniqueChannels.map((channel) => (
-                  <SelectItem key={channel} value={channel} className="text-[10px] md:text-[12px]">
+                  <SelectItem
+                    key={channel}
+                    value={channel}
+                    className="text-[10px] md:text-[12px]"
+                  >
                     {channel.replace("_", " ")}
                   </SelectItem>
                 ))}
@@ -258,9 +301,15 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
                 <SelectValue placeholder="Purpose" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all" className="text-[10px] md:text-[12px]">All Purposes</SelectItem>
+                <SelectItem value="all" className="text-[10px] md:text-[12px]">
+                  All Purposes
+                </SelectItem>
                 {uniquePurposes.map((purpose) => (
-                  <SelectItem key={purpose} value={purpose} className="text-[10px] md:text-[12px]">
+                  <SelectItem
+                    key={purpose}
+                    value={purpose}
+                    className="text-[10px] md:text-[12px]"
+                  >
                     {purpose.replace("_", " ")}
                   </SelectItem>
                 ))}
@@ -301,12 +350,24 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
             <Table className="w-full min-w-full">
               <TableHeader className="bg-zinc-50/30">
                 <TableRow className="border-zinc-200/60 hover:bg-transparent">
-                  <TableHead className="font-medium text-zinc-500 text-[8px] md:text-xs h-8 md:h-10 w-[140px] md:w-[200px] whitespace-nowrap px-2 md:px-4">Reference & Date</TableHead>
-                  <TableHead className="font-medium text-zinc-500 text-[8px] md:text-xs h-8 md:h-10 whitespace-nowrap px-2 md:px-4">Property</TableHead>
-                  <TableHead className="font-medium text-zinc-500 text-[8px] md:text-xs h-8 md:h-10 hidden sm:table-cell whitespace-nowrap px-2 md:px-4">Payment Type</TableHead>
-                  <TableHead className="font-medium text-zinc-500 text-[8px] md:text-xs h-8 md:h-10 hidden sm:table-cell whitespace-nowrap px-2 md:px-4">Method</TableHead>
-                  <TableHead className="font-medium text-zinc-500 text-[8px] md:text-xs h-8 md:h-10 whitespace-nowrap px-2 md:px-4">Amount</TableHead>
-                  <TableHead className="font-medium text-zinc-500 text-[8px] md:text-xs h-8 md:h-10 w-[80px] md:w-[140px] text-right pr-3 md:pr-6 whitespace-nowrap">Status</TableHead>
+                  <TableHead className="font-medium text-zinc-500 text-[8px] md:text-xs h-8 md:h-10 w-[140px] md:w-[200px] whitespace-nowrap px-2 md:px-4">
+                    Reference & Date
+                  </TableHead>
+                  <TableHead className="font-medium text-zinc-500 text-[8px] md:text-xs h-8 md:h-10 whitespace-nowrap px-2 md:px-4">
+                    Property
+                  </TableHead>
+                  <TableHead className="font-medium text-zinc-500 text-[8px] md:text-xs h-8 md:h-10 hidden sm:table-cell whitespace-nowrap px-2 md:px-4">
+                    Payment Type
+                  </TableHead>
+                  <TableHead className="font-medium text-zinc-500 text-[8px] md:text-xs h-8 md:h-10 hidden sm:table-cell whitespace-nowrap px-2 md:px-4">
+                    Method
+                  </TableHead>
+                  <TableHead className="font-medium text-zinc-500 text-[8px] md:text-xs h-8 md:h-10 whitespace-nowrap px-2 md:px-4">
+                    Amount
+                  </TableHead>
+                  <TableHead className="font-medium text-zinc-500 text-[8px] md:text-xs h-8 md:h-10 w-[80px] md:w-[140px] text-right pr-3 md:pr-6 whitespace-nowrap">
+                    Status
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -331,10 +392,18 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
                       <div className="flex items-center gap-1.5 md:gap-3 min-w-0">
                         <div className="w-5 h-5 md:w-8 md:h-8 rounded md:rounded-md overflow-hidden bg-zinc-100/50 shrink-0 border border-zinc-200/60 flex items-center justify-center">
                           {tx.listing.image ? (
-                            <img src={tx.listing.image} alt={tx.listing.title} className="w-full h-full object-cover" />
+                            <img
+                              src={tx.listing.image}
+                              alt={tx.listing.title}
+                              className="w-full h-full object-cover"
+                            />
                           ) : (
                             <span className="scale-75 md:scale-100 flex items-center">
-                              <HugeiconsIcon icon={Building03Icon} size={14} className="text-zinc-400" />
+                              <HugeiconsIcon
+                                icon={Building03Icon}
+                                size={14}
+                                className="text-zinc-400"
+                              />
                             </span>
                           )}
                         </div>
@@ -345,21 +414,28 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
                     </TableCell>
 
                     <TableCell className="py-2 md:py-3 align-middle px-2 md:px-4 hidden sm:table-cell">
-                      <span className={`px-1.5 md:px-2 py-0.5 rounded md:rounded-md text-[7px] md:text-[10px] uppercase font-bold tracking-widest whitespace-nowrap ${getPurposeBadge(tx.paymentPurpose)}`}>
+                      <span
+                        className={`px-1.5 md:px-2 py-0.5 rounded md:rounded-md text-[7px] md:text-[10px] uppercase font-bold tracking-widest whitespace-nowrap ${getPurposeBadge(tx.paymentPurpose)}`}
+                      >
                         {tx.paymentPurpose.replace("_", " ")}
                       </span>
                     </TableCell>
 
                     <TableCell className="py-2 md:py-3 align-middle px-2 md:px-4 hidden sm:table-cell">
                       <div className="flex items-center text-[9px] md:text-[12px] font-medium text-zinc-600 gap-1 md:gap-1.5 capitalize whitespace-nowrap">
-                        <span className="scale-75 md:scale-100 flex items-center">{getChannelIcon(tx.channel)}</span>
+                        <span className="scale-75 md:scale-100 flex items-center">
+                          {getChannelIcon(tx.channel)}
+                        </span>
                         {tx.channel.replace("_", " ")}
                       </div>
                     </TableCell>
 
                     <TableCell className="py-2 md:py-3 align-middle px-2 md:px-4">
                       <span className="text-[10px] md:text-[14px] font-semibold text-zinc-900 font-tabular-nums tracking-tight whitespace-nowrap">
-                        {formatCurrency(tx.amount, tx.currency)}
+                        {formatCurrency(tx.amount, tx.currency).replace(
+                          "GH",
+                          "",
+                        )}
                       </span>
                     </TableCell>
 
@@ -376,7 +452,10 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
 
                 {filteredData.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={6} className="h-20 md:h-32 text-center text-zinc-500 text-[10px] md:text-sm">
+                    <TableCell
+                      colSpan={6}
+                      className="h-20 md:h-32 text-center text-zinc-500 text-[10px] md:text-sm"
+                    >
                       You don't have any transactions matching this criteria.
                     </TableCell>
                   </TableRow>
@@ -388,7 +467,10 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
       </div>
 
       {/* INDUSTRY STANDARD TRANSACTION DESK (Sheet) */}
-      <Dialog open={!!selectedTx && !isViewingReceipt} onOpenChange={(open) => !open && setSelectedTx(null)}>
+      <Dialog
+        open={!!selectedTx && !isViewingReceipt}
+        onOpenChange={(open) => !open && setSelectedTx(null)}
+      >
         <DialogContent className="w-full sm:max-w-xl md:max-w-2xl p-0 bg-[#FAFAFA] border border-slate-200/80 flex flex-col font-sans shadow-sm rounded-lg max-h-[85vh] overflow-hidden">
           {selectedTx && (
             <>
@@ -401,19 +483,18 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
                   >
                     {selectedTx.status}
                   </Badge>
-                  <span className={`px-1.5 md:px-2 py-0.5 rounded md:rounded-md text-[8px] md:text-[10px] font-bold uppercase tracking-widest ${getPurposeBadge(selectedTx.paymentPurpose)}`}>
-                    {selectedTx.paymentPurpose.replace(/_/g, " ")}
-                  </span>
                 </div>
 
                 <h2 className="text-2xl md:text-4xl font-semibold tracking-tighter text-zinc-900 font-tabular-nums leading-none truncate">
-                  {formatCurrency(selectedTx.amount, selectedTx.currency)}
+                  {formatCurrency(
+                    selectedTx.amount,
+                    selectedTx.currency,
+                  ).replace("GH", "")}
                 </h2>
               </div>
 
               {/* Scrollable Data Body */}
               <div className="flex-1 overflow-y-auto px-4 md:px-6 py-6 md:py-8 space-y-6 md:space-y-10 w-full box-border">
-                
                 {/* 1. Transaction Audit Block (Definition List) */}
                 <section className="w-full box-border">
                   <h3 className="text-[9px] md:text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-2 md:mb-4">
@@ -422,29 +503,39 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
                   <div className="bg-white border border-zinc-200/60 rounded-lg md:rounded-lg overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.01)] w-full box-border">
                     <dl className="divide-y divide-zinc-100 text-[10px] md:text-[13px] w-full">
                       <div className="flex justify-between py-2 md:py-3 px-3 md:px-4 w-full">
-                        <dt className="text-zinc-500 font-medium shrink-0">Reference ID</dt>
+                        <dt className="text-zinc-500 font-medium shrink-0">
+                          Reference ID
+                        </dt>
                         <dd className="text-zinc-900 font-mono tracking-tight text-right font-medium truncate pl-2 max-w-[150px] md:max-w-[250px]">
                           {selectedTx.reference}
                         </dd>
                       </div>
                       <div className="flex justify-between py-2 md:py-3 px-3 md:px-4 w-full">
-                        <dt className="text-zinc-500 font-medium shrink-0">Date Initiated</dt>
+                        <dt className="text-zinc-500 font-medium shrink-0">
+                          Date Initiated
+                        </dt>
                         <dd className="text-zinc-900 font-tabular-nums text-right font-medium truncate pl-2">
                           {formatDate(selectedTx.createdAt)}
                         </dd>
                       </div>
                       {selectedTx.paidAt && (
                         <div className="flex justify-between py-2 md:py-3 px-3 md:px-4 w-full">
-                          <dt className="text-zinc-500 font-medium shrink-0">Date Cleared</dt>
+                          <dt className="text-zinc-500 font-medium shrink-0">
+                            Date Cleared
+                          </dt>
                           <dd className="text-emerald-700 font-tabular-nums text-right font-medium truncate pl-2">
                             {formatDate(selectedTx.paidAt)}
                           </dd>
                         </div>
                       )}
                       <div className="flex justify-between py-2 md:py-3 px-3 md:px-4 w-full">
-                        <dt className="text-zinc-500 font-medium shrink-0">Payment Channel</dt>
+                        <dt className="text-zinc-500 font-medium shrink-0">
+                          Payment Channel
+                        </dt>
                         <dd className="text-zinc-900 capitalize text-right flex items-center justify-end gap-1 md:gap-1.5 font-medium truncate pl-2">
-                          <span className="scale-75 md:scale-100 flex items-center">{getChannelIcon(selectedTx.channel)}</span>
+                          <span className="scale-75 md:scale-100 flex items-center">
+                            {getChannelIcon(selectedTx.channel)}
+                          </span>
                           {selectedTx.channel.replace("_", " ")}
                         </dd>
                       </div>
@@ -463,7 +554,10 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
                       target="_blank"
                       className="inline-flex items-center gap-1 text-[9px] md:text-[11px] font-medium text-zinc-500 hover:text-zinc-900 tracking-wide transition-colors shrink-0"
                     >
-                      View Asset <span className="scale-75 md:scale-100 flex items-center"><HugeiconsIcon icon={LinkSquare01Icon} size={12} /></span>
+                      View Asset{" "}
+                      <span className="scale-75 md:scale-100 flex items-center">
+                        <HugeiconsIcon icon={LinkSquare01Icon} size={12} />
+                      </span>
                     </Link>
                   </div>
 
@@ -471,10 +565,20 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
                     <div className="p-3 md:p-4 flex gap-2 md:gap-4 w-full min-w-0">
                       <div className="h-10 w-10 md:h-12 md:w-12 shrink-0 bg-zinc-100/50 rounded-md overflow-hidden border border-zinc-200/60 shadow-sm">
                         {selectedTx.listing.image ? (
-                          <img src={selectedTx.listing.image} alt="Property" className="w-full h-full object-cover" />
+                          <img
+                            src={selectedTx.listing.image}
+                            alt="Property"
+                            className="w-full h-full object-cover"
+                          />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
-                            <span className="scale-75 md:scale-100 flex items-center"><HugeiconsIcon icon={Building03Icon} size={16} className="text-zinc-300"/></span>
+                            <span className="scale-75 md:scale-100 flex items-center">
+                              <HugeiconsIcon
+                                icon={Building03Icon}
+                                size={16}
+                                className="text-zinc-300"
+                              />
+                            </span>
                           </div>
                         )}
                       </div>
@@ -483,7 +587,9 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
                           {selectedTx.listing.title}
                         </h4>
                         <p className="text-[9px] md:text-[12px] text-zinc-500 mt-0.5 truncate">
-                          {selectedTx.listing.property?.propertyName || selectedTx.listing.property?.location || "Location not provided"}
+                          {selectedTx.listing.property?.propertyName ||
+                            selectedTx.listing.property?.location ||
+                            "Location not provided"}
                         </p>
                       </div>
                     </div>
@@ -498,7 +604,9 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
                   onClick={() => setIsReportingIssue(true)}
                   className="h-8 md:h-10 w-full text-[10px] md:text-[12px] font-medium border-zinc-200/60 hover:bg-zinc-50 text-zinc-700 rounded-md md:rounded-lg shadow-none truncate px-1"
                 >
-                  <span className="scale-75 md:scale-100 flex items-center md:mr-2 shrink-0"><HugeiconsIcon icon={Alert01Icon} size={14} /></span>
+                  <span className="scale-75 md:scale-100 flex items-center md:mr-2 shrink-0">
+                    <HugeiconsIcon icon={Alert01Icon} size={14} />
+                  </span>
                   Report Issue
                 </Button>
                 <Button
@@ -506,8 +614,12 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
                   onClick={() => setIsViewingReceipt(true)}
                   className="h-8 md:h-10 w-full text-[10px] md:text-[12px] font-medium bg-zinc-900 text-white hover:bg-zinc-800 rounded-md md:rounded-lg shadow-none disabled:bg-zinc-200 disabled:text-zinc-400 truncate px-1"
                 >
-                  <span className="scale-75 md:scale-100 flex items-center md:mr-2 shrink-0"><HugeiconsIcon icon={Download01Icon} size={14} /></span>
-                  {selectedTx.status === "Success" ? "View Receipt" : "Unavailable"}
+                  <span className="scale-75 md:scale-100 flex items-center md:mr-2 shrink-0">
+                    <HugeiconsIcon icon={Download01Icon} size={14} />
+                  </span>
+                  {selectedTx.status === "Success"
+                    ? "View Receipt"
+                    : "Unavailable"}
                 </Button>
               </div>
             </>
@@ -516,10 +628,7 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
       </Dialog>
 
       {/* SHADCN CONFIRMATION DIALOG (Report Issue Action) */}
-      <AlertDialog
-        open={isReportingIssue}
-        onOpenChange={setIsReportingIssue}
-      >
+      <AlertDialog open={isReportingIssue} onOpenChange={setIsReportingIssue}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="text-base md:text-lg font-semibold tracking-tight text-zinc-900">
@@ -527,7 +636,9 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
             </AlertDialogTitle>
             <AlertDialogDescription className="text-[11px] md:text-[13px] text-zinc-500 leading-relaxed mt-1 md:mt-2 break-words">
               Are you sure you want to report transaction{" "}
-              <span className="font-mono text-zinc-900 font-medium">#{selectedTx?.reference.slice(-6)}</span>{" "}
+              <span className="font-mono text-zinc-900 font-medium">
+                #{selectedTx?.reference.slice(-6)}
+              </span>{" "}
               to support? This will open a formal investigation ticket.
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -545,7 +656,13 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
             >
               {isPending ? (
                 <>
-                  <span className="scale-75 md:scale-100 flex items-center md:mr-2 shrink-0"><HugeiconsIcon icon={Loading03Icon} className="animate-spin" size={14} /></span>
+                  <span className="scale-75 md:scale-100 flex items-center md:mr-2 shrink-0">
+                    <HugeiconsIcon
+                      icon={Loading03Icon}
+                      className="animate-spin"
+                      size={14}
+                    />
+                  </span>
                   Sending...
                 </>
               ) : (

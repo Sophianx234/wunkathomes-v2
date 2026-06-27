@@ -243,7 +243,7 @@ export default function PropertyCard({
                   
                   {/* UPDATE: Trigger Local Modal */}
                   <DropdownMenuItem 
-                    className="cursor-pointer text-rose-600 focus:text-rose-700 focus:bg-rose-50 text-[10px] md:text-sm"
+                    className="cursor-pointer  text-[10px] md:text-sm"
                     onClick={(e) => {
                       e.stopPropagation();
                       setIsDeleteDialogOpen(true);
@@ -392,7 +392,7 @@ export default function PropertyCard({
               <span className="font-bold text-zinc-900">{property.title}</span>,
               including all media, smart lock configurations, and listing data from the database. 
               <br/><br/>
-              <span className="text-rose-600 font-medium">Warning:</span> If there are active leases tied to this asset, they will be orphaned.
+              <span className="text-red-700 font-medium">Warning:</span> If there are active leases tied to this asset, they will be orphaned.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="mt-4 md:mt-6 w-full flex gap-16 sm:gap-0">
@@ -408,7 +408,7 @@ export default function PropertyCard({
                 handleDeleteConfirm();
               }}
               disabled={isPending}
-              className="bg-rose-600 text-white hover:bg-rose-700 focus:ring-rose-600 min-w-[120px] md:min-w-[140px] h-8 md:h-10 text-[11px] md:text-sm rounded-lg m-0"
+              className="bg-black text-white hover:bg-zinc-800 focus:ring-zinc-800 min-w-[120px] md:min-w-[140px] h-8 md:h-10 text-[11px] md:text-sm rounded-lg m-0"
             >
               {isPending ? (
                 <>

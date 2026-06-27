@@ -94,13 +94,11 @@ export function TenancyDocument({ selectedActivation, onBack,showNav=true }: Ten
         <div className="flex-1 w-full bg-white border border-zinc-200/80 rounded-md md:rounded-sm shadow-[0_2px_12px_-4px_rgba(0,0,0,0.04)] print:border-none print:shadow-none print:w-full print:block box-border overflow-hidden">
           <div className="p-5 md:p-14 lg:p-20 font-serif text-zinc-800 leading-relaxed md:leading-[1.8] text-[10px] md:text-[14px] text-justify print:p-0 print:text-black w-full box-border">
             
-            <div className="text-center mb-8 md:mb-14 w-full box-border">
+            <div className="text-center mb-4 md:mb-6 w-full box-border">
               <h2 className="text-sm md:text-xl font-bold uppercase tracking-widest border-b border-zinc-200/60 pb-2 md:pb-4 inline-block mx-auto text-zinc-900 break-words max-w-full">
                 Standard Tenancy Agreement
               </h2>
-              <p className="mt-2 md:mt-4 font-sans text-[7px] md:text-[10px] uppercase tracking-widest text-zinc-400 font-bold truncate px-2">
-                Doc Ref: {selectedActivation.lease.id.slice(-12).toUpperCase()}
-              </p>
+              
             </div>
 
             <div className="space-y-4 md:space-y-6 w-full box-border">
@@ -135,7 +133,7 @@ export function TenancyDocument({ selectedActivation, onBack,showNav=true }: Ten
               <div className="w-full sm:w-56 font-sans min-w-0">
                 <p className="text-[8px] md:text-[10px] uppercase tracking-widest text-zinc-400 font-bold mb-3 md:mb-6 truncate">Landlord Signature</p>
                 <div className="h-8 md:h-12 border-b border-zinc-300 flex items-end pb-1 md:pb-2">
-                  <span className="text-lg md:text-2xl truncate w-full" style={{ fontFamily: "'Brush Script MT', 'Bradley Hand', cursive", lineHeight: 0.8 }}>
+                  <span className="text-lg  truncate w-full font-serif md:text-[11px]">
                     WunkatHomes Ltd.
                   </span>
                 </div>
@@ -145,7 +143,7 @@ export function TenancyDocument({ selectedActivation, onBack,showNav=true }: Ten
               <div className="w-full sm:w-56 font-sans min-w-0 mt-4 sm:mt-0">
                 <p className="text-[8px] md:text-[10px] uppercase tracking-widest text-zinc-400 font-bold mb-3 md:mb-6 truncate">Tenant E-Signature</p>
                 <div className="h-8 md:h-12 border-b border-zinc-300 flex items-end pb-1 md:pb-2">
-                  <span className="text-xl md:text-3xl truncate w-full" style={{ fontFamily: "'Brush Script MT', 'Bradley Hand', cursive", lineHeight: 0.8 }}>
+                  <span className=" md:text-[11px] truncate w-full font-serif " >
                     {selectedActivation.lease.signatureAudit?.typedName || selectedActivation.user.name}
                   </span>
                 </div>
@@ -157,9 +155,7 @@ export function TenancyDocument({ selectedActivation, onBack,showNav=true }: Ten
 
             </div>
             
-            <div className="mt-8 md:mt-12 bg-zinc-50 p-2 md:p-4 rounded-md font-mono text-[8px] md:text-[10px] text-zinc-400 break-all border border-zinc-200/60 print:border-none print:bg-white print:p-0 print:text-black w-full box-border">
-              <strong>SEC-HASH:</strong> {selectedActivation.lease.signatureAudit?.documentHash || "Pending Generation"}
-            </div>
+            
 
           </div>
         </div>

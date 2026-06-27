@@ -6,10 +6,10 @@ import {
   FilterIcon,
   Key01Icon,
   Search01Icon,
-  Time01Icon,
   Loading03Icon,
   Cancel01Icon,
   FileDownloadIcon,
+  Clock01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useMemo, useState, useTransition } from "react";
@@ -206,7 +206,7 @@ export default function OnboardingClient({
       description:
         "Are you sure you want to reject these documents? The tenant will be notified to submit new documentation.",
       confirmText: "Yes, Reject",
-      confirmClass: "bg-rose-600 text-white hover:bg-rose-700",
+      confirmClass: "bg-black text-white hover:bg-zinc-800",
     },
     pin: {
       title: "Activate Lease & Generate PIN",
@@ -222,9 +222,9 @@ export default function OnboardingClient({
   // =====================================================================
   if (isViewingDocument && selectedActivation) {
     return (
-      <TenancyDocument 
-        selectedActivation={selectedActivation} 
-        onBack={() => setIsViewingDocument(false)} 
+      <TenancyDocument
+        selectedActivation={selectedActivation}
+        onBack={() => setIsViewingDocument(false)}
       />
     );
   }
@@ -407,7 +407,7 @@ export default function OnboardingClient({
                         </Badge>
                         <Badge
                           variant="outline"
-                          className={`px-1.5 py-0 border-0 rounded text-[9px] uppercase tracking-wider font-bold h-5 flex items-center gap-1 ${record.checklist.ghanaCardVerified === "Verified" ? "bg-emerald-50/50 text-emerald-700 ring-1 ring-emerald-200/60" : "bg-amber-50/50 text-amber-700 ring-1 ring-amber-300/60"}`}
+                          className={`px-1.5 py-0 border-0 rounded text-[9px] uppercase tracking-wider font-bold h-5 flex items-center gap-1 ${record.checklist.ghanaCardVerified === "Verified" ? "bg-emerald-50/50 text-emerald-700 ring-1 ring-emerald-200/60" : ""}`}
                         >
                           {record.checklist.ghanaCardVerified === "Verified" ? (
                             <HugeiconsIcon
@@ -415,13 +415,13 @@ export default function OnboardingClient({
                               size={10}
                             />
                           ) : (
-                            <HugeiconsIcon icon={Time01Icon} size={10} />
+                            <HugeiconsIcon icon={Clock01Icon} size={10} />
                           )}{" "}
                           ID
                         </Badge>
                         <Badge
                           variant="outline"
-                          className={`px-1.5 py-0 border-0 rounded text-[9px] uppercase tracking-wider font-bold h-5 flex items-center gap-1 ${record.checklist.leaseSigned === "Signed" ? "bg-emerald-50/50 text-emerald-700 ring-1 ring-emerald-200/60" : "bg-amber-50/50 text-amber-700 ring-1 ring-amber-300/60"}`}
+                          className={`px-1.5 py-0 border-0 rounded text-[9px] uppercase tracking-wider font-bold h-5 flex items-center gap-1 ${record.checklist.leaseSigned === "Signed" ? "bg-emerald-50/50 text-emerald-700 ring-1 ring-emerald-200/60" : ""}`}
                         >
                           {record.checklist.leaseSigned === "Signed" ? (
                             <HugeiconsIcon
@@ -429,7 +429,7 @@ export default function OnboardingClient({
                               size={10}
                             />
                           ) : (
-                            <HugeiconsIcon icon={Time01Icon} size={10} />
+                            <HugeiconsIcon icon={Clock01Icon} size={10} />
                           )}{" "}
                           Lease
                         </Badge>
@@ -531,36 +531,40 @@ export default function OnboardingClient({
                     <p className="text-[13px] text-zinc-500 mt-0.5">
                       {selectedActivation.user.email}
                     </p>
+                    <Badge
+                      variant="outline"
+                      className={`px-0 py-0.5 border-0 rounded-full text-[10px] uppercase tracking-widest font-bold ${
+                        selectedActivation.status === "Active"
+                          ? "bg-green-50 text-green-700"
+                          : "bg-zinc-100/50 text-zinc-600"
+                      }`}
+                    >
+                      {selectedActivation.status.replace(/_/g, " ")}
+                    </Badge>
                   </div>
                 </div>
-                <Badge
-                  variant="outline"
-                  className={`px-2.5 py-0.5 border-0 rounded-full text-[10px] uppercase tracking-widest font-bold ${
-                    selectedActivation.status === "Active"
-                      ? "bg-green-50 text-green-700"
-                      : "bg-zinc-100/50 text-zinc-600"
-                  }`}
-                >
-                  {selectedActivation.status.replace(/_/g, " ")}
-                </Badge>
               </div>
 
               {/* --- 2. SCROLLABLE BODY --- */}
               <div className="flex-1 overflow-y-auto p-6 space-y-10">
-                
                 {/* A. Document Verification Section */}
                 <section>
                   <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-4">
                     Identity & Documents
                   </h3>
-                  
+
                   <div className="space-y-3">
                     {/* Ghana Card Row */}
                     <div className="flex items-center justify-between p-3.5 rounded-lg border border-zinc-200/60 bg-white ">
                       <div className="flex items-center gap-4">
                         {/* Professional Thumbnail Viewer */}
                         <button
-                          onClick={() => selectedActivation.user.ghanaCardUrl && setExpandedImage(selectedActivation.user.ghanaCardUrl)}
+                          onClick={() =>
+                            selectedActivation.user.ghanaCardUrl &&
+                            setExpandedImage(
+                              selectedActivation.user.ghanaCardUrl,
+                            )
+                          }
                           disabled={!selectedActivation.user.ghanaCardUrl}
                           className="relative h-12 w-16 bg-zinc-50 rounded-md border border-zinc-200/60 overflow-hidden group transition-all hover:border-zinc-300 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:ring-offset-2"
                         >
@@ -572,12 +576,20 @@ export default function OnboardingClient({
                                 className="w-full h-full object-cover"
                               />
                               <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                <HugeiconsIcon icon={Search01Icon} size={14} className="text-white" />
+                                <HugeiconsIcon
+                                  icon={Search01Icon}
+                                  size={14}
+                                  className="text-white"
+                                />
                               </div>
                             </>
                           ) : (
                             <div className="w-full h-full flex items-center justify-center">
-                              <HugeiconsIcon icon={Cancel01Icon} size={14} className="text-zinc-300" />
+                              <HugeiconsIcon
+                                icon={Cancel01Icon}
+                                size={14}
+                                className="text-zinc-300"
+                              />
                             </div>
                           )}
                         </button>
@@ -587,16 +599,26 @@ export default function OnboardingClient({
                             National ID
                           </p>
                           <p className="font-mono text-[13px] font-medium text-zinc-900 tracking-tight">
-                            {selectedActivation.user.ghanaCardNumber || "Not Provided"}
+                            {selectedActivation.user.ghanaCardNumber ||
+                              "Not Provided"}
                           </p>
                         </div>
                       </div>
 
                       <div>
-                        {selectedActivation.checklist.ghanaCardVerified === "Verified" ? (
-                          <HugeiconsIcon icon={CheckmarkCircle01Icon} size={18} className="text-green-500" />
+                        {selectedActivation.checklist.ghanaCardVerified ===
+                        "Verified" ? (
+                          <HugeiconsIcon
+                            icon={CheckmarkCircle01Icon}
+                            size={18}
+                            className=""
+                          />
                         ) : (
-                          <HugeiconsIcon icon={Time01Icon} size={18} className="text-amber-500" />
+                          <HugeiconsIcon
+                            icon={Clock01Icon}
+                            size={18}
+                            className=""
+                          />
                         )}
                       </div>
                     </div>
@@ -605,65 +627,99 @@ export default function OnboardingClient({
                     <div className="flex items-center justify-between p-3.5 rounded-lg border border-zinc-200/60 bg-white ">
                       <div className="flex items-center gap-4">
                         <div className="h-12 w-12 bg-zinc-50 rounded-md border border-zinc-200/60 flex items-center justify-center">
-                          <HugeiconsIcon icon={FileDownloadIcon} size={18} className="text-zinc-400" />
+                          <HugeiconsIcon
+                            icon={FileDownloadIcon}
+                            size={18}
+                            className="text-zinc-400"
+                          />
                         </div>
                         <div>
                           <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest mb-0.5">
                             Tenancy Agreement
                           </p>
-                          <button 
+                          <button
                             onClick={() => setIsViewingDocument(true)}
-                            disabled={selectedActivation.checklist.leaseSigned !== "Signed"}
+                            disabled={
+                              selectedActivation.checklist.leaseSigned !==
+                              "Signed"
+                            }
                             className="text-[13px] font-medium text-zinc-900 hover:underline underline-offset-4 disabled:no-underline disabled:text-zinc-400 text-left"
                           >
-                            {selectedActivation.checklist.leaseSigned === "Signed" ? "View Signed Document" : "Awaiting Tenant Signature"}
+                            {selectedActivation.checklist.leaseSigned ===
+                            "Signed"
+                              ? "View Signed Document"
+                              : "Awaiting Tenant Signature"}
                           </button>
                         </div>
                       </div>
                       <div>
-                        {selectedActivation.checklist.leaseSigned === "Signed" ? (
-                          <HugeiconsIcon icon={CheckmarkCircle01Icon} size={18} className="text-green-500" />
+                        {selectedActivation.checklist.leaseSigned ===
+                        "Signed" ? (
+                          <HugeiconsIcon
+                            icon={CheckmarkCircle01Icon}
+                            size={18}
+                            className=""
+                          />
                         ) : (
-                          <HugeiconsIcon icon={Time01Icon} size={18} className="text-amber-500" />
+                          <HugeiconsIcon
+                            icon={Clock01Icon}
+                            size={18}
+                            className=""
+                          />
                         )}
                       </div>
                     </div>
                   </div>
 
                   {/* Admin Decision Actions */}
-                  {!isLegalApproved && selectedActivation.status !== "Active" && (
-                    <div className="mt-4 flex gap-3">
-                      <Button
-                        className="flex-1 h-9 bg-zinc-900 text-white hover:bg-zinc-800 text-[12px] font-medium rounded-lg"
-                        onClick={() => setConfirmAction("approve")}
-                      >
-                        Approve Documents
-                      </Button>
-                      <Button
-                        variant="outline"
-                        className="flex-1 h-9 border-zinc-200/60 text-zinc-700 hover:bg-zinc-50 text-[12px] font-medium rounded-lg"
-                        onClick={() => setConfirmAction("reject")}
-                      >
-                        Request Resubmission
-                      </Button>
-                    </div>
-                  )}
+                  {!isLegalApproved &&
+                    selectedActivation.status !== "Active" && (
+                      <div className="mt-4 flex gap-3">
+                        <Button
+                          className="flex-1 h-9 bg-zinc-900 text-white hover:bg-zinc-800 text-[12px] font-medium rounded-lg"
+                          onClick={() => setConfirmAction("approve")}
+                        >
+                          Approve Documents
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="flex-1 h-9 border-zinc-200/60 text-zinc-700 hover:bg-zinc-50 text-[12px] font-medium rounded-lg"
+                          onClick={() => setConfirmAction("reject")}
+                        >
+                          Request Resubmission
+                        </Button>
+                      </div>
+                    )}
                 </section>
 
                 <div className="h-px w-full bg-zinc-100/50" />
 
                 {/* B. Property Access Section */}
-                <section className={`transition-opacity duration-300 ${!isLegalApproved ? "opacity-40 pointer-events-none" : ""}`}>
+                <section
+                  className={`transition-opacity duration-300 ${!isLegalApproved ? "opacity-40 pointer-events-none" : ""}`}
+                >
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
                       Property Access
                     </h3>
-                    {!isLegalApproved && <HugeiconsIcon icon={Key01Icon} size={14} className="text-zinc-300" />}
+                    {!isLegalApproved && (
+                      <HugeiconsIcon
+                        icon={Key01Icon}
+                        size={14}
+                        className="text-zinc-300"
+                      />
+                    )}
                   </div>
 
                   <div className="p-5 rounded-lg border border-zinc-200/60 bg-zinc-50/50">
                     <p className="text-[13px] text-zinc-600 leading-relaxed mb-5">
-                      Provision digital access for <span className="font-semibold text-zinc-900">{selectedActivation.lease.propertyName} ({selectedActivation.lease.unitNumber})</span>. The tenant will receive their entry PIN securely via SMS.
+                      Provision digital access for{" "}
+                      <span className="font-semibold text-zinc-900">
+                        {selectedActivation.lease.propertyName} (
+                        {selectedActivation.lease.unitNumber})
+                      </span>
+                      . The tenant will receive their entry PIN securely via
+                      SMS.
                     </p>
 
                     {selectedActivation.smartLockPin ? (
@@ -676,7 +732,10 @@ export default function OnboardingClient({
                             {selectedActivation.smartLockPin}
                           </p>
                         </div>
-                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-[10px]">
+                        <Badge
+                          variant="outline"
+                          className="bg-green-50 text-green-700 border-green-200 text-[10px]"
+                        >
                           Synced
                         </Badge>
                       </div>
@@ -685,7 +744,11 @@ export default function OnboardingClient({
                         className="w-full h-10 bg-zinc-900 text-white hover:bg-zinc-800 text-[13px] font-medium rounded-lg shadow-sm"
                         onClick={() => setConfirmAction("pin")}
                       >
-                        <HugeiconsIcon icon={Key01Icon} size={14} className="mr-2" />
+                        <HugeiconsIcon
+                          icon={Key01Icon}
+                          size={14}
+                          className="mr-2"
+                        />
                         Generate Smart Lock PIN
                       </Button>
                     )}
@@ -693,14 +756,18 @@ export default function OnboardingClient({
 
                   {!isLegalApproved && (
                     <div className="mt-3 flex items-start gap-2 text-zinc-500">
-                      <HugeiconsIcon icon={Alert01Icon} size={14} className="mt-0.5 shrink-0" />
+                      <HugeiconsIcon
+                        icon={Alert01Icon}
+                        size={14}
+                        className="mt-0.5 shrink-0"
+                      />
                       <p className="text-[12px] leading-tight">
-                        Access provisioning is disabled until all tenant documents are approved.
+                        Access provisioning is disabled until all tenant
+                        documents are approved.
                       </p>
                     </div>
                   )}
                 </section>
-
               </div>
             </>
           )}

@@ -69,6 +69,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { formatCurrency } from "./transactions-client"
+
 
 // --- STATIC CONFIGS ---
 const revenueChartConfig = {
@@ -83,7 +85,6 @@ const assetChartConfig = {
 }
 
 // --- UTILS ---
-const formatCurrency = (amount: number) => `₵ ${amount.toLocaleString()}`
 
 const getPropertyIcon = (type: string) => {
   switch (type) {
@@ -284,7 +285,7 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
                   </div>
                   <div className="mt-4 flex flex-col">
                     <span className="text-2xl font-bold tracking-tight text-foreground font-tabular-nums">
-                      {formatCurrency(metrics.monthlyRevenue)}
+                      {formatCurrency(metrics.monthlyRevenue).replace("GH", "")}
                     </span>
                     <div className="mt-2 flex items-center text-xs text-muted-foreground">
                       <span className="mr-1.5 flex items-center font-medium text-emerald-600">
@@ -332,7 +333,7 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
                   </div>
                   <div className="mt-4 flex flex-col">
                     <span className="text-2xl font-bold tracking-tight text-foreground font-tabular-nums">
-                      {formatCurrency(metrics.unverifiedFunds)}
+                      {formatCurrency(metrics.unverifiedFunds).replace("GH", "")}
                     </span>
                     <div className="mt-2 flex items-center text-xs text-muted-foreground">
                       <span className="mr-1.5 flex items-center font-medium text-rose-600">
@@ -356,7 +357,7 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
                   </div>
                   <div className="mt-4 flex flex-col">
                     <span className="text-2xl font-bold tracking-tight text-foreground font-tabular-nums">
-                      {formatCurrency(metrics.outstandingRent)}
+                      {formatCurrency(metrics.outstandingRent).replace("GH", "")}
                     </span>
                     <div className="mt-2 flex items-center text-xs text-muted-foreground">
                       Across active tenancies
@@ -543,7 +544,7 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
                           </div>
                         </TableCell>
                         <TableCell className="py-3 text-right">
-                          <span className="text-[13px] font-semibold text-foreground font-tabular-nums">{formatCurrency(payment.amount)}</span>
+                          <span className="text-[13px] font-semibold text-foreground font-tabular-nums">{formatCurrency(payment.amount).replace("GH", "")}</span>
                         </TableCell>
                         <TableCell className="py-3 px-5 text-right">
                           <Badge variant="secondary" className={`rounded-md px-2 py-0.5 text-[10px] font-medium hover:bg-transparent border-none ${
@@ -600,7 +601,7 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
                           </div>
                         </TableCell>
                         <TableCell className="py-3 px-5">
-                          <span className="text-[13px] font-semibold text-foreground font-tabular-nums">{formatCurrency(listing.price)}</span>
+                          <span className="text-[13px] font-semibold text-foreground font-tabular-nums">{formatCurrency(listing.price).replace("GH", "")}</span>
                         </TableCell>
                         <TableCell className="py-3 ">
                           <Badge variant="secondary" className={`rounded-md px-2 py-0.5 text-[10px] font-medium hover:bg-transparent border-none ${
@@ -658,7 +659,7 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
                           </div>
                         </TableCell>
                         <TableCell className="py-3 text-right">
-                          <span className="text-[13px] font-semibold text-foreground font-tabular-nums">{formatCurrency(rent.amountDue)}</span>
+                          <span className="text-[13px] font-semibold text-foreground font-tabular-nums">{formatCurrency(rent.amountDue).replace("GH", "")}</span>
                         </TableCell>
                         <TableCell className="py-3 px-5 text-right">
                           <Badge variant="secondary" className={`rounded-md px-2 py-0.5 text-[10px] font-medium hover:bg-transparent border-none ${

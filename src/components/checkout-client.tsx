@@ -18,6 +18,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react"
 import { IProperty } from "@/components/property-card"
 import { verifyPaystackPayment } from "@/actions/user/payment.action"
+import { LoginModal } from "@/components/login-modal"
 
 interface CheckoutClientProps {
   listing: IProperty | any;
@@ -225,23 +226,37 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
             </div>
 
             {/* Submit Button */}
-            <button 
-              type="submit"
-              disabled={isProcessing}
-              className="block w-full min-w-0 max-w-full box-border py-2.5 md:py-5 bg-zinc-950 text-white font-black uppercase tracking-widest text-[10px] md:text-sm rounded-lg hover:bg-zinc-800 transition-colors flex items-center justify-center gap-1.5 md:gap-3 disabled:opacity-70 m-0"
-            >
-              {isProcessing && (
-                <span className="scale-75 md:scale-100 flex items-center">
-                  <HugeiconsIcon icon={Loading03Icon} size={18} className="animate-spin" />
-                </span>
-              )}
-              {isProcessing ? "Connecting..." : `Pay $${listing.price.toLocaleString()} Securely`}
-              {!isProcessing && (
-                <span className="scale-75 md:scale-100 flex items-center">
-                   <HugeiconsIcon icon={Shield01Icon} size={18} />
-                </span>
-              )}
-            </button>
+            {currentUser ? (
+              <button 
+                type="submit"
+                disabled={isProcessing}
+                className="block w-full min-w-0 max-w-full box-border py-2.5 md:py-5 bg-zinc-950 text-white font-black uppercase tracking-widest text-[10px] md:text-sm rounded-lg hover:bg-zinc-800 transition-colors flex items-center justify-center gap-1.5 md:gap-3 disabled:opacity-70 m-0"
+              >
+                {isProcessing && (
+                  <span className="scale-75 md:scale-100 flex items-center">
+                    <HugeiconsIcon icon={Loading03Icon} size={18} className="animate-spin" />
+                  </span>
+                )}
+                {isProcessing ? "Connecting..." : `Pay $${listing.price.toLocaleString()} Securely`}
+                {!isProcessing && (
+                  <span className="scale-75 md:scale-100 flex items-center">
+                     <HugeiconsIcon icon={Shield01Icon} size={18} />
+                  </span>
+                )}
+              </button>
+            ) : (
+              <LoginModal>
+                <button 
+                  type="button"
+                  className="block w-full min-w-0 max-w-full box-border py-2.5 md:py-5 bg-zinc-950 text-white font-black uppercase tracking-widest text-[10px] md:text-sm rounded-lg hover:bg-zinc-800 transition-colors flex items-center justify-center gap-1.5 md:gap-3 m-0"
+                >
+                  Log in to Pay ${listing.price.toLocaleString()} Securely
+                  <span className="scale-75 md:scale-100 flex items-center">
+                     <HugeiconsIcon icon={Shield01Icon} size={18} />
+                  </span>
+                </button>
+              </LoginModal>
+            )}
 
             {/* Trust Badges */}
             <div className="flex flex-col items-center gap-2 md:gap-4 mt-3 md:mt-6 w-full box-border">

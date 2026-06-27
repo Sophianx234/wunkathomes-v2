@@ -50,6 +50,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { updateTourAction } from "@/actions/user/tour.action";
+import { formatCurrency } from "./transactions-client";
 
 type TourStatus =
   | "Pending_Time"
@@ -103,7 +104,6 @@ const formatTime = (dateString: string) => {
   });
 };
 
-const formatCurrency = (amount: number) => `GHS ${amount.toLocaleString()}`;
 
 // REFINED INDUSTRY-STANDARD MONOCHROMATIC BADGES
 const getStatusBadge = (status: TourStatus) => {
@@ -571,7 +571,7 @@ export default function TourTable({
                     <dl className="grid grid-cols-2 gap-x-4 gap-y-4 p-4 text-[13px]">
                       <div>
                         <dt className="text-zinc-500 mb-1">Pricing</dt>
-                        <dd className="font-medium text-zinc-900 font-tabular-nums">{formatCurrency(selectedTour.listing.price)}</dd>
+                        <dd className="font-medium text-zinc-900 font-tabular-nums">{formatCurrency(selectedTour.listing.price).replace("GH", "")}</dd>
                       </div>
                       <div>
                         <dt className="text-zinc-500 mb-1">Asset Type</dt>

@@ -13,7 +13,7 @@ import {
   Bathtub01Icon,
   Maximize01Icon,
   CreditCardIcon,
-  Time01Icon,
+  Clock01Icon,
   Building03Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -40,6 +40,7 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { TransactionReceipt } from "./transaction-reciept";
+import { formatCurrency } from "./transactions-client";
 
 // IMPORT YOUR RECEIPT COMPONENT HERE
 
@@ -72,8 +73,6 @@ export interface TransactionRecord {
 }
 
 // --- UTILS ---
-const formatCurrency = (amount: number, currency: string = "GHS") =>
-  new Intl.NumberFormat("en-GH", { style: "currency", currency }).format(amount);
 
 const formatDate = (dateString: string) => {
   const d = new Date(dateString);
@@ -111,13 +110,33 @@ const getStatusBadge = (status: string) => {
 const getChannelIcon = (channel: string) => {
   switch (channel) {
     case "card":
-      return <HugeiconsIcon icon={CreditCardIcon} size={12} className="text-zinc-400" />;
+      return (
+        <HugeiconsIcon
+          icon={CreditCardIcon}
+          size={12}
+          className="text-zinc-400"
+        />
+      );
     case "mobile_money":
-      return <HugeiconsIcon icon={SmartPhone01Icon} size={12} className="text-zinc-400" />;
+      return (
+        <HugeiconsIcon
+          icon={SmartPhone01Icon}
+          size={12}
+          className="text-zinc-400"
+        />
+      );
     case "bank":
-      return <HugeiconsIcon icon={UniversityIcon} size={12} className="text-zinc-400" />;
+      return (
+        <HugeiconsIcon
+          icon={UniversityIcon}
+          size={12}
+          className="text-zinc-400"
+        />
+      );
     default:
-      return <HugeiconsIcon icon={Time01Icon} size={12} className="text-zinc-400" />;
+      return (
+        <HugeiconsIcon icon={Clock01Icon} size={12} className="text-zinc-400" />
+      );
   }
 };
 
@@ -127,11 +146,13 @@ export default function TransactionsClient({
 }: {
   initialTransactions: TransactionRecord[];
 }) {
-  const [activeTab, setActiveTab] = useState<"all" | "success" | "pending">("all");
+  const [activeTab, setActiveTab] = useState<"all" | "success" | "pending">(
+    "all",
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [channelFilter, setChannelFilter] = useState("all");
   const [purposeFilter, setPurposeFilter] = useState("all");
-  
+
   const [selectedTx, setSelectedTx] = useState<TransactionRecord | null>(null);
   const [isViewingReceipt, setIsViewingReceipt] = useState(false); // NEW STATE FOR RECEIPT VIEWER
 
@@ -144,7 +165,8 @@ export default function TransactionsClient({
 
       // Dropdown Filters
       if (channelFilter !== "all" && tx.channel !== channelFilter) return false;
-      if (purposeFilter !== "all" && tx.paymentPurpose !== purposeFilter) return false;
+      if (purposeFilter !== "all" && tx.paymentPurpose !== purposeFilter)
+        return false;
 
       // Search Filter
       if (searchQuery) {
@@ -157,22 +179,34 @@ export default function TransactionsClient({
       }
       return true;
     });
-  }, [initialTransactions, activeTab, searchQuery, channelFilter, purposeFilter]);
+  }, [
+    initialTransactions,
+    activeTab,
+    searchQuery,
+    channelFilter,
+    purposeFilter,
+  ]);
 
-  const pendingCount = initialTransactions.filter((t) => t.status === "Pending").length;
+  const pendingCount = initialTransactions.filter(
+    (t) => t.status === "Pending",
+  ).length;
 
   // Extract unique dynamic options for filters
-  const uniqueChannels = Array.from(new Set(initialTransactions.map((t) => t.channel)));
-  const uniquePurposes = Array.from(new Set(initialTransactions.map((t) => t.paymentPurpose)));
+  const uniqueChannels = Array.from(
+    new Set(initialTransactions.map((t) => t.channel)),
+  );
+  const uniquePurposes = Array.from(
+    new Set(initialTransactions.map((t) => t.paymentPurpose)),
+  );
 
   // =====================================================================
   // INVOCATION OF THE ISOLATED RECEIPT COMPONENT
   // =====================================================================
   if (isViewingReceipt && selectedTx) {
     return (
-      <TransactionReceipt 
-        transaction={selectedTx} 
-        onBack={() => setIsViewingReceipt(false)} 
+      <TransactionReceipt
+        transaction={selectedTx}
+        onBack={() => setIsViewingReceipt(false)}
       />
     );
   }
@@ -180,7 +214,6 @@ export default function TransactionsClient({
   return (
     <div className="min-h-screen bg-[#FAFAFA] p-6 lg:pb-10 font-sans">
       <div className="max-w-[1400px] mx-auto space-y-6">
-        
         {/* PAGE HEADER & TABS */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-zinc-200/60 pb-4">
           <div>
@@ -195,13 +228,22 @@ export default function TransactionsClient({
             className="w-full md:w-auto"
           >
             <TabsList className="h-9 bg-zinc-100/50 border border-zinc-200/60 p-0.5 rounded-lg">
-              <TabsTrigger value="all" className="text-[13px] font-medium data-[state=active]:bg-white  rounded-md px-4">
-                All 
+              <TabsTrigger
+                value="all"
+                className="text-[13px] font-medium data-[state=active]:bg-white  rounded-md px-4"
+              >
+                All
               </TabsTrigger>
-              <TabsTrigger value="success" className="text-[13px] font-medium data-[state=active]:bg-white  rounded-md px-4">
+              <TabsTrigger
+                value="success"
+                className="text-[13px] font-medium data-[state=active]:bg-white  rounded-md px-4"
+              >
                 Successful
               </TabsTrigger>
-              <TabsTrigger value="pending" className="text-[13px] font-medium data-[state=active]:bg-white  rounded-md px-4">
+              <TabsTrigger
+                value="pending"
+                className="text-[13px] font-medium data-[state=active]:bg-white  rounded-md px-4"
+              >
                 Pending
                 {pendingCount > 0 && (
                   <span className="ml-2 inline-flex items-center justify-center bg-zinc-200/80 text-[10px] font-bold h-4 w-4 rounded-full text-zinc-700">
@@ -216,7 +258,11 @@ export default function TransactionsClient({
         {/* INLINE FILTER CHROME */}
         <section className="flex flex-col xl:flex-row items-center gap-4 bg-white p-1.5 border border-zinc-200/60 rounded-lg shadow-[0_1px_4px_rgba(0,0,0,0.01)] w-full">
           <div className="relative flex-1 w-full">
-            <HugeiconsIcon icon={Search01Icon} size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+            <HugeiconsIcon
+              icon={Search01Icon}
+              size={16}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"
+            />
             <Input
               placeholder="Search by Reference ID, Tenant, or Property..."
               value={searchQuery}
@@ -287,12 +333,24 @@ export default function TransactionsClient({
           <Table>
             <TableHeader className="bg-zinc-50/30">
               <TableRow className="border-zinc-200/60 hover:bg-transparent">
-                <TableHead className="font-medium text-zinc-500 text-xs h-10 w-[180px]">ID & Date</TableHead>
-                <TableHead className="font-medium text-zinc-500 text-xs h-10">Client / Tenant</TableHead>
-                <TableHead className="font-medium text-zinc-500 text-xs h-10">Allocation</TableHead>
-                <TableHead className="font-medium text-zinc-500 text-xs h-10">Channel</TableHead>
-                <TableHead className="font-medium text-zinc-500 text-xs h-10 ">Value</TableHead>
-                <TableHead className="font-medium text-zinc-500 text-xs h-10 w-[140px] ">Status</TableHead>
+                <TableHead className="font-medium text-zinc-500 text-xs h-10 w-[180px]">
+                  ID & Date
+                </TableHead>
+                <TableHead className="font-medium text-zinc-500 text-xs h-10">
+                  Client / Tenant
+                </TableHead>
+                <TableHead className="font-medium text-zinc-500 text-xs h-10">
+                  Allocation
+                </TableHead>
+                <TableHead className="font-medium text-zinc-500 text-xs h-10">
+                  Channel
+                </TableHead>
+                <TableHead className="font-medium text-zinc-500 text-xs h-10 ">
+                  Value
+                </TableHead>
+                <TableHead className="font-medium text-zinc-500 text-xs h-10 w-[140px] ">
+                  Status
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -309,7 +367,10 @@ export default function TransactionsClient({
                         {tx.reference}
                       </span>
                       <span className="text-[11px] text-zinc-500 mt-0.5">
-                        {new Date(tx.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short" })}
+                        {new Date(tx.createdAt).toLocaleDateString("en-GB", {
+                          day: "2-digit",
+                          month: "short",
+                        })}
                       </span>
                     </div>
                   </TableCell>
@@ -331,7 +392,9 @@ export default function TransactionsClient({
 
                   {/* Col 3: Allocation */}
                   <TableCell className="py-3 align-middle">
-                    <span className={`px-2 py-0.5 rounded-md text-[11px] font-medium tracking-wide whitespace-nowrap ${getPurposeBadge(tx.paymentPurpose)}`}>
+                    <span
+                      className={`px-2 py-0.5 rounded-md text-[11px] font-medium tracking-wide whitespace-nowrap ${getPurposeBadge(tx.paymentPurpose)}`}
+                    >
                       {tx.paymentPurpose.replace("_", " ")}
                     </span>
                   </TableCell>
@@ -347,7 +410,7 @@ export default function TransactionsClient({
                   {/* Col 5: Value */}
                   <TableCell className="py-3 align-middle ">
                     <span className="text-[14px] font-semibold text-zinc-900 font-tabular-nums tracking-tight">
-                      {formatCurrency(tx.amount, tx.currency)}
+                      {formatCurrency(tx.amount, tx.currency).replace("GH", "")}
                     </span>
                   </TableCell>
 
@@ -365,7 +428,10 @@ export default function TransactionsClient({
 
               {filteredData.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} className="h-32 text-center text-zinc-500 text-sm">
+                  <TableCell
+                    colSpan={6}
+                    className="h-32 text-center text-zinc-500 text-sm"
+                  >
                     No transactions match your current filters.
                   </TableCell>
                 </TableRow>
@@ -376,7 +442,10 @@ export default function TransactionsClient({
       </div>
 
       {/* INDUSTRY STANDARD TRANSACTION DESK (Sheet) */}
-      <Dialog open={!!selectedTx && !isViewingReceipt} onOpenChange={(open) => !open && setSelectedTx(null)}>
+      <Dialog
+        open={!!selectedTx && !isViewingReceipt}
+        onOpenChange={(open) => !open && setSelectedTx(null)}
+      >
         <DialogContent className="w-full sm:max-w-xl md:max-w-2xl p-0 bg-[#FAFAFA] border border-slate-200/80 flex flex-col font-sans shadow-sm rounded-lg max-h-[85vh] overflow-hidden">
           {selectedTx && (
             <>
@@ -389,13 +458,18 @@ export default function TransactionsClient({
                   >
                     {selectedTx.status}
                   </Badge>
-                  <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${getPurposeBadge(selectedTx.paymentPurpose)}`}>
+                  <span
+                    className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${getPurposeBadge(selectedTx.paymentPurpose)}`}
+                  >
                     {selectedTx.paymentPurpose.replace(/_/g, " ")}
                   </span>
                 </div>
 
                 <h2 className="text-3xl font-semibold tracking-tighter text-zinc-900 font-tabular-nums mb-6 leading-none">
-                  {formatCurrency(selectedTx.amount, selectedTx.currency)}
+                  {formatCurrency(
+                    selectedTx.amount,
+                    selectedTx.currency,
+                  ).replace("GH", "")}
                 </h2>
 
                 <div className="flex items-center gap-4">
@@ -418,7 +492,6 @@ export default function TransactionsClient({
 
               {/* Scrollable Data Body */}
               <div className="flex-1 overflow-y-auto px-6 py-8 space-y-10">
-                
                 {/* 1. Property Context Card */}
                 <section>
                   <div className="flex items-center justify-between mb-4">
@@ -430,7 +503,8 @@ export default function TransactionsClient({
                       target="_blank"
                       className="inline-flex items-center gap-1 text-[11px] font-medium text-zinc-500 hover:text-zinc-900 tracking-wide transition-colors"
                     >
-                      View Asset <HugeiconsIcon icon={LinkSquare01Icon} size={12} />
+                      View Asset{" "}
+                      <HugeiconsIcon icon={LinkSquare01Icon} size={12} />
                     </Link>
                   </div>
 
@@ -438,10 +512,18 @@ export default function TransactionsClient({
                     <div className="p-4 bg-zinc-50/50 flex gap-4 border-b border-zinc-200/60">
                       <div className="h-12 w-12 shrink-0 bg-white rounded-md overflow-hidden border border-zinc-200/60 shadow-sm">
                         {selectedTx.listing.image ? (
-                          <img src={selectedTx.listing.image} alt="Property" className="w-full h-full object-cover" />
+                          <img
+                            src={selectedTx.listing.image}
+                            alt="Property"
+                            className="w-full h-full object-cover"
+                          />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
-                            <HugeiconsIcon icon={Building03Icon} size={16} className="text-zinc-300"/>
+                            <HugeiconsIcon
+                              icon={Building03Icon}
+                              size={16}
+                              className="text-zinc-300"
+                            />
                           </div>
                         )}
                       </div>
@@ -450,33 +532,56 @@ export default function TransactionsClient({
                           {selectedTx.listing.title}
                         </h4>
                         <p className="text-[12px] text-zinc-500 mt-0.5 truncate">
-                          {selectedTx.listing.property.propertyName || selectedTx.listing.property.location}
+                          {selectedTx.listing.property.propertyName ||
+                            selectedTx.listing.property.location}
                         </p>
                       </div>
                     </div>
                     <dl className="grid grid-cols-2 gap-x-4 gap-y-4 p-4 text-[13px] bg-white">
                       <div>
                         <dt className="text-zinc-500 mb-1">Pricing</dt>
-                        <dd className="font-medium text-zinc-900 font-tabular-nums">{formatCurrency(selectedTx.listing.price)}</dd>
+                        <dd className="font-medium text-zinc-900 font-tabular-nums">
+                          {formatCurrency(selectedTx.listing.price).replace(
+                            "GH",
+                            "",
+                          )}
+                        </dd>
                       </div>
                       <div>
                         <dt className="text-zinc-500 mb-1">Asset Type</dt>
-                        <dd className="font-medium text-zinc-900 capitalize">{selectedTx.listing.property.propertyType.replace("_", " ")}</dd>
+                        <dd className="font-medium text-zinc-900 capitalize">
+                          {selectedTx.listing.property.propertyType.replace(
+                            "_",
+                            " ",
+                          )}
+                        </dd>
                       </div>
                       <div className="col-span-2">
                         <dt className="text-zinc-500 mb-1.5">Configurations</dt>
                         <dd className="flex items-center gap-4 text-zinc-700 font-medium">
                           <span className="flex items-center gap-1.5">
-                            <HugeiconsIcon icon={BedSingle01Icon} size={14} className="text-zinc-400" />
+                            <HugeiconsIcon
+                              icon={BedSingle01Icon}
+                              size={14}
+                              className="text-zinc-400"
+                            />
                             {selectedTx.listing.features.bedrooms} Bed
                           </span>
                           <span className="flex items-center gap-1.5">
-                            <HugeiconsIcon icon={Bathtub01Icon} size={14} className="text-zinc-400" />
+                            <HugeiconsIcon
+                              icon={Bathtub01Icon}
+                              size={14}
+                              className="text-zinc-400"
+                            />
                             {selectedTx.listing.features.bathrooms} Bath
                           </span>
                           {selectedTx.listing.features.sizeSqm > 0 && (
                             <span className="flex items-center gap-1.5">
-                              <HugeiconsIcon icon={Maximize01Icon} size={14} className="text-zinc-400" />
+                              <HugeiconsIcon
+                                icon={Maximize01Icon}
+                                size={14}
+                                className="text-zinc-400"
+                              />
                               {selectedTx.listing.features.sizeSqm} sqm
                             </span>
                           )}
@@ -494,20 +599,26 @@ export default function TransactionsClient({
                   <div className="bg-white border border-zinc-200/60 rounded-lg overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.01)]">
                     <dl className="divide-y divide-zinc-100 text-[13px]">
                       <div className="flex justify-between py-3 px-4">
-                        <dt className="text-zinc-500 font-medium">Reference ID</dt>
+                        <dt className="text-zinc-500 font-medium">
+                          Reference ID
+                        </dt>
                         <dd className="text-zinc-900 font-mono tracking-tight text-right font-medium">
                           {selectedTx.reference}
                         </dd>
                       </div>
                       <div className="flex justify-between py-3 px-4">
-                        <dt className="text-zinc-500 font-medium">Created At</dt>
+                        <dt className="text-zinc-500 font-medium">
+                          Created At
+                        </dt>
                         <dd className="text-zinc-900 font-tabular-nums text-right font-medium">
                           {formatDate(selectedTx.createdAt)}
                         </dd>
                       </div>
                       {selectedTx.paidAt && (
                         <div className="flex justify-between py-3 px-4">
-                          <dt className="text-zinc-500 font-medium">Cleared At</dt>
+                          <dt className="text-zinc-500 font-medium">
+                            Cleared At
+                          </dt>
                           <dd className="text-emerald-700 font-tabular-nums text-right font-medium">
                             {formatDate(selectedTx.paidAt)}
                           </dd>
@@ -522,9 +633,15 @@ export default function TransactionsClient({
                       </div>
                       {selectedTx.leaseId && (
                         <div className="flex justify-between py-3 px-4 bg-zinc-50/50">
-                          <dt className="text-zinc-500 font-medium">Lease Link</dt>
+                          <dt className="text-zinc-500 font-medium">
+                            Lease Link
+                          </dt>
                           <dd className="flex items-center gap-1 text-zinc-900 text-right font-medium">
-                            <HugeiconsIcon icon={ArrowUpRight01Icon} size={14} className="text-zinc-400" />
+                            <HugeiconsIcon
+                              icon={ArrowUpRight01Icon}
+                              size={14}
+                              className="text-zinc-400"
+                            />
                             <span className="font-mono tracking-tight text-[12px] uppercase">
                               {selectedTx.leaseId.slice(-8)}
                             </span>
@@ -544,7 +661,11 @@ export default function TransactionsClient({
                   className="h-10 w-full text-[12px] font-medium border-zinc-200/60 hover:bg-zinc-50 rounded-lg flex items-center justify-center gap-2 shadow-none text-zinc-700"
                 >
                   View Official Receipt
-                  <HugeiconsIcon icon={ArrowUpRight01Icon} size={14} className="text-zinc-400" />
+                  <HugeiconsIcon
+                    icon={ArrowUpRight01Icon}
+                    size={14}
+                    className="text-zinc-400"
+                  />
                 </Button>
               </div>
             </>

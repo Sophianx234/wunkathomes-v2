@@ -11,7 +11,7 @@ import {
   UserCircleIcon,
   Shield02Icon,
   SignatureIcon,
-  Time01Icon,
+  Clock01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { AnimatePresence, motion } from "framer-motion";
@@ -482,12 +482,16 @@ export function VerificationDashboard({
                           <option value="Ghana_Card">Ghana Card</option>
                           <option value="Voter_ID">Voter ID</option>
                           <option value="Passport">Passport</option>
-                          <option value="Driver_License">Driver's License</option>
+                          <option value="Driver_License">
+                            Driver's License
+                          </option>
                         </select>
                         <input
                           type="text"
                           placeholder={
-                            idType === "Ghana_Card" ? "GHA-000000000-0" : "1234567890"
+                            idType === "Ghana_Card"
+                              ? "GHA-000000000-0"
+                              : "1234567890"
                           }
                           value={idNumber}
                           onChange={handleIdChange}
@@ -571,7 +575,7 @@ export function VerificationDashboard({
                       <>
                         <div className="w-12 h-12 md:w-20 md:h-20 bg-black text-white rounded-full flex items-center justify-center mb-4 md:mb-6 shrink-0">
                           <span className="scale-75 md:scale-100 flex items-center">
-                            <HugeiconsIcon icon={Time01Icon} size={40} />
+                            <HugeiconsIcon icon={Clock01Icon} size={40} />
                           </span>
                         </div>
                         <h3 className="text-lg md:text-2xl font-bold text-zinc-900 mb-1 md:mb-2 px-2 break-words w-full">
