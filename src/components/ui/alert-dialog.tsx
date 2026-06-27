@@ -160,7 +160,7 @@ function AlertDialogAction({
     <Button variant={variant} size={size} asChild>
       <AlertDialogPrimitive.Action
         data-slot="alert-dialog-action"
-        className={cn(className)}
+        className={cn("bg-black text-white hover:bg-black/90 dark:bg-black dark:text-white dark:hover:bg-black/90", className)}
         {...props}
       />
     </Button>
