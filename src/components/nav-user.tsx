@@ -117,7 +117,7 @@ export function NavUser({
               className={`cursor-pointer ${
                 isLoggingOut 
                   ? "text-zinc-400 focus:bg-transparent pointer-events-none" 
-                  : "text-rose-600 focus:bg-rose-50 focus:text-rose-700"
+                  : "  "
               }`}
             >
               {isLoggingOut ? (

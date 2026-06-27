@@ -18,7 +18,7 @@ import { signupAction } from "@/actions/user/auth.action";
 import { toast } from "sonner";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Loading03Icon } from "@hugeicons/core-free-icons";
-import { useRouter } from "next/navigation"; // <-- 1. Import useRouter
+import { useRouter, useSearchParams } from "next/navigation"; // <-- 1. Import useRouter
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -38,6 +38,8 @@ export function SignupForm({
   ...props
 }: React.ComponentProps<"form">) {
   const router = useRouter(); // <-- 2. Initialize router
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get('callbackUrl');
   const [phone, setPhone] = useState("");
   const [countryCode, setCountryCode] = useState("+233");
   const [state, formAction] = useFormState(signupAction, null);
@@ -49,9 +51,11 @@ export function SignupForm({
     } else if (state?.success) {
       toast.success(state.message);
       // <-- 3. Redirect on the client AFTER the toast triggers
-      router.push("/");
+      const userRole = state?.userRole;
+      const targetDestination = callbackUrl || (userRole === "Admin" ? "/admin/overview" : "/");
+      router.push(targetDestination);
     }
-  }, [state, router]);
+  }, [state, router, callbackUrl]);
 
   return (
     <form
@@ -139,7 +143,7 @@ export function SignupForm({
           </Button>
           <FieldDescription className="text-center mt-4">
             Already have an account?{" "}
-            <Link href="/login" className="underline underline-offset-4">
+            <Link href={`/login${callbackUrl ? `?callbackUrl=${encodeURIComponent(callbackUrl)}` : ''}`} className="underline underline-offset-4">
               Login
             </Link>
           </FieldDescription>

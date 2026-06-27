@@ -17,7 +17,7 @@ import { loginAction } from "@/actions/user/auth.action";
 import { toast } from "sonner";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Loading03Icon } from "@hugeicons/core-free-icons";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 // --- Submit Button Component ---
 function SubmitButton() {
@@ -34,11 +34,18 @@ function SubmitButton() {
 }
 
 // --- Main Form Component ---
+interface LoginFormProps extends React.ComponentProps<"form"> {
+  isModal?: boolean;
+}
+
 export function LoginForm({
   className,
+  isModal = false,
   ...props
-}: React.ComponentProps<"form">) {
+}: LoginFormProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get('callbackUrl');
 
   // Initialize server action state hook
   const [state, formAction] = useFormState(loginAction, null);
@@ -49,10 +56,15 @@ export function LoginForm({
       toast.error(state.error);
     } else if (state?.success) {
       toast.success(state.message);
-      // Route user to dashboard upon success
-      router.push(state?.redirectUrl||"/");
+      if (state.redirectUrl === "REFRESH") {
+        window.location.reload(); // Hard reload guarantees checkout page gets the updated session
+      } else {
+        const userRole = state?.userRole;
+        const targetDestination = callbackUrl || (userRole === "Admin" ? "/admin/overview" : (state?.redirectUrl || "/"));
+        router.push(targetDestination);
+      }
     }
-  }, [state, router]);
+  }, [state, router, callbackUrl]);
 
   return (
     <form
@@ -60,6 +72,7 @@ export function LoginForm({
       action={formAction}
       {...props}
     >
+      {isModal && <input type="hidden" name="isModal" value="true" />}
       <FieldGroup>
         <div className="flex flex-col items-center gap-1 text-center">
           <h1 className="text-2xl font-bold">Login to your account</h1>
@@ -121,7 +134,7 @@ export function LoginForm({
           </Button>
           <FieldDescription className="text-center mt-4">
             Don&apos;t have an account?{" "}
-            <Link href="/signup" className="underline underline-offset-4">
+            <Link href={`/signup${callbackUrl ? `?callbackUrl=${encodeURIComponent(callbackUrl)}` : ''}`} className="underline underline-offset-4">
               Sign up
             </Link>
           </FieldDescription>

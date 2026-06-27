@@ -163,6 +163,7 @@ export async function loginAction(prevState: any, formData: FormData) {
     let targetRoute = "/";
     if (user.role === "Admin") targetRoute = "/admin/overview";
     else if (user.role === "Manager") targetRoute = "/admin/overview";
+    else if (formData.get("isModal") === "true") targetRoute = "REFRESH";
 
     return { success: true, message: "Welcome back!", redirectUrl: targetRoute };
 

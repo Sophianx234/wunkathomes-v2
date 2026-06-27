@@ -38,7 +38,7 @@ export function LoginModal({ children }: LoginModalProps) {
             </DialogDescription>
           </DialogHeader>
           
-          <LoginForm />
+          <LoginForm isModal={true} />
         </div>
       </DialogContent>
     </Dialog>
