@@ -69,6 +69,23 @@ export default function BookingCard({ listing, isRent, hasBookedTour, bookedTour
 
   const displayDate = bookedTourDate || selectedDate;
 
+  const isSale = listing.listingType === "For_Sale";
+  const isShortLet = listing.listingType === "Short_Let";
+
+  let ctaText = "Secure This Property";
+  let microCopy = "You will be securely redirected to pay the full amount and take this property off the market.";
+
+  if (isSale) {
+    ctaText = "Secure This Property";
+    microCopy = "You will be securely redirected to pay the full amount and take this property off the market.";
+  } else if (isShortLet) {
+    ctaText = "Secure Your Booking";
+    microCopy = "You will be securely redirected to complete your payment.";
+  } else {
+    ctaText = "Secure Your Lease";
+    microCopy = "You will be securely redirected to pay the full amount and take this property off the market.";
+  }
+
   return (
     <div className="lg:col-span-4 lg:-translate-y-8 w-full lg:w-[300px] lg:ml-auto relative">
       
@@ -105,8 +122,8 @@ export default function BookingCard({ listing, isRent, hasBookedTour, bookedTour
                   </span>
                 </button>
                 <Link href={`/checkout/${listing.slug}?type=deposit`} className="shrink-0">
-                  <button className="px-5 py-3 bg-black text-white font-black uppercase tracking-widest text-[10px] rounded-lg hover:bg-zinc-800 transition-colors whitespace-nowrap w-full">
-                    {isRent ? "Reserve" : "Buy Now"}
+                  <button className="px-5 py-3 bg-black text-white font-black uppercase tracking-widest text-[10px] rounded-lg hover:bg-black/90 transition-colors whitespace-nowrap w-full">
+                    {ctaText}
                   </button>
                 </Link>
               </div>
@@ -173,14 +190,19 @@ export default function BookingCard({ listing, isRent, hasBookedTour, bookedTour
           
           {step === "IDLE" && (
             <div className="hidden lg:contents w-full box-border">
-              <Link
-                href={`/checkout/${listing.slug}?type=deposit`}
-                className="w-full block"
-              >
-                <button className="w-full py-4 bg-black text-white font-black uppercase tracking-widest text-xs rounded-lg hover:bg-zinc-800 transition-colors">
-                  {isRent ? "Reserve Now" : "Reserve to Buy"}
-                </button>
-              </Link>
+              <div className="w-full box-border">
+                <Link
+                  href={`/checkout/${listing.slug}?type=deposit`}
+                  className="w-full block"
+                >
+                  <button className="w-full bg-black text-white hover:bg-black/90 py-6 text-sm uppercase tracking-widest font-bold rounded-lg transition-colors">
+                    {ctaText}
+                  </button>
+                </Link>
+                <p className="text-[10px] lg:text-xs text-slate-500 text-center mt-2 font-medium">
+                  {microCopy}
+                </p>
+              </div>
 
               <div className="relative flex items-center py-2 w-full box-border">
                 <div className="flex-grow border-t border-zinc-200/60"></div>
