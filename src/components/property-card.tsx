@@ -167,6 +167,9 @@ export default function PropertyCard({
       : `${loc.area}, ${loc.region}`;
   }
 
+  // Format the location string to remove underscores
+  locationString = locationString.replace(/_/g, " ");
+
   const pathname = usePathname();
   const isAdminView = pathname.startsWith("/admin");
 
