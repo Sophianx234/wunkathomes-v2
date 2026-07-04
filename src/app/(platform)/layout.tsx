@@ -4,7 +4,7 @@ import "../globals.css";
 import { cn } from "@/lib/utils";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
-import GlobalConcierge from "@/components/global-concierge";
+import SupportWidget from "@/components/support-widget";
 import { getSession } from "@/lib/session";
 import { StoreInitializer } from "@/lib/session-initializer";
 import { Toaster } from "@/components/ui/sonner";
@@ -46,7 +46,7 @@ export default async function RootLayout({
         {children}
         
       <div className="print:hidden">
-        <GlobalConcierge/>
+        <SupportWidget/>
         <Footer/>
       </div>
         <Toaster position="top-right"/>
