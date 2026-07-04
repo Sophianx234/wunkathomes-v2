@@ -22,14 +22,12 @@ export default async function Navbar() {
       .lean();
 
     if (dbUser) {
-      // Mock / Extract these boolean variables to determine if "Verify Identity" should be shown
+      // Extract these boolean variables to determine if "Verify Identity" should be shown
       const hasPaidProperty = await Lease.exists({ userId: session.userId }); // Checks if user has a lease/transaction
-      const isIdentityVerified = dbUser.kycStatus === "Approved";
-      
-      const showVerifyIdentityPrompt = !!hasPaidProperty && !isIdentityVerified;
+      const verificationStatus = dbUser.kycStatus || "Unverified";
       
       let signaturePending = false;
-      if (isIdentityVerified) {
+      if (verificationStatus === "Approved") {
         const unsignedLease = await Lease.exists({
           userId: session.userId,
           status: { $in: ["Pending_Verification", "Awaiting_Admin_Approval", "Active"] },
@@ -52,7 +50,8 @@ export default async function Navbar() {
         email: dbUser.email || "",
         profilePicture: dbUser.profilePicture || (dbUser as any).avatar || null,
         indicators: {
-          showVerifyIdentityPrompt,
+          hasPaidProperty: !!hasPaidProperty,
+          verificationStatus,
           signaturePending,
           newSaved,
         },
