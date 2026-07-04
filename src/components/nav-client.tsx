@@ -1,5 +1,7 @@
 "use client";
 
+import { ShieldAlert } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import {
   ArrowDown01Icon,
@@ -46,7 +48,7 @@ interface NavbarUser {
   email: string;
   profilePicture: string | null;
   indicators: {
-    kycPending: boolean;
+    showVerifyIdentityPrompt: boolean;
     signaturePending: boolean;
     newSaved: boolean;
   };
@@ -59,9 +61,9 @@ interface NavbarClientProps {
 export default function NavbarClient({ user }: NavbarClientProps) {
   const isLoggedIn = !!user;
 
-  // Master check: Does the avatar need a red dot?
+  // Master check: Does the avatar need an alert dot?
   const hasAnyPendingAction = user
-    ? user.indicators.kycPending ||
+    ? user.indicators.showVerifyIdentityPrompt ||
       user.indicators.signaturePending ||
       user.indicators.newSaved
     : false;
@@ -322,7 +324,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                     )}
                     {/* MASTER AVATAR INDICATOR */}
                     {hasAnyPendingAction && (
-                      <span className="absolute top-0 right-0 size-2.5 bg-red-500 rounded-full border-2 border-white ring-1 ring-red-200 shadow-sm" />
+                      <span className="absolute top-0 right-0 size-2.5 bg-orange-400 rounded-full border-2 border-white ring-2 ring-amber-400/50 animate-pulse shadow-sm" />
                     )}
                   </div>
 
@@ -411,23 +413,24 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                         </Link>
 
                         {/* KYC INDICATOR */}
-                        <Link
-                          href="/user/leases"
-                          onClick={() => setProfileOpen(false)}
-                          className="flex items-center justify-between px-4 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50/50 transition"
-                        >
-                          <div className="flex items-center gap-3">
-                            <HugeiconsIcon
-                              icon={File01Icon}
-                              size={18}
-                              className="text-zinc-400"
-                            />{" "}
-                            Verify Identity
-                          </div>
-                          {user.indicators.kycPending && (
-                            <span className="size-2 bg-red-500 rounded-full animate-pulse shadow-sm" />
-                          )}
-                        </Link>
+                        {user.indicators.showVerifyIdentityPrompt && (
+                          <Link
+                            href="/user/leases"
+                            onClick={() => setProfileOpen(false)}
+                            className="flex items-center justify-between px-4 py-2.5 text-sm font-medium text-zinc-700 hover:bg-amber-50 transition"
+                          >
+                            <div className="flex items-center gap-3">
+                              <ShieldAlert
+                                size={18}
+                                className=""
+                              />{" "}
+                              Verify Identity
+                            </div>
+                            <span className="text-[7px] font-bold uppercase tracking-wider  bg-gray-100 px-2 py-0.5 rounded-full">
+                              Action Required
+                            </span>
+                          </Link>
+                        )}
 
                         <Link
                           href="/user/transactions"
@@ -494,7 +497,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
           <div className="flex items-center gap-3 md:hidden z-50">
             {/* Master indicator for mobile avatar */}
             {isLoggedIn && hasAnyPendingAction && (
-              <div className="size-2.5 bg-red-500 rounded-full border-2 border-white absolute right-14 top-8 z-10 pointer-events-none shadow-sm" />
+              <div className="size-2.5 bg-orange-400 rounded-full border-2 border-white ring-2 ring-amber-400/50 animate-pulse absolute right-14 top-8 z-10 pointer-events-none shadow-sm" />
             )}
 
             <motion.button
@@ -619,21 +622,21 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                     </Link>
 
                     {/* Leases (KYC Pending) */}
-                    <Link
-                      href="/user/leases"
-                      onClick={toggleMenu}
-                      className="flex items-center justify-between text-lg font-medium text-zinc-700 hover:text-zinc-900 transition"
-                    >
-                      <span className="flex items-center gap-3">
-                        <HugeiconsIcon icon={File01Icon} size={20} /> KYC &
-                        Bookings
-                      </span>
-                      {user.indicators.kycPending && (
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-red-600 bg-red-50 px-2 py-0.5 rounded-full">
-                          Verify ID
+                    {user.indicators.showVerifyIdentityPrompt && (
+                      <Link
+                        href="/user/leases"
+                        onClick={toggleMenu}
+                        className="flex items-center justify-between text-lg font-medium text-zinc-700  hover:bg-amber-50 px-2 rounded-lg transition"
+                      >
+                        <span className="flex items-center gap-3">
+                          <ShieldAlert size={20} className="" />{" "}
+                          Verify Identity
                         </span>
-                      )}
-                    </Link>
+                        <span className="text-[10px] font-bold uppercase tracking-wider  bg-gray-100 px-2 py-0.5 rounded-full">
+                          Action Required
+                        </span>
+                      </Link>
+                    )}
 
                     <Link
                       href="/user/transactions"
