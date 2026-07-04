@@ -12,7 +12,7 @@ export async function GET(request: Request) {
   try {
     // 1. Zero-Trust Authorization: Ensure ONLY your cron service can trigger this
     const authHeader = request.headers.get("authorization");
-    if (authHeader !== `Bearer ${process.env.CRON_SECRET_KEY}`) {
+    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
       console.warn("[SECURITY] Unauthorized cron execution attempt.");
       return new NextResponse("Unauthorized", { status: 401 });
     }
