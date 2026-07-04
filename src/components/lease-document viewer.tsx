@@ -42,7 +42,7 @@ export function TenancyDocument({ selectedActivation, onBack,showNav=true }: Ten
   };
 
   return (
-    <div className="min-h-screen bg-zinc-100/50 font-sans print:bg-white w-full overflow-x-hidden box-border">
+    <div className="min-h-screen bg-zinc-100/50 font-sans print:bg-white print:absolute print:inset-0 print:w-full print:m-0 print:p-0 w-full overflow-x-hidden box-border">
       {/* Print styles injected via dangerouslySetInnerHTML. 
         This ensures that when the user prints the page, 
         the background is white and the "Back" / "Print" buttons disappear. 
@@ -58,7 +58,7 @@ export function TenancyDocument({ selectedActivation, onBack,showNav=true }: Ten
       />
 
       {/* TOP NAVIGATION BAR (Hidden during printing) */}
-      {showNav&&<div className="print-hide sticky top-0 z-10 flex items-center justify-between p-2 md:p-4 bg-white border-b border-zinc-200/60 shadow-sm w-full box-border">
+      {showNav&&<div className="print:hidden sticky top-0 z-10 flex items-center justify-between p-2 md:p-4 bg-white border-b border-zinc-200/60 shadow-sm w-full box-border">
         <div className="flex items-center gap-2 md:gap-4 min-w-0">
           <Button
             variant="ghost"
@@ -81,7 +81,7 @@ export function TenancyDocument({ selectedActivation, onBack,showNav=true }: Ten
         </div>
         <Button
           onClick={() => window.print()}
-          className="bg-zinc-900 text-white hover:bg-zinc-800 h-7 md:h-9 px-3 md:px-6 text-[9px] md:text-xs font-bold uppercase tracking-wider rounded-md md:rounded-lg shadow-sm shrink-0 ml-2"
+          className="print:hidden bg-zinc-900 text-white hover:bg-zinc-800 h-7 md:h-9 px-3 md:px-6 text-[9px] md:text-xs font-bold uppercase tracking-wider rounded-md md:rounded-lg shadow-sm shrink-0 ml-2"
         >
           <span className="scale-75 md:scale-100 flex items-center md:mr-2 shrink-0"><HugeiconsIcon icon={PrinterIcon} size={16} /></span>
           <span className="hidden sm:inline">Print Document</span>
@@ -91,7 +91,7 @@ export function TenancyDocument({ selectedActivation, onBack,showNav=true }: Ten
 
       {/* DOCUMENT BODY */}
       <div className="max-w-4xl mx-auto p-4 md:p-8 print:p-0 w-full box-border">
-        <div className="flex-1 w-full bg-white border border-zinc-200/80 rounded-md md:rounded-sm shadow-[0_2px_12px_-4px_rgba(0,0,0,0.04)] print:border-none print:shadow-none print:w-full print:block box-border overflow-hidden">
+        <div className="flex-1 w-full bg-white border border-zinc-200/80 rounded-md md:rounded-sm shadow-[0_2px_12px_-4px_rgba(0,0,0,0.04)] print:border-none print:shadow-none print:rounded-none print:w-full print:block box-border overflow-hidden">
           <div className="p-5 md:p-14 lg:p-20 font-serif text-zinc-800 leading-relaxed md:leading-[1.8] text-[10px] md:text-[14px] text-justify print:p-0 print:text-black w-full box-border">
             
             <div className="text-center mb-4 md:mb-6 w-full box-border">
@@ -102,27 +102,27 @@ export function TenancyDocument({ selectedActivation, onBack,showNav=true }: Ten
             </div>
 
             <div className="space-y-4 md:space-y-6 w-full box-border">
-              <p>
+              <p className="print:break-inside-avoid">
                 This Tenancy Agreement is formally established between <strong>WunkatHomes Ltd.</strong> (referred to as the "Landlord") and <strong>{selectedActivation.user.name}</strong> (referred to as the "Tenant").
               </p>
               
-              <p>
+              <p className="print:break-inside-avoid">
                 <strong>1. The Property:</strong> The Landlord agrees to rent, and the Tenant agrees to occupy the property known as <strong>{selectedActivation.lease.propertyName}</strong> located at <strong>{selectedActivation.lease.propertyLocation || `Unit ${selectedActivation.lease.unitNumber}`}</strong>.
               </p>
               
-              <p>
+              <p className="print:break-inside-avoid">
                 <strong>2. Lease Duration:</strong> This agreement begins on <strong>{formatDate(selectedActivation.lease.startDate)}</strong> and will remain active until <strong>{selectedActivation.lease.endDate ? formatDate(selectedActivation.lease.endDate) : "the end of the agreed term"}</strong>, unless ended earlier under the terms of this agreement.
               </p>
               
-              <p>
+              <p className="print:break-inside-avoid">
                 <strong>3. Rent & Payment:</strong> The total rent payment of <strong>GHS {selectedActivation.lease.totalRentAmount?.toLocaleString(undefined, { minimumFractionDigits: 2 })}</strong> has been successfully processed and verified.
               </p>
               
-              <p>
+              <p className="print:break-inside-avoid">
                 <strong>4. Smart Lock & Property Access:</strong> Access to the property is managed securely via a Tuya Smart Lock system. The Tenant agrees to keep their personal access PIN confidential and not share it with unauthorized individuals.
               </p>
 
-              <p>
+              <p className="print:break-inside-avoid">
                 <strong>5. Tenant Responsibilities:</strong> The Tenant agrees to maintain the interior of the property in good condition, use the property only for residential living, and allow the Landlord or maintenance teams to enter for repairs with fair prior notice.
               </p>
             </div>
