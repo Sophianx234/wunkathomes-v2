@@ -6,6 +6,8 @@ import Image from "next/image"
 import Link from "next/link"
 import { usePaystackPayment } from "react-paystack"
 import { toast } from "sonner" 
+import { Lock } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 import { 
   ArrowLeft01Icon, 
@@ -35,6 +37,20 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
   const tomorrow = new Date()
   tomorrow.setDate(tomorrow.getDate() + 1)
   const defaultDate = tomorrow.toISOString().split('T')[0]
+
+  const propType = listing?.listingType || listing?.property?.type || "Rent";
+
+  const pageHeader = propType === "Sale" ? "Complete Your Property Acquisition" :
+                     propType === "Short-let" ? "Confirm Your Booking" :
+                     "Finalize Your Lease Agreement";
+
+  const pricingLabel = propType === "Sale" ? "Total Purchase Price" :
+                       propType === "Short-let" ? "Total Booking Cost" :
+                       "Total Lease Payment";
+
+  const buttonText = propType === "Sale" ? "Authorize Payment & Secure Property" :
+                     propType === "Short-let" ? "Pay & Confirm Booking" :
+                     "Pay & Secure Lease";
 
   // --- State ---
   const [formData, setFormData] = useState({
@@ -149,10 +165,10 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
         
         {/* --- LEFT COLUMN: Form & Payment --- */}
         <div className="lg:col-span-7 flex flex-col">
-          <h1 className="text-xl md:text-4xl font-black uppercase tracking-tight mb-1 md:mb-2">
-            Secure Your New Home
+          <h1 className="text-xl md:text-4xl font-bold tracking-tight mb-1 md:mb-2 text-slate-900">
+            {pageHeader}
           </h1>
-          <p className="text-xs md:text-sm font-medium text-zinc-500 mb-5 md:mb-10">
+          <p className="text-xs md:text-sm text-slate-500 mb-5 md:mb-10 leading-relaxed">
             Enter your details below to reserve this property and start your move-in process.
           </p>
 
@@ -227,34 +243,36 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
 
             {/* Submit Button */}
             {currentUser ? (
-              <button 
-                type="submit"
-                disabled={isProcessing}
-                className="block w-full min-w-0 max-w-full box-border py-2.5 md:py-5 bg-zinc-950 text-white font-black uppercase tracking-widest text-[10px] md:text-sm rounded-lg hover:bg-zinc-800 transition-colors flex items-center justify-center gap-1.5 md:gap-3 disabled:opacity-70 m-0"
-              >
-                {isProcessing && (
-                  <span className="scale-75 md:scale-100 flex items-center">
-                    <HugeiconsIcon icon={Loading03Icon} size={18} className="animate-spin" />
-                  </span>
-                )}
-                {isProcessing ? "Connecting..." : `Pay $${listing.price.toLocaleString()} Securely`}
-                {!isProcessing && (
-                  <span className="scale-75 md:scale-100 flex items-center">
-                     <HugeiconsIcon icon={Shield01Icon} size={18} />
-                  </span>
-                )}
-              </button>
+              <div className="w-full">
+                <Button 
+                  type="submit"
+                  disabled={isProcessing}
+                  className="w-full py-6 bg-black text-white hover:bg-black/90 font-bold tracking-tight text-sm md:text-base rounded-lg flex items-center justify-center gap-2 transition-colors"
+                >
+                  {isProcessing && <HugeiconsIcon icon={Loading03Icon} size={18} className="animate-spin" />}
+                  {isProcessing ? "Processing..." : buttonText}
+                </Button>
+                
+                <p className="text-xs text-slate-500 text-center flex items-center justify-center gap-1.5 mt-3 leading-relaxed">
+                  <Lock size={14} className="text-slate-500" />
+                  Payments are securely processed and encrypted. Your transaction is protected.
+                </p>
+              </div>
             ) : (
               <LoginModal>
-                <button 
-                  type="button"
-                  className="block w-full min-w-0 max-w-full box-border py-2.5 md:py-5 bg-zinc-950 text-white font-black uppercase tracking-widest text-[10px] md:text-sm rounded-lg hover:bg-zinc-800 transition-colors flex items-center justify-center gap-1.5 md:gap-3 m-0"
-                >
-                  Log in to Pay ${listing.price.toLocaleString()} Securely
-                  <span className="scale-75 md:scale-100 flex items-center">
-                     <HugeiconsIcon icon={Shield01Icon} size={18} />
-                  </span>
-                </button>
+                <div className="w-full">
+                  <Button 
+                    type="button"
+                    className="w-full py-6 bg-black text-white hover:bg-black/90 font-bold tracking-tight text-sm md:text-base rounded-lg flex items-center justify-center gap-2 transition-colors"
+                  >
+                    Log in to {buttonText}
+                  </Button>
+                  
+                  <p className="text-xs text-slate-500 text-center flex items-center justify-center gap-1.5 mt-3 leading-relaxed">
+                    <Lock size={14} className="text-slate-500" />
+                    Payments are securely processed and encrypted. Your transaction is protected.
+                  </p>
+                </div>
               </LoginModal>
             )}
 
@@ -308,8 +326,8 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
             <h4 className="text-xs md:text-sm font-bold uppercase tracking-widest mb-2 md:mb-4">Payment Summary</h4>
             
             <div className="space-y-2 md:space-y-4 mb-3 md:mb-6 w-full box-border">
-              <div className="flex justify-between items-center text-xs md:text-sm font-medium text-zinc-600">
-                <span>Total Rent</span>
+              <div className="flex justify-between items-center text-xs md:text-sm font-medium text-slate-900">
+                <span>{pricingLabel}</span>
                 <span>${listing.price.toLocaleString()}</span>
               </div>
               <div className="flex justify-between items-center text-xs md:text-sm font-medium text-zinc-600">
