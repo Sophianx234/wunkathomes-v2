@@ -1,5 +1,6 @@
 "use client"
 
+import { Suspense } from "react"
 import { SignupForm } from "@/components/signup-form"
 import Logo from "@/components/logo"
 
@@ -12,7 +13,9 @@ export default function SignupPage() {
         </div>
         <div className="flex flex-1 items-center justify-center">
           <div className="w-full max-w-sm">
-            <SignupForm />
+            <Suspense fallback={<div className="flex justify-center p-4 text-sm text-slate-500">Loading Registration...</div>}>
+              <SignupForm />
+            </Suspense>
           </div>
         </div>
       </div>
