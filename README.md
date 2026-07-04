@@ -16,7 +16,7 @@
 
 <div align="center">
   <!-- Replace with your compressed Cloudinary screenshot URL -->
-  <img src="https://res.cloudinary.com/dtytb8qrc/image/upload/c_scale,w_1200,q_auto,f_auto/v1234567890/wunkathomes_v2_placeholder.png" alt="WunkatHomes Platform Dashboard" width="100%" />
+<img src="https://res.cloudinary.com/dtytb8qrc/image/upload/c_scale,w_1200,q_auto,f_auto/v1783201431/screencapture-wunkathomes-v2-t5wg-vercel-app-2026-07-04-13_49_59_c9diex.png" alt="WunkatHomes Platform Dashboard" width="100%" />
 </div>
 
 <br />
