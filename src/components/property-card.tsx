@@ -65,6 +65,7 @@ export interface IProperty {
     _id?: string;
     propertyType: "Apartment_Building" | "Commercial" | "House" | "Land";
     location: any;
+    region?: string;
     coordinates?: {
       lat?: number;
       lng?: number;
@@ -155,7 +156,10 @@ export default function PropertyCard({
 
   let locationString = "Unknown Location";
   if (typeof property.property?.location === "string") {
-    locationString = property.property.location;
+    const region = property.property.region;
+    locationString = region 
+      ? `${property.property.location}, ${region}`
+      : property.property.location;
   } else if (property.property?.location) {
     const loc = property.property.location;
     locationString = loc.city
