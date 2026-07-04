@@ -29,6 +29,7 @@ import {
   Settings05Icon,
   HelpCircleIcon,
   SearchIcon,
+  MessageMultiple01Icon,
 } from "@hugeicons/core-free-icons";
 
 // --- TYPES ---
@@ -95,9 +96,14 @@ const data = {
           icon: <HugeiconsIcon icon={LockIcon} strokeWidth={2} />,
         },
         {
-          title: "Support ",
+          title: "Maintenance",
           url: "/admin/manage/maintenance",
           icon: <HugeiconsIcon icon={HelpCircleIcon} strokeWidth={2} />,
+        },
+        {
+          title: "Inquiries",
+          url: "/admin/manage/inquiries",
+          icon: <HugeiconsIcon icon={MessageMultiple01Icon} strokeWidth={2} />,
         },
       ],
     },
