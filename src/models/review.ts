@@ -1,9 +1,9 @@
 import mongoose from 'mongoose';
 
 const reviewSchema = new mongoose.Schema({
-  listingId: {
+  propertyId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Listing',
+    ref: 'Listing', // References Listing as per previous codebase structure
     required: true,
   },
   userId: {
@@ -21,6 +21,9 @@ const reviewSchema = new mongoose.Schema({
     type: String,
   }
 }, { timestamps: true });
+
+// Task 1: Compound unique index to natively block duplicate reviews
+reviewSchema.index({ userId: 1, propertyId: 1 }, { unique: true });
 
 const Review = mongoose.models.Review || mongoose.model('Review', reviewSchema);
 export default Review;
