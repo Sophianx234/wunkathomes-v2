@@ -1,15 +1,15 @@
 "use client";
 
 import {
-  File02Icon,
-  Key01Icon,
-  Shield01Icon,
-  ArrowRight01Icon,
-  CompassIcon,
-} from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+  ShieldCheck,
+  Banknote,
+  Search,
+  MapPin,
+  Scale,
+  Droplets
+} from "lucide-react";
 
-interface WunkatProtocolProps {
+interface ThingsToKnowProps {
   isRent: boolean;
   propertyType: "Apartment_Building" | "Commercial" | "House" | "Land" | string;
 }
@@ -17,231 +17,75 @@ interface WunkatProtocolProps {
 export default function ThingsToKnow({
   isRent,
   propertyType,
-}: WunkatProtocolProps) {
-  const cleanType = propertyType?.toLowerCase() || "";
+}: ThingsToKnowProps) {
+  const isLand = propertyType?.toLowerCase() === "land";
 
-  // --- 1. Dynamic Content Helper for Column 1: The Booking Process ---
-  const getBookingContent = () => {
-    if (isRent) {
-      return (
-        <ul className="space-y-2">
-          <li>
-            • A small holding deposit keeps this property reserved just for you
-            for 72 hours.
-          </li>
-          <li>
-            • Review and sign your Tenancy Agreement entirely online through
-            your user profile.
-          </li>
-          <li>
-            • Pay your first month's rent and refundable security deposit before
-            your move-in date.
-          </li>
-        </ul>
-      );
-    } else {
-      return (
-        <ul className="space-y-2">
-          <li>
-            • A small online deposit secures this property and temporarily takes
-            it off the market.
-          </li>
-          <li>
-            • Please share a proof of funds or bank pre-approval letter within
-            48 hours of booking.
-          </li>
-          <li>
-            • Our in-house legal team will guide you through a smooth, secure
-            title deed transfer.
-          </li>
-        </ul>
-      );
-    }
-  };
+  const considerations = [
+    {
+      title: "Title & Legal Documents",
+      icon: ShieldCheck,
+      description: isLand 
+        ? "Verify the Land Commission indenture and ensure the site plan matches the coordinates perfectly to avoid disputes."
+        : "All property deeds and ownership certificates have been pre-verified by our legal compliance team.",
+    },
+    {
+      title: "Hidden Costs & Taxes",
+      icon: Banknote,
+      description: isRent
+        ? "Be aware of potential extra costs like sanitation fees, security levies, or upfront utility deposits before signing."
+        : "Factor in the 5% stamp duty and potential property valuation fees required during the transfer of ownership.",
+    },
+    {
+      title: "Property Inspections",
+      icon: Search,
+      description: isLand
+        ? "We recommend a physical site visit to confirm boundary pillars and check the topography for waterlogging."
+        : "Check for consistent water supply (Polytank availability), dampness on walls, and structural integrity during your tour.",
+    },
+    {
+      title: "Zoning & Area Regulations",
+      icon: MapPin,
+      description: "Ensure the local municipal assembly zoning allows for your intended residential or commercial use.",
+    },
+    {
+      title: isRent ? "Terms of Agreement" : "Sale Agreement",
+      icon: Scale,
+      description: isRent
+        ? "Review the tenancy agreement carefully, noting the subletting clauses, maintenance responsibilities, and renewal terms."
+        : "Our legal team provides a standardized, equitable Sale and Purchase Agreement to protect both buyer and seller.",
+    },
+    {
+      title: "Utility & Water Consistency",
+      icon: Droplets,
+      description: "Water supply can be intermittent in certain neighborhoods. We verify backup storage (Polytank) capacities for you.",
+    },
+  ];
 
-  // --- 2. Dynamic Content Helper for Column 2: Access & Keys ---
-  const getAccessContent = () => {
-    if (cleanType === "land") {
-      return {
-        title: "Site Visits & Boundaries",
-        icon: CompassIcon,
-        button: "View Site Map",
-        text: (
-          <ul className="space-y-2">
-            <li>
-              • Schedule a guided tour with us or visit the plot on your own
-              schedule.
-            </li>
-            <li>
-              • All physical corner pillars and boundaries are clearly marked
-              out on the ground.
-            </li>
-            <li>
-              • Digital site plans and exact plot coordinates are instantly
-              available to download.
-            </li>
-          </ul>
-        ),
-      };
-    }
-
-    if (cleanType === "commercial") {
-      return {
-        title: "Smart Business Access",
-        icon: Key01Icon,
-        button: "Smart Entry Guide",
-        text: (
-          <ul className="space-y-2">
-            <li>
-              • No keys to pass around. Your secure digital entry codes are
-              generated automatically.
-            </li>
-            <li>
-              • Easily set up temporary entry PINs for your staff, vendors, or
-              contractors.
-            </li>
-            <li>
-              • Manage your business hours access anytime directly from your
-              smartphone.
-            </li>
-          </ul>
-        ),
-      };
-    }
-
-    // Default Residential (House / Apartment Building)
-    return {
-      title: "Move-In & Keyless Entry",
-      icon: Key01Icon,
-      button: "Smart Lock Guide",
-      text: (
-        <ul className="space-y-2">
-          <li>
-            • Enjoy code-based access with your secure digital smart lock. No
-            key exchange required!
-          </li>
-          <li>
-            • Your digital entry code activates automatically on your scheduled
-            move-in day.
-          </li>
-          <li>
-            • Create temporary digital codes for family, friends, or cleaners
-            from your dashboard.
-          </li>
-        </ul>
-      ),
-    };
-  };
-
-  // --- 3. Dynamic Content Helper for Column 3: The Property Promise ---
-  const getPromiseContent = () => {
-    if (cleanType === "land") {
-      return (
-        <ul className="space-y-2">
-          <li>
-            • Guaranteed 100% dispute-free land background checked by our
-            compliance team.
-          </li>
-          <li>
-            • All documents are registered and completely ready for immediate
-            development.
-          </li>
-          <li>
-            • Clear zoning information is provided upfront so you know exactly
-            what you can build.
-          </li>
-        </ul>
-      );
-    }
-    return (
-      <ul className="space-y-2">
-        <li>
-          • This property is completely managed by WunkatHomes, ensuring high
-          maintenance standards.
-        </li>
-        <li>
-          • Deal with us directly. There are no middle-men landlords or surprise
-          brokerage fees.
-        </li>
-        <li>
-          • Enjoy peace of mind with active outdoor security and a dedicated
-          support team.
-        </li>
-      </ul>
-    );
-  };
-
-  const accessDetails = getAccessContent();
+  // If the property is Land, remove the Utility & Water Consistency since it might not apply directly
+  const displayItems = isLand ? considerations.slice(0, 5) : considerations;
 
   return (
-    <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14 border-t border-zinc-200/60">
-      <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight mb-8">
+    <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14 border-t border-slate-200">
+      <h2 className="text-2xl font-semibold tracking-tight text-slate-900 mb-8">
         Things to know before you {isRent ? "Rent" : "Buy"}
       </h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
-        {/* Column 1: Booking & Financial Process */}
-        <div className="flex flex-col items-start">
-          <div className="mb-4 text-zinc-900">
-            <HugeiconsIcon icon={File02Icon} size={24} />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+        {displayItems.map((item, index) => (
+          <div key={index} className="flex items-start gap-4">
+            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-slate-100 shrink-0">
+              <item.icon size={24} className="text-slate-700" />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-slate-900 mb-1">
+                {item.title}
+              </h3>
+              <p className="text-sm text-slate-500 leading-relaxed">
+                {item.description}
+              </p>
+            </div>
           </div>
-          <h3 className="font-bold text-base mb-3 uppercase tracking-tight text-zinc-900">
-            Booking Process
-          </h3>
-          <div className="text-zinc-500 text-[13px] md:text-sm leading-relaxed font-medium flex-1 space-y-2">
-            {getBookingContent()}
-          </div>
-          <button className="mt-5 text-[10px] font-bold uppercase tracking-widest border-b-[1.5px] border-black pb-0.5 hover:text-zinc-500 hover:border-slate-500 transition-colors flex items-center gap-1.5 group">
-            Booking Guide{" "}
-            <HugeiconsIcon
-              icon={ArrowRight01Icon}
-              size={12}
-              className="group-hover:translate-x-1 transition-transform"
-            />
-          </button>
-        </div>
-
-        {/* Column 2: Access, Moving, and Inspections */}
-        <div className="flex flex-col items-start">
-          <div className="mb-4 text-zinc-900">
-            <HugeiconsIcon icon={accessDetails.icon} size={24} />
-          </div>
-          <h3 className="font-bold text-base mb-3 uppercase tracking-tight text-zinc-900">
-            {accessDetails.title}
-          </h3>
-          <div className="text-zinc-500 text-[13px] md:text-sm leading-relaxed font-medium flex-1 space-y-2">
-            {accessDetails.text}
-          </div>
-          <button className="mt-5 text-[10px] font-bold uppercase tracking-widest border-b-[1.5px] border-black pb-0.5 hover:text-zinc-500 hover:border-slate-500 transition-colors flex items-center gap-1.5 group">
-            {accessDetails.button}{" "}
-            <HugeiconsIcon
-              icon={ArrowRight01Icon}
-              size={12}
-              className="group-hover:translate-x-1 transition-transform"
-            />
-          </button>
-        </div>
-
-        {/* Column 3: Safety & Guarantees */}
-        <div className="flex flex-col items-start">
-          <div className="mb-4 text-zinc-900">
-            <HugeiconsIcon icon={Shield01Icon} size={24} />
-          </div>
-          <h3 className="font-bold text-base mb-3 uppercase tracking-tight text-zinc-900">
-            Our Guarantee
-          </h3>
-          <div className="text-zinc-500 text-[13px] md:text-sm leading-relaxed font-medium flex-1 space-y-2">
-            {getPromiseContent()}
-          </div>
-          <button className="mt-5 text-[10px] font-bold uppercase tracking-widest border-b-[1.5px] border-black pb-0.5 hover:text-zinc-500 hover:border-slate-500 transition-colors flex items-center gap-1.5 group">
-            Our Commitments{" "}
-            <HugeiconsIcon
-              icon={ArrowRight01Icon}
-              size={12}
-              className="group-hover:translate-x-1 transition-transform"
-            />
-          </button>
-        </div>
+        ))}
       </div>
     </section>
   );
