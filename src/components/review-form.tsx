@@ -18,11 +18,13 @@ import { useParams } from "next/navigation";
 interface ReviewFormProps {
   listingId: string;
   hasReviewed?: boolean;
+  hasOccupied?: boolean;
+  isLoggedIn?: boolean;
 }
 
 const initialState: ReviewActionState = { success: false, message: "" };
 
-export default function ReviewForm({ listingId, hasReviewed }: ReviewFormProps) {
+export default function ReviewForm({ listingId, hasReviewed, hasOccupied, isLoggedIn }: ReviewFormProps) {
   const params = useParams();
   const slug = params.slug as string;
 
@@ -51,6 +53,23 @@ export default function ReviewForm({ listingId, hasReviewed }: ReviewFormProps) 
   // IF THE USER HAS ALREADY REVIEWED, HIDE THE BUTTON/FORM ENTIRELY
   if (hasReviewed) {
     return null;
+  }
+
+  // UI STATE GUARD: If the user is logged in but fails the occupancy check
+  if (isLoggedIn && !hasOccupied) {
+    return (
+      <div className="mb-8">
+        <button
+          disabled
+          className="px-6 py-3.5 border-2 border-zinc-200 text-zinc-400 font-bold uppercase tracking-widest text-[10px] rounded cursor-not-allowed"
+        >
+          Write a Review
+        </button>
+        <p className="text-zinc-500 text-[10px] mt-2 font-medium">
+          Only verified past or present occupants can leave reviews.
+        </p>
+      </div>
+    );
   }
 
   // If the form is closed, show a clean, standard button that matches the page aesthetic

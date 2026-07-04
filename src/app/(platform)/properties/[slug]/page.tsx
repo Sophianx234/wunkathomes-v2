@@ -175,6 +175,16 @@ export default async function PropertyDetailsPage({
     }
   }
 
+  let hasOccupied = false;
+  if (session?.userId && listing.id) {
+    const Lease = (await import("@/models/lease")).default;
+    hasOccupied = await Lease.exists({
+      userId: session.userId,
+      listingId: listing.id,
+      status: { $in: ["Active", "Expired"] }
+    });
+  }
+
   const hasReviewed = session?.userId
     ? reviews.some((review) => review.userId === session.userId)
     : false;
@@ -377,6 +387,8 @@ export default async function PropertyDetailsPage({
             <ReviewForm
               listingId={listing.id as string}
               hasReviewed={hasReviewed}
+              hasOccupied={!!hasOccupied}
+              isLoggedIn={!!session?.userId}
             />
 
             {reviewCount > 0 ? (
