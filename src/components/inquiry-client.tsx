@@ -303,7 +303,7 @@ export default function InquiryClient({ initialInquiries }: InquiryClientProps) 
                       <p className="text-[10px] uppercase tracking-widest text-slate-500 mb-1">User Type</p>
                       {selectedInquiry.isGuest ? (
                         <p className="text-[13px] font-bold text-slate-600 flex items-center gap-1.5">
-                          <HugeiconsIcon icon={UserCircleIcon} size={14} /> Guest Lead
+                          <HugeiconsIcon icon={UserCircleIcon} size={14} /> Guest 
                         </p>
                       ) : (
                         <p className="text-[13px] font-bold text-slate-900 flex items-center gap-1.5">
@@ -348,7 +348,6 @@ export default function InquiryClient({ initialInquiries }: InquiryClientProps) 
                     href={`mailto:${selectedInquiry.email}?subject=Re: Your Inquiry to WunkatHomes`}
                     className="flex-1 sm:flex-none inline-flex h-9 items-center justify-center rounded-lg bg-slate-50 px-4 text-[12px] font-semibold text-slate-900 border border-slate-200 hover:bg-slate-100 transition-colors gap-2"
                   >
-                    <HugeiconsIcon icon={Mail01Icon} size={14} />
                     Quick Reply
                   </a>
                   
@@ -371,7 +370,7 @@ export default function InquiryClient({ initialInquiries }: InquiryClientProps) 
                     variant="ghost"
                     onClick={() => setDeleteId(selectedInquiry._id)}
                     disabled={isPending}
-                    className="flex-1 sm:flex-none text-[11px] font-bold uppercase tracking-wider text-red-500 hover:text-red-700 hover:bg-red-50 h-9"
+                    className="flex-1 sm:flex-none text-[11px] font-bold uppercase tracking-wider  rounded-sm h-9"
                   >
                     Delete
                   </Button>
@@ -382,7 +381,10 @@ export default function InquiryClient({ initialInquiries }: InquiryClientProps) 
                     className="flex-1 sm:flex-none h-9 bg-black hover:bg-slate-900 text-white font-semibold text-[13px] px-6 rounded-lg transition-colors"
                   >
                     {isPending ? (
+                      <>
                       <HugeiconsIcon icon={Loading03Icon} size={16} className="animate-spin" />
+                      resolving issue....
+                      </>
                     ) : selectedInquiry.status === "Resolved" ? (
                       "Reopen Inquiry"
                     ) : (

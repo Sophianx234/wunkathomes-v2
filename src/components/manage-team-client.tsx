@@ -484,7 +484,7 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
                                       ),
                                   })
                                 }
-                                className="text-sm cursor-pointer text-amber-600 focus:bg-amber-50 focus:text-amber-700 rounded-lg"
+                                className="text-sm cursor-pointer  rounded-lg"
                               >
                                 Suspend Access
                               </DropdownMenuItem>
@@ -519,7 +519,7 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
                                   onConfirm: () => handleRemoveUser(member.id),
                                 })
                               }
-                              className="text-sm cursor-pointer text-rose-600 focus:bg-rose-50 focus:text-rose-700 rounded-lg"
+                              className="text-sm cursor-pointer  rounded-lg"
                             >
                               Revoke & Remove User
                             </DropdownMenuItem>
