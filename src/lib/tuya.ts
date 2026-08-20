@@ -109,6 +109,7 @@ export async function getDeviceDetails(deviceId?: string) {
 }
 
 export interface TempPinParams {
+  deviceId: string;
   pin: string;
   name: string;
   effectiveTime: number; // Start timestamp in ms
@@ -117,25 +118,44 @@ export interface TempPinParams {
 
 /**
  * Generates a time-bound, temporary passcode for tenant access.
- * Target Endpoint typically involves /v1.0/devices/{device_id}/door-lock/temp-passwords or similar.
  */
-export async function createTemporaryPin({ pin, name, effectiveTime, invalidTime }: TempPinParams) {
-  if (!TUYA_LOCK_DEVICE_ID) throw new Error('TUYA_LOCK_DEVICE_ID is missing from environment variables');
+export async function createTemporaryPin({ deviceId, pin, name, effectiveTime, invalidTime }: TempPinParams) {
+  if (!deviceId) throw new Error('Device ID is required to create a PIN');
   
-  const path = `/v1.0/devices/${TUYA_LOCK_DEVICE_ID}/door-lock/temp-passwords`;
+  const path = `/v1.0/devices/${deviceId}/door-lock/temp-password`;
   
   const body = {
     password: pin,
     name: name,
-    // Convert ms to seconds if required by Tuya
     effective_time: Math.floor(effectiveTime / 1000), 
     invalid_time: Math.floor(invalidTime / 1000),
-    type: 1 // 1 typically denotes a time-bound PIN in Tuya docs
+    type: 1 
   };
 
   const data = await tuyaRequest('POST', path, body);
   return data.result;
 }
+
+/**
+ * Sends a remote unlock command to the specific smart lock.
+ */
+export async function remoteUnlock(deviceId: string) {
+  if (!deviceId) throw new Error('Device ID is required to remote unlock');
+  
+  const path = `/v1.0/devices/${deviceId}/commands`;
+  const body = {
+    commands: [
+      {
+        code: 'remote_no_dp_key',
+        value: true
+      }
+    ]
+  };
+
+  const data = await tuyaRequest('POST', path, body);
+  return data.result;
+}
+
 
 /**
  * Get all devices associated with the Tuya Admin App Account.

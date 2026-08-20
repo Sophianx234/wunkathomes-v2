@@ -48,20 +48,27 @@ The following variables are active in `.env`:
 - **Private Data:** In the `Listing` model, `smartLock.accessInstructions` is explicitly configured with `select: false`. This ensures sensitive entry codes are never accidentally leaked in public API queries.
 - **Querying Private Data:** If you ever need to retrieve the instructions (e.g., to display in the secure Tenant Dashboard or the Admin Edit Page), you **MUST** explicitly append `.select('+smartLock.accessInstructions')` to your Mongoose query.
 
+### 8. Admin Tenant Onboarding & Activation
+- The provisioning flow is fully integrated into `src/app/admin/manage/tenants` (Unified Tenant Directory).
+- The "Tenant Profile Modal" automatically adapts to the lease stage. For `Pending_Verification` leases that are fully approved, Admins can click **"Activate Lease & Generate PIN"**.
+- This action triggers `activateLeaseAndGeneratePin()` which provisions the Tuya lock, changes the lease status to Active, and securely stores the PIN.
+
+### 9. Admin Emergency Access Control
+- The unified Tenant Directory also features an **Emergency Unlock** button inside the "Occupied Asset" panel for active leases.
+- This queries `getTenantsData()` in `tenant.service.ts` to map the specific `SmartLock` to the active lease's `propertyId`.
+- The Tuya command uses `remote_no_dp_key` (with a value of `true`) to remotely trigger the lock via the `remoteUnlockAction`.
+
 ---
 
 ## 🚀 Next Steps (For the Next Agent/Developer)
 
-The Admin/Fleet Management phase is officially done. If you are picking up this project, you need to build the **User/Tenant Phase**:
+The Admin Phase (Fleet Management, Tenant PIN Provisioning, and Emergency Access) is **100% complete**. 
+If you are picking up this project, you need to build the **User/Tenant Phase**:
 
-### Step 1: The Remote Unlock API Call
-Add a function in `src/lib/tuya.ts` to trigger a remote unlock command.
-*Note: Tuya usually uses the `/v1.0/devices/{device_id}/commands` endpoint for this.*
+### Step 1: User Dashboard UI Component
+Create a reusable React component (e.g., `src/components/smartlock/tenant-controls.tsx`) meant for the tenant's digital portal. It should contain:
+1. A large "Unlock Door" button that calls the existing `remoteUnlockAction` (or a tenant-specific version).
+2. A form to call the existing `createTemporaryPin()` function so users can generate time-bound access for guests.
 
-### Step 2: User Dashboard UI Component
-Create a reusable React component (e.g., `src/components/smartlock/user-controls.tsx`) meant for the tenant's dashboard. It should contain:
-1. A large "Unlock Door" button that calls a Next.js Server Action.
-2. A form to call `createTemporaryPin()` so users can give access to guests.
-
-### Step 3: Subscription & Lease Verification Middleware
-Before the server executes the Tuya "Unlock" command triggered by a user, you must query the database to ensure that the `User` has an **Active Lease** or **Subscription** for the `Property` linked to that specific `SmartLock`. If their lease is expired or unpaid, the backend must reject the unlock request.
+### Step 2: Subscription & Lease Verification Middleware
+Before the server executes the Tuya "Unlock" command triggered by a user, you must query the database to ensure that the `User` has an **Active Lease** or **Subscription** for the `Property` linked to that specific `SmartLock`. If their lease is expired, suspended, or unpaid, the backend must firmly reject the unlock request.

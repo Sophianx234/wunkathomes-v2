@@ -65,14 +65,9 @@ const data = {
       title: "CRM & Leasing",
       items: [
         {
-          title: "Tenant Management",
+          title: "Tenant Directory",
           url: "/admin/manage/tenants",
           icon: <HugeiconsIcon icon={UserGroupIcon} strokeWidth={2} />,
-        },
-        {
-          title: "Tenant Onboarding",
-          url: "/admin/manage/tenants/onboarding",
-          icon: <HugeiconsIcon icon={File01Icon} strokeWidth={2} />,
         },
         {
           title: "Tour Management",
@@ -92,7 +87,7 @@ const data = {
 
         {
           title: "Smartlock & Access",
-          url: "/admin/manage/access-control",
+          url: "/admin/smartlocks",
           icon: <HugeiconsIcon icon={LockIcon} strokeWidth={2} />,
         },
         {

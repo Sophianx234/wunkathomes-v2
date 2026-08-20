@@ -109,3 +109,86 @@ export async function getUnassignedLocks() {
     return { success: false, error: 'Failed to fetch unassigned locks' };
   }
 }
+
+/**
+ * Remotely unlocks a smart lock for emergency access.
+ */
+export async function remoteUnlockAction(tuyaDeviceId: string) {
+  try {
+    const { remoteUnlock } = await import('@/lib/tuya');
+    await remoteUnlock(tuyaDeviceId);
+    return { success: true, message: 'Door unlocked successfully.' };
+  } catch (error: any) {
+    console.error('Failed to remote unlock:', error);
+    return { success: false, error: error.message || 'Failed to unlock door' };
+  }
+}
+
+/**
+ * Generates a short-lived temporary PIN for vendors/maintenance.
+ */
+export async function generateVendorPinAction(tuyaDeviceId: string, hoursValid: number = 2) {
+  try {
+    const { createTemporaryPin } = await import('@/lib/tuya');
+    
+    // Generate a random 6 digit PIN
+    const generatedPin = Array.from(crypto.getRandomValues(new Uint8Array(6)))
+      .map(n => (n % 10).toString())
+      .join('');
+      
+    const effectiveTime = Date.now();
+    const invalidTime = effectiveTime + (hoursValid * 60 * 60 * 1000);
+
+    await createTemporaryPin({
+      deviceId: tuyaDeviceId,
+      pin: generatedPin,
+      name: `Vendor_${Math.floor(Math.random() * 1000)}`,
+      effectiveTime,
+      invalidTime
+    });
+
+    return { success: true, pin: generatedPin, message: `Created vendor PIN valid for ${hoursValid} hours.` };
+  } catch (error: any) {
+    console.error('Failed to generate vendor PIN:', error);
+    return { success: false, error: error.message || 'Failed to generate PIN' };
+  }
+}
+
+/**
+ * Resets a tenant's PIN (Deletes old conceptually by overwriting in DB and syncing new temp pin for 1 year)
+ */
+export async function resetTenantPinAction(tuyaDeviceId: string, leaseId: string) {
+  try {
+    const { createTemporaryPin } = await import('@/lib/tuya');
+    await connectToDatabase();
+    
+    // Cryptographically secure 6-digit PIN
+    const generatedPin = Array.from(crypto.getRandomValues(new Uint8Array(6)))
+      .map(n => (n % 10).toString())
+      .join('');
+      
+    const effectiveTime = Date.now();
+    const invalidTime = effectiveTime + (365 * 24 * 60 * 60 * 1000); // Valid for 1 year
+
+    // 1. Sync to Tuya Hardware
+    await createTemporaryPin({
+      deviceId: tuyaDeviceId,
+      pin: generatedPin,
+      name: `Tenant_${leaseId.slice(-4)}`,
+      effectiveTime,
+      invalidTime
+    });
+
+    // 2. Update DB
+    const Lease = (await import('@/models/lease')).default;
+    await Lease.findByIdAndUpdate(leaseId, { smartLockPin: generatedPin });
+
+    // Note: You would typically send an email here to the tenant with the new PIN.
+    
+    revalidatePath('/admin/manage/tenants');
+    return { success: true, pin: generatedPin, message: 'Tenant PIN reset successfully.' };
+  } catch (error: any) {
+    console.error('Failed to reset tenant PIN:', error);
+    return { success: false, error: error.message || 'Failed to reset PIN' };
+  }
+}
