@@ -30,7 +30,7 @@ const initialState: ActionState = {
   message: "",
 };
 
-export default function CreatePropertyForm() {
+export default function CreatePropertyForm({ unassignedLocks = [] }: { unassignedLocks?: any[] }) {
   const router = useRouter();
 
   // 1. Setup states for our Server Action, Transition, and Files
@@ -416,7 +416,7 @@ export default function CreatePropertyForm() {
       {/* --- MEDIA & ACCESS CONTROL (Client Islands) --- */}
       <MediaUpload files={uploadedFiles} setFiles={setUploadedFiles} />
 
-      <SmartLockToggle />
+      <SmartLockToggle unassignedLocks={unassignedLocks} />
 
       <div className="bg-white rounded-lg border border-zinc-200/60 p-8 flex items-center justify-between">
         <p className="text-[13px] text-zinc-500 max-w-sm">

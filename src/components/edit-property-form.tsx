@@ -42,7 +42,15 @@ const initialState: ActionState = {
   message: "",
 };
 
-export default function EditPropertyForm({ initialData }: { initialData: any }) {
+export default function EditPropertyForm({ 
+  initialData, 
+  unassignedLocks = [],
+  currentLock = null
+}: { 
+  initialData: any,
+  unassignedLocks?: any[],
+  currentLock?: any
+}) {
   const router = useRouter();
 
   const [state, formAction] = useActionState(editPropertyAction, initialState);
@@ -433,9 +441,11 @@ export default function EditPropertyForm({ initialData }: { initialData: any }) 
           setExistingImages={setExistingImages}
         />
         
-        <input type="hidden" name="hasSmartLock" value={initialData.smartLock?.hasSmartLock ? "on" : "off"} />
-        <input type="hidden" name="accessInstructions" value={initialData.smartLock?.accessInstructions || ""} />
-        <SmartLockToggle />
+        <SmartLockToggle 
+          unassignedLocks={unassignedLocks} 
+          currentLock={currentLock} 
+          initialAccessInstructions={initialData.smartLock?.accessInstructions || ""}
+        />
 
         <div className="bg-white rounded-lg border border-zinc-200/60 p-8 flex items-center justify-between">
           <p className="text-[13px] text-zinc-500 max-w-sm">

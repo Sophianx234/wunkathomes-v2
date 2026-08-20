@@ -8,6 +8,7 @@ import mongoose from "mongoose";
 import { connectToDatabase } from "@/config/DbConnect";
 import Property from "@/models/property";
 import Listing from "@/models/listing";
+import SmartLock from "@/models/smartlock";
 import { deleteFromCloudinary, uploadToCloudinary } from "@/lib/cloudinary"; 
 import { getSession } from "@/lib/session";
 import { COMMON_AMENITIES } from "@/lib/constants";
@@ -51,6 +52,7 @@ const createPropertySchema = z.object({
   landmarks: z.array(z.string().trim().max(100)).max(20).optional(),
   
   hasSmartLock: z.boolean().default(false),
+  smartLockId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid Lock ID").optional().or(z.literal('')),
   accessInstructions: z.string().trim().max(1000).optional().nullable(),
 
   mediaUrls: z.array(z.string().url("Invalid image URL"))
@@ -130,6 +132,7 @@ export async function createPropertyAction(prevState: ActionState, formData: For
       amenities: formData.getAll("amenities"),
       landmarks: landmarksStr ? landmarksStr.split(",").map(item => item.trim()).filter(Boolean) : [],
       hasSmartLock: formData.get("hasSmartLock") === "on" || formData.get("hasSmartLock") === "true",
+      smartLockId: formData.get("smartLockId"),
       accessInstructions: formData.get("accessInstructions"),
       
       // 1. THIS IS THE KEY CHANGE: Grab the URLs instead of Files
@@ -151,7 +154,7 @@ export async function createPropertyAction(prevState: ActionState, formData: For
         generalAmenities: validData.amenities,
       }], { session: dbSession });
 
-      await Listing.create([{
+      const newListing = await Listing.create([{
         propertyId: newProperty[0]._id,
         listingType: validData.listingType,
         status: validData.status,
@@ -165,6 +168,19 @@ export async function createPropertyAction(prevState: ActionState, formData: For
         // 2. PASS THE URLS DIRECTLY TO MONGO
         images: validData.mediaUrls, 
       }], { session: dbSession });
+
+      // 3. IF SMART LOCK ID WAS PROVIDED, ASSIGN IT
+      if (validData.hasSmartLock && validData.smartLockId) {
+        await SmartLock.findByIdAndUpdate(
+          validData.smartLockId,
+          { 
+            propertyId: newProperty[0]._id,
+            listingId: newListing[0]._id,
+            status: 'online'
+          },
+          { session: dbSession }
+        );
+      }
     });
     await dbSession.endSession();
 
@@ -225,6 +241,8 @@ export async function editPropertyAction(prevState: ActionState, formData: FormD
       amenities: formData.getAll("amenities"),
       landmarks: landmarksStr ? landmarksStr.split(",").map(item => item.trim()).filter(Boolean) : [],
       hasSmartLock: formData.get("hasSmartLock") === "on" || formData.get("hasSmartLock") === "true",
+      smartLockId: formData.get("smartLockId"),
+      accessInstructions: formData.get("accessInstructions"),
       
       // Look for the lightweight strings, not files
       newMediaUrls: formData.getAll("newMediaUrls"), 
@@ -266,6 +284,27 @@ export async function editPropertyAction(prevState: ActionState, formData: FormD
         smartLock: { hasSmartLock: validData.hasSmartLock, accessInstructions: validData.accessInstructions },
         images: finalImageUrls, // <-- Directly save the text arrays
       }, { session: dbSession });
+      
+      // Handle Smart Lock reassignment securely
+      // 1. Unassign ANY lock currently pointing to this property to guarantee a clean slate
+      await SmartLock.updateMany(
+        { propertyId: targetPropertyId },
+        { propertyId: null, listingId: null, status: 'unassigned' },
+        { session: dbSession }
+      );
+      
+      // 2. If the user explicitly provided a new valid lock ID, assign it
+      if (validData.hasSmartLock && validData.smartLockId) {
+        await SmartLock.findByIdAndUpdate(
+          validData.smartLockId,
+          { 
+            propertyId: targetPropertyId,
+            listingId: validData.listingId,
+            status: 'online'
+          },
+          { session: dbSession }
+        );
+      }
     });
     await dbSession.endSession();
 
@@ -320,7 +359,16 @@ export async function deletePropertyAction(rawListingId: string) {
     const dbSession = await mongoose.startSession();
     await dbSession.withTransaction(async () => {
       await Listing.findByIdAndDelete(listingId, { session: dbSession });
-      if (propertyId) await Property.findByIdAndDelete(propertyId, { session: dbSession });
+      if (propertyId) {
+        await Property.findByIdAndDelete(propertyId, { session: dbSession });
+        
+        // Unassign any smart lock connected to this property so it returns to the pool
+        await SmartLock.updateMany(
+          { propertyId: propertyId },
+          { propertyId: null, listingId: null, status: 'unassigned' },
+          { session: dbSession }
+        );
+      }
     });
     await dbSession.endSession();
 

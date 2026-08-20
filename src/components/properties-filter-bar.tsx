@@ -134,6 +134,14 @@ export default function PropertiesFilterBar({
           </button>
         </div>
 
+        {/* Manage Smart Locks Button */}
+        <Link
+          href="/admin/smartlocks"
+          className="text-zinc-900 flex items-center bg-white border border-zinc-200 hover:bg-zinc-50 rounded-lg h-10 px-5 text-[14px] font-medium shrink-0 w-full md:w-auto transition-colors"
+        >
+          Manage Smart Locks
+        </Link>
+
         {/* Create Property Button */}
         <Link
           href="/admin/properties/create"
