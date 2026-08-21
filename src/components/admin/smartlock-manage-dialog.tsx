@@ -36,11 +36,23 @@ export function SmartLockManageDialog({
 
   if (!lock) return null;
 
+  const [unlockCountdown, setUnlockCountdown] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (unlockCountdown !== null && unlockCountdown > 0) {
+      const timer = setTimeout(() => setUnlockCountdown(c => (c ? c - 1 : null)), 1000);
+      return () => clearTimeout(timer);
+    } else if (unlockCountdown === 0) {
+      setUnlockCountdown(null);
+    }
+  }, [unlockCountdown]);
+
   const handleRemoteUnlock = () => {
     startTransition(async () => {
       const res = await remoteUnlockAction(lock.tuyaDeviceId);
       if (res.success) {
         toast.success('Lock opened successfully.');
+        setUnlockCountdown(5);
       } else {
         toast.error(res.error || 'Failed to unlock door.');
       }
@@ -107,10 +119,14 @@ export function SmartLockManageDialog({
                 </div>
                 <button
                   onClick={handleRemoteUnlock}
-                  disabled={isPending || lock.status !== 'online'}
-                  className="bg-amber-100 text-amber-700 hover:bg-amber-200 px-4 py-2 rounded text-xs font-bold uppercase tracking-wider disabled:opacity-50"
+                  disabled={isPending || lock.status !== 'online' || unlockCountdown !== null}
+                  className={`px-4 py-2 rounded text-xs font-bold uppercase tracking-wider disabled:opacity-50 transition-colors ${
+                    unlockCountdown !== null 
+                      ? 'bg-emerald-100 text-emerald-700 w-40 text-center' 
+                      : 'bg-amber-100 text-amber-700 hover:bg-amber-200'
+                  }`}
                 >
-                  {isPending ? 'Working...' : 'Unlock Door'}
+                  {isPending ? 'Working...' : unlockCountdown !== null ? `Unlocked (${unlockCountdown}s)` : 'Unlock Door'}
                 </button>
               </div>
             </section>

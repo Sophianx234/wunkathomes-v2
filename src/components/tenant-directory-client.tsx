@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useState, useTransition, useEffect } from "react";
 import { toast } from "sonner";
 import {
   Alert01Icon,
@@ -188,6 +188,29 @@ export default function TenantDirectoryClient({
   const [newPinResult, setNewPinResult] = useState<{ pin: string; name: string } | null>(null);
   
   const [isPending, startTransition] = useTransition();
+
+  const [unlockCountdown, setUnlockCountdown] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (unlockCountdown !== null && unlockCountdown > 0) {
+      const timer = setTimeout(() => setUnlockCountdown(c => (c ? c - 1 : null)), 1000);
+      return () => clearTimeout(timer);
+    } else if (unlockCountdown === 0) {
+      setUnlockCountdown(null);
+    }
+  }, [unlockCountdown]);
+
+  const handleInlineRemoteUnlock = async (deviceId: string) => {
+    startTransition(async () => {
+      const result = await remoteUnlockAction(deviceId);
+      if (result.success) {
+        toast.success("Lock opened successfully.");
+        setUnlockCountdown(5);
+      } else {
+        toast.error(result.error || "Failed to unlock door.");
+      }
+    });
+  };
 
   const selectedTenant = useMemo(() => {
     return data.find((r) => r.id === selectedTenantId) || null;
@@ -616,11 +639,15 @@ export default function TenantDirectoryClient({
                           <div className="flex flex-wrap gap-2">
                             <Button 
                               variant="ghost" 
-                              className="h-8 px-3 rounded-md text-[10px] font-bold uppercase tracking-widest bg-amber-50 text-amber-600 hover:bg-amber-100 hover:text-amber-700 border-0 shadow-none transition-colors" 
-                              onClick={() => requestAction("remoteUnlock")}
-                              disabled={!selectedTenant.smartLock.online}
+                              className={`h-8 px-3 rounded-md text-[10px] font-bold uppercase tracking-widest border-0 shadow-none transition-colors ${
+                                unlockCountdown !== null 
+                                  ? 'bg-emerald-50 text-emerald-700 w-36 text-center hover:bg-emerald-50 hover:text-emerald-700' 
+                                  : 'bg-amber-50 text-amber-600 hover:bg-amber-100 hover:text-amber-700'
+                              }`}
+                              onClick={() => handleInlineRemoteUnlock(selectedTenant.smartLock!.tuyaDeviceId)}
+                              disabled={!selectedTenant.smartLock.online || isPending || unlockCountdown !== null}
                             >
-                              <HugeiconsIcon icon={Key01Icon} size={12} className="mr-1.5" /> Unlock
+                              {isPending ? 'Working...' : unlockCountdown !== null ? `Unlocked (${unlockCountdown}s)` : <><HugeiconsIcon icon={Key01Icon} size={12} className="mr-1.5" /> Unlock</>}
                             </Button>
                             <Button 
                               variant="ghost" 

@@ -529,16 +529,24 @@ export default function SmartLockManager({
                     </Badge>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-1.5 text-zinc-700">
-                      {lock.lockState === 'unlocked' ? <Unlock className="h-3.5 w-3.5 text-zinc-500" /> : <Lock className="h-3.5 w-3.5 text-zinc-900" />}
-                      <span className="text-xs font-medium capitalize">{lock.lockState || 'Unknown'}</span>
-                    </div>
+                    {!lock.lockState || lock.lockState === 'unknown' ? (
+                      <Badge variant="secondary" className="text-[10px] text-zinc-500 bg-zinc-100 hover:bg-zinc-100 border-zinc-200">Auto (Clutch)</Badge>
+                    ) : (
+                      <div className="flex items-center gap-1.5 text-zinc-700">
+                        {lock.lockState === 'unlocked' ? <Unlock className="h-3.5 w-3.5 text-zinc-500" /> : <Lock className="h-3.5 w-3.5 text-zinc-900" />}
+                        <span className="text-xs font-medium capitalize">{lock.lockState}</span>
+                      </div>
+                    )}
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-1.5 text-zinc-700">
-                      {lock.doorState === 'open' ? <DoorOpen className="h-3.5 w-3.5 text-zinc-500" /> : <DoorClosed className="h-3.5 w-3.5 text-zinc-900" />}
-                      <span className="text-xs font-medium capitalize">{lock.doorState || 'Unknown'}</span>
-                    </div>
+                    {!lock.doorState || lock.doorState === 'unknown' ? (
+                      <Badge variant="secondary" className="text-[10px] text-zinc-500 bg-zinc-100 hover:bg-zinc-100 border-zinc-200">No Sensor</Badge>
+                    ) : (
+                      <div className="flex items-center gap-1.5 text-zinc-700">
+                        {lock.doorState === 'open' ? <DoorOpen className="h-3.5 w-3.5 text-zinc-500" /> : <DoorClosed className="h-3.5 w-3.5 text-zinc-900" />}
+                        <span className="text-xs font-medium capitalize">{lock.doorState}</span>
+                      </div>
+                    )}
                   </td>
                   <td className="px-6 py-4 text-xs text-zinc-500">
                     {lock.updatedAt ? new Date(lock.updatedAt).toLocaleString() : 'Just now'}
