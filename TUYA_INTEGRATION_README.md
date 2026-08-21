@@ -66,7 +66,8 @@ The following variables are active in `.env`:
 - Wi-Fi locks require a 7-digit PIN, so the PIN generation logic in `src/actions/admin/smartlock.action.ts` has been updated to generate 7-digit PINs.
 
 ### 11. Audit Logging and Temporary PIN Management
-- The system maintains a robust security audit trail. A Mongoose model (`AccessLog`) tracks every critical smart lock event: `PIN_RESET`, `TEMP_PIN_CREATED`, `REMOTE_UNLOCK`, and `PIN_REVOKED`.
+- The system maintains a robust security audit trail. A Mongoose model (`AccessLog`) tracks every critical smart lock event: `PIN_RESET`, `TEMP_PIN_CREATED`, `REMOTE_UNLOCK`, `PIN_REVOKED`, `PHYSICAL_UNLOCK`, and `ALARM_TRIGGERED`.
+- **Audit History UI**: Inside the `/admin/smartlocks` dashboard, clicking "Manage" on any lock opens the `SmartLockManageDialog`. This modal contains an **Audit History** tab that dynamically queries `getLockAuditLogs(lockId)` to display a timeline of the 50 most recent events specific to that lock.
 - When an admin generates a temporary/vendor PIN, they can provide a custom name and duration. The hardware issues the PIN, and the backend securely stores it in the `SmartLock.activeTempPins` array (saving only the last 4 digits, e.g., `***1234`, for security) along with its expiration date.
 - Admins have the ability to explicitly revoke active temporary PINs before they expire using the `revokeTemporaryPinAction`, which hits Tuya's `DELETE /v1.0/devices/{device_id}/door-lock/temp-passwords/{password_id}` endpoint and prunes the database array.
 
