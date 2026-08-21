@@ -35,17 +35,24 @@ export async function syncLocksFromCloud() {
     for (const device of tuyaDevices) {
       // Parse Tuya status array if available
       let batteryLevel = 'high';
+      let batteryPercentage = null;
       let lockState = 'unknown';
       let doorState = 'unknown';
 
       if (Array.isArray(device.status)) {
         for (const stat of device.status) {
-          if (stat.code === 'battery_state' || stat.code === 'residual_electricity') {
+          if (stat.code === 'residual_electricity' || stat.code === 'battery_percentage') {
+            const val = Number(stat.value);
+            if (!isNaN(val)) {
+              batteryPercentage = val;
+              batteryLevel = val <= 20 ? 'low' : 'high';
+            }
+          } else if (stat.code === 'battery_state') {
             batteryLevel = stat.value;
           } else if (stat.code === 'doorcontact_state') {
             doorState = (stat.value === 'open' || stat.value === true) ? 'open' : 'closed';
-          } else if (stat.code === 'closed_opened_status' || stat.code === 'open_close_status') {
-            lockState = (stat.value === 'unlocked' || stat.value === 'open') ? 'unlocked' : 'locked';
+          } else if (stat.code === 'closed_opened_status' || stat.code === 'open_close_status' || stat.code === 'lock_state') {
+            lockState = (stat.value === 'unlocked' || stat.value === 'open' || stat.value === true) ? 'unlocked' : 'locked';
           }
         }
       }
@@ -58,6 +65,7 @@ export async function syncLocksFromCloud() {
           name: device.name,
           status: device.online ? 'unassigned' : 'offline',
           batteryLevel,
+          batteryPercentage,
           lockState,
           doorState
         });
@@ -67,6 +75,7 @@ export async function syncLocksFromCloud() {
         await SmartLock.updateOne({ _id: existing._id }, { 
           $set: {
             batteryLevel,
+            batteryPercentage,
             lockState,
             doorState,
             status: existing.status === 'unassigned' && device.online ? 'unassigned' : (device.online ? 'online' : 'offline'),

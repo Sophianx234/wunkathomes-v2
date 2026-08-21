@@ -15,7 +15,11 @@ const smartLockSchema = new mongoose.Schema({
     pinMasked: String, // just last 3 digits e.g. "***456"
     validFrom: Date,
     expiresAt: Date
-  }]
+  }],
+  // New SOC / Monitoring Fields
+  batteryPercentage: { type: Number, min: 0, max: 100, default: null }, // e.g. 85
+  signalStrength: { type: String, default: null }, // e.g. "-65dBm" or "strong"
+  activeAlarms: [{ type: String }] // e.g. ["door_unclosed_alarm", "tamper_alarm"]
 }, { timestamps: true });
 
 const SmartLock = mongoose.models.SmartLock || mongoose.model('SmartLock', smartLockSchema);

@@ -70,13 +70,13 @@ The following variables are active in `.env`:
 - When an admin generates a temporary/vendor PIN, they can provide a custom name and duration. The hardware issues the PIN, and the backend securely stores it in the `SmartLock.activeTempPins` array (saving only the last 4 digits, e.g., `***1234`, for security) along with its expiration date.
 - Admins have the ability to explicitly revoke active temporary PINs before they expire using the `revokeTemporaryPinAction`, which hits Tuya's `DELETE /v1.0/devices/{device_id}/door-lock/temp-passwords/{password_id}` endpoint and prunes the database array.
 
-### 12. Real-Time Hardware Monitoring Dashboard
+### 12. Security Operations Center (SOC) & Live Monitoring
 - The platform uses a **Zero-Polling Architecture** via Pusher to monitor fleet health and activity in real-time.
 - `src/lib/pusher-server.ts` handles API route triggers, and `src/lib/pusher-client.ts` connects the React UI using `pusher-js`.
-- Tuya's Webhooks post to `src/app/api/webhooks/tuya/route.ts` whenever a lock goes online/offline or its battery drops.
-- The webhook automatically updates the `SmartLock` document in MongoDB, parsing granular telemetry like `battery_state`, `doorcontact_state`, and `closed_opened_status`.
-- It then fires a `pusherServer.trigger('smartlocks', 'status_update')` event.
-- The `/admin/smartlocks` dashboard subscribes to this channel. Upon receiving an event, it instantly updates the UI (including Lock State and Door State) and re-sorts the "Real-Time Activity Log" table so the most recently updated lock jumps to the top.
+- Tuya's Webhooks post to `src/app/api/webhooks/tuya/route.ts` which is fully configured to parse advanced Tuya Data Points (DPs) including `residual_electricity` (exact 0-100% battery), hardware alarms (`tamper_alarm`, `door_unclosed_alarm`), and physical unlock records (`unlock_record`, `unlock_fingerprint`).
+- The webhook automatically updates the `SmartLock` document (managing an `activeAlarms` array and `batteryPercentage`), and securely saves hardware events (`PHYSICAL_UNLOCK`, `ALARM_TRIGGERED`) to the `AccessLog` audit timeline.
+- It streams this data to the frontend via two Pusher channels: `status_update` and `activity_log`.
+- The `/admin/smartlocks` "Live Monitoring" tab subscribes to these streams to instantly flash red ALARM badges on tampered locks, update dynamic battery progress bars, and scroll a real-time "Security & Access Event Feed" at the bottom of the dashboard.
 
 ---
 

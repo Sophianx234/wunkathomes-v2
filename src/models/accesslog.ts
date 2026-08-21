@@ -5,7 +5,10 @@ const accessLogSchema = new mongoose.Schema({
   propertyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Property' },
   action: { 
     type: String, 
-    enum: ['PIN_RESET', 'TEMP_PIN_CREATED', 'REMOTE_UNLOCK', 'PIN_REVOKED', 'LEASE_ACTIVATED'], 
+    enum: [
+      'PIN_RESET', 'TEMP_PIN_CREATED', 'REMOTE_UNLOCK', 'PIN_REVOKED', 'LEASE_ACTIVATED',
+      'PHYSICAL_UNLOCK', 'ALARM_TRIGGERED', 'ALARM_CLEARED'
+    ], 
     required: true 
   },
   performedBy: { type: String }, // e.g., 'Admin', 'Tenant', or an ID

@@ -27,6 +27,7 @@ export default function SmartLockManager({
 
   // Store only the *deltas* (updates) from Pusher in state
   const [liveUpdates, setLiveUpdates] = useState<Record<string, any>>({});
+  const [liveActivities, setLiveActivities] = useState<any[]>([]);
 
   useEffect(() => {
     const pusher = getPusherClient();
@@ -42,6 +43,10 @@ export default function SmartLockManager({
           updatedAt: new Date().toISOString() 
         }
       }));
+    });
+
+    channel.bind('activity_log', (data: any) => {
+      setLiveActivities(prev => [data, ...prev].slice(0, 50)); // keep last 50 events
     });
 
     return () => {
@@ -398,7 +403,7 @@ export default function SmartLockManager({
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-zinc-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-zinc-900"></span>
                 </span>
-                Real-Time Activity Log
+                Live Device Status
               </h3>
               <span className="text-xs text-zinc-500 bg-white border border-zinc-200 px-2 py-1 rounded shadow-sm">Live (Pusher)</span>
             </div>
@@ -447,13 +452,28 @@ export default function SmartLockManager({
                 <tr key={lock._id} className="hover:bg-zinc-50/50 transition-colors">
                   <td className="px-6 py-4">
                     <span className="font-medium text-zinc-900">{lock.name}</span>
+                    {lock.activeAlarms && lock.activeAlarms.length > 0 && (
+                      <span className="ml-2 inline-flex animate-pulse items-center gap-1 rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-bold text-rose-700">
+                        {lock.activeAlarms.length} ALARM(S)
+                      </span>
+                    )}
                     <p className="text-[11px] text-zinc-500 font-mono mt-0.5">{lock.tuyaDeviceId}</p>
                   </td>
                   <td className="px-6 py-4">
-                    {lock.batteryLevel ? (
+                    {lock.batteryPercentage != null ? (
+                      <div className="flex items-center gap-2">
+                        <div className="w-16 h-1.5 bg-zinc-200 rounded-full overflow-hidden">
+                          <div 
+                            className={`h-full ${lock.batteryPercentage <= 20 ? 'bg-rose-500' : 'bg-emerald-500'}`} 
+                            style={{ width: `${lock.batteryPercentage}%` }} 
+                          />
+                        </div>
+                        <span className="text-[11px] font-medium text-zinc-600">{lock.batteryPercentage}%</span>
+                      </div>
+                    ) : lock.batteryLevel ? (
                       <div className="flex items-center gap-1.5 text-zinc-600">
                         {lock.batteryLevel === 'low' ? (
-                          <BatteryWarning className="h-3.5 w-3.5 text-zinc-900" />
+                          <BatteryWarning className="h-3.5 w-3.5 text-rose-600" />
                         ) : (
                           <Battery className="h-3.5 w-3.5" />
                         )}
@@ -506,6 +526,52 @@ export default function SmartLockManager({
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Live Activity Stream */}
+        <div className="bg-white rounded-lg border border-zinc-200 overflow-hidden shadow-sm mt-8">
+          <div className="p-4 border-b border-zinc-200 bg-zinc-50">
+            <h3 className="font-semibold text-zinc-900 flex items-center gap-2">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+              </span>
+              Security & Access Event Feed
+            </h3>
+          </div>
+          <div className="p-0">
+            {liveActivities.length === 0 ? (
+              <div className="p-8 text-center text-sm text-zinc-500">
+                Listening for hardware events from Tuya Cloud...
+              </div>
+            ) : (
+              <ul className="divide-y divide-zinc-100 max-h-[400px] overflow-y-auto">
+                {liveActivities.map((act, idx) => (
+                  <li key={idx} className="p-4 hover:bg-zinc-50 transition-colors text-sm flex items-start gap-4">
+                    <div className="shrink-0 mt-1">
+                      {act.action === 'ALARM_TRIGGERED' ? (
+                        <div className="h-2 w-2 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.8)]" />
+                      ) : act.action === 'ALARM_CLEARED' ? (
+                        <div className="h-2 w-2 rounded-full bg-emerald-500" />
+                      ) : (
+                        <div className="h-2 w-2 rounded-full bg-blue-500" />
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-zinc-900 font-medium">{act.lockName} <span className="text-zinc-400 font-normal">({act.tuyaDeviceId})</span></p>
+                      <p className="text-zinc-600 mt-0.5">
+                        <span className="font-semibold text-zinc-800">{act.action}</span> - {act.performedBy} 
+                        {act.metadata?.targetName && <code className="ml-2 text-[10px] bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-500">{act.metadata.targetName}</code>}
+                      </p>
+                      <p className="text-[10px] text-zinc-400 font-mono mt-1">
+                        {new Date(act.timestamp).toLocaleTimeString()}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
       </TabsContent>
 
