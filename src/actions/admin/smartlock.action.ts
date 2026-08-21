@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { connectToDatabase } from '@/config/DbConnect';
 import SmartLock from '@/models/smartlock';
+import AccessLog from '@/models/accesslog';
 import { getDevicesByUser } from '@/lib/tuya';
 
 /**
@@ -30,8 +31,25 @@ export async function syncLocksFromCloud() {
     
     let newLocksAdded = 0;
 
-    // Loop through each device and add to DB if it doesn't exist
+    // Loop through each device and add/update DB
     for (const device of tuyaDevices) {
+      // Parse Tuya status array if available
+      let batteryLevel = 'high';
+      let lockState = 'unknown';
+      let doorState = 'unknown';
+
+      if (Array.isArray(device.status)) {
+        for (const stat of device.status) {
+          if (stat.code === 'battery_state' || stat.code === 'residual_electricity') {
+            batteryLevel = stat.value;
+          } else if (stat.code === 'doorcontact_state') {
+            doorState = (stat.value === 'open' || stat.value === true) ? 'open' : 'closed';
+          } else if (stat.code === 'closed_opened_status' || stat.code === 'open_close_status') {
+            lockState = (stat.value === 'unlocked' || stat.value === 'open') ? 'unlocked' : 'locked';
+          }
+        }
+      }
+
       const existing = await SmartLock.findOne({ tuyaDeviceId: device.id });
       
       if (!existing) {
@@ -39,12 +57,23 @@ export async function syncLocksFromCloud() {
           tuyaDeviceId: device.id,
           name: device.name,
           status: device.online ? 'unassigned' : 'offline',
-          batteryLevel: 'high', // Note: fetch detailed status if battery is needed immediately
+          batteryLevel,
+          lockState,
+          doorState
         });
         newLocksAdded++;
-      } else if (existing.name !== device.name && existing.status === 'unassigned') {
-         // Optional: Auto-update name if it was changed in Tuya app and hasn't been assigned yet
-         await SmartLock.updateOne({ _id: existing._id }, { name: device.name });
+      } else {
+        // Update existing lock with fresh telemetry from Tuya
+        await SmartLock.updateOne({ _id: existing._id }, { 
+          $set: {
+            batteryLevel,
+            lockState,
+            doorState,
+            status: existing.status === 'unassigned' && device.online ? 'unassigned' : (device.online ? 'online' : 'offline'),
+            // optionally auto-update name if it's unassigned
+            ...(existing.status === 'unassigned' && existing.name !== device.name ? { name: device.name } : {})
+          }
+        });
       }
     }
 
@@ -116,7 +145,19 @@ export async function getUnassignedLocks() {
 export async function remoteUnlockAction(tuyaDeviceId: string) {
   try {
     const { remoteUnlock } = await import('@/lib/tuya');
+    await connectToDatabase();
     await remoteUnlock(tuyaDeviceId);
+    
+    const lock = await SmartLock.findOne({ tuyaDeviceId });
+    if (lock) {
+      await AccessLog.create({
+        lockId: lock._id,
+        propertyId: lock.propertyId,
+        action: 'REMOTE_UNLOCK',
+        performedBy: 'Admin'
+      });
+    }
+
     return { success: true, message: 'Door unlocked successfully.' };
   } catch (error: any) {
     console.error('Failed to remote unlock:', error);
@@ -127,26 +168,51 @@ export async function remoteUnlockAction(tuyaDeviceId: string) {
 /**
  * Generates a short-lived temporary PIN for vendors/maintenance.
  */
-export async function generateVendorPinAction(tuyaDeviceId: string, hoursValid: number = 2) {
+export async function generateVendorPinAction(tuyaDeviceId: string, hoursValid: number = 2, customName?: string) {
   try {
     const { createTemporaryPin } = await import('@/lib/tuya');
     
-    // Generate a random 6 digit PIN
-    const generatedPin = Array.from(crypto.getRandomValues(new Uint8Array(6)))
+    // Generate a random 7 digit PIN
+    const generatedPin = Array.from(crypto.getRandomValues(new Uint8Array(7)))
       .map(n => (n % 10).toString())
       .join('');
       
     const effectiveTime = Date.now();
     const invalidTime = effectiveTime + (hoursValid * 60 * 60 * 1000);
 
-    await createTemporaryPin({
+    await connectToDatabase();
+    
+    const name = customName || `Vendor_${Math.floor(Math.random() * 1000)}`;
+    const result = await createTemporaryPin({
       deviceId: tuyaDeviceId,
       pin: generatedPin,
-      name: `Vendor_${Math.floor(Math.random() * 1000)}`,
+      name,
       effectiveTime,
       invalidTime
     });
 
+    const lock = await SmartLock.findOne({ tuyaDeviceId });
+    if (lock) {
+      lock.activeTempPins.push({
+        pinId: result?.id?.toString() || Math.random().toString(),
+        name,
+        pinMasked: `***${generatedPin.slice(-4)}`,
+        validFrom: new Date(effectiveTime),
+        expiresAt: new Date(invalidTime)
+      });
+      await lock.save();
+
+      await AccessLog.create({
+        lockId: lock._id,
+        propertyId: lock.propertyId,
+        action: 'TEMP_PIN_CREATED',
+        performedBy: 'Admin', 
+        metadata: { targetName: name, expiresAt: new Date(invalidTime) }
+      });
+    }
+
+    revalidatePath('/admin/manage/tenants');
+    revalidatePath('/admin/smartlocks');
     return { success: true, pin: generatedPin, message: `Created vendor PIN valid for ${hoursValid} hours.` };
   } catch (error: any) {
     console.error('Failed to generate vendor PIN:', error);
@@ -162,8 +228,8 @@ export async function resetTenantPinAction(tuyaDeviceId: string, leaseId: string
     const { createTemporaryPin } = await import('@/lib/tuya');
     await connectToDatabase();
     
-    // Cryptographically secure 6-digit PIN
-    const generatedPin = Array.from(crypto.getRandomValues(new Uint8Array(6)))
+    // Cryptographically secure 7-digit PIN
+    const generatedPin = Array.from(crypto.getRandomValues(new Uint8Array(7)))
       .map(n => (n % 10).toString())
       .join('');
       
@@ -181,14 +247,67 @@ export async function resetTenantPinAction(tuyaDeviceId: string, leaseId: string
 
     // 2. Update DB
     const Lease = (await import('@/models/lease')).default;
-    await Lease.findByIdAndUpdate(leaseId, { smartLockPin: generatedPin });
+    const lease = await Lease.findByIdAndUpdate(leaseId, { smartLockPin: generatedPin });
+
+    const lock = await SmartLock.findOne({ tuyaDeviceId });
+    if (lock && lease) {
+      await AccessLog.create({
+        lockId: lock._id,
+        propertyId: lock.propertyId,
+        action: 'PIN_RESET',
+        performedBy: 'Admin',
+        metadata: { leaseId: lease._id }
+      });
+    }
 
     // Note: You would typically send an email here to the tenant with the new PIN.
     
     revalidatePath('/admin/manage/tenants');
+    revalidatePath('/admin/smartlocks');
     return { success: true, pin: generatedPin, message: 'Tenant PIN reset successfully.' };
   } catch (error: any) {
     console.error('Failed to reset tenant PIN:', error);
     return { success: false, error: error.message || 'Failed to reset PIN' };
+  }
+}
+
+/**
+ * Revokes a temporary vendor PIN manually before it expires.
+ */
+export async function revokeTemporaryPinAction(tuyaDeviceId: string, pinId: string) {
+  try {
+    const { deleteTemporaryPin } = await import('@/lib/tuya');
+    await connectToDatabase();
+
+    // 1. Delete from hardware
+    await deleteTemporaryPin(tuyaDeviceId, pinId);
+
+    // 2. Remove from DB & log
+    const lock = await SmartLock.findOne({ tuyaDeviceId });
+    if (lock) {
+      // Find the pin details before removing
+      const pinIndex = lock.activeTempPins.findIndex((p: any) => p.pinId === pinId);
+      if (pinIndex !== -1) {
+        const pinDetails = lock.activeTempPins[pinIndex];
+        
+        lock.activeTempPins.splice(pinIndex, 1);
+        await lock.save();
+
+        await AccessLog.create({
+          lockId: lock._id,
+          propertyId: lock.propertyId,
+          action: 'PIN_REVOKED',
+          performedBy: 'Admin',
+          metadata: { targetName: pinDetails.name }
+        });
+      }
+    }
+
+    revalidatePath('/admin/manage/tenants');
+    revalidatePath('/admin/smartlocks');
+    return { success: true, message: 'Temporary PIN revoked successfully.' };
+  } catch (error: any) {
+    console.error('Failed to revoke PIN:', error);
+    return { success: false, error: error.message || 'Failed to revoke PIN' };
   }
 }

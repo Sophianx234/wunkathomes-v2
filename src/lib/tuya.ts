@@ -122,10 +122,27 @@ export interface TempPinParams {
 export async function createTemporaryPin({ deviceId, pin, name, effectiveTime, invalidTime }: TempPinParams) {
   if (!deviceId) throw new Error('Device ID is required to create a PIN');
   
+  // 1. Get Ticket
+  const ticketPath = `/v1.0/devices/${deviceId}/door-lock/password-ticket`;
+  const ticketRes = await tuyaRequest('POST', ticketPath);
+  const { ticket_id, ticket_key } = ticketRes.result;
+
+  // 2. Decrypt Ticket Key using AES-256-ECB with Tuya Access Secret
+  const decipher = crypto.createDecipheriv('aes-256-ecb', TUYA_ACCESS_SECRET, null);
+  let originalKey = decipher.update(ticket_key, 'hex', 'utf8');
+  originalKey += decipher.final('utf8');
+
+  // 3. Encrypt PIN using AES-128-ECB with the decrypted original Key
+  const cipher = crypto.createCipheriv('aes-128-ecb', originalKey, null);
+  let encryptedPin = cipher.update(pin, 'utf8', 'hex');
+  encryptedPin += cipher.final('hex');
+
   const path = `/v1.0/devices/${deviceId}/door-lock/temp-password`;
   
   const body = {
-    password: pin,
+    password: encryptedPin.toUpperCase(),
+    password_type: 'ticket',
+    ticket_id: ticket_id,
     name: name,
     effective_time: Math.floor(effectiveTime / 1000), 
     invalid_time: Math.floor(invalidTime / 1000),
@@ -133,6 +150,16 @@ export async function createTemporaryPin({ deviceId, pin, name, effectiveTime, i
   };
 
   const data = await tuyaRequest('POST', path, body);
+  return data.result;
+}
+
+/**
+ * Revokes a temporary passcode.
+ */
+export async function deleteTemporaryPin(deviceId: string, passwordId: string) {
+  if (!deviceId || !passwordId) throw new Error('Device ID and Password ID are required');
+  const path = `/v1.0/devices/${deviceId}/door-lock/temp-passwords/${passwordId}`;
+  const data = await tuyaRequest('DELETE', path);
   return data.result;
 }
 

@@ -146,6 +146,12 @@ export async function getTenantsData() {
         status: lock.status,
         batteryLevel: lock.batteryLevel,
         online: lock.status === 'online',
+        activeTempPins: (lock.activeTempPins || []).map((pin: any) => ({
+          pinId: pin.pinId,
+          name: pin.name,
+          pinMasked: pin.pinMasked,
+          expiresAt: pin.expiresAt ? new Date(pin.expiresAt).toISOString() : null
+        })).filter((pin: any) => pin.expiresAt && new Date(pin.expiresAt) > new Date())
       } : undefined,
       smartLockPin: lease.smartLockPin || undefined,
     };

@@ -27,7 +27,7 @@ The following variables are active in `.env`:
 
 ### 3. Database Schema (`src/models/smartlock.ts`)
 - A Mongoose model (`SmartLock`) bridges Tuya devices to properties.
-- Fields: `tuyaDeviceId`, `name`, `propertyId`, `listingId`, `status` ('unassigned', 'online', 'offline'), `batteryLevel`.
+- Fields: `tuyaDeviceId`, `name`, `propertyId`, `listingId`, `status` ('unassigned', 'online', 'offline'), `batteryLevel`, `lockState` ('locked', 'unlocked', 'unknown'), `doorState` ('closed', 'open', 'unknown').
 
 ### 4. Fleet Auto-Sync & Admin Actions (`src/actions/admin/smartlock.action.ts`)
 - `syncLocksFromCloud()`: Fetches the entire fleet of devices from Tuya's servers and saves new ones to MongoDB. 
@@ -38,6 +38,7 @@ The following variables are active in `.env`:
 - A full Admin UI is available at `/admin/smartlocks`.
 - Uses client component `src/components/admin/smartlock-manager.tsx`.
 - Features real-time search, status filtering, renaming, and an "Edit Property" link that jumps directly to the property a lock is assigned to.
+- **UI Architecture:** Completely redesigned to match the Wunkat monochrome/zinc aesthetic, heavily relying on Shadcn UI (`Badge`, `DropdownMenu`) and minimalist Lucide icons over flashy colored backgrounds.
 
 ### 6. Property Assignment Integration
 - Locks are assigned to properties during the Property Creation or Edit flow.
@@ -57,6 +58,25 @@ The following variables are active in `.env`:
 - The unified Tenant Directory also features an **Emergency Unlock** button inside the "Occupied Asset" panel for active leases.
 - This queries `getTenantsData()` in `tenant.service.ts` to map the specific `SmartLock` to the active lease's `propertyId`.
 - The Tuya command uses `remote_no_dp_key` (with a value of `true`) to remotely trigger the lock via the `remoteUnlockAction`.
+
+### 10. Temporary PIN Encryption
+- Tuya's temporary password API requires a specific encryption flow which has been implemented.
+- First, a `password-ticket` is fetched. The `ticket_key` is decrypted using AES-256-ECB with the `TUYA_ACCESS_SECRET`.
+- The desired PIN is then encrypted using AES-128-ECB with the decrypted original key, and passed to the API with `password_type: 'ticket'`.
+- Wi-Fi locks require a 7-digit PIN, so the PIN generation logic in `src/actions/admin/smartlock.action.ts` has been updated to generate 7-digit PINs.
+
+### 11. Audit Logging and Temporary PIN Management
+- The system maintains a robust security audit trail. A Mongoose model (`AccessLog`) tracks every critical smart lock event: `PIN_RESET`, `TEMP_PIN_CREATED`, `REMOTE_UNLOCK`, and `PIN_REVOKED`.
+- When an admin generates a temporary/vendor PIN, they can provide a custom name and duration. The hardware issues the PIN, and the backend securely stores it in the `SmartLock.activeTempPins` array (saving only the last 4 digits, e.g., `***1234`, for security) along with its expiration date.
+- Admins have the ability to explicitly revoke active temporary PINs before they expire using the `revokeTemporaryPinAction`, which hits Tuya's `DELETE /v1.0/devices/{device_id}/door-lock/temp-passwords/{password_id}` endpoint and prunes the database array.
+
+### 12. Real-Time Hardware Monitoring Dashboard
+- The platform uses a **Zero-Polling Architecture** via Pusher to monitor fleet health and activity in real-time.
+- `src/lib/pusher-server.ts` handles API route triggers, and `src/lib/pusher-client.ts` connects the React UI using `pusher-js`.
+- Tuya's Webhooks post to `src/app/api/webhooks/tuya/route.ts` whenever a lock goes online/offline or its battery drops.
+- The webhook automatically updates the `SmartLock` document in MongoDB, parsing granular telemetry like `battery_state`, `doorcontact_state`, and `closed_opened_status`.
+- It then fires a `pusherServer.trigger('smartlocks', 'status_update')` event.
+- The `/admin/smartlocks` dashboard subscribes to this channel. Upon receiving an event, it instantly updates the UI (including Lock State and Door State) and re-sorts the "Real-Time Activity Log" table so the most recently updated lock jumps to the top.
 
 ---
 

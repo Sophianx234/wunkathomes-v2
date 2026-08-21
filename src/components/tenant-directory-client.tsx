@@ -70,12 +70,13 @@ import {
 import { 
   remoteUnlockAction,
   generateVendorPinAction,
-  resetTenantPinAction
+  resetTenantPinAction,
+  revokeTemporaryPinAction
 } from "@/actions/admin/smartlock.action";
 
 // --- TYPES ---
 type TabStage = "all" | "pending" | "active";
-type ActionType = "approve" | "reject" | "pin" | "suspend" | "restore" | "remoteUnlock" | "vendorPin" | "resetPin";
+type ActionType = "approve" | "reject" | "pin" | "suspend" | "restore" | "remoteUnlock" | "vendorPin" | "resetPin" | "revokePin";
 
 export interface TenantRecord {
   id: string;
@@ -130,6 +131,12 @@ export interface TenantRecord {
     status: string;
     batteryLevel: string;
     online: boolean;
+    activeTempPins?: Array<{
+      pinId: string;
+      name: string;
+      pinMasked: string;
+      expiresAt: string;
+    }>;
   };
   smartLockPin?: string;
 }
@@ -175,6 +182,11 @@ export default function TenantDirectoryClient({
   const [isViewingDocument, setIsViewingDocument] = useState<boolean>(false);
   
   const [confirmAction, setConfirmAction] = useState<ActionType | null>(null);
+  const [vendorPinName, setVendorPinName] = useState("");
+  const [vendorPinHours, setVendorPinHours] = useState(2);
+  const [pinToRevoke, setPinToRevoke] = useState<{ pinId: string; name: string } | null>(null);
+  const [newPinResult, setNewPinResult] = useState<{ pin: string; name: string } | null>(null);
+  
   const [isPending, startTransition] = useTransition();
 
   const selectedTenant = useMemo(() => {
@@ -225,11 +237,25 @@ export default function TenantDirectoryClient({
         result = await remoteUnlockAction(selectedTenant.smartLock.tuyaDeviceId);
       } else if (confirmAction === "vendorPin") {
         if (!selectedTenant.smartLock?.tuyaDeviceId) return;
-        result = await generateVendorPinAction(selectedTenant.smartLock.tuyaDeviceId, 2);
+        if (!vendorPinName.trim()) {
+          toast.error("Please enter a name for this temporary PIN.");
+          return;
+        }
+        result = await generateVendorPinAction(selectedTenant.smartLock.tuyaDeviceId, vendorPinHours, vendorPinName.trim());
         if (result?.success) {
-           // We can show the PIN in a special way, or just let the toast show it.
-           toast.success(`Temp PIN: ${result.pin} (Valid for 2 hours)`, { duration: 10000 });
+           setNewPinResult({ pin: result.pin as string, name: vendorPinName.trim() });
            setConfirmAction(null);
+           setVendorPinName("");
+           setVendorPinHours(2);
+           return;
+        }
+      } else if (confirmAction === "revokePin") {
+        if (!selectedTenant.smartLock?.tuyaDeviceId || !pinToRevoke) return;
+        result = await revokeTemporaryPinAction(selectedTenant.smartLock.tuyaDeviceId, pinToRevoke.pinId);
+        if (result?.success) {
+           toast.success(`Revoked PIN for ${pinToRevoke.name}`);
+           setConfirmAction(null);
+           setPinToRevoke(null);
            return;
         }
       } else if (confirmAction === "resetPin") {
@@ -301,6 +327,12 @@ export default function TenantDirectoryClient({
       title: "Reset Tenant PIN",
       description: "This will instantly revoke the tenant's current PIN and generate a new one. The new PIN will be emailed to them.",
       confirmText: "Reset PIN",
+      confirmClass: "bg-rose-600 text-white hover:bg-rose-700",
+    },
+    revokePin: {
+      title: "Revoke Temporary PIN",
+      description: `Are you sure you want to revoke the temporary PIN for "${pinToRevoke?.name}"? They will lose access immediately.`,
+      confirmText: "Revoke Access",
       confirmClass: "bg-rose-600 text-white hover:bg-rose-700",
     },
   };
@@ -683,7 +715,36 @@ export default function TenantDirectoryClient({
                 )}
 
                 {selectedTenant.pipelineStage === "active" && (
-                  <section>
+                  <>
+                    {selectedTenant.smartLock?.activeTempPins && selectedTenant.smartLock.activeTempPins.length > 0 && (
+                      <section>
+                        <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-4">Active Temporary Access</h3>
+                        <div className="space-y-2">
+                          {selectedTenant.smartLock.activeTempPins.map((pin, i) => (
+                            <div key={i} className="flex justify-between items-center p-3 bg-white border border-zinc-200/60 rounded-lg shadow-sm">
+                              <div>
+                                <p className="text-[13px] font-medium text-zinc-900">{pin.name}</p>
+                                <p className="text-[11px] text-zinc-500">Expires {new Date(pin.expiresAt).toLocaleString()}</p>
+                              </div>
+                              <div className="flex gap-3 items-center">
+                                <code className="text-[11px] bg-zinc-100/80 font-mono font-semibold px-2 py-1 rounded text-zinc-700">{pin.pinMasked}</code>
+                                <button 
+                                  className="text-[11px] font-semibold text-rose-600 hover:text-rose-700 hover:underline"
+                                  onClick={() => {
+                                    setPinToRevoke({ pinId: pin.pinId, name: pin.name });
+                                    setConfirmAction("revokePin");
+                                  }}
+                                >
+                                  Revoke
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </section>
+                    )}
+
+                    <section>
                     <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-4">Recent Transactions</h3>
                     <div className="space-y-1">
                       {selectedTenant.transactions.length > 0 ? (
@@ -709,6 +770,7 @@ export default function TenantDirectoryClient({
                       )}
                     </div>
                   </section>
+                  </>
                 )}
               </div>
             </>
@@ -726,6 +788,36 @@ export default function TenantDirectoryClient({
                 <AlertDialogTitle className="text-lg font-bold text-zinc-900">{dialogContent[confirmAction].title}</AlertDialogTitle>
                 <AlertDialogDescription className="text-[13px] text-zinc-500 leading-relaxed">{dialogContent[confirmAction].description}</AlertDialogDescription>
               </AlertDialogHeader>
+              
+              {confirmAction === "vendorPin" && (
+                <div className="mt-4 space-y-4">
+                  <div>
+                    <label className="text-xs font-semibold text-zinc-700 mb-1.5 block">Visitor / Vendor Name</label>
+                    <Input 
+                      value={vendorPinName} 
+                      onChange={e => setVendorPinName(e.target.value)} 
+                      placeholder="e.g. John - Plumber" 
+                      className="h-9 text-[13px] border-zinc-200/80 bg-white" 
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-zinc-700 mb-1.5 block">Access Duration</label>
+                    <Select value={vendorPinHours.toString()} onValueChange={v => setVendorPinHours(Number(v))}>
+                      <SelectTrigger className="h-9 text-[13px] border-zinc-200/80 bg-white">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1">1 Hour</SelectItem>
+                        <SelectItem value="2">2 Hours</SelectItem>
+                        <SelectItem value="4">4 Hours</SelectItem>
+                        <SelectItem value="8">8 Hours</SelectItem>
+                        <SelectItem value="24">24 Hours</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              )}
+
               <AlertDialogFooter className="mt-6 gap-2 sm:gap-0">
                 <AlertDialogCancel disabled={isPending} className="h-10 text-[13px] font-semibold border-zinc-200/60 hover:bg-zinc-50 rounded-lg">Cancel</AlertDialogCancel>
                 <AlertDialogAction onClick={executeConfirmedAction} disabled={isPending} className={`h-10 text-[13px] font-semibold rounded-lg ${dialogContent[confirmAction].confirmClass}`}>
@@ -734,6 +826,29 @@ export default function TenantDirectoryClient({
               </AlertDialogFooter>
             </>
           )}
+        </AlertDialogContent>
+      </AlertDialog>
+      
+      <AlertDialog open={!!newPinResult} onOpenChange={(open) => !open && setNewPinResult(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-lg font-bold text-zinc-900">Temporary PIN Generated</AlertDialogTitle>
+            <AlertDialogDescription className="text-[13px] text-zinc-500 leading-relaxed">
+              Successfully generated an access code for <strong className="text-zinc-900 font-semibold">{newPinResult?.name}</strong>.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="bg-zinc-50 border border-zinc-200/80 rounded-lg p-6 my-4 text-center">
+            <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-2">Access Code</p>
+            <p className="font-mono text-3xl font-bold tracking-[0.2em] text-zinc-900">{newPinResult?.pin}</p>
+          </div>
+          <p className="text-[12px] text-rose-600 font-medium text-center">
+            Please copy this code now. For security reasons, the full PIN will not be shown again.
+          </p>
+          <AlertDialogFooter className="mt-4">
+            <AlertDialogAction onClick={() => setNewPinResult(null)} className="w-full h-10 text-[13px] font-semibold bg-black text-white hover:bg-zinc-800 rounded-lg">
+              Done
+            </AlertDialogAction>
+          </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
     </div>

@@ -26,7 +26,7 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "50mb", 
       
       // CORRECT PLACEMENT: Allow specific external IPs/domains to call your actions
-      allowedOrigins: ['10.107.67.240'], 
+      allowedOrigins: ['127.0.0.1'], 
     },
   },
 
