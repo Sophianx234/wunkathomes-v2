@@ -5,6 +5,7 @@ import { connectToDatabase } from '@/config/DbConnect';
 import SmartLock from '@/models/smartlock';
 import AccessLog from '@/models/accesslog';
 import { getDevicesByUser } from '@/lib/tuya';
+import { getSession } from '@/lib/session';
 
 /**
  * Syncs all devices from the Tuya Cloud and saves new ones to the database.
@@ -157,16 +158,21 @@ export async function remoteUnlockAction(tuyaDeviceId: string) {
     await connectToDatabase();
     await remoteUnlock(tuyaDeviceId);
     
+    const session = await getSession();
     const lock = await SmartLock.findOne({ tuyaDeviceId });
     if (lock) {
       await AccessLog.create({
         lockId: lock._id,
         propertyId: lock.propertyId,
         action: 'REMOTE_UNLOCK',
+        actorId: session?.userId || null,
+        actorType: 'Admin',
         performedBy: 'Admin'
       });
     }
 
+    revalidatePath('/admin/smartlocks');
+    revalidatePath('/admin/manage/tenants');
     return { success: true, message: 'Door unlocked successfully.' };
   } catch (error: any) {
     console.error('Failed to remote unlock:', error);
@@ -211,10 +217,13 @@ export async function generateVendorPinAction(tuyaDeviceId: string, hoursValid: 
       });
       await lock.save();
 
+      const session = await getSession();
       await AccessLog.create({
         lockId: lock._id,
         propertyId: lock.propertyId,
         action: 'TEMP_PIN_CREATED',
+        actorId: session?.userId || null,
+        actorType: 'Admin',
         performedBy: 'Admin', 
         metadata: { targetName: name, expiresAt: new Date(invalidTime) }
       });
@@ -260,10 +269,13 @@ export async function resetTenantPinAction(tuyaDeviceId: string, leaseId: string
 
     const lock = await SmartLock.findOne({ tuyaDeviceId });
     if (lock && lease) {
+      const session = await getSession();
       await AccessLog.create({
         lockId: lock._id,
         propertyId: lock.propertyId,
         action: 'PIN_RESET',
+        actorId: session?.userId || null,
+        actorType: 'Admin',
         performedBy: 'Admin',
         metadata: { leaseId: lease._id }
       });
@@ -302,10 +314,13 @@ export async function revokeTemporaryPinAction(tuyaDeviceId: string, pinId: stri
         lock.activeTempPins.splice(pinIndex, 1);
         await lock.save();
 
+        const session = await getSession();
         await AccessLog.create({
           lockId: lock._id,
           propertyId: lock.propertyId,
           action: 'PIN_REVOKED',
+          actorId: session?.userId || null,
+          actorType: 'Admin',
           performedBy: 'Admin',
           metadata: { targetName: pinDetails.name }
         });
@@ -324,17 +339,31 @@ export async function revokeTemporaryPinAction(tuyaDeviceId: string, pinId: stri
 export async function getLockAuditLogs(lockId: string) {
   try {
     await connectToDatabase();
-    
-    const logs = await AccessLog.find({ lockId }).sort({ createdAt: -1 }).limit(50).lean();
+    // Populate actorId so frontend gets the image and name
+    const logs = await AccessLog.find({ lockId })
+      .sort({ createdAt: -1 })
+      .limit(50)
+      .populate('actorId', 'name email profilePicture')
+      .lean();
+      
+    // Transform documents for safe client serialization
     return {
       success: true,
-      logs: logs.map((l: any) => ({
-        ...l,
-        _id: l._id.toString(),
-        lockId: l.lockId.toString(),
-        propertyId: l.propertyId?.toString() || null,
-        createdAt: l.createdAt.toISOString(),
-        updatedAt: l.updatedAt.toISOString(),
+      logs: logs.map((log: any) => ({
+        _id: log._id.toString(),
+        lockId: log.lockId.toString(),
+        propertyId: log.propertyId ? log.propertyId.toString() : null,
+        action: log.action,
+        actorType: log.actorType,
+        actorId: log.actorId ? {
+          _id: log.actorId._id.toString(),
+          name: log.actorId.name,
+          email: log.actorId.email,
+          profilePicture: log.actorId.profilePicture
+        } : null,
+        performedBy: log.performedBy,
+        metadata: log.metadata,
+        createdAt: log.createdAt ? log.createdAt.toISOString() : new Date().toISOString(),
       }))
     };
   } catch (error: any) {

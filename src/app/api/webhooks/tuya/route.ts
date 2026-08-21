@@ -58,6 +58,7 @@ export async function POST(req: Request) {
             lockId: lock._id,
             propertyId: lock.propertyId,
             action: 'PHYSICAL_UNLOCK',
+            actorType: 'Hardware',
             performedBy: `Tuya User/Method: ${stat.value}`,
             metadata: { targetName: stat.code }
           });
@@ -71,6 +72,7 @@ export async function POST(req: Request) {
               lockId: lock._id,
               propertyId: lock.propertyId,
               action: 'ALARM_TRIGGERED',
+              actorType: 'Hardware',
               performedBy: 'Hardware Sensor',
               metadata: { targetName: stat.code }
             });
@@ -80,6 +82,7 @@ export async function POST(req: Request) {
               lockId: lock._id,
               propertyId: lock.propertyId,
               action: 'ALARM_CLEARED',
+              actorType: 'Hardware',
               performedBy: 'Hardware Sensor',
               metadata: { targetName: stat.code }
             });

@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { remoteUnlockAction, generateVendorPinAction, revokeTemporaryPinAction, getLockAuditLogs } from '@/actions/admin/smartlock.action';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export function SmartLockManageDialog({
   lock,
@@ -24,17 +25,18 @@ export function SmartLockManageDialog({
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
   const [loadingLogs, setLoadingLogs] = useState(false);
 
+  const fetchLogs = async () => {
+    if (!lock?._id) return;
+    const res = await getLockAuditLogs(lock._id);
+    if (res.success && res.logs) setAuditLogs(res.logs);
+  };
+
   useEffect(() => {
     if (isOpen && lock?._id) {
       setLoadingLogs(true);
-      getLockAuditLogs(lock._id).then(res => {
-        if (res.success && res.logs) setAuditLogs(res.logs);
-        setLoadingLogs(false);
-      });
+      fetchLogs().finally(() => setLoadingLogs(false));
     }
   }, [isOpen, lock?._id]);
-
-  if (!lock) return null;
 
   const [unlockCountdown, setUnlockCountdown] = useState<number | null>(null);
 
@@ -47,12 +49,15 @@ export function SmartLockManageDialog({
     }
   }, [unlockCountdown]);
 
+  if (!lock) return null;
+
   const handleRemoteUnlock = () => {
     startTransition(async () => {
       const res = await remoteUnlockAction(lock.tuyaDeviceId);
       if (res.success) {
         toast.success('Lock opened successfully.');
         setUnlockCountdown(5);
+        fetchLogs();
       } else {
         toast.error(res.error || 'Failed to unlock door.');
       }
@@ -71,6 +76,7 @@ export function SmartLockManageDialog({
         setVendorName('');
         setVendorHours(2);
         toast.success('Temporary PIN created.');
+        fetchLogs();
       } else {
         toast.error(res?.error || 'Failed to generate PIN.');
       }
@@ -82,6 +88,7 @@ export function SmartLockManageDialog({
       const res = await revokeTemporaryPinAction(lock.tuyaDeviceId, pinId);
       if (res?.success) {
         toast.success('PIN revoked successfully.');
+        fetchLogs();
       } else {
         toast.error(res?.error || 'Failed to revoke PIN.');
       }
@@ -228,7 +235,21 @@ export function SmartLockManageDialog({
                       <span className="text-[11px] text-zinc-400 font-mono">{new Date(log.createdAt).toLocaleString()}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-zinc-600 text-xs">By: {log.performedBy || 'System'}</span>
+                      <div className="flex items-center gap-2">
+                        {log.actorId ? (
+                          <Avatar className="h-5 w-5">
+                            <AvatarImage src={log.actorId.profilePicture} alt={log.actorId.name} />
+                            <AvatarFallback>{log.actorId.name?.charAt(0) || 'U'}</AvatarFallback>
+                          </Avatar>
+                        ) : (
+                          <Avatar className="h-5 w-5">
+                            <AvatarFallback>{log.actorType?.charAt(0) || log.performedBy?.charAt(0) || 'S'}</AvatarFallback>
+                          </Avatar>
+                        )}
+                        <span className="text-zinc-600 text-xs">
+                          By: {log.actorId?.name || log.performedBy || log.actorType || 'System'}
+                        </span>
+                      </div>
                       {log.metadata?.targetName && (
                         <code className="text-[10px] bg-zinc-100 border border-zinc-200 px-1.5 py-0.5 rounded text-zinc-600">
                           {log.metadata.targetName}

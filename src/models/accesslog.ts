@@ -11,7 +11,9 @@ const accessLogSchema = new mongoose.Schema({
     ], 
     required: true 
   },
-  performedBy: { type: String }, // e.g., 'Admin', 'Tenant', or an ID
+  actorId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+  actorType: { type: String, enum: ['Admin', 'Tenant', 'System', 'Hardware'] },
+  performedBy: { type: String }, // e.g., 'Admin', 'Tenant', or an ID (legacy, keeping for backwards compat momentarily or just deprecating)
   metadata: {
     targetName: String,
     expiresAt: Date,
