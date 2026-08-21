@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition, useCallback, useRef, useEffect } from 'react';
+import { useState, useTransition, useCallback, useRef, useEffect, useMemo } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { getPusherClient } from '@/lib/pusher-client';
@@ -25,10 +25,8 @@ export default function SmartLockManager({
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
-  // State for live monitoring table
-  const [liveLocks, setLiveLocks] = useState([...allLocks].sort((a, b) => 
-    new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime()
-  ));
+  // Store only the *deltas* (updates) from Pusher in state
+  const [liveUpdates, setLiveUpdates] = useState<Record<string, any>>({});
 
   useEffect(() => {
     const pusher = getPusherClient();
@@ -36,20 +34,29 @@ export default function SmartLockManager({
 
     const channel = pusher.subscribe('smartlocks');
     channel.bind('status_update', (data: any) => {
-      setLiveLocks(prev => {
-        const updated = prev.map(lock => 
-          lock.tuyaDeviceId === data.tuyaDeviceId 
-            ? { ...lock, ...data.updates, updatedAt: new Date().toISOString() } 
-            : lock
-        );
-        return updated.sort((a, b) => new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime());
-      });
+      setLiveUpdates(prev => ({
+        ...prev,
+        [data.tuyaDeviceId]: { 
+          ...prev[data.tuyaDeviceId], 
+          ...data.updates, 
+          updatedAt: new Date().toISOString() 
+        }
+      }));
     });
 
     return () => {
       pusher.unsubscribe('smartlocks');
     };
   }, []);
+
+  // Merge the server truth (allLocks) with the live updates
+  const liveLocks = useMemo(() => {
+    return allLocks.map(lock => {
+      const updates = liveUpdates[lock.tuyaDeviceId];
+      if (updates) return { ...lock, ...updates };
+      return lock;
+    }).sort((a, b) => new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime());
+  }, [allLocks, liveUpdates]);
 
   const [syncLoading, setSyncLoading] = useState(false);
   const [syncMessage, setSyncMessage] = useState('');
@@ -505,7 +512,7 @@ export default function SmartLockManager({
       <SmartLockManageDialog 
         isOpen={!!manageLockId}
         onClose={() => setManageLockId(null)}
-        lock={manageLockId ? allLocks.find(l => l._id === manageLockId) : null}
+        lock={manageLockId ? liveLocks.find(l => l._id === manageLockId) : null}
       />
     </Tabs>
   );

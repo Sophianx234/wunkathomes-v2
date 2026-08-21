@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { pusherServer } from '@/lib/pusher-server';
-import SmartLock from '@/models/smartlock.model';
-import { connectToDatabase } from '@/lib/db';
+import SmartLock from '@/models/smartlock';
+import { connectToDatabase } from '@/config/DbConnect';
 
 export async function POST(req: Request) {
   try {
