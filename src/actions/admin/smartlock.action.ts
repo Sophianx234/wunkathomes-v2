@@ -320,3 +320,28 @@ export async function revokeTemporaryPinAction(tuyaDeviceId: string, pinId: stri
     return { success: false, error: error.message || 'Failed to revoke PIN' };
   }
 }
+
+export async function getLockAuditLogs(lockId: string) {
+  try {
+    await connectToDatabase();
+    if (!mongoose.models.AccessLog) {
+      require('@/models/accesslog');
+    }
+    const logs = await mongoose.models.AccessLog.find({ lockId }).sort({ createdAt: -1 }).limit(50).lean();
+    return {
+      success: true,
+      logs: logs.map((l: any) => ({
+        ...l,
+        _id: l._id.toString(),
+        lockId: l.lockId.toString(),
+        propertyId: l.propertyId?.toString() || null,
+        createdAt: l.createdAt.toISOString(),
+        updatedAt: l.updatedAt.toISOString(),
+      }))
+    };
+  } catch (error: any) {
+    console.error('Error fetching audit logs:', error);
+    return { success: false, error: error.message || 'Failed to fetch logs' };
+  }
+}
+
