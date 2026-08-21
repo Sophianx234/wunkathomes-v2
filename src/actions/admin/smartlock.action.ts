@@ -324,10 +324,8 @@ export async function revokeTemporaryPinAction(tuyaDeviceId: string, pinId: stri
 export async function getLockAuditLogs(lockId: string) {
   try {
     await connectToDatabase();
-    if (!mongoose.models.AccessLog) {
-      require('@/models/accesslog');
-    }
-    const logs = await mongoose.models.AccessLog.find({ lockId }).sort({ createdAt: -1 }).limit(50).lean();
+    
+    const logs = await AccessLog.find({ lockId }).sort({ createdAt: -1 }).limit(50).lean();
     return {
       success: true,
       logs: logs.map((l: any) => ({
