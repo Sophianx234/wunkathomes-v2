@@ -79,6 +79,14 @@ The following variables are active in `.env`:
 - It streams this data to the frontend via two Pusher channels: `status_update` and `activity_log`.
 - The `/admin/smartlocks` "Live Monitoring" tab subscribes to these streams to instantly flash red ALARM badges on tampered locks, update dynamic battery progress bars, and scroll a real-time "Security & Access Event Feed" at the bottom of the dashboard.
 
+
+### 13. Hardware Specifics: Auto-Locking Clutch Constraints
+- The fleet primarily consists of the "Camera Lock with Display" model. This specific hardware is an **auto-locking clutch lever** lock.
+- **Missing Sensors:** Diagnostic analysis of the Tuya API responses for these devices confirmed they *do not expose* physical state sensors like `doorcontact_state` (open/closed) or `closed_opened_status` (latch engaged/disengaged).
+- **UI Constraints:** Because the cloud cannot track the physical state of the door, all "Unlock" buttons across the application (in both `SmartLockManageDialog` and `TenantDirectoryClient`) are implemented as **stateless triggers**, not toggle switches.
+- **The 5-Second Standard:** When an Admin or Tenant clicks "Unlock", the command is fired instantly and the UI transitions into a green "Unlocked (5s)" countdown timer, mimicking the physical clutch disengaging and re-engaging 5 seconds later. The UI specifically avoids saying "Status: Unlocked" because the data would instantly become stale.
+- The `Lock State` and `Door State` columns in the Live Monitoring dashboard gracefully render "Auto (Clutch)" and "No Sensor" badges for these devices instead of displaying confusing "Unknown" states.
+
 ---
 
 ## 🚀 Next Steps (For the Next Agent/Developer)
