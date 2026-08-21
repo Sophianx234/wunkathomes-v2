@@ -146,18 +146,54 @@ export default function SmartLockManager({
     return matchesSearch && matchesStatus;
   });
 
-  return (
-    <Tabs defaultValue="directory" className="space-y-6">
-      <TabsList className="bg-zinc-100/50 border border-zinc-200/60 p-0.5 rounded-lg inline-flex">
-        <TabsTrigger value="directory" className="text-[13px] font-medium data-[state=active]:bg-white rounded-sm px-6 data-[state=active]:shadow-sm">
-          Fleet Directory
-        </TabsTrigger>
-        <TabsTrigger value="monitoring" className="text-[13px] font-medium data-[state=active]:bg-white rounded-sm px-6 data-[state=active]:shadow-sm">
-          Live Monitoring
-        </TabsTrigger>
-      </TabsList>
+  // API Health Check
+  const [apiHealth, setApiHealth] = useState<'checking' | 'online' | 'offline' | null>(null);
+  
+  const checkApiHealth = async () => {
+    setApiHealth('checking');
+    try {
+      const res = await fetch('/api/tuya/health');
+      if (res.ok) {
+        setApiHealth('online');
+      } else {
+        setApiHealth('offline');
+      }
+    } catch (e) {
+      setApiHealth('offline');
+    }
+  };
 
-      <TabsContent value="directory" className="space-y-6 outline-none">
+  return (
+    <div className="space-y-6">
+      <Tabs defaultValue="directory" className="space-y-6">
+        <div className="flex items-center justify-between">
+          <TabsList className="bg-zinc-100/50 border border-zinc-200/60 p-0.5 rounded-lg inline-flex">
+            <TabsTrigger value="directory" className="text-[13px] font-medium data-[state=active]:bg-white rounded-sm px-6 data-[state=active]:shadow-sm">
+              Fleet Directory
+            </TabsTrigger>
+            <TabsTrigger value="monitoring" className="text-[13px] font-medium data-[state=active]:bg-white rounded-sm px-6 data-[state=active]:shadow-sm">
+              Live Monitoring
+            </TabsTrigger>
+          </TabsList>
+
+          <button 
+            onClick={checkApiHealth} 
+            className="text-xs bg-white border border-zinc-200 shadow-sm px-3 py-1.5 rounded-md hover:bg-zinc-50 flex items-center gap-2 transition-colors"
+          >
+            {apiHealth === 'checking' ? (
+              <span className="flex h-2 w-2 relative"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-zinc-400 opacity-75"></span><span className="relative inline-flex rounded-full h-2 w-2 bg-zinc-500"></span></span>
+            ) : apiHealth === 'online' ? (
+              <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
+            ) : apiHealth === 'offline' ? (
+              <span className="h-2 w-2 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]"></span>
+            ) : (
+              <span className="h-2 w-2 rounded-full bg-zinc-300"></span>
+            )}
+            <span className="font-medium text-zinc-700">Test Tuya API Connection</span>
+          </button>
+        </div>
+
+        <TabsContent value="directory" className="space-y-6 outline-none">
         {/* Top Action Bar (Sync + Search/Filter) */}
         <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-white p-4 rounded-lg border border-zinc-200 shadow-sm">
           <div className="flex items-center gap-4 w-full md:w-auto">
@@ -580,6 +616,7 @@ export default function SmartLockManager({
         onClose={() => setManageLockId(null)}
         lock={manageLockId ? liveLocks.find(l => l._id === manageLockId) : null}
       />
-    </Tabs>
+      </Tabs>
+    </div>
   );
 }
