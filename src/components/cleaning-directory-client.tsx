@@ -302,21 +302,7 @@ export default function CleaningDirectoryClient({ data, availableProperties }: C
               </DialogHeader>
 
               <div className="p-5 space-y-6 flex-1">
-                {/* Status Badge */}
-                <div>
-                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-2">
-                    Current Status
-                  </h4>
-                  {selectedRecord.isDispatchToday ? (
-                    <Badge className="bg-green-100 text-green-800 hover:bg-green-100 border-0 uppercase tracking-widest text-xs font-bold px-3 py-1">
-                      Dispatch Today
-                    </Badge>
-                  ) : (
-                    <Badge variant="outline" className="text-zinc-500 border-zinc-200 uppercase tracking-widest text-xs font-bold px-3 py-1">
-                      Scheduled
-                    </Badge>
-                  )}
-                </div>
+              
 
                 {/* Tenant Details */}
                 <div>
@@ -386,7 +372,7 @@ export default function CleaningDirectoryClient({ data, availableProperties }: C
                         <div className="flex flex-wrap gap-1 mt-2">
                           {selectedRecord.customDates && selectedRecord.customDates.length > 0 ? (
                             selectedRecord.customDates.map((dateStr, idx) => (
-                              <span key={idx} className="px-2 py-1 bg-white border border-zinc-200/60 rounded text-xs font-bold text-zinc-800 shadow-sm">
+                              <span key={idx} className="px-2 py-1 bg-white border border-zinc-200/60 rounded text-xs font-bold text-zinc-800 ">
                                 {format(new Date(dateStr), "MMM d, yyyy")}
                               </span>
                             ))
