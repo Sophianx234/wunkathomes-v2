@@ -69,7 +69,7 @@ export default async function AdminCleaningPage() {
   ).sort();
 
   return (
-    <div className="w-full">
+    <div className="w-full max-w-[1400px] mx-auto p-6 lg:pb-10">
       <div className="mb-6">
         <h1 className="text-2xl font-black text-zinc-900 tracking-tight uppercase">Cleaning Schedules</h1>
         <p className="text-sm font-medium text-zinc-500">

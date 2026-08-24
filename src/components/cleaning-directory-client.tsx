@@ -24,6 +24,13 @@ import {
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 
 export interface CleaningRecord {
   id: string;
@@ -48,6 +55,8 @@ export default function CleaningDirectoryClient({ data, availableProperties }: C
   const [searchQuery, setSearchQuery] = useState("");
   const [propertyFilter, setPropertyFilter] = useState("all");
   const [dispatchFilter, setDispatchFilter] = useState("all");
+  const [selectedRecord, setSelectedRecord] = useState<CleaningRecord | null>(null);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   const filteredData = useMemo(() => {
     return data.filter((record) => {
@@ -172,7 +181,11 @@ export default function CleaningDirectoryClient({ data, availableProperties }: C
               filteredData.map((record) => (
                 <TableRow
                   key={record.id}
-                  className="group border-zinc-200/60 hover:bg-zinc-50/50 transition-colors"
+                  onClick={() => {
+                    setSelectedRecord(record);
+                    setIsSheetOpen(true);
+                  }}
+                  className="group border-zinc-200/60 hover:bg-zinc-50/50 transition-colors cursor-pointer"
                 >
                   {/* TENANT */}
                   <TableCell className="py-3 align-middle">
@@ -247,6 +260,121 @@ export default function CleaningDirectoryClient({ data, availableProperties }: C
           </TableBody>
         </Table>
       </div>
+
+      <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+        <SheetContent className="bg-white border-zinc-200/60 overflow-y-auto sm:max-w-md p-0">
+          {selectedRecord && (
+            <div className="flex flex-col h-full">
+              <SheetHeader className="p-6 border-b border-zinc-100 bg-zinc-50/50">
+                <SheetTitle className="text-xl font-bold tracking-tight text-zinc-900">
+                  Service Request Details
+                </SheetTitle>
+                <SheetDescription className="text-sm font-medium text-zinc-500">
+                  Detailed view of the tenant's cleaning schedule.
+                </SheetDescription>
+              </SheetHeader>
+
+              <div className="p-6 space-y-8 flex-1">
+                {/* Status Badge */}
+                <div>
+                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-2">
+                    Current Status
+                  </h4>
+                  {selectedRecord.isDispatchToday ? (
+                    <Badge className="bg-green-100 text-green-800 hover:bg-green-100 border-0 uppercase tracking-widest text-xs font-bold px-3 py-1">
+                      Dispatch Today
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="text-zinc-500 border-zinc-200 uppercase tracking-widest text-xs font-bold px-3 py-1">
+                      Scheduled
+                    </Badge>
+                  )}
+                </div>
+
+                {/* Tenant Details */}
+                <div>
+                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-3">
+                    Tenant Information
+                  </h4>
+                  <div className="flex items-center gap-3 p-3 bg-zinc-50/50 border border-zinc-200/60 rounded-lg">
+                    <Avatar className="h-10 w-10 border border-zinc-200/60 shadow-sm">
+                      <AvatarFallback className="bg-white text-zinc-900 font-bold text-sm">
+                        {selectedRecord.tenantName.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-bold text-zinc-900">
+                        {selectedRecord.tenantName}
+                      </span>
+                      <span className="text-xs font-medium text-zinc-500">
+                        {selectedRecord.tenantEmail}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Property Details */}
+                <div>
+                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-3">
+                    Property Location
+                  </h4>
+                  <div className="flex flex-col p-3 bg-zinc-50/50 border border-zinc-200/60 rounded-lg">
+                    <span className="text-sm font-bold text-zinc-900">
+                      {selectedRecord.propertyTitle}
+                    </span>
+                    <span className="text-xs font-medium text-zinc-500 mt-0.5">
+                      {selectedRecord.propertyLocation}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Schedule Rules */}
+                <div>
+                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-3">
+                    Schedule Rules
+                  </h4>
+                  <div className="flex flex-col p-4 bg-zinc-50/50 border border-zinc-200/60 rounded-lg">
+                    {selectedRecord.scheduleType === "daily" && (
+                      <div>
+                        <span className="text-sm font-black text-black tracking-tight">Daily Cleaning</span>
+                        <p className="text-xs text-zinc-500 font-medium mt-1">Cleaners are dispatched to this property every single day.</p>
+                      </div>
+                    )}
+                    {selectedRecord.scheduleType === "weekly" && (
+                      <div>
+                        <span className="text-sm font-black text-black tracking-tight">Weekly Recurring</span>
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {selectedRecord.weeklyDays?.map((d: number) => (
+                            <span key={d} className="px-2 py-1 bg-white border border-zinc-200/60 rounded text-xs font-bold text-zinc-800 shadow-sm">
+                              {dayNames[d]}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {selectedRecord.scheduleType === "custom" && (
+                      <div>
+                        <span className="text-sm font-black text-black tracking-tight">Custom Dates</span>
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {selectedRecord.customDates && selectedRecord.customDates.length > 0 ? (
+                            selectedRecord.customDates.map((dateStr, idx) => (
+                              <span key={idx} className="px-2 py-1 bg-white border border-zinc-200/60 rounded text-xs font-bold text-zinc-800 shadow-sm">
+                                {format(new Date(dateStr), "MMM d, yyyy")}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="text-xs text-zinc-500 italic">No future dates selected.</span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
