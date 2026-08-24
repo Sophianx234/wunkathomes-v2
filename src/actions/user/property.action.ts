@@ -35,7 +35,7 @@ const createPropertySchema = z.object({
   status: z.enum(["Available", "Pending", "Rented", "Sold"]).default("Available"),
   price: z.coerce.number().positive("Price must be greater than 0"),
   description: z.string().trim().min(20, "Description too short").max(5000),
-  leaseTerm: z.string().trim().max(50).optional().nullable(),
+
   
   bedrooms: z.coerce.number().min(0).max(50).default(0),
   bathrooms: z.coerce.number().min(0).max(50).default(0),
@@ -120,7 +120,7 @@ export async function createPropertyAction(prevState: ActionState, formData: For
       propertyType: formData.get("propertyType"),
       description: formData.get("description"),
       price: formData.get("price"),
-      leaseTerm: formData.get("leaseTerm"),
+      roomType: formData.get("roomType"),
       status: formData.get("status") || "Available",
       bedrooms: formData.get("bedrooms"),
       bathrooms: formData.get("bathrooms"),
@@ -164,7 +164,7 @@ export async function createPropertyAction(prevState: ActionState, formData: For
         title: validData.title,
         description: validData.description,
         features: { bedrooms: validData.bedrooms, bathrooms: validData.bathrooms, sizeSqm: validData.sizeSqm },
-        terms: { leaseTerm: validData.leaseTerm || undefined },
+        terms: { },
         smartLock: { hasSmartLock: validData.hasSmartLock, accessInstructions: validData.accessInstructions },
         
         // 2. PASS THE URLS DIRECTLY TO MONGO
@@ -230,7 +230,7 @@ export async function editPropertyAction(prevState: ActionState, formData: FormD
       propertyType: formData.get("propertyType"),
       description: formData.get("description"),
       price: formData.get("price"),
-      leaseTerm: formData.get("leaseTerm"),
+      roomType: formData.get("roomType"),
       status: formData.get("status") || "Available",
       bedrooms: formData.get("bedrooms"),
       bathrooms: formData.get("bathrooms"),
@@ -283,7 +283,7 @@ export async function editPropertyAction(prevState: ActionState, formData: FormD
         title: validData.title,
         description: validData.description,
         features: { bedrooms: validData.bedrooms, bathrooms: validData.bathrooms, sizeSqm: validData.sizeSqm },
-        terms: { leaseTerm: validData.leaseTerm || undefined },
+        terms: { },
         smartLock: { hasSmartLock: validData.hasSmartLock, accessInstructions: validData.accessInstructions },
         images: finalImageUrls, // <-- Directly save the text arrays
       }, { session: dbSession });
