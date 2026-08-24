@@ -30,6 +30,7 @@ import {
   HelpCircleIcon,
   SearchIcon,
   MessageMultiple01Icon,
+  SparklesIcon,
 } from "@hugeicons/core-free-icons";
 
 // --- TYPES ---
@@ -84,11 +85,15 @@ const data = {
           url: "/admin/manage/transactions",
           icon: <HugeiconsIcon icon={Wallet01Icon} strokeWidth={2} />,
         },
-
         {
           title: "Smartlock & Access",
           url: "/admin/smartlocks",
           icon: <HugeiconsIcon icon={LockIcon} strokeWidth={2} />,
+        },
+        {
+          title: "Cleaning Services",
+          url: "/admin/manage/cleaning",
+          icon: <HugeiconsIcon icon={SparklesIcon} strokeWidth={2} />,
         },
         {
           title: "Maintenance",

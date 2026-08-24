@@ -20,6 +20,7 @@ import {
   ArrowRight01Icon,
   Shield02Icon,
   Logout01Icon,
+  SparklesIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import Image from "next/image";
@@ -110,6 +111,13 @@ export function UserDashboard({ user, activeLeases, initialSchedule }: Dashboard
   >("LOCKED");
   const [isRenewing, setIsRenewing] = useState(false);
   const [isVacating, setIsVacating] = useState(false);
+  
+  const hasActiveSchedule = initialSchedule && 
+    (initialSchedule.scheduleType === 'daily' || 
+     (initialSchedule.customDates && initialSchedule.customDates.length > 0) || 
+     (initialSchedule.weeklyDays && initialSchedule.weeklyDays.length > 0));
+     
+  const [showCleaning, setShowCleaning] = useState(!!hasActiveSchedule);
   
   const [isGuestModalOpen, setIsGuestModalOpen] = useState(false);
   const [guestName, setGuestName] = useState("");
@@ -862,8 +870,42 @@ export function UserDashboard({ user, activeLeases, initialSchedule }: Dashboard
 
         {/* CLEANING SERVICES */}
         {!isRestricted && (
-          <div className="mb-4 md:mb-6 w-full box-border">
-            <CleaningScheduleClient initialSchedule={initialSchedule} />
+          <div className="mb-4 md:mb-6 w-full ">
+            {!showCleaning ? (
+              <div className="bg-white border border-zinc-200/60 p-6 md:p-8 rounded-[20px]  flex flex-col sm:flex-row items-center justify-between gap-6 w-full max-w-4xl mx-auto overflow-hidden relative">
+                <div className="flex items-start sm:items-center gap-4 min-w-0">
+                  
+                  <div className="min-w-0">
+                    <h4 className="text-[15px] font-semibold text-zinc-900 tracking-tight mb-1 truncate">
+                      Professional Cleaning Services
+                    </h4>
+                    <p className="text-[13px] font-medium text-zinc-500 break-words leading-relaxed">
+                      Would you like to request property cleaning service? Payment is collected by the cleaner after service.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-3 shrink-0 w-full sm:w-auto">
+                  <button
+                    onClick={() => setShowCleaning(true)}
+                    className="w-full sm:w-auto px-6 py-2.5 bg-black hover:bg-zinc-800 text-white text-[13px] font-medium rounded-lg transition-colors shadow-sm"
+                  >
+                    Yes, Request Cleaning
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3 w-full max-w-4xl mx-auto">
+                <div className="flex justify-end px-2">
+                  <button
+                    onClick={() => setShowCleaning(false)}
+                    className="text-[12px] font-bold text-zinc-400 hover:text-zinc-600 tracking-widest uppercase transition-colors flex items-center gap-1"
+                  >
+                    Hide Service
+                  </button>
+                </div>
+                <CleaningScheduleClient initialSchedule={initialSchedule} />
+              </div>
+            )}
           </div>
         )}
 

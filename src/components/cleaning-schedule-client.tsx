@@ -64,17 +64,13 @@ export default function CleaningScheduleClient({ initialSchedule }: CleaningSche
       {/* HEADER */}
       <div className="px-6 py-5 border-b border-zinc-100 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <div className="w-10 h-10 rounded-full border border-zinc-200/60 flex items-center justify-center bg-zinc-50/50">
-            <HugeiconsIcon icon={SparklesIcon} size={20} className="text-zinc-700" />
-          </div>
+          
           <div>
             <h2 className="text-[15px] font-semibold text-zinc-900 tracking-tight">Cleaning Service</h2>
             <p className="text-[13px] text-zinc-500 mt-0.5">Schedule your property cleaning easily</p>
           </div>
         </div>
-        <button className="p-2 text-zinc-400 hover:text-zinc-600 rounded-full hover:bg-zinc-100 transition-colors">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="M6 6l12 12"/></svg>
-        </button>
+        
       </div>
 
       {/* BODY GRID */}
