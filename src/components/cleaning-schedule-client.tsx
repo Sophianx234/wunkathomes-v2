@@ -100,17 +100,54 @@ export default function CleaningScheduleClient({ initialSchedule }: CleaningSche
 
         {/* Custom Mode */}
         {scheduleType === "custom" && (
-          <div className="flex flex-col items-center border border-zinc-200/60 rounded-xl p-4 bg-zinc-50/50">
-            <Calendar
-              mode="multiple"
-              selected={customDates}
-              onSelect={setCustomDates as any}
-              className="bg-transparent"
-              disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))}
-            />
-            <p className="text-xs text-zinc-500 mt-2 font-medium uppercase tracking-widest text-center">
-              Select multiple specific days
-            </p>
+          <div className="flex flex-col md:flex-row gap-6 border border-zinc-200/60 rounded-xl p-4 md:p-6 bg-zinc-50/50">
+            <div className="flex-1 flex justify-center bg-white rounded-xl border border-zinc-200/60 p-2 shadow-sm">
+              <Calendar
+                mode="multiple"
+                selected={customDates}
+                onSelect={(dates) => setCustomDates(dates as Date[] || [])}
+                className="w-full flex justify-center"
+                disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))}
+              />
+            </div>
+            <div className="flex-1 flex flex-col">
+              <div className="flex items-center justify-between mb-3">
+                <Label className="text-xs font-bold uppercase tracking-widest text-zinc-500">
+                  Selected Dates
+                </Label>
+                {customDates.length > 0 && (
+                  <span className="text-xs font-bold bg-zinc-200/60 text-zinc-600 px-2 py-0.5 rounded">
+                    {customDates.length}
+                  </span>
+                )}
+              </div>
+              
+              {customDates.length === 0 ? (
+                <div className="flex-1 flex flex-col items-center justify-center text-center p-6 border-2 border-dashed border-zinc-200 rounded-xl bg-white/50 min-h-[200px]">
+                  <HugeiconsIcon icon={Calendar01Icon} size={28} className="text-zinc-400 mb-3" />
+                  <p className="text-sm font-bold text-zinc-700">No dates selected</p>
+                  <p className="text-xs text-zinc-500 mt-1 font-medium leading-relaxed">
+                    Tap on the calendar to schedule specific cleaning days.
+                  </p>
+                </div>
+              ) : (
+                <div className="flex flex-wrap gap-2 content-start max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
+                  {[...customDates].sort((a, b) => a.getTime() - b.getTime()).map((d, i) => (
+                    <div key={i} className="flex items-center gap-2 bg-white border border-zinc-200/60 px-3 py-1.5 rounded-md shadow-sm group hover:border-red-200 transition-colors">
+                      <span className="text-xs font-bold text-zinc-800">
+                        {format(d, "MMM d, yyyy")}
+                      </span>
+                      <button
+                        onClick={() => setCustomDates(customDates.filter((date) => date.getTime() !== d.getTime()))}
+                        className="text-zinc-400 hover:text-red-500 transition-colors text-lg leading-none"
+                      >
+                        &times;
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
 
