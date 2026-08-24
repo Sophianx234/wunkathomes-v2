@@ -53,7 +53,7 @@ const createPropertySchema = z.object({
   landmarks: z.array(z.string().trim().max(100)).max(20).optional(),
   
   hasSmartLock: z.boolean().default(false),
-  smartLockId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid Lock ID").optional().or(z.literal('')),
+  smartLockId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid Lock ID").optional().nullable().or(z.literal('')),
   accessInstructions: z.string().trim().max(1000).optional().nullable(),
 
   mediaUrls: z.array(z.string().url("Invalid image URL"))

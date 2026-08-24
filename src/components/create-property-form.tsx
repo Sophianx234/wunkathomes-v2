@@ -221,13 +221,13 @@ export default function CreatePropertyForm({ unassignedLocks = [] }: { unassigne
                 htmlFor="price"
                 className="text-[13px] font-medium text-zinc-700 flex flex-col "
               >
-                <span>
+                <div className='text-left w-full'>
                   {listingType === "For_Sale" 
                     ? "Total Price (GHS) *" 
                     : roomType === "Furnished" 
                       ? "Base Rent Amount (Per Day) *" 
                       : "Base Rent Amount (Per Month) *"}
-                </span>
+                </div>
                 
               </Label>
               <Input

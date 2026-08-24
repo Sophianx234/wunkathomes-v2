@@ -262,13 +262,13 @@ export default function EditPropertyForm({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="space-y-2">
                 <Label htmlFor="price" className="text-[13px] font-medium text-zinc-700 flex flex-col ">
-                  <span>
+                  <div className='text-left w-full'>
                     {listingType === "For_Sale" 
                       ? "Total Price (GHS) *" 
                       : roomType === "Furnished" 
                         ? "Base Rent Amount (Per Day) *" 
                         : "Base Rent Amount (Per Month) *"}
-                  </span>
+                  </div>
                   
                 </Label>
                 <Input
