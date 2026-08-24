@@ -100,7 +100,7 @@ export default function CleaningScheduleClient({ initialSchedule }: CleaningSche
               mode="multiple"
               selected={customDates}
               onSelect={(dates) => setCustomDates(dates as Date[] || [])}
-              className="w-full max-w-[320px] flex justify-center [&_.rdp-cell]:w-10 [&_.rdp-cell]:h-10 [&_.rdp-head_cell]:w-10 [&_.rdp-head_cell]:font-bold [&_.rdp-head_cell]:text-zinc-400 [&_.rdp-head_cell]:text-[10px] [&_.rdp-head_cell]:uppercase [&_.rdp-head_cell]:tracking-widest [&_.rdp-day]:w-9 [&_.rdp-day]:h-9 [&_.rdp-day]:text-sm [&_.rdp-day]:font-medium [&_.rdp-day_selected]:bg-black [&_.rdp-day_selected]:text-white [&_.rdp-day_selected]:font-bold [&_.rdp-day_today:not(.rdp-day_selected)]:bg-zinc-100 [&_.rdp-day_today:not(.rdp-day_selected)]:text-black"
+              className="w-full max-w-[360px] flex justify-center"
               disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))}
             />
             {customDates.length > 0 && (
