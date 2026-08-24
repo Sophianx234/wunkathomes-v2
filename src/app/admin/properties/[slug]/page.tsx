@@ -84,9 +84,8 @@ export const mapToIProperty = (
     bathrooms: doc.features?.bathrooms ?? 0,
     sizeSqm: doc.features?.sizeSqm ?? 0,
   },
-  terms: {
-    leaseTerm: doc.terms?.leaseTerm ?? null,
-  },
+  roomType: doc.roomType,
+  terms: { leaseTerm: null },
   smartLock: {
     hasSmartLock: doc.smartLock?.hasSmartLock ?? false,
     accessInstructions: doc.smartLock?.accessInstructions,
