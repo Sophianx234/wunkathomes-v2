@@ -34,7 +34,7 @@ import { PropertyMap } from "@/components/property-map-dynamic";
 import SimilarCarousel from "@/components/similar-carousel";
 import ThingsToKnow from "@/components/things-to-know";
 import ReviewForm from "@/components/review-form";
-import { formatLeaseTerm, getNeighborhoodDescription } from "@/lib/helpers";
+import { getNeighborhoodDescription } from "@/lib/helpers";
 import { Toaster } from "@/components/ui/sonner";
 import SavePropertyButton from "@/components/ui/saved-property-button";
 import Listing from "@/models/listing";
@@ -413,8 +413,7 @@ export default async function PropertyDetailsPage({
           <div className="text-xl font-black">
             ${listing.price.toLocaleString()}
             <span className="text-sm font-medium text-zinc-500">
-              {" "}
-              {formatLeaseTerm(listing.terms.leaseTerm)}
+              {listing.listingType === "For_Rent" ? (listing.roomType === "Furnished" ? " /day" : " /month") : ""}
             </span>
           </div>
           <div className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">

@@ -18,7 +18,7 @@ import {
   Loading03Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { formatLeaseTerm } from "@/lib/helpers";
+
 import { usePathname } from "next/navigation";
 
 // --- Shadcn Imports ---
@@ -48,6 +48,7 @@ export interface IProperty {
   description: string;
   price: number;
   listingType: "For_Rent" | "For_Sale";
+  roomType?: "Furnished" | "Empty";
   status: "Available" | "Pending" | "Rented" | "Sold";
   features: {
     bedrooms: number;
@@ -152,7 +153,11 @@ export default function PropertyCard({
   };
 
   const formattedPrice = `₵${property.price.toLocaleString()}`;
-  const priceSuffix = formatLeaseTerm(property.terms?.leaseTerm);
+  
+  let priceSuffix = "";
+  if (property.listingType === "For_Rent") {
+    priceSuffix = property.roomType === "Furnished" ? "/day" : "/month";
+  }
 
   let locationString = "Unknown Location";
   if (typeof property.property?.location === "string") {

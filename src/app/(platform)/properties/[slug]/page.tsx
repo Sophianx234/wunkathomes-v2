@@ -34,7 +34,7 @@ import { PropertyMap } from "@/components/property-map-dynamic";
 import SimilarCarousel from "@/components/similar-carousel";
 import ThingsToKnow from "@/components/things-to-know";
 import ReviewForm from "@/components/review-form";
-import { formatLeaseTerm, getNeighborhoodDescription } from "@/lib/helpers";
+import { getNeighborhoodDescription } from "@/lib/helpers";
 import { Toaster } from "@/components/ui/sonner";
 import SavePropertyButton from "@/components/ui/saved-property-button";
 import Listing from "@/models/listing";

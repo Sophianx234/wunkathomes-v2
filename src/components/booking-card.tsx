@@ -11,7 +11,7 @@ import {
   Clock01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { formatLeaseTerm } from "@/lib/helpers";
+
 import { createTourAction, TourActionState } from "@/actions/user/tour.action";
 import { toast } from "sonner";
 import { PhoneInput } from "@/components/phone-input";
@@ -103,8 +103,7 @@ export default function BookingCard({ listing, isRent, hasBookedTour, bookedTour
                 <div className="text-xl font-black truncate">
                   ${listing.price?.toLocaleString()}
                   <span className="text-[10px] font-medium text-zinc-500">
-                    {" "}
-                    {formatLeaseTerm(listing.terms?.leaseTerm)}
+                    {listing.listingType === "For_Rent" ? (listing.roomType === "Furnished" ? " /day" : " /month") : ""}
                   </span>
                 </div>
                 <div className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 truncate">
@@ -154,10 +153,9 @@ export default function BookingCard({ listing, isRent, hasBookedTour, bookedTour
           </span>
           <div className="text-4xl font-black tracking-tight break-words">
             ${listing.price?.toLocaleString()}
-            {listing.terms?.leaseTerm && (
+            {listing.listingType === "For_Rent" && (
               <span className="text-lg text-zinc-500 font-medium tracking-normal">
-                {" "}
-                {formatLeaseTerm(listing.terms.leaseTerm)}
+                {listing.roomType === "Furnished" ? " /day" : " /month"}
               </span>
             )}
           </div>
