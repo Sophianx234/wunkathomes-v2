@@ -8,7 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { remoteUnlockAction, generateVendorPinAction, revokeTemporaryPinAction, getLockAuditLogs } from '@/actions/admin/smartlock.action';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-
+import { Badge } from '@/components/ui/badge';
+import { ShieldAlert, Fingerprint, Activity } from 'lucide-react';
 export function SmartLockManageDialog({
   lock,
   isOpen,
@@ -225,40 +226,86 @@ export function SmartLockManageDialog({
             ) : auditLogs.length === 0 ? (
               <div className="p-12 text-center text-sm text-zinc-500">No events logged yet.</div>
             ) : (
-              <ul className="divide-y divide-zinc-200">
-                {auditLogs.map((log) => (
-                  <li key={log._id} className="p-4 hover:bg-white transition-colors text-sm flex flex-col">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className={`font-semibold ${log.action.includes('ALARM') ? 'text-rose-600' : 'text-zinc-900'}`}>
-                        {log.action.replace(/_/g, ' ')}
-                      </span>
-                      <span className="text-[11px] text-zinc-400 font-mono">{new Date(log.createdAt).toLocaleString()}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
+              <div className="flex flex-col">
+                {auditLogs.map((log) => {
+                  const isAlarm = log.action.includes('ALARM');
+                  const isSystem = !log.actorId && log.actorType === 'Hardware';
+                  
+                  return (
+                    <div key={log._id} className="group relative flex gap-4 p-4 hover:bg-zinc-50 transition-colors border-b border-zinc-100 last:border-0">
+                      {/* Avatar Column */}
+                      <div className="flex-shrink-0 pt-0.5">
                         {log.actorId ? (
-                          <Avatar className="h-5 w-5">
+                          <Avatar className="h-8 w-8 ring-1 ring-zinc-200">
                             <AvatarImage src={log.actorId.profilePicture} alt={log.actorId.name} />
-                            <AvatarFallback>{log.actorId.name?.charAt(0) || 'U'}</AvatarFallback>
+                            <AvatarFallback className="bg-zinc-100 text-zinc-600 font-medium text-xs">
+                              {log.actorId.name?.charAt(0) || 'U'}
+                            </AvatarFallback>
                           </Avatar>
+                        ) : isAlarm ? (
+                          <div className="h-8 w-8 rounded-full bg-rose-100 flex items-center justify-center text-rose-600 ring-1 ring-rose-200">
+                            <ShieldAlert className="h-4 w-4" />
+                          </div>
                         ) : (
-                          <Avatar className="h-5 w-5">
-                            <AvatarFallback>{log.actorType?.charAt(0) || log.performedBy?.charAt(0) || 'S'}</AvatarFallback>
-                          </Avatar>
+                          <div className="h-8 w-8 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-500 ring-1 ring-zinc-200">
+                            <Activity className="h-4 w-4" />
+                          </div>
                         )}
-                        <span className="text-zinc-600 text-xs">
-                          By: {log.actorId?.name || log.performedBy || log.actorType || 'System'}
-                        </span>
                       </div>
-                      {log.metadata?.targetName && (
-                        <code className="text-[10px] bg-zinc-100 border border-zinc-200 px-1.5 py-0.5 rounded text-zinc-600">
-                          {log.metadata.targetName}
-                        </code>
-                      )}
+                      
+                      {/* Content Column */}
+                      <div className="flex-1 min-w-0 flex flex-col gap-0.5">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex flex-col">
+                            <div className="flex items-center gap-2">
+                              <span className="text-[13px] font-semibold text-zinc-900 truncate">
+                                {log.actorId ? log.actorId.name : log.performedBy || 'System Event'}
+                              </span>
+                              {log.actorId?.role && (
+                                <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-4 font-medium uppercase tracking-wider text-zinc-500 bg-zinc-100">
+                                  {log.actorId.role}
+                                </Badge>
+                              )}
+                              {isSystem && (
+                                <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4 font-medium uppercase tracking-wider text-zinc-500">
+                                  Hardware
+                                </Badge>
+                              )}
+                            </div>
+                            
+                            {/* User Contact Info */}
+                            {log.actorId && (log.actorId.email || log.actorId.phone) && (
+                              <div className="flex items-center gap-1.5 text-[11px] text-zinc-500 mt-0.5">
+                                {log.actorId.email && <span>{log.actorId.email}</span>}
+                                {log.actorId.email && log.actorId.phone && <span className="text-zinc-300">•</span>}
+                                {log.actorId.phone && <span>{log.actorId.phone}</span>}
+                              </div>
+                            )}
+                          </div>
+                          
+                          <span className="text-[11px] text-zinc-400 whitespace-nowrap font-mono mt-0.5">
+                            {new Date(log.createdAt).toLocaleString(undefined, { 
+                              month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' 
+                            })}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center justify-between mt-1.5">
+                          <span className={`text-[12px] ${isAlarm ? 'text-rose-600 font-semibold' : 'text-zinc-700 font-medium'}`}>
+                            {log.action.replace(/_/g, ' ')}
+                          </span>
+                          
+                          {log.metadata?.targetName && (
+                            <code className="text-[10px] bg-zinc-100 border border-zinc-200 px-1.5 py-0.5 rounded text-zinc-600 max-w-[150px] truncate">
+                              {log.metadata.targetName}
+                            </code>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                  </li>
-                ))}
-              </ul>
+                  );
+                })}
+              </div>
             )}
           </TabsContent>
         </Tabs>

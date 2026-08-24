@@ -339,11 +339,10 @@ export async function revokeTemporaryPinAction(tuyaDeviceId: string, pinId: stri
 export async function getLockAuditLogs(lockId: string) {
   try {
     await connectToDatabase();
-    // Populate actorId so frontend gets the image and name
     const logs = await AccessLog.find({ lockId })
       .sort({ createdAt: -1 })
       .limit(50)
-      .populate('actorId', 'name email profilePicture')
+      .populate('actorId', 'name email profilePicture role phone')
       .lean();
       
     // Transform documents for safe client serialization
@@ -359,7 +358,9 @@ export async function getLockAuditLogs(lockId: string) {
           _id: log.actorId._id.toString(),
           name: log.actorId.name,
           email: log.actorId.email,
-          profilePicture: log.actorId.profilePicture
+          profilePicture: log.actorId.profilePicture,
+          role: log.actorId.role,
+          phone: log.actorId.phone
         } : null,
         performedBy: log.performedBy,
         metadata: log.metadata,
