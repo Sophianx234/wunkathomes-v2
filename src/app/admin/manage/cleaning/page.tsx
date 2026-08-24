@@ -15,7 +15,7 @@ export default async function AdminCleaningPage() {
     .populate({
       path: "userId",
       model: User,
-      select: "name email phone",
+      select: "name email phone profilePicture",
     })
     .populate({
       path: "listingId",
@@ -55,6 +55,7 @@ export default async function AdminCleaningPage() {
       id: schedule._id.toString(),
       tenantName: schedule.userId?.name || "Unknown",
       tenantEmail: schedule.userId?.email || "",
+      tenantImage: schedule.userId?.profilePicture || "",
       propertyTitle: schedule.listingId?.title || "Unknown Property",
       propertyLocation: locationString,
       scheduleType: schedule.scheduleType,

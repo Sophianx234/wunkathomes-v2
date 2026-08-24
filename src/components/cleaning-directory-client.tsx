@@ -22,20 +22,28 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { MoreHorizontalIcon, ViewIcon } from "@hugeicons/core-free-icons";
 
 export interface CleaningRecord {
   id: string;
   tenantName: string;
   tenantEmail: string;
+  tenantImage?: string;
   propertyTitle: string;
   propertyLocation: string;
   scheduleType: "custom" | "daily" | "weekly";
@@ -56,7 +64,7 @@ export default function CleaningDirectoryClient({ data, availableProperties }: C
   const [propertyFilter, setPropertyFilter] = useState("all");
   const [dispatchFilter, setDispatchFilter] = useState("all");
   const [selectedRecord, setSelectedRecord] = useState<CleaningRecord | null>(null);
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const filteredData = useMemo(() => {
     return data.filter((record) => {
@@ -168,12 +176,13 @@ export default function CleaningDirectoryClient({ data, availableProperties }: C
               <TableHead className="font-medium text-zinc-500 text-xs h-10">Property</TableHead>
               <TableHead className="font-medium text-zinc-500 text-xs h-10">Schedule Rule</TableHead>
               <TableHead className="font-medium text-zinc-500 text-xs h-10 text-right">Status</TableHead>
+              <TableHead className="w-[50px]"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredData.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={4} className="h-32 text-center text-zinc-500 font-medium">
+                <TableCell colSpan={5} className="h-32 text-center text-zinc-500 font-medium">
                   No cleaning schedules found matching your filters.
                 </TableCell>
               </TableRow>
@@ -181,16 +190,13 @@ export default function CleaningDirectoryClient({ data, availableProperties }: C
               filteredData.map((record) => (
                 <TableRow
                   key={record.id}
-                  onClick={() => {
-                    setSelectedRecord(record);
-                    setIsSheetOpen(true);
-                  }}
-                  className="group border-zinc-200/60 hover:bg-zinc-50/50 transition-colors cursor-pointer"
+                  className="group border-zinc-200/60 hover:bg-zinc-50/50 transition-colors"
                 >
                   {/* TENANT */}
                   <TableCell className="py-3 align-middle">
                     <div className="flex items-center gap-3">
                       <Avatar className="h-9 w-9 border border-zinc-200/60 shadow-sm">
+                        <AvatarImage src={record.tenantImage} />
                         <AvatarFallback className="bg-zinc-100/50 text-zinc-600 text-xs font-medium">
                           {record.tenantName.charAt(0)}
                         </AvatarFallback>
@@ -254,6 +260,29 @@ export default function CleaningDirectoryClient({ data, availableProperties }: C
                       </Badge>
                     )}
                   </TableCell>
+
+                  {/* ACTIONS */}
+                  <TableCell className="py-3 align-middle text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <HugeiconsIcon icon={MoreHorizontalIcon} size={16} className="text-zinc-500" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-[160px]">
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setSelectedRecord(record);
+                            setIsDialogOpen(true);
+                          }}
+                          className="text-xs font-medium cursor-pointer flex items-center gap-2"
+                        >
+                          <HugeiconsIcon icon={ViewIcon} size={14} className="text-zinc-400" />
+                          View Details
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
                 </TableRow>
               ))
             )}
@@ -261,18 +290,18 @@ export default function CleaningDirectoryClient({ data, availableProperties }: C
         </Table>
       </div>
 
-      <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-        <SheetContent className="bg-white border-zinc-200/60 overflow-y-auto sm:max-w-md p-0">
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="bg-white border-zinc-200/60 overflow-y-auto sm:max-w-md p-0 rounded-xl gap-0">
           {selectedRecord && (
             <div className="flex flex-col h-full">
-              <SheetHeader className="p-6 border-b border-zinc-100 bg-zinc-50/50">
-                <SheetTitle className="text-xl font-bold tracking-tight text-zinc-900">
+              <DialogHeader className="p-6 border-b border-zinc-100 bg-zinc-50/50">
+                <DialogTitle className="text-xl font-bold tracking-tight text-zinc-900">
                   Service Request Details
-                </SheetTitle>
-                <SheetDescription className="text-sm font-medium text-zinc-500">
+                </DialogTitle>
+                <DialogDescription className="text-sm font-medium text-zinc-500">
                   Detailed view of the tenant's cleaning schedule.
-                </SheetDescription>
-              </SheetHeader>
+                </DialogDescription>
+              </DialogHeader>
 
               <div className="p-6 space-y-8 flex-1">
                 {/* Status Badge */}
@@ -298,6 +327,7 @@ export default function CleaningDirectoryClient({ data, availableProperties }: C
                   </h4>
                   <div className="flex items-center gap-3 p-3 bg-zinc-50/50 border border-zinc-200/60 rounded-lg">
                     <Avatar className="h-10 w-10 border border-zinc-200/60 shadow-sm">
+                      <AvatarImage src={selectedRecord.tenantImage} />
                       <AvatarFallback className="bg-white text-zinc-900 font-bold text-sm">
                         {selectedRecord.tenantName.charAt(0)}
                       </AvatarFallback>
@@ -373,8 +403,8 @@ export default function CleaningDirectoryClient({ data, availableProperties }: C
               </div>
             </div>
           )}
-        </SheetContent>
-      </Sheet>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
