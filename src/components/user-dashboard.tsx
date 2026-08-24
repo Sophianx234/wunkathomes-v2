@@ -26,6 +26,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import CleaningScheduleClient from "./cleaning-schedule-client";
 import { useRouter } from "next/navigation";
 import { submitNoticeToVacate } from "@/actions/user/lease.action";
 
@@ -94,9 +95,10 @@ export interface DashboardProps {
       }>;
     } | null;
   }>;
+  initialSchedule?: any;
 }
 
-export function UserDashboard({ user, activeLeases }: DashboardProps) {
+export function UserDashboard({ user, activeLeases, initialSchedule }: DashboardProps) {
   const router = useRouter();
   const [selectedIndex, setSelectedIndex] = useState(0);
   const currentData = activeLeases[selectedIndex];
@@ -855,6 +857,13 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* CLEANING SERVICES */}
+        {!isRestricted && (
+          <div className="mb-4 md:mb-6 w-full box-border">
+            <CleaningScheduleClient initialSchedule={initialSchedule} />
           </div>
         )}
 

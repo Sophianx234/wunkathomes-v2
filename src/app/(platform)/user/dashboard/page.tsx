@@ -111,10 +111,15 @@ export default async function DashboardPage() {
     };
   }));
 
+  const { getCleaningSchedule } = await import("@/actions/user/cleaning.action");
+  const scheduleRes = await getCleaningSchedule();
+  const initialSchedule = scheduleRes.success ? scheduleRes.data : null;
+
   return (
     <UserDashboard
       user={serializedUser}
       activeLeases={serializedActiveLeases}
+      initialSchedule={initialSchedule}
     />
   );
 }
