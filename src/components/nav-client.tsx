@@ -109,7 +109,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
 
   return (
     <header
-      className={`sticky top-0 sm:h-20 z-50 transition-colors duration-300 ${
+      className={`print:hidden sticky top-0 sm:h-20 z-50 transition-colors duration-300 ${
         isScrolled
           ? "bg-white border-b border-border shadow-sm"
           : "bg-background"
