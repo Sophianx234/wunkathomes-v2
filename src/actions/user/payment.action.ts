@@ -14,6 +14,7 @@ import React from "react";
 import { z } from "zod";
 import mongoose from "mongoose";
 import { headers } from "next/headers";
+import crypto from "crypto";
 
 // ============================================================================
 // 1. STRICT INPUT VALIDATION SCHEMAS (ZOD)
@@ -144,6 +145,12 @@ export async function verifyPaystackPayment(
         throw new Error("ALREADY_VERIFIED");
       }
 
+      const typedSignature = data.data.metadata?.signature || "Pre-Signed";
+      const timestamp = new Date();
+      const userAgent = headersList.get("user-agent") || "Unknown Device";
+      const signaturePayload = `${listingId}:${session.userId}:${typedSignature}:${ip}:${userAgent}:${timestamp.toISOString()}`;
+      const documentHash = crypto.createHash("sha256").update(signaturePayload).digest("hex");
+
       const newLease = await Lease.create(
         [
           {
@@ -153,7 +160,15 @@ export async function verifyPaystackPayment(
             startDate,
             endDate,
             reminders: dynamicReminders, // <-- INJECTING THE MILESTONES
-            status: "Pending_Verification",
+            status: "Awaiting_Admin_Approval",
+            signatureAudit: {
+              isSigned: true,
+              signedAt: timestamp,
+              ipAddress: ip,
+              userAgent: userAgent,
+              typedName: typedSignature,
+              documentHash: documentHash,
+            },
           },
         ],
         { session: dbSession },

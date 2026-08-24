@@ -53,9 +53,9 @@ export default function SuccessReceipt({ transaction }: SuccessReceiptProps) {
     buttonText = "Return to Dashboard";
     ButtonIcon = Home09Icon;
   } else if (isVerified) {
-    continueUrl = `/user/sign-lease?leaseId=${targetLeaseId}`;
-    buttonText = "Sign Tenancy Agreement";
-    ButtonIcon = ArrowRight01Icon;
+    continueUrl = `/user/dashboard`;
+    buttonText = "View Your Lease";
+    ButtonIcon = Home09Icon;
   } else {
     continueUrl = `/user/leases`;
     buttonText = "Verify Identity to Continue";

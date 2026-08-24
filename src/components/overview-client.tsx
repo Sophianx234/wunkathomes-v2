@@ -287,11 +287,23 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
                     <span className="text-2xl font-bold tracking-tight text-foreground font-tabular-nums">
                       {formatCurrency(metrics.monthlyRevenue).replace("GH", "")}
                     </span>
+                    {/* quik info */}
                     <div className="mt-2 flex items-center text-xs text-muted-foreground">
-                      <span className="mr-1.5 flex items-center font-medium text-emerald-600">
-                        <HugeiconsIcon icon={ArrowUpRight01Icon} strokeWidth={2.5} className="mr-0.5 size-3" />
-                        {metrics.revenueTrend}%
-                      </span>
+                      {metrics.revenueTrend > 0 ? (
+                        <span className="mr-1.5 flex items-center font-medium text-emerald-600">
+                          <HugeiconsIcon icon={ArrowUpRight01Icon} strokeWidth={2.5} className="mr-0.5 size-3" />
+                          {metrics.revenueTrend}%
+                        </span>
+                      ) : metrics.revenueTrend < 0 ? (
+                        <span className="mr-1.5 flex items-center font-medium text-rose-600">
+                          <HugeiconsIcon icon={ArrowDownRight01Icon} strokeWidth={2.5} className="mr-0.5 size-3" />
+                          {Math.abs(metrics.revenueTrend)}%
+                        </span>
+                      ) : (
+                        <span className="mr-1.5 flex items-center font-medium text-zinc-500">
+                          0%
+                        </span>
+                      )}
                       since last month
                     </div>
                   </div>
@@ -303,6 +315,7 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
                 <div className="flex flex-col p-6 h-full justify-center">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-foreground">Occupied Units</span>
+                    {/* quick info */}
                     <div className="flex  items-center justify-center rounded-lg  ">
                       <HugeiconsIcon icon={House03Icon} strokeWidth={1} className="size-10 text-zinc-400" />
                     </div>
@@ -312,8 +325,7 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
                       {metrics.rentedListings} <span className="text-xl font-semibold text-muted-foreground">/ {metrics.totalListings}</span>
                     </span>
                     <div className="mt-2 flex items-center text-xs text-muted-foreground">
-                      <span className="mr-1.5 flex items-center font-medium text-emerald-600">
-                        <HugeiconsIcon icon={ArrowUpRight01Icon} strokeWidth={2.5} className="mr-0.5 size-3" />
+                      <span className="mr-1.5 font-medium text-emerald-600">
                         {metrics.totalListings > 0 ? Math.round((metrics.rentedListings / metrics.totalListings) * 100) : 0}%
                       </span>
                       portfolio capacity
@@ -322,45 +334,43 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
                 </div>
               </Card>
 
-              {/* Card 3: Unverified Funds */}
+              {/* Card 3: Active Tenancies */}
               <Card className="rounded-lg shadow-none bg-white border border-zinc-200/50">
                 <div className="flex flex-col p-6 h-full justify-center">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-foreground">Pending Verifications</span>
+                    <span className="text-sm font-medium text-foreground">Active Tenancies</span>
+                    {/* quick info */}
                     <div className="flex  items-center justify-center rounded-lg  ">
-                      <HugeiconsIcon icon={BankIcon} strokeWidth={1} className="size-10 text-zinc-400" />
+                      <HugeiconsIcon icon={Door01Icon} strokeWidth={1} className="size-10 text-zinc-400" />
                     </div>
                   </div>
                   <div className="mt-4 flex flex-col">
                     <span className="text-2xl font-bold tracking-tight text-foreground font-tabular-nums">
-                      {formatCurrency(metrics.unverifiedFunds).replace("GH", "")}
+                      {metrics.activeTenancies}
                     </span>
                     <div className="mt-2 flex items-center text-xs text-muted-foreground">
-                      <span className="mr-1.5 flex items-center font-medium text-rose-600">
-                        <HugeiconsIcon icon={ArrowDownRight01Icon} strokeWidth={2.5} className="mr-0.5 size-3" />
-                        {Math.abs(metrics.unverifiedTrend)}%
-                      </span>
-                      pending queue reduced
+                      <span className="mx-1 font-medium text-foreground">{metrics.pendingLeases}</span> new application{metrics.pendingLeases === 1 ? '' : 's'} pending
                     </div>
                   </div>
                 </div>
               </Card>
 
-              {/* Card 4: Due & Arrears */}
+              {/* Card 4: Open Work Orders */}
               <Card className="rounded-lg shadow-none bg-white border border-zinc-200/50">
                 <div className="flex flex-col p-6 h-full justify-center">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-foreground">Outstanding Rent</span>
+                    <span className="text-sm font-medium text-foreground">Open Work Orders</span>
+                    {/* quick info */}
                     <div className="flex  items-center justify-center rounded-lg  ">
-                      <HugeiconsIcon icon={Clock01Icon} strokeWidth={1} className="size-10 text-zinc-400" />
+                      <HugeiconsIcon icon={Wrench01Icon} strokeWidth={1} className="size-10 text-zinc-400" />
                     </div>
                   </div>
                   <div className="mt-4 flex flex-col">
                     <span className="text-2xl font-bold tracking-tight text-foreground font-tabular-nums">
-                      {formatCurrency(metrics.outstandingRent).replace("GH", "")}
+                      {metrics.openWorkOrders}
                     </span>
                     <div className="mt-2 flex items-center text-xs text-muted-foreground">
-                      Across active tenancies
+                      <span className="mx-1 font-medium text-rose-600">{metrics.urgentMaintenance}</span> require{metrics.urgentMaintenance === 1 ? 's' : ''} urgent attention
                     </div>
                   </div>
                 </div>
@@ -479,17 +489,24 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
                 <Card className="rounded-lg shadow-none bg-white border border-zinc-200/50">
                   <div className="flex flex-col p-5">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-foreground">Hardware</span>
+                      <span className="text-sm font-medium text-foreground">Smart Locks</span>
                       <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-border/60 text-muted-foreground">
-                        <HugeiconsIcon icon={SmartPhone01Icon} strokeWidth={2} className="size-4" />
+                        <HugeiconsIcon icon={Shield02Icon} strokeWidth={2} className="size-4" />
                       </div>
                     </div>
                     <div className="mt-3 flex flex-col">
                       <span className="text-2xl font-bold tracking-tight text-foreground font-tabular-nums">
-                        {metrics.onlineLocks} <span className="text-lg font-semibold text-muted-foreground">/ {metrics.totalLocks}</span>
+                        {metrics.totalLocks}
                       </span>
-                      <div className="mt-1 flex items-center text-[11px] font-medium text-muted-foreground">
-                        Locks online
+                      <div className="mt-1 flex items-center gap-2 text-[11px] font-medium">
+                        <span className="flex items-center text-emerald-600">
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 mr-1"></span>
+                          {metrics.onlineLocks} Online
+                        </span>
+                        <span className="flex items-center text-rose-600">
+                          <span className="h-1.5 w-1.5 rounded-full bg-rose-500 mr-1"></span>
+                          {metrics.offlineLocks} Offline
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -839,6 +856,77 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
                   )) : (
                     <TableRow>
                       <TableCell colSpan={6} className="text-center py-6 text-xs text-muted-foreground">No tenant feedback yet.</TableCell>
+                      <TableCell colSpan={6} className="text-center py-6 text-xs text-muted-foreground">No tenant feedback yet.</TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+
+          {/* ROW 5: Security & Hardware Events */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+            <div className="overflow-hidden rounded-lg lg:col-span-12 border border-border/60 bg-white shadow-sm">
+              <div className="flex items-center justify-between p-5 border-b border-border/40">
+                <span className="text-sm font-medium text-foreground">Recent Security & Access Events</span>
+                <Link href="/admin/smartlocks">
+                  <Button variant="ghost" size="sm" className="h-7 text-[11px] px-3 font-medium text-muted-foreground border border-border/50">
+                    Manage Fleet
+                  </Button>
+                </Link>
+              </div>
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-b border-border/40 hover:bg-transparent">
+                    <TableHead className="h-10 px-5 text-xs font-medium text-muted-foreground">Actor</TableHead>
+                    <TableHead className="h-10 px-5 text-xs font-medium text-muted-foreground">Event</TableHead>
+                    <TableHead className="h-10 px-5 text-xs font-medium text-muted-foreground">Target Lock</TableHead>
+                    <TableHead className="h-10 text-right text-xs font-medium text-muted-foreground pr-5">Time</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {data.recentSecurityEvents && data.recentSecurityEvents.length > 0 ? data.recentSecurityEvents.map((event: any) => (
+                    <TableRow key={event.id} className="group border-b border-border/40 transition-colors hover:bg-muted/30">
+                      <TableCell className="py-3 px-5">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="size-8 ring-1 ring-zinc-200 shrink-0">
+                            {event.avatar ? <AvatarImage src={event.avatar} alt={event.actorName} /> : null}
+                            <AvatarFallback className={`text-[10px] font-bold ${event.actorRole === 'Hardware' ? 'bg-zinc-100 text-zinc-500' : 'bg-muted'}`}>
+                              {event.actorRole === 'Hardware' ? 'HW' : event.actorName?.charAt(0) || 'S'}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex flex-col">
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-[13px] font-semibold text-foreground">{event.actorName}</span>
+                              <span className="text-[9px] text-muted-foreground uppercase tracking-wider font-medium">{event.actorRole || 'System'}</span>
+                            </div>
+                            {(event.actorEmail || event.actorPhone) && (
+                              <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground mt-0.5">
+                                {event.actorEmail && <span>{event.actorEmail}</span>}
+                                {event.actorEmail && event.actorPhone && <span>•</span>}
+                                {event.actorPhone && <span>{event.actorPhone}</span>}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="py-3 px-5">
+                        <Badge variant="secondary" className={`rounded px-1.5 py-0.5 text-[10px] font-bold border-none tracking-wider ${
+                          event.isAlarm ? 'bg-rose-100 text-rose-700' : 'bg-zinc-100/50 text-zinc-700'
+                        }`}>
+                          {event.action.replace(/_/g, ' ')}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="py-3 px-5">
+                        <span className="text-[12px] font-medium text-foreground">{event.lockName}</span>
+                      </TableCell>
+                      <TableCell className="py-3 pr-5 text-right">
+                        <span className="text-[11px] text-muted-foreground font-mono">{event.timestamp}</span>
+                      </TableCell>
+                    </TableRow>
+                  )) : (
+                    <TableRow>
+                      <TableCell colSpan={4} className="text-center py-6 text-xs text-muted-foreground">No recent security events.</TableCell>
                     </TableRow>
                   )}
                 </TableBody>
@@ -846,7 +934,6 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
             </div>
           </div>
         </div>
-
       </div>
     </div>
   )

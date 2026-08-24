@@ -15,12 +15,16 @@ import {
   CreditCardIcon,
   SmartPhone01Icon,
   Loading03Icon,
-  Shield01Icon
+  Shield01Icon,
+  ArrowDown01Icon
 } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { IProperty } from "@/components/property-card"
 import { verifyPaystackPayment } from "@/actions/user/payment.action"
 import { LoginModal } from "@/components/login-modal"
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
+import { Checkbox } from "@/components/ui/checkbox"
+import { TenancyDocument } from "@/components/lease-document viewer"
 
 interface CheckoutClientProps {
   listing: IProperty | any;
@@ -60,6 +64,9 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
   })
   const [moveInDate, setMoveInDate] = useState(defaultDate)
   const [isProcessing, setIsProcessing] = useState(false)
+  const [agreedToTerms, setAgreedToTerms] = useState(false)
+  const [typedSignature, setTypedSignature] = useState("")
+  const [isAgreementOpen, setIsAgreementOpen] = useState(false)
 
   const priceInGhs = listing.price ;
 
@@ -74,6 +81,7 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
       userId: currentUser?.id, 
       listingId: listing.id,
       moveInDate: moveInDate,
+      signature: typedSignature,
       custom_fields: [
         {
           display_name: "Tenant Name",
@@ -103,6 +111,17 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
     if (loc?.area && loc?.region) return `${loc.area}, ${loc.region}`;
     return "Location available upon booking";
   }
+
+  const draftActivation = {
+    user: { name: formData.legalName || "Tenant Name" },
+    lease: {
+      id: "draft",
+      propertyName: listing?.title || "Property",
+      propertyLocation: formatLocation(listing?.property?.location),
+      startDate: moveInDate,
+      totalRentAmount: listing.price,
+    }
+  };
 
   // Handle Paystack Success & Close events
   const onSuccess = async (paystackResponse: any) => {
@@ -138,6 +157,11 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
     
     if (!formData.email || !formData.legalName || !formData.phone || !moveInDate) {
       toast.error("Please complete all required details.")
+      return
+    }
+
+    if (!agreedToTerms || !typedSignature.trim()) {
+      toast.error("Please review and agree to the Tenancy Agreement with your signature.")
       return
     }
 
@@ -235,9 +259,62 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
                     className="block w-full min-w-0 max-w-full box-border m-0 p-2 md:p-4 border border-slate-300 rounded-lg text-xs md:text-sm font-bold focus:outline-none focus:border-black focus:ring-1 focus:ring-black bg-zinc-50/50 focus:bg-white transition-all appearance-none"
                   />
                   <p className="text-[8px] md:text-[10px] text-zinc-400 mt-1 md:mt-2 font-medium break-words">
-                    Your digital lease and Smart Lock PIN will activate at 12:00 AM on this date.
+                    Your digital lease will activate at 12:00 AM on this date. Access instructions will be provided by your property manager.
                   </p>
                 </div>
+              </div>
+            </div>
+
+            {/* Terms and Signature Section */}
+            <div className="bg-white p-3 md:p-8 rounded-lg border border-zinc-200/60 w-full max-w-full box-border">
+              <h2 className="text-xs md:text-sm font-bold uppercase tracking-widest mb-3 md:mb-6 border-b border-zinc-200/60 pb-2 md:pb-4 flex items-center justify-between">
+                Tenancy Agreement
+                <Dialog open={isAgreementOpen} onOpenChange={setIsAgreementOpen}>
+                  <DialogTrigger asChild>
+                    <Button type="button" variant="outline" size="sm" className="text-[9px] md:text-xs">
+                      View Agreement
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-3xl max-h-[85vh] overflow-hidden p-0 border-0 bg-white shadow-xl sm:rounded-xl flex flex-col relative">
+                    <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
+                      <TenancyDocument selectedActivation={draftActivation as any} onBack={() => setIsAgreementOpen(false)} showNav={false} isModal={true} />
+                    </div>
+                    {/* Fixed Caret Indicator */}
+                    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 pointer-events-none text-zinc-400 bg-white/90 p-1.5 rounded-full shadow-sm border border-zinc-100">
+                      <HugeiconsIcon icon={ArrowDown01Icon} size={18} />
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </h2>
+              
+              <div className="space-y-4">
+                <div className="flex items-start space-x-3">
+                  <Checkbox 
+                    id="terms" 
+                    checked={agreedToTerms}
+                    onCheckedChange={(checked) => setAgreedToTerms(checked as boolean)}
+                    className="mt-1"
+                  />
+                  <label htmlFor="terms" className="text-xs md:text-sm text-zinc-600 leading-relaxed cursor-pointer">
+                    I acknowledge that I have reviewed the Standard Tenancy Agreement. I agree to be legally bound by its terms, which will take effect upon successful payment.
+                  </label>
+                </div>
+
+                {agreedToTerms && (
+                  <div className="animate-in fade-in slide-in-from-top-2 pt-2">
+                    <label className="block text-[9px] md:text-[11px] font-bold uppercase tracking-widest text-zinc-500 mb-1 md:mb-2">
+                      Type Full Legal Name
+                    </label>
+                    <input 
+                      required
+                      type="text" 
+                      placeholder="e.g. John Doe"
+                      value={typedSignature}
+                      onChange={e => setTypedSignature(e.target.value)}
+                      className="block w-full min-w-0 max-w-full box-border m-0 p-2 md:p-4 border border-slate-300 rounded-lg text-xs md:text-sm font-bold focus:outline-none focus:border-black focus:ring-1 focus:ring-black bg-zinc-50/50 focus:bg-white transition-all appearance-none"
+                    />
+                  </div>
+                )}
               </div>
             </div>
 
@@ -355,10 +432,9 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
                  <HugeiconsIcon icon={CheckmarkBadge01Icon} size={20} className="text-green-600" />
               </span>
               <p className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-green-800 leading-relaxed break-words">
-                Once payment is successful, your digital Tenancy Agreement and Smart Lock PIN will be generated instantly.
+                Upon successful payment, your digital Tenancy Agreement will be officially executed and attached to your account.
               </p>
             </div>
-
           </div>
         </div>
 

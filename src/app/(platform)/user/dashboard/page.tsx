@@ -48,7 +48,7 @@ export default async function DashboardPage() {
     kycStatus: dbUser.kycStatus || "Unverified",
   };
 
-  const serializedActiveLeases = dbLeases.map((dbLease: any) => {
+  const serializedActiveLeases = await Promise.all(dbLeases.map(async (dbLease: any) => {
     let endDate = dbLease.endDate;
     if (!endDate && dbLease.startDate) {
       const end = new Date(dbLease.startDate);
@@ -63,6 +63,27 @@ export default async function DashboardPage() {
       ? typeof loc === "string" ? loc : `${loc.area}, ${loc.city || loc.region}`
       : "Accra, Ghana";
 
+    // Fetch Smart Lock for this property/listing
+    let lockData = null;
+    if (listingDoc) {
+      const { default: SmartLock } = await import("@/models/smartlock");
+      const lock = await SmartLock.findOne({
+        $or: [{ propertyId: propertyDoc?._id }, { listingId: listingDoc._id }],
+      }).lean();
+      
+      if (lock) {
+        lockData = {
+          activeTempPins: (lock.activeTempPins || []).map((pin: any) => ({
+            pinId: pin.pinId,
+            name: pin.name,
+            pinMasked: pin.pinMasked,
+            validFrom: pin.validFrom ? pin.validFrom.toISOString() : null,
+            expiresAt: pin.expiresAt ? pin.expiresAt.toISOString() : null,
+          })),
+        };
+      }
+    }
+
     return {
       lease: {
         id: dbLease._id.toString(),
@@ -71,7 +92,7 @@ export default async function DashboardPage() {
         startDate: dbLease.startDate ? new Date(dbLease.startDate).toISOString() : new Date().toISOString(),
         endDate: endDate ? new Date(endDate).toISOString() : undefined,
         smartLockPin: dbLease.smartLockPin,
-        intentToVacate: dbLease.intentToVacate || false, // Included for the client
+        intentToVacate: dbLease.intentToVacate || false,
         signatureAudit: {
           isSigned: dbLease.signatureAudit?.isSigned || false,
         },
@@ -86,8 +107,9 @@ export default async function DashboardPage() {
         sizeSqm: listingDoc?.features?.sizeSqm || 0,
         amenities: propertyDoc?.generalAmenities || [],
       },
+      lock: lockData,
     };
-  });
+  }));
 
   return (
     <UserDashboard

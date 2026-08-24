@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 // Define the shape of the data this component requires to render correctly
 export interface TenancyDocumentProps {
   showNav?:boolean
+  isModal?:boolean
   selectedActivation: {
     user: {
       name: string;
@@ -31,7 +32,7 @@ export interface TenancyDocumentProps {
   onBack: () => void;
 }
 
-export function TenancyDocument({ selectedActivation, onBack,showNav=true }: TenancyDocumentProps) {
+export function TenancyDocument({ selectedActivation, onBack,showNav=true, isModal=false }: TenancyDocumentProps) {
   // Utility function to safely format dates
   const formatDate = (date: string | Date) => {
     return new Date(date).toLocaleDateString("en-US", {
@@ -42,7 +43,7 @@ export function TenancyDocument({ selectedActivation, onBack,showNav=true }: Ten
   };
 
   return (
-    <div className="min-h-screen bg-zinc-100/50 font-sans print:bg-white print:absolute print:inset-0 print:w-full print:m-0 print:p-0 w-full overflow-x-hidden box-border">
+    <div className={`font-sans print:bg-white print:absolute print:inset-0 print:w-full print:m-0 print:p-0 w-full box-border ${isModal ? "bg-white" : "min-h-screen bg-zinc-100/50 overflow-x-hidden"}`}>
       {/* Print styles injected via dangerouslySetInnerHTML. 
         This ensures that when the user prints the page, 
         the background is white and the "Back" / "Print" buttons disappear. 
@@ -90,9 +91,9 @@ export function TenancyDocument({ selectedActivation, onBack,showNav=true }: Ten
       </div>}
 
       {/* DOCUMENT BODY */}
-      <div className="max-w-4xl mx-auto p-4 md:p-8 print:p-0 w-full box-border">
-        <div className="flex-1 w-full bg-white border border-zinc-200/80 rounded-md md:rounded-sm shadow-[0_2px_12px_-4px_rgba(0,0,0,0.04)] print:border-none print:shadow-none print:rounded-none print:w-full print:block box-border overflow-hidden">
-          <div className="p-5 md:p-14 lg:p-20 font-serif text-zinc-800 leading-relaxed md:leading-[1.8] text-[10px] md:text-[14px] text-justify print:p-0 print:text-black w-full box-border">
+      <div className={`mx-auto w-full box-border ${isModal ? "max-w-none p-0" : "max-w-4xl p-4 md:p-8 print:p-0"}`}>
+        <div className={`flex-1 w-full bg-white print:border-none print:shadow-none print:rounded-none print:w-full print:block box-border overflow-hidden ${isModal ? "" : "border border-zinc-200/80 rounded-md md:rounded-sm shadow-[0_2px_12px_-4px_rgba(0,0,0,0.04)]"}`}>
+          <div className={`font-serif text-zinc-800 leading-relaxed md:leading-[1.8] text-[10px] md:text-[14px] text-justify print:p-0 print:text-black w-full box-border ${isModal ? "p-4 md:p-8" : "p-5 md:p-14 lg:p-20"}`}>
             
             <div className="text-center mb-4 md:mb-6 w-full box-border">
               <h2 className="text-sm md:text-xl font-bold uppercase tracking-widest border-b border-zinc-200/60 pb-2 md:pb-4 inline-block mx-auto text-zinc-900 break-words max-w-full">

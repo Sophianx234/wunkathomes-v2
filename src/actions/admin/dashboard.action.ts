@@ -10,6 +10,8 @@ import Tour from "@/models/tour";
 import Transaction from "@/models/transaction";
 import User from "@/models/user"; 
 import Maintenance from "@/models/maintenance"; 
+import SmartLock from "@/models/smartlock";
+import AccessLog from "@/models/accesslog";
 
 export async function getDashboardData() {
   // 1. STRICT ZERO-TRUST AUTHORIZATION (CRITICAL FIX)
@@ -24,41 +26,43 @@ export async function getDashboardData() {
 
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
     const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
     // 2. Metrics & Aggregations (Running in parallel)
     const [
       monthlyRevenueRes,
-      outstandingRentRes,
-      unverifiedFundsRes,
+      lastMonthRevenueRes,
+      activeTenanciesCount,
+      openWorkOrdersCount,
       listingStats,
       tourStats,
       pendingBankTransfers,
       pendingKYC,            
       pendingLeases,         
-      urgentMaintenance      
+      urgentMaintenance,
+      smartLockStats
     ] = await Promise.all([
       Transaction.aggregate([
         { $match: { status: "Success", paidAt: { $gte: startOfMonth } } },
         { $group: { _id: null, total: { $sum: "$amount" } } }
       ]),
-      
-      Lease.aggregate([
-        { $match: { status: { $in: ["Awaiting_Payment", "Active"] } } },
-        { $group: { _id: null, total: { $sum: "$totalRentAmount" } } } 
-      ]),
 
       Transaction.aggregate([
-        { $match: { status: "Pending" } },
+        { $match: { status: "Success", paidAt: { $gte: startOfLastMonth, $lte: endOfLastMonth } } },
         { $group: { _id: null, total: { $sum: "$amount" } } }
       ]),
+      
+      Lease.countDocuments({ status: "Active" }),
+
+      Maintenance.countDocuments({ status: { $in: ["Pending", "In_Progress"] } }),
 
       Listing.aggregate([
         { $group: { 
             _id: null, 
             total: { $sum: 1 },
-            rented: { $sum: { $cond: [{ $eq: ["$status", "Rented"] }, 1, 0] } },
-            smartLocks: { $sum: { $cond: ["$smartLock.hasSmartLock", 1, 0] } }
+            rented: { $sum: { $cond: [{ $eq: ["$status", "Rented"] }, 1, 0] } }
         }}
       ]),
 
@@ -70,19 +74,37 @@ export async function getDashboardData() {
       Transaction.countDocuments({ channel: "bank", status: "Pending" }),
       User.countDocuments({ kycStatus: "Pending" }),
       Lease.countDocuments({ status: { $in: ["Pending_Verification", "Awaiting_Admin_Approval"] } }),
-      Maintenance.countDocuments({ priority: { $in: ["Emergency", "High"] }, status: "Pending" })
+      Maintenance.countDocuments({ priority: { $in: ["Emergency", "High"] }, status: "Pending" }),
+      
+      SmartLock.aggregate([
+        { $group: { 
+            _id: null, 
+            total: { $sum: 1 },
+            online: { $sum: { $cond: [{ $eq: ["$status", "online"] }, 1, 0] } },
+            offline: { $sum: { $cond: [{ $eq: ["$status", "offline"] }, 1, 0] } }
+        }}
+      ])
     ]);
 
+    const currentRevenue = monthlyRevenueRes[0]?.total || 0;
+    const lastRevenue = lastMonthRevenueRes[0]?.total || 0;
+    let revTrend = 0;
+    if (lastRevenue > 0) {
+      revTrend = Number((((currentRevenue - lastRevenue) / lastRevenue) * 100).toFixed(1));
+    } else if (currentRevenue > 0) {
+      revTrend = 100;
+    }
+
     const metrics = {
-      monthlyRevenue: monthlyRevenueRes[0]?.total || 0,
-      revenueTrend: 8.2, 
-      outstandingRent: outstandingRentRes[0]?.total || 0,
-      unverifiedFunds: unverifiedFundsRes[0]?.total || 0,
-      unverifiedTrend: -1.2,
+      monthlyRevenue: currentRevenue,
+      revenueTrend: revTrend, 
+      activeTenancies: activeTenanciesCount,
+      openWorkOrders: openWorkOrdersCount,
       totalListings: listingStats[0]?.total || 0,
       rentedListings: listingStats[0]?.rented || 0,
-      onlineLocks: listingStats[0]?.smartLocks || 0, 
-      totalLocks: listingStats[0]?.smartLocks || 0,
+      totalLocks: smartLockStats[0]?.total || 0,
+      onlineLocks: smartLockStats[0]?.online || 0,
+      offlineLocks: smartLockStats[0]?.offline || 0,
       activeTours: await Tour.countDocuments({ status: { $in: ["Pending_Time", "Confirmed"] } }),
       
       toursToday: tourStats,
@@ -94,7 +116,7 @@ export async function getDashboardData() {
     };
 
     // 3. Recent Data Lists
-    const [recentTransactions, dueRentsData, recentListingsData, recentReviewsData, propertyData] = await Promise.all([
+    const [recentTransactions, dueRentsData, recentListingsData, recentReviewsData, propertyData, recentSecurityEventsData] = await Promise.all([
       Transaction.find().sort({ createdAt: -1 }).limit(4).populate('userId', 'name').populate('listingId', 'title'),
       Lease.find({ status: { $in: ["Awaiting_Payment", "Pending_Verification"] } })
         .sort({ createdAt: -1 })
@@ -105,7 +127,8 @@ export async function getDashboardData() {
       Review.find().sort({ createdAt: -1 }).limit(3).populate('userId', 'name email profilePicture').populate('listingId', 'title'),
       Property.aggregate([
         { $group: { _id: "$propertyType", total: { $sum: 1 } } }
-      ])
+      ]),
+      AccessLog.find().sort({ createdAt: -1 }).limit(5).populate('actorId', 'name email profilePicture role').populate('lockId', 'name').lean()
     ]);
 
     // Transform Data
@@ -158,6 +181,21 @@ export async function getDashboardData() {
       occupied: Math.floor(p.total * 0.8) 
     }));
 
+    const recentSecurityEvents = recentSecurityEventsData.map((log: any) => ({
+      id: log._id.toString(),
+      lockName: log.lockId?.name || "Unknown Lock",
+      action: log.action,
+      actorName: log.actorId?.name || log.performedBy || "System",
+      actorRole: log.actorId?.role || (log.actorType === 'Hardware' ? 'Hardware' : ''),
+      actorEmail: log.actorId?.email || null,
+      actorPhone: log.actorId?.phone || null,
+      avatar: log.actorId?.profilePicture || null,
+      timestamp: new Date(log.createdAt).toLocaleString(undefined, { 
+        month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' 
+      }),
+      isAlarm: log.action.includes('ALARM')
+    }));
+
     // 4. Chart Data Generation
     const assetAggregations = await Listing.aggregate([
       { $group: { _id: "$status", count: { $sum: 1 } } }
@@ -199,6 +237,7 @@ export async function getDashboardData() {
       dueRents,
       recentListings,
       recentReviews,
+      recentSecurityEvents,
       propertyTypeStats,
       assetChartData,
       revenueChartData

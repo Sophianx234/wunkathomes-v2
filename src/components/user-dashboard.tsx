@@ -41,6 +41,19 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 const getDaysDifference = (start: Date, end: Date) => {
   const utc1 = Date.UTC(start.getFullYear(), start.getMonth(), start.getDate());
@@ -71,6 +84,15 @@ export interface DashboardProps {
       sizeSqm: number;
       amenities: string[];
     };
+    lock: {
+      activeTempPins: Array<{
+        pinId: string;
+        name: string;
+        pinMasked: string;
+        validFrom: string;
+        expiresAt: string;
+      }>;
+    } | null;
   }>;
 }
 
@@ -86,6 +108,41 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
   >("LOCKED");
   const [isRenewing, setIsRenewing] = useState(false);
   const [isVacating, setIsVacating] = useState(false);
+  
+  const [isGuestModalOpen, setIsGuestModalOpen] = useState(false);
+  const [guestName, setGuestName] = useState("");
+  const [guestDuration, setGuestDuration] = useState("24");
+
+  const handleGenerateGuestPin = async () => {
+    if (!guestName.trim()) {
+      toast.error("Please enter a guest name.");
+      return;
+    }
+    const duration = parseInt(guestDuration, 10);
+    if (isNaN(duration) || duration <= 0 || duration > 48) {
+      toast.error("Duration must be between 1 and 48 hours.");
+      return;
+    }
+
+    const toastId = toast.loading("Generating guest PIN...");
+    setIsGuestModalOpen(false);
+    
+    try {
+      const { tenantCreateGuestPinAction } = await import("@/actions/user/smartlock.action");
+      const result = await tenantCreateGuestPinAction(lease.id, guestName.trim(), duration);
+      
+      if (result.success) {
+        toast.success(`Guest PIN: ${result.pin} (Valid for ${duration}h)`, { id: toastId, duration: 10000 });
+        setGuestName("");
+        setGuestDuration("24");
+        router.refresh();
+      } else {
+        toast.error(result.error || "Failed to generate PIN.", { id: toastId });
+      }
+    } catch (error) {
+      toast.error("An unexpected error occurred.", { id: toastId });
+    }
+  };
 
   const needsKyc =
     user.kycStatus === "Unverified" || user.kycStatus === "Rejected";
@@ -143,20 +200,29 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
   }
 
   const toggleSmartLock = async () => {
-    if (lockStatus === "LOADING" || isRestricted) return;
-    const action = lockStatus === "LOCKED" ? "unlocking" : "locking";
+    if (lockStatus === "LOADING" || lockStatus === "UNLOCKED" || isRestricted || today < startDate) return;
+    
     setLockStatus("LOADING");
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      const newStatus = action === "unlocking" ? "UNLOCKED" : "LOCKED";
-      setLockStatus(newStatus);
-      toast.success(`Door securely ${newStatus.toLowerCase()}.`);
+      const { tenantRemoteUnlockAction } = await import("@/actions/user/smartlock.action");
+      const result = await tenantRemoteUnlockAction(lease.id);
+      
+      if (result.success) {
+        toast.success(result.message || "Door unlocked (5s).");
+        setLockStatus("UNLOCKED");
+        
+        // Auto-lock clutch UI fallback (5 seconds)
+        setTimeout(() => {
+          setLockStatus("LOCKED");
+        }, 5000);
+      } else {
+        toast.error(result.error || "Failed to unlock door. Check connection.");
+        setLockStatus("LOCKED");
+      }
     } catch (error) {
-      toast.error(
-        `Failed to ${action.replace("ing", "e")} door. Check connection.`,
-      );
-      setLockStatus(action === "unlocking" ? "LOCKED" : "UNLOCKED");
+      toast.error("An unexpected error occurred.");
+      setLockStatus("LOCKED");
     }
   };
 
@@ -705,13 +771,92 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
                     <span className="scale-75 md:scale-100 flex items-center shrink-0">
                       <HugeiconsIcon icon={LockKeyIcon} size={18} />
                     </span>{" "}
-                    <span className="truncate">Lock Door Securely</span>
+                    <span className="truncate">Unlocked (5s)...</span>
                   </>
                 )}
               </button>
+              
+              {!isRestricted && today >= startDate && (
+                <button
+                  onClick={() => setIsGuestModalOpen(true)}
+                  className="w-full mt-3 py-2 md:py-3 rounded-lg md:rounded-lg border border-white/20 text-white font-bold uppercase tracking-widest text-[8px] md:text-[10px] hover:bg-white/10 transition-colors flex items-center justify-center gap-1.5 min-w-0 box-border px-2 truncate"
+                >
+                  <span className="scale-75 md:scale-100 flex items-center shrink-0">
+                    <HugeiconsIcon icon={Key01Icon} size={14} />
+                  </span>
+                  Generate Guest Pass
+                </button>
+              )}
             </div>
           </div>
         </div>
+
+        {/* ACTIVE GUEST PASSES */}
+        {!isRestricted && currentData.lock && currentData.lock.activeTempPins.length > 0 && (
+          <div className="mb-4 md:mb-6 w-full box-border bg-white rounded-lg border border-zinc-200/60 overflow-hidden">
+            <div className="p-4 md:p-6 border-b border-zinc-100 flex items-center justify-between">
+              <h3 className="text-sm font-bold uppercase tracking-widest text-zinc-900">
+                Active Guest Passes
+              </h3>
+              <span className="text-xs font-bold text-zinc-500 bg-zinc-100 px-2 py-1 rounded">
+                {currentData.lock.activeTempPins.length} / 5
+              </span>
+            </div>
+            <div className="divide-y divide-zinc-100">
+              {currentData.lock.activeTempPins.map((pin) => (
+                <div key={pin.pinId} className="p-4 md:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="flex flex-col">
+                    <span className="text-sm font-bold text-zinc-900 mb-1">{pin.name}</span>
+                    <div className="flex items-center gap-3 text-xs text-zinc-500 font-medium">
+                      <span className="font-mono bg-zinc-100 px-1.5 py-0.5 rounded">{pin.pinMasked}</span>
+                      <span>Expires: {new Date(pin.expiresAt).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</span>
+                    </div>
+                  </div>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <button
+                        className="text-xs font-bold uppercase tracking-widest text-red-600 hover:text-white border border-red-200 hover:border-red-600 hover:bg-red-600 transition-colors px-4 py-2 rounded"
+                      >
+                        Revoke
+                      </button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent className="bg-white border-zinc-200">
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Revoke Guest Pass?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to revoke the guest pass for <span className="font-bold text-zinc-800">{pin.name}</span>? This will immediately delete the PIN from the smart lock and prevent entry.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel className="border-zinc-200 text-zinc-700">Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          className="bg-red-600 text-white hover:bg-red-700"
+                          onClick={async () => {
+                            const toastId = toast.loading("Revoking guest pass...");
+                            try {
+                              const { tenantRevokeGuestPinAction } = await import("@/actions/user/smartlock.action");
+                              const res = await tenantRevokeGuestPinAction(lease.id, pin.pinId);
+                              if (res.success) {
+                                toast.success(res.message, { id: toastId });
+                                router.refresh();
+                              } else {
+                                toast.error(res.error || "Failed to revoke.", { id: toastId });
+                              }
+                            } catch (e) {
+                              toast.error("Error revoking pin.", { id: toastId });
+                            }
+                          }}
+                        >
+                          Yes, Revoke
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* UTILITIES & ACTIONS */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 w-full box-border">
@@ -778,6 +923,57 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
           )}
         </div>
       </div>
+      
+      {/* Generate Guest PIN Modal */}
+      <Dialog open={isGuestModalOpen} onOpenChange={setIsGuestModalOpen}>
+        <DialogContent className="sm:max-w-md bg-white border border-zinc-200">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold tracking-tight text-zinc-900">Create Guest Pass</DialogTitle>
+            <DialogDescription className="text-zinc-500 font-medium text-sm">
+              Generate a temporary PIN for visitors, cleaners, or contractors. Valid for up to 48 hours.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-4 py-4">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="guestName" className="text-xs font-bold uppercase tracking-widest text-zinc-900">
+                Guest Name
+              </Label>
+              <Input
+                id="guestName"
+                placeholder="e.g. Cleaner, John Doe"
+                value={guestName}
+                onChange={(e) => setGuestName(e.target.value)}
+                className="bg-zinc-50 border-zinc-200 text-zinc-900 focus-visible:ring-zinc-400"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="guestDuration" className="text-xs font-bold uppercase tracking-widest text-zinc-900">
+                Valid For (Hours)
+              </Label>
+              <Input
+                id="guestDuration"
+                type="number"
+                min="1"
+                max="48"
+                placeholder="24"
+                value={guestDuration}
+                onChange={(e) => setGuestDuration(e.target.value)}
+                className="bg-zinc-50 border-zinc-200 text-zinc-900 focus-visible:ring-zinc-400"
+              />
+            </div>
+          </div>
+          <DialogFooter className="sm:justify-end gap-2">
+            <DialogClose asChild>
+              <Button type="button" variant="outline" className="border-zinc-200 text-zinc-700 hover:bg-zinc-100">
+                Cancel
+              </Button>
+            </DialogClose>
+            <Button type="button" onClick={handleGenerateGuestPin} className="bg-zinc-900 text-white hover:bg-zinc-800">
+              Generate PIN
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </main>
   );
 }

@@ -97,6 +97,21 @@ export async function submitMaintenanceRequest(
           "No active lease found. Maintenance requests are only available for current residents.",
       };
     }
+    
+    // 4.5. Anti-Spam & Abuse Prevention
+    // Check how many open tickets the user currently has
+    const openTicketCount = await Maintenance.countDocuments({
+      userId: session.userId,
+      status: { $in: ["Pending", "In_Progress"] }
+    });
+    
+    if (openTicketCount >= 3) {
+       return {
+        success: false,
+        message: "",
+        error: "You have reached the maximum of 3 open maintenance tickets. Please wait for them to be resolved before submitting new ones."
+       }
+    }
 
     // 5. Secure Media Validation (Defense-in-Depth)
     const rawMediaFiles = formData.getAll("media") as File[];

@@ -18,7 +18,17 @@ const nextConfig: NextConfig = {
     ],
   },
 
-  // 2. EXPERIMENTAL & SERVER ACTION CONTROLS
+  // 2. DEV TUNNEL ACCESS (NGROK)
+  allowedDevOrigins: [
+    'crawlers-ladder-flagman.ngrok-free.dev',
+    '*.ngrok-free.dev',
+    '*.ngrok-free.app',
+    '*.ngrok.app',
+    '*.ngrok.io',
+    '*.ngrok.dev'
+  ],
+
+  // 3. EXPERIMENTAL & SERVER ACTION CONTROLS
   experimental: {
     serverActions: {
       // Tighter perimeter: 10 images * 5MB max = 50MB. 
@@ -26,7 +36,14 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "50mb", 
       
       // CORRECT PLACEMENT: Allow specific external IPs/domains to call your actions
-      allowedOrigins: ['127.0.0.1'], 
+      allowedOrigins: [
+        '127.0.0.1',
+        'localhost:3000', 
+        '*.ngrok-free.app', 
+        '*.ngrok.io', 
+        '*.ngrok.dev', 
+        '*.ngrok.app'
+      ], 
     },
   },
 

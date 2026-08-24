@@ -107,7 +107,7 @@ export default function DocumentVaultClient({
             <div className="h-3 md:h-4 w-px bg-zinc-200 hidden sm:block shrink-0" />
             <div className="flex items-center gap-1 md:gap-2 min-w-0">
               <h1 className="text-[10px] md:text-[14px] font-semibold tracking-tight text-zinc-900 truncate">
-                Sign Tenancy Agreement
+                View Tenancy Agreement
               </h1>
             </div>
           </div>
