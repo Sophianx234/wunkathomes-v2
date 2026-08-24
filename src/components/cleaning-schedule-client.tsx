@@ -6,13 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { updateCleaningSchedule } from "@/actions/user/cleaning.action";
 import { toast } from "sonner";
-import {
-  SparklesIcon,
-  Calendar01Icon,
-  CheckmarkBadge01Icon,
-} from "@hugeicons/core-free-icons";
+import { SparklesIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Label } from "./ui/label";
 
 interface CleaningScheduleClientProps {
   initialSchedule: any;
@@ -23,12 +18,10 @@ export default function CleaningScheduleClient({ initialSchedule }: CleaningSche
     initialSchedule?.scheduleType || "custom"
   );
   
-  // Custom dates
   const [customDates, setCustomDates] = useState<Date[]>(
     initialSchedule?.customDates?.map((d: string) => new Date(d)) || []
   );
 
-  // Weekly days (0=Sun, 1=Mon, ..., 6=Sat)
   const [weeklyDays, setWeeklyDays] = useState<number[]>(
     initialSchedule?.weeklyDays || []
   );
@@ -67,130 +60,101 @@ export default function CleaningScheduleClient({ initialSchedule }: CleaningSche
   };
 
   return (
-    <div className="bg-white rounded-xl border border-zinc-200/60 p-5 md:p-6 shadow-sm flex flex-col w-full box-border">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
-          <HugeiconsIcon icon={SparklesIcon} size={20} />
-        </div>
+    <div className="bg-white rounded-xl border border-zinc-200/60 p-6 md:p-8 shadow-sm flex flex-col w-full box-border">
+      
+      {/* HEADER & CONTROLS */}
+      <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-8">
         <div>
-          <h3 className="font-black text-lg text-zinc-900 tracking-tight">Cleaning Service</h3>
-          <p className="text-sm font-medium text-zinc-500">
-            50 GHS per scheduled day. Pay later.
+          <div className="flex items-center gap-2 mb-1">
+            <HugeiconsIcon icon={SparklesIcon} size={18} className="text-black" />
+            <h3 className="font-bold text-lg text-zinc-900 tracking-tight">Cleaning Service</h3>
+          </div>
+          <p className="text-xs font-medium text-zinc-500 uppercase tracking-widest">
+            50 GHS / Day • Billed Later
           </p>
         </div>
-      </div>
 
-      <div className="space-y-6">
-        {/* Type Selector */}
-        <div className="grid grid-cols-3 gap-2">
+        {/* Minimalist Segmented Control */}
+        <div className="flex bg-zinc-100 p-1 rounded-lg w-full md:w-auto">
           {["custom", "weekly", "daily"].map((type) => (
             <button
               key={type}
               onClick={() => setScheduleType(type as any)}
-              className={`py-2 px-3 text-sm font-bold uppercase tracking-widest rounded-lg border-2 transition-colors ${
+              className={`flex-1 md:flex-none md:w-24 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-md transition-all ${
                 scheduleType === type
-                  ? "border-black bg-black text-white"
-                  : "border-zinc-200/60 text-zinc-500 hover:border-black/50"
+                  ? "bg-white text-black shadow-sm"
+                  : "text-zinc-500 hover:text-zinc-700"
               }`}
             >
               {type}
             </button>
           ))}
         </div>
+      </div>
 
-        {/* Custom Mode */}
+      <div className="flex-1">
+        {/* Custom Mode - Ultra Minimal Calendar */}
         {scheduleType === "custom" && (
-          <div className="flex flex-col md:flex-row gap-6 border border-zinc-200/60 rounded-xl p-4 md:p-6 bg-zinc-50/50">
-            <div className="flex-1 flex justify-center bg-white rounded-xl border border-zinc-200/60 p-2 shadow-sm">
-              <Calendar
-                mode="multiple"
-                selected={customDates}
-                onSelect={(dates) => setCustomDates(dates as Date[] || [])}
-                className="w-full flex justify-center"
-                disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))}
-              />
-            </div>
-            <div className="flex-1 flex flex-col">
-              <div className="flex items-center justify-between mb-3">
-                <Label className="text-xs font-bold uppercase tracking-widest text-zinc-500">
-                  Selected Dates
-                </Label>
-                {customDates.length > 0 && (
-                  <span className="text-xs font-bold bg-zinc-200/60 text-zinc-600 px-2 py-0.5 rounded">
-                    {customDates.length}
-                  </span>
-                )}
-              </div>
-              
-              {customDates.length === 0 ? (
-                <div className="flex-1 flex flex-col items-center justify-center text-center p-6 border-2 border-dashed border-zinc-200 rounded-xl bg-white/50 min-h-[200px]">
-                  <HugeiconsIcon icon={Calendar01Icon} size={28} className="text-zinc-400 mb-3" />
-                  <p className="text-sm font-bold text-zinc-700">No dates selected</p>
-                  <p className="text-xs text-zinc-500 mt-1 font-medium leading-relaxed">
-                    Tap on the calendar to schedule specific cleaning days.
-                  </p>
-                </div>
-              ) : (
-                <div className="flex flex-wrap gap-2 content-start max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
-                  {[...customDates].sort((a, b) => a.getTime() - b.getTime()).map((d, i) => (
-                    <div key={i} className="flex items-center gap-2 bg-white border border-zinc-200/60 px-3 py-1.5 rounded-md shadow-sm group hover:border-red-200 transition-colors">
-                      <span className="text-xs font-bold text-zinc-800">
-                        {format(d, "MMM d, yyyy")}
-                      </span>
-                      <button
-                        onClick={() => setCustomDates(customDates.filter((date) => date.getTime() !== d.getTime()))}
-                        className="text-zinc-400 hover:text-red-500 transition-colors text-lg leading-none"
-                      >
-                        &times;
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+          <div className="flex flex-col items-center">
+            <Calendar
+              mode="multiple"
+              selected={customDates}
+              onSelect={(dates) => setCustomDates(dates as Date[] || [])}
+              className="w-full max-w-[320px] flex justify-center [&_.rdp-cell]:w-10 [&_.rdp-cell]:h-10 [&_.rdp-head_cell]:w-10 [&_.rdp-head_cell]:font-bold [&_.rdp-head_cell]:text-zinc-400 [&_.rdp-head_cell]:text-[10px] [&_.rdp-head_cell]:uppercase [&_.rdp-head_cell]:tracking-widest [&_.rdp-day]:w-9 [&_.rdp-day]:h-9 [&_.rdp-day]:text-sm [&_.rdp-day]:font-medium [&_.rdp-day_selected]:bg-black [&_.rdp-day_selected]:text-white [&_.rdp-day_selected]:font-bold [&_.rdp-day_today:not(.rdp-day_selected)]:bg-zinc-100 [&_.rdp-day_today:not(.rdp-day_selected)]:text-black"
+              disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))}
+            />
+            {customDates.length > 0 && (
+              <p className="text-xs font-medium text-zinc-500 mt-4">
+                {customDates.length} day{customDates.length !== 1 ? 's' : ''} selected
+              </p>
+            )}
           </div>
         )}
 
-        {/* Weekly Mode */}
+        {/* Weekly Mode - Minimalist Days */}
         {scheduleType === "weekly" && (
-          <div className="border border-zinc-200/60 rounded-xl p-4 bg-zinc-50/50">
-            <Label className="text-xs font-bold uppercase tracking-widest text-zinc-500 mb-3 block">
-              Select Days of the Week
-            </Label>
-            <div className="flex flex-wrap gap-2">
-              {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((dayName, idx) => (
+          <div className="flex flex-col items-center justify-center py-8">
+            <div className="flex gap-2">
+              {["S", "M", "T", "W", "T", "F", "S"].map((dayLetter, idx) => (
                 <button
                   key={idx}
                   onClick={() => toggleWeeklyDay(idx)}
-                  className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors border-2 ${
+                  className={`w-10 h-10 rounded-full text-xs font-bold transition-all flex items-center justify-center ${
                     weeklyDays.includes(idx)
-                      ? "bg-black text-white border-black"
-                      : "bg-white border-zinc-200/60 text-zinc-700 hover:border-black/50"
+                      ? "bg-black text-white"
+                      : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"
                   }`}
                 >
-                  {dayName}
+                  {dayLetter}
                 </button>
               ))}
             </div>
+            {weeklyDays.length > 0 && (
+              <p className="text-xs font-medium text-zinc-500 mt-6">
+                Repeats every week on selected days
+              </p>
+            )}
           </div>
         )}
 
-        {/* Daily Mode */}
+        {/* Daily Mode - Clean Typography */}
         {scheduleType === "daily" && (
-          <div className="border border-zinc-200/60 rounded-xl p-4 bg-zinc-50/50 flex items-center gap-3">
-            <HugeiconsIcon icon={CheckmarkBadge01Icon} size={24} className="text-green-600" />
-            <p className="text-sm font-bold text-zinc-700">
-              Cleaners will be dispatched every single day.
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <h4 className="text-2xl font-black tracking-tight text-zinc-900 mb-2">Every Day</h4>
+            <p className="text-sm font-medium text-zinc-500 max-w-[250px] leading-relaxed">
+              Cleaners will automatically be dispatched to your property daily.
             </p>
           </div>
         )}
+      </div>
 
+      <div className="mt-8 pt-6 border-t border-zinc-100 flex justify-end">
         <Button
           onClick={handleSave}
           disabled={isSubmitting}
-          className="w-full h-12 bg-black hover:bg-zinc-800 text-white font-black uppercase tracking-widest text-xs"
+          className="bg-black hover:bg-zinc-800 text-white font-bold text-xs uppercase tracking-widest px-8"
         >
-          {isSubmitting ? "Saving..." : "Save Schedule"}
+          {isSubmitting ? "Saving..." : "Save Preferences"}
         </Button>
       </div>
     </div>
