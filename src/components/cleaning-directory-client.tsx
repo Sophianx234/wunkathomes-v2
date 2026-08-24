@@ -229,7 +229,6 @@ export default function CleaningDirectoryClient({ data, availableProperties }: C
                     )}
                     {record.scheduleType === "weekly" && (
                       <div className="text-[12px]">
-                        <span className="font-bold text-black">Weekly: </span>
                         <span className="text-zinc-600 font-medium">
                           {record.weeklyDays?.map((d: number) => dayNames[d]).join(", ")}
                         </span>
@@ -240,7 +239,6 @@ export default function CleaningDirectoryClient({ data, availableProperties }: C
                         className="max-w-[200px] truncate text-[12px]"
                         title={formatCustomDates(record.customDates)}
                       >
-                        <span className="font-bold text-black">Custom Dates: </span>
                         <span className="text-zinc-600 font-medium">
                           {formatCustomDates(record.customDates)}
                         </span>
@@ -291,10 +289,10 @@ export default function CleaningDirectoryClient({ data, availableProperties }: C
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="bg-white border-zinc-200/60 overflow-y-auto sm:max-w-md p-0 rounded-xl gap-0">
+        <DialogContent className="bg-white border-zinc-200/60 overflow-y-auto max-h-[85vh] sm:max-w-md p-0 rounded-xl gap-0">
           {selectedRecord && (
             <div className="flex flex-col h-full">
-              <DialogHeader className="p-6 border-b border-zinc-100 bg-zinc-50/50">
+              <DialogHeader className="p-5 border-b border-zinc-100 bg-zinc-50/50">
                 <DialogTitle className="text-xl font-bold tracking-tight text-zinc-900">
                   Service Request Details
                 </DialogTitle>
@@ -303,7 +301,7 @@ export default function CleaningDirectoryClient({ data, availableProperties }: C
                 </DialogDescription>
               </DialogHeader>
 
-              <div className="p-6 space-y-8 flex-1">
+              <div className="p-5 space-y-6 flex-1">
                 {/* Status Badge */}
                 <div>
                   <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-2">
