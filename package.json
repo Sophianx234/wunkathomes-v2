@@ -42,7 +42,7 @@
     "pusher-js": "^8.6.0",
     "radix-ui": "^1.4.3",
     "react": "19.2.4",
-    "react-day-picker": "^10.0.1",
+    "react-day-picker": "^8.10.1",
     "react-dom": "19.2.4",
     "react-dropzone": "^15.0.0",
     "react-email": "^6.6.0",
