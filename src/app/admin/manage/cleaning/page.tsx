@@ -4,6 +4,7 @@ import User from "@/models/user";
 import Listing from "@/models/listing";
 import Property from "@/models/property";
 import { format } from "date-fns";
+import CleaningDirectoryClient, { CleaningRecord } from "@/components/cleaning-directory-client";
 
 export const dynamic = "force-dynamic";
 
@@ -27,13 +28,45 @@ export default async function AdminCleaningPage() {
 
   const today = new Date();
   const dayOfWeek = today.getDay(); // 0-6
+  const todayStr = format(today, "yyyy-MM-dd");
 
-  // Helper to format custom dates
-  const formatDates = (dates: Date[]) => {
-    return dates.map(d => format(new Date(d), "MMM d, yyyy")).join(", ");
-  };
+  const records: CleaningRecord[] = schedules.map((schedule: any) => {
+    let isDispatchToday = false;
+    if (schedule.scheduleType === "daily") {
+      isDispatchToday = true;
+    } else if (schedule.scheduleType === "weekly") {
+      if (schedule.weeklyDays?.includes(dayOfWeek)) {
+        isDispatchToday = true;
+      }
+    } else if (schedule.scheduleType === "custom") {
+      isDispatchToday = schedule.customDates?.some(
+        (d: Date) => format(new Date(d), "yyyy-MM-dd") === todayStr
+      );
+    }
 
-  const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const loc = schedule.listingId?.propertyId?.location;
+    const locationString = loc
+      ? typeof loc === "string"
+        ? loc
+        : `${loc.area || ""}, ${loc.city || loc.region || ""}`
+      : "Unknown Location";
+
+    return {
+      id: schedule._id.toString(),
+      tenantName: schedule.userId?.name || "Unknown",
+      tenantEmail: schedule.userId?.email || "",
+      propertyTitle: schedule.listingId?.title || "Unknown Property",
+      propertyLocation: locationString,
+      scheduleType: schedule.scheduleType,
+      weeklyDays: schedule.weeklyDays || [],
+      customDates: schedule.customDates ? schedule.customDates.map((d: Date) => d.toISOString()) : [],
+      isDispatchToday,
+    };
+  });
+
+  const availableProperties = Array.from(
+    new Set(records.map((r) => r.propertyTitle))
+  ).sort();
 
   return (
     <div className="w-full">
@@ -44,90 +77,10 @@ export default async function AdminCleaningPage() {
         </p>
       </div>
 
-      <div className="bg-white border border-zinc-200/60 rounded-xl overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm whitespace-nowrap">
-            <thead className="bg-zinc-50 border-b border-zinc-200/60 font-bold uppercase tracking-widest text-[10px] text-zinc-500">
-              <tr>
-                <th className="px-6 py-4">Tenant</th>
-                <th className="px-6 py-4">Property</th>
-                <th className="px-6 py-4">Schedule Rule</th>
-                <th className="px-6 py-4">Status / Dispatch</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-100">
-              {schedules.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="px-6 py-12 text-center text-zinc-500 font-medium">
-                    No active cleaning schedules.
-                  </td>
-                </tr>
-              ) : (
-                schedules.map((schedule: any) => {
-                  let isDispatchToday = false;
-                  if (schedule.scheduleType === "daily") {
-                    isDispatchToday = true;
-                  } else if (schedule.scheduleType === "weekly") {
-                    if (schedule.weeklyDays?.includes(dayOfWeek)) {
-                      isDispatchToday = true;
-                    }
-                  } else if (schedule.scheduleType === "custom") {
-                    const todayStr = format(today, "yyyy-MM-dd");
-                    isDispatchToday = schedule.customDates?.some((d: Date) => format(new Date(d), "yyyy-MM-dd") === todayStr);
-                  }
-
-                  return (
-                    <tr key={schedule._id.toString()} className="hover:bg-zinc-50/50 transition-colors group">
-                      <td className="px-6 py-4">
-                        <div className="font-bold text-zinc-900">{schedule.userId?.name || "Unknown"}</div>
-                        <div className="text-xs text-zinc-500">{schedule.userId?.email || ""}</div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="font-bold text-zinc-900">{schedule.listingId?.title || "Unknown Property"}</div>
-                        <div className="text-xs text-zinc-500 truncate max-w-[200px]">
-                          {schedule.listingId?.propertyId?.location?.area || "Unknown Location"}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        {schedule.scheduleType === "daily" && (
-                          <span className="font-bold text-black border-b border-black">Daily</span>
-                        )}
-                        {schedule.scheduleType === "weekly" && (
-                          <div>
-                            <span className="font-bold text-black">Weekly: </span>
-                            <span className="text-zinc-600">
-                              {schedule.weeklyDays?.map((d: number) => dayNames[d]).join(", ")}
-                            </span>
-                          </div>
-                        )}
-                        {schedule.scheduleType === "custom" && (
-                          <div className="max-w-[250px] truncate" title={formatDates(schedule.customDates)}>
-                            <span className="font-bold text-black">Custom Dates: </span>
-                            <span className="text-zinc-600">
-                              {formatDates(schedule.customDates)}
-                            </span>
-                          </div>
-                        )}
-                      </td>
-                      <td className="px-6 py-4">
-                        {isDispatchToday ? (
-                          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800">
-                            Dispatch Today
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-zinc-100 text-zinc-600">
-                            Scheduled
-                          </span>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <CleaningDirectoryClient
+        data={records}
+        availableProperties={availableProperties}
+      />
     </div>
   );
 }
