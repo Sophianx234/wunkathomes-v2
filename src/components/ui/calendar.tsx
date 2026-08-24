@@ -18,24 +18,24 @@ function Calendar({
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
-      className={cn("p-4", className)}
+      className={cn("p-3", className)}
       classNames={{
-        months: "flex flex-col sm:flex-row space-y-4 sm:space-x-6 sm:space-y-0",
-        month: "space-y-4",
-        caption: "flex justify-between pt-1 pb-4 relative items-center w-full",
-        caption_label: "text-lg font-black tracking-tight text-zinc-900 capitalize",
+        months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
+        month: "space-y-3",
+        caption: "flex justify-between pt-1 pb-2 relative items-center w-full px-1",
+        caption_label: "text-base font-black tracking-tight text-zinc-900 capitalize",
         nav: "space-x-1 flex items-center bg-zinc-50/80 rounded-full border border-zinc-200/50 p-0.5",
         nav_button: cn(
           buttonVariants({ variant: "ghost" }),
-          "h-7 w-7 bg-transparent p-0 text-zinc-600 hover:bg-white hover:text-black hover:shadow-sm rounded-full transition-all"
+          "h-6 w-6 bg-transparent p-0 text-zinc-600 hover:bg-white hover:text-black hover:shadow-sm rounded-full transition-all"
         ),
         nav_button_previous: "",
         nav_button_next: "",
-        table: "w-full border-collapse space-y-2",
-        head_row: "flex w-full mb-3",
+        table: "w-full border-collapse space-y-1",
+        head_row: "flex w-full mb-1",
         head_cell:
-          "text-zinc-400 w-10 font-bold text-[11px] uppercase tracking-widest",
-        row: "flex w-full mt-2",
+          "text-zinc-400 w-9 font-bold text-[10px] uppercase tracking-widest",
+        row: "flex w-full mt-1",
         cell: cn(
           "relative p-0 text-center text-sm focus-within:relative focus-within:z-20",
           props.mode === "range"
@@ -44,7 +44,7 @@ function Calendar({
         ),
         day: cn(
           buttonVariants({ variant: "ghost" }),
-          "h-10 w-10 p-0 font-bold text-zinc-700 text-sm rounded-full transition-all hover:bg-zinc-100 hover:text-zinc-900 aria-selected:opacity-100"
+          "h-9 w-9 p-0 font-bold text-zinc-700 text-sm rounded-full transition-all hover:bg-zinc-100 hover:text-zinc-900 aria-selected:opacity-100"
         ),
         day_range_start: "day-range-start",
         day_range_end: "day-range-end",
