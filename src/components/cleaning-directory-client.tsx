@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef, useEffect } from "react";
 import { format } from "date-fns";
-import { Search01Icon, FilterIcon } from "@hugeicons/core-free-icons";
+import { Search01Icon, FilterIcon, MoreHorizontalIcon, ViewIcon, ArrowDown01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 
 import { Input } from "@/components/ui/input";
@@ -37,7 +37,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontalIcon, ViewIcon } from "@hugeicons/core-free-icons";
 
 export interface CleaningRecord {
   id: string;
@@ -65,6 +64,21 @@ export default function CleaningDirectoryClient({ data, availableProperties }: C
   const [dispatchFilter, setDispatchFilter] = useState("all");
   const [selectedRecord, setSelectedRecord] = useState<CleaningRecord | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [canScrollMore, setCanScrollMore] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const checkScroll = () => {
+    if (scrollRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
+      setCanScrollMore(scrollHeight > clientHeight && Math.ceil(scrollTop + clientHeight) < scrollHeight);
+    }
+  };
+
+  useEffect(() => {
+    if (isDialogOpen) {
+      setTimeout(checkScroll, 100);
+    }
+  }, [isDialogOpen, selectedRecord]);
 
   const filteredData = useMemo(() => {
     return data.filter((record) => {
@@ -289,10 +303,10 @@ export default function CleaningDirectoryClient({ data, availableProperties }: C
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="bg-white border-zinc-200/60 overflow-y-auto max-h-[85vh] sm:max-w-md p-0 rounded-xl gap-0">
+        <DialogContent className="bg-white border-zinc-200/60 overflow-hidden max-h-[85vh] sm:max-w-md p-0 rounded-xl gap-0 flex flex-col">
           {selectedRecord && (
-            <div className="flex flex-col h-full">
-              <DialogHeader className="p-5 border-b border-zinc-100 bg-zinc-50/50">
+            <>
+              <DialogHeader className="p-5 border-b border-zinc-100 bg-zinc-50/50 shrink-0">
                 <DialogTitle className="text-xl font-bold tracking-tight text-zinc-900">
                   Service Request Details
                 </DialogTitle>
@@ -301,8 +315,26 @@ export default function CleaningDirectoryClient({ data, availableProperties }: C
                 </DialogDescription>
               </DialogHeader>
 
-              <div className="p-5 space-y-6 flex-1">
-              
+              <div 
+                ref={scrollRef}
+                onScroll={checkScroll}
+                className="p-5 space-y-6 flex-1 overflow-y-auto hide-scrollbar relative"
+              >
+                {/* Status Badge */}
+                <div>
+                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-2">
+                    Current Status
+                  </h4>
+                  {selectedRecord.isDispatchToday ? (
+                    <Badge className="bg-green-100 text-green-800 hover:bg-green-100 border-0 uppercase tracking-widest text-xs font-bold px-3 py-1">
+                      Dispatch Today
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="text-zinc-500 border-zinc-200 uppercase tracking-widest text-xs font-bold px-3 py-1">
+                      Scheduled
+                    </Badge>
+                  )}
+                </div>
 
                 {/* Tenant Details */}
                 <div>
@@ -385,7 +417,16 @@ export default function CleaningDirectoryClient({ data, availableProperties }: C
                   </div>
                 </div>
               </div>
-            </div>
+
+              {/* Scroll Indicator Caret */}
+              {canScrollMore && (
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex justify-center w-full pointer-events-none animate-bounce">
+                  <div className="bg-white/80 backdrop-blur shadow-sm border border-zinc-200 rounded-full p-1 text-zinc-500">
+                    <HugeiconsIcon icon={ArrowDown01Icon} size={16} />
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </DialogContent>
       </Dialog>
