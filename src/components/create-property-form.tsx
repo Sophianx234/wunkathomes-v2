@@ -43,6 +43,10 @@ export default function CreatePropertyForm({ unassignedLocks = [] }: { unassigne
   
   // NEW: State to track the Cloudinary upload phase
   const [isUploadingToCloud, setIsUploadingToCloud] = useState(false);
+  
+  // NEW: Track listing type and room type for dynamic UI
+  const [listingType, setListingType] = useState("For_Rent");
+  const [roomType, setRoomType] = useState("Empty");
 
   // Watch for state changes to trigger toasts and client-side redirects
   useEffect(() => {
@@ -147,7 +151,7 @@ export default function CreatePropertyForm({ unassignedLocks = [] }: { unassigne
                 <Label className="text-[13px] font-medium text-zinc-700">
                   Listing Type *
                 </Label>
-                <Select name="listingType" defaultValue="For_Rent">
+                <Select name="listingType" value={listingType} onValueChange={setListingType}>
                   <SelectTrigger className="h-10 bg-zinc-50/50 focus:ring-zinc-950">
                     <SelectValue placeholder="Select type" />
                   </SelectTrigger>
@@ -157,6 +161,23 @@ export default function CreatePropertyForm({ unassignedLocks = [] }: { unassigne
                   </SelectContent>
                 </Select>
               </div>
+
+              {listingType === "For_Rent" && (
+                <div className="space-y-2">
+                  <Label className="text-[13px] font-medium text-zinc-700">
+                    Rental Category *
+                  </Label>
+                  <Select name="roomType" value={roomType} onValueChange={setRoomType}>
+                    <SelectTrigger className="h-10 bg-zinc-50/50 focus:ring-zinc-950">
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Empty">Empty Room</SelectItem>
+                      <SelectItem value="Furnished">Furnished Apartment</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
               <div className="space-y-2">
                 <Label className="text-[13px] font-medium text-zinc-700">
                   Property Type *
@@ -194,13 +215,20 @@ export default function CreatePropertyForm({ unassignedLocks = [] }: { unassigne
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div className="space-y-2">
               <Label
                 htmlFor="price"
-                className="text-[13px] font-medium text-zinc-700"
+                className="text-[13px] font-medium text-zinc-700 flex flex-col "
               >
-                Price (GHS) *
+                <span>
+                  {listingType === "For_Sale" 
+                    ? "Total Price (GHS) *" 
+                    : roomType === "Furnished" 
+                      ? "Base Rent Amount (Per Day) *" 
+                      : "Base Rent Amount (Per Month) *"}
+                </span>
+                
               </Label>
               <Input
                 id="price"
@@ -210,22 +238,11 @@ export default function CreatePropertyForm({ unassignedLocks = [] }: { unassigne
                 className="h-10 bg-zinc-50/50 focus:ring-zinc-950"
                 required
               />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-[13px] font-medium text-zinc-700">
-                Lease Term
-              </Label>
-              <Select name="leaseTerm">
-                <SelectTrigger className="h-10 bg-zinc-50/50 focus:ring-zinc-950">
-                  <SelectValue placeholder="Select duration" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Monthly">Monthly</SelectItem>
-                  <SelectItem value="1_Year">1 Year</SelectItem>
-                  <SelectItem value="2_Years">2 Years</SelectItem>
-                  <SelectItem value="3_Years">3 Years</SelectItem>
-                </SelectContent>
-              </Select>
+              {listingType === "For_Rent" && (
+                  <span className="text-[10px] text-amber-600 font-medium">
+                    Note: Checkout will automatically enforce a {roomType === "Furnished" ? "2-day" : "2-month"} security deposit.
+                  </span>
+                )}
             </div>
             <div className="space-y-2">
               <Label className="text-[13px] font-medium text-zinc-700">

@@ -88,8 +88,6 @@ export async function verifyPaystackPayment(
     if (listing.status === "Rented")
       return { success: false, message: "Property is already rented." };
 
-    const serverExpectedPrice = listing.price;
-
     const response = await fetch(
       `https://api.paystack.co/transaction/verify/${reference}`,
       {
@@ -108,6 +106,16 @@ export async function verifyPaystackPayment(
       };
     }
 
+    const roomType = listing.roomType || "Empty";
+    const rentDuration = data.data.metadata?.rentDuration || (roomType === "Furnished" ? 1 : 3);
+    const basePrice = listing.price || 0;
+    const isRent = listing.listingType !== "For_Sale";
+    
+    let rentSubtotal = basePrice * rentDuration;
+    let securityDeposit = basePrice * 2; // Both use 2 units (days or months)
+    
+    const serverExpectedPrice = isRent ? (rentSubtotal + securityDeposit) : basePrice;
+
     const amountPaidInGhs = data.data.amount / 100;
     if (amountPaidInGhs < serverExpectedPrice - 1) {
       console.error(
@@ -121,14 +129,13 @@ export async function verifyPaystackPayment(
 
     const startDate = new Date(selectedMoveInDate);
     const endDate = new Date(startDate);
-    const term = listing.terms?.leaseTerm?.toLowerCase() || "";
-
-    if (term.includes("month")) {
-      endDate.setMonth(endDate.getMonth() + 1);
-    } else if (term.includes("year")) {
-      const yearMatch = term.match(/(\d+)_year/);
-      const yearsToAdd = yearMatch ? parseInt(yearMatch[1], 10) : 1;
-      endDate.setFullYear(endDate.getFullYear() + yearsToAdd);
+    
+    if (isRent) {
+      if (roomType === "Furnished") {
+        endDate.setDate(endDate.getDate() + rentDuration);
+      } else {
+        endDate.setMonth(endDate.getMonth() + rentDuration);
+      }
     } else {
       endDate.setFullYear(endDate.getFullYear() + 1);
     }

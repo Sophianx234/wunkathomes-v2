@@ -68,13 +68,31 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
   const [typedSignature, setTypedSignature] = useState("")
   const [isAgreementOpen, setIsAgreementOpen] = useState(false)
 
-  const priceInGhs = listing.price ;
+  const isRent = propType !== "Sale" && propType !== "For_Sale";
+  const roomType = listing?.roomType || "Empty"; // 'Furnished' or 'Empty'
+  const [rentDuration, setRentDuration] = useState<number>(roomType === 'Furnished' ? 1 : 3);
+
+  // Calculations
+  const basePrice = listing.price || 0;
+  let rentSubtotal = basePrice;
+  let securityDeposit = 0;
+
+  if (isRent) {
+    rentSubtotal = basePrice * rentDuration;
+    if (roomType === 'Furnished') {
+      securityDeposit = basePrice * 2; // 2 days
+    } else {
+      securityDeposit = basePrice * 2; // 2 months
+    }
+  }
+
+  const finalTotal = isRent ? rentSubtotal + securityDeposit : basePrice;
 
   // Paystack Configuration
   const paystackConfig = {
     reference: new Date().getTime().toString(),
     email: formData.email,
-    amount: Math.round(priceInGhs * 100), 
+    amount: Math.round(finalTotal * 100), 
     publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY as string,
     currency: "GHS", 
     metadata: {
@@ -82,6 +100,9 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
       listingId: listing.id,
       moveInDate: moveInDate,
       signature: typedSignature,
+      rentDuration,
+      securityDeposit,
+      rentSubtotal,
       custom_fields: [
         {
           display_name: "Tenant Name",
@@ -119,7 +140,7 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
       propertyName: listing?.title || "Property",
       propertyLocation: formatLocation(listing?.property?.location),
       startDate: moveInDate,
-      totalRentAmount: listing.price,
+      totalRentAmount: finalTotal,
     }
   };
 
@@ -245,21 +266,56 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
                   </div>
                 </div>
 
-                {/* Move-In Date Selector */}
-                <div className="pt-1 md:pt-2 w-full min-w-0 max-w-full box-border">
-                  <label className="block text-[9px] md:text-[11px] font-bold uppercase tracking-widest text-zinc-500 mb-1 md:mb-2">
-                    Expected Move-In Date
-                  </label>
-                  <input 
-                    required
-                    type="date" 
-                    min={defaultDate}
-                    value={moveInDate}
-                    onChange={e => setMoveInDate(e.target.value)}
-                    className="block w-full min-w-0 max-w-full box-border m-0 p-2 md:p-4 border border-slate-300 rounded-lg text-xs md:text-sm font-bold focus:outline-none focus:border-black focus:ring-1 focus:ring-black bg-zinc-50/50 focus:bg-white transition-all appearance-none"
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 md:gap-5 w-full max-w-full box-border pt-1 md:pt-2">
+                  {/* Move-In Date Selector */}
+                  <div className="w-full min-w-0 max-w-full box-border">
+                    <label className="block text-[9px] md:text-[11px] font-bold uppercase tracking-widest text-zinc-500 mb-1 md:mb-2">
+                      Expected Move-In Date
+                    </label>
+                    <input 
+                      required
+                      type="date" 
+                      min={defaultDate}
+                      value={moveInDate}
+                      onChange={e => setMoveInDate(e.target.value)}
+                      className="block w-full min-w-0 max-w-full box-border m-0 p-2 md:p-4 border border-slate-300 rounded-lg text-xs md:text-sm font-bold focus:outline-none focus:border-black focus:ring-1 focus:ring-black bg-zinc-50/50 focus:bg-white transition-all appearance-none"
+                    />
+                  </div>
+
+                  {/* Rent Duration Selector */}
+                  {isRent && (
+                    <div className="w-full min-w-0 max-w-full box-border">
+                      <label className="block text-[9px] md:text-[11px] font-bold uppercase tracking-widest text-zinc-500 mb-1 md:mb-2">
+                        Rent Duration ({roomType === 'Furnished' ? 'Days' : 'Months'})
+                      </label>
+                      {roomType === 'Furnished' ? (
+                        <input 
+                          required
+                          type="number" 
+                          min={1}
+                          value={rentDuration}
+                          onChange={e => setRentDuration(Math.max(1, parseInt(e.target.value) || 1))}
+                          className="block w-full min-w-0 max-w-full box-border m-0 p-2 md:p-4 border border-slate-300 rounded-lg text-xs md:text-sm font-bold focus:outline-none focus:border-black focus:ring-1 focus:ring-black bg-zinc-50/50 focus:bg-white transition-all appearance-none"
+                        />
+                      ) : (
+                        <select
+                          required
+                          value={rentDuration}
+                          onChange={e => setRentDuration(parseInt(e.target.value))}
+                          className="block w-full min-w-0 max-w-full box-border m-0 p-2 md:p-4 border border-slate-300 rounded-lg text-xs md:text-sm font-bold focus:outline-none focus:border-black focus:ring-1 focus:ring-black bg-zinc-50/50 focus:bg-white transition-all appearance-none cursor-pointer"
+                        >
+                          <option value={3}>3 Months</option>
+                          <option value={6}>6 Months</option>
+                          <option value={12}>1 Year (12 Months)</option>
+                        </select>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                <div className="w-full min-w-0 max-w-full box-border">
                   <p className="text-[8px] md:text-[10px] text-zinc-400 mt-1 md:mt-2 font-medium break-words">
-                    Your digital lease will activate at 12:00 AM on this date. Access instructions will be provided by your property manager.
+                    Your digital lease will activate at 12:00 AM on the move-in date. Access instructions will be provided by your property manager.
                   </p>
                 </div>
               </div>
@@ -405,8 +461,14 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
             <div className="space-y-2 md:space-y-4 mb-3 md:mb-6 w-full box-border">
               <div className="flex justify-between items-center text-xs md:text-sm font-medium text-slate-900">
                 <span>{pricingLabel}</span>
-                <span>${listing.price.toLocaleString()}</span>
+                <span>${(isRent ? rentSubtotal : basePrice).toLocaleString()}</span>
               </div>
+              {isRent && securityDeposit > 0 && (
+                <div className="flex justify-between items-center text-xs md:text-sm font-medium text-slate-900">
+                  <span>Security Deposit (Refundable)</span>
+                  <span>${securityDeposit.toLocaleString()}</span>
+                </div>
+              )}
               <div className="flex justify-between items-center text-xs md:text-sm font-medium text-zinc-600">
                 <span>Agency Fees</span>
                 <span className="text-green-600 font-bold text-[10px] md:text-sm">Free</span>
@@ -419,7 +481,7 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
                   Total Due
                 </span>
                 <span className="text-lg md:text-xl font-black text-black">
-                  ${listing.price.toLocaleString()}
+                  ${finalTotal.toLocaleString()}
                 </span>
               </div>
               <p className="text-[8px] md:text-[10px] text-zinc-500 font-medium leading-relaxed mt-1 md:mt-2 break-words">

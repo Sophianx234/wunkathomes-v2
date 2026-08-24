@@ -12,6 +12,11 @@ const listingSchema = new mongoose.Schema({
     enum: ['For_Rent', 'For_Sale'],
     required: true,
   },
+  roomType: {
+    type: String,
+    enum: ['Furnished', 'Empty'],
+    default: 'Empty',
+  },
   status: {
     type: String,
     enum: ['Available', 'Pending', 'Rented', 'Sold'],

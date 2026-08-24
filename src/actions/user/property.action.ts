@@ -31,6 +31,7 @@ const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/web
 const createPropertySchema = z.object({
   title: z.string().trim().min(5, "Title is too short").max(100).regex(/^[^<>]+$/, "Invalid characters detected"),
   listingType: z.enum(["For_Rent", "For_Sale"]),
+  roomType: z.enum(["Furnished", "Empty"]).optional().default("Empty"),
   status: z.enum(["Available", "Pending", "Rented", "Sold"]).default("Available"),
   price: z.coerce.number().positive("Price must be greater than 0"),
   description: z.string().trim().min(20, "Description too short").max(5000),
@@ -157,6 +158,7 @@ export async function createPropertyAction(prevState: ActionState, formData: For
       const newListing = await Listing.create([{
         propertyId: newProperty[0]._id,
         listingType: validData.listingType,
+        roomType: validData.roomType,
         status: validData.status,
         price: validData.price,
         title: validData.title,
@@ -275,6 +277,7 @@ export async function editPropertyAction(prevState: ActionState, formData: FormD
 
       await Listing.findByIdAndUpdate(validData.listingId, {
         listingType: validData.listingType,
+        roomType: validData.roomType,
         status: validData.status,
         price: validData.price,
         title: validData.title,

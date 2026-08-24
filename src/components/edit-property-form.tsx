@@ -62,6 +62,9 @@ export default function EditPropertyForm({
   // Track existing images so they aren't lost if the user doesn't upload new ones
   const [existingImages, setExistingImages] = useState<string[]>(initialData.images || []);
 
+  const [listingType, setListingType] = useState(initialData.listingType || "For_Rent");
+  const [roomType, setRoomType] = useState(initialData.roomType || "Empty");
+
   // --- NEW: Confirmation Modal State ---
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [pendingFormData, setPendingFormData] = useState<FormData | null>(null);
@@ -190,12 +193,12 @@ export default function EditPropertyForm({
                   required
                 />
               </div>
-              <div className="grid grid-cols-2 gap-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div className="space-y-2">
                   <Label className="text-[13px] font-medium text-zinc-700">
                     Listing Type *
                   </Label>
-                  <Select name="listingType" defaultValue={initialData.listingType}>
+                  <Select name="listingType" value={listingType} onValueChange={setListingType}>
                     <SelectTrigger className="h-10 bg-zinc-50/50 focus:ring-zinc-950">
                       <SelectValue placeholder="Select type" />
                     </SelectTrigger>
@@ -205,6 +208,7 @@ export default function EditPropertyForm({
                     </SelectContent>
                   </Select>
                 </div>
+                
                 <div className="space-y-2">
                   <Label className="text-[13px] font-medium text-zinc-700">
                     Property Type *
@@ -221,6 +225,23 @@ export default function EditPropertyForm({
                     </SelectContent>
                   </Select>
                 </div>
+
+                {listingType === "For_Rent" && (
+                  <div className="space-y-2 md:col-span-2">
+                    <Label className="text-[13px] font-medium text-zinc-700">
+                      Rental Category *
+                    </Label>
+                    <Select name="roomType" value={roomType} onValueChange={setRoomType}>
+                      <SelectTrigger className="h-10 bg-zinc-50/50 focus:ring-zinc-950">
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Empty">Empty Room</SelectItem>
+                        <SelectItem value="Furnished">Furnished Apartment</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -238,10 +259,17 @@ export default function EditPropertyForm({
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="space-y-2">
-                <Label htmlFor="price" className="text-[13px] font-medium text-zinc-700">
-                  Price (GHS) *
+                <Label htmlFor="price" className="text-[13px] font-medium text-zinc-700 flex flex-col ">
+                  <span>
+                    {listingType === "For_Sale" 
+                      ? "Total Price (GHS) *" 
+                      : roomType === "Furnished" 
+                        ? "Base Rent Amount (Per Day) *" 
+                        : "Base Rent Amount (Per Month) *"}
+                  </span>
+                  
                 </Label>
                 <Input
                   id="price"
@@ -252,22 +280,11 @@ export default function EditPropertyForm({
                   className="h-10 bg-zinc-50/50 focus:ring-zinc-950"
                   required
                 />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-[13px] font-medium text-zinc-700">
-                  Lease Term
-                </Label>
-                <Select name="leaseTerm" defaultValue={initialData.terms?.leaseTerm || undefined}>
-                  <SelectTrigger className="h-10 bg-zinc-50/50 focus:ring-zinc-950">
-                    <SelectValue placeholder="Select duration" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Monthly">Monthly</SelectItem>
-                    <SelectItem value="1_Year">1 Year</SelectItem>
-                    <SelectItem value="2_Years">2 Years</SelectItem>
-                    <SelectItem value="3_Years">3 Years</SelectItem>
-                  </SelectContent>
-                </Select>
+                {listingType === "For_Rent" && (
+                    <span className="text-[10px] text-amber-600 font-medium">
+                      Note: Checkout will automatically enforce a {roomType === "Furnished" ? "2-day" : "2-month"} security deposit.
+                    </span>
+                  )}
               </div>
               <div className="space-y-2">
                 <Label className="text-[13px] font-medium text-zinc-700">
