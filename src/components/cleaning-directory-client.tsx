@@ -181,12 +181,12 @@ export default function CleaningDirectoryClient({
 
         {/* DATA TABLE */}
         <div className="bg-white border border-zinc-200/60 rounded-lg overflow-hidden shadow-sm">
-          <Table>
+          <Table className="min-w-[800px]">
             <TableHeader className="bg-zinc-50/30">
               <TableRow className="border-zinc-200/60 hover:bg-transparent">
-                <TableHead className="font-medium text-zinc-500 text-xs h-10 w-[280px]">Tenant Profile</TableHead>
+                <TableHead className="font-medium text-zinc-500 text-xs h-10">Tenant Profile</TableHead>
                 <TableHead className="font-medium text-zinc-500 text-xs h-10">Property</TableHead>
-                <TableHead className="font-medium text-zinc-500 text-xs h-10">Schedule Rule</TableHead>
+                <TableHead className="font-medium text-zinc-500 text-xs h-10">Scheduled Date</TableHead>
                 <TableHead className="font-medium text-zinc-500 text-xs h-10">Status</TableHead>
                 <TableHead className="w-[50px]"></TableHead>
               </TableRow>
@@ -315,21 +315,7 @@ export default function CleaningDirectoryClient({
                 onScroll={checkScroll}
                 className="p-5 space-y-6 flex-1 overflow-y-auto hide-scrollbar relative"
               >
-                {/* Status Badge */}
-                <div>
-                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-2">
-                    Current Status
-                  </h4>
-                  {selectedRecord.isDispatchToday ? (
-                    <Badge className="bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/60 border-0 rounded px-2 py-0.5 text-[10px] uppercase tracking-wider font-bold">
-                      Dispatch Today
-                    </Badge>
-                  ) : (
-                    <Badge variant="outline" className="bg-zinc-100/50 text-zinc-600 ring-1 ring-zinc-200/80 border-0 rounded px-2 py-0.5 text-[10px] uppercase tracking-wider font-bold">
-                      Scheduled
-                    </Badge>
-                  )}
-                </div>
+              
 
                 {/* Tenant Details */}
                 <div>
@@ -361,7 +347,6 @@ export default function CleaningDirectoryClient({
                   </h4>
                   <div className="flex flex-col p-3 bg-zinc-50/50 border border-zinc-200/60 rounded-lg">
                     <span className="text-sm font-bold text-zinc-900 flex items-center gap-1.5">
-                      <HugeiconsIcon icon={Building01Icon} size={14} className="text-zinc-400" />
                       {selectedRecord.propertyTitle}
                     </span>
                     <span className="text-xs font-medium text-zinc-500 mt-0.5">
@@ -373,7 +358,7 @@ export default function CleaningDirectoryClient({
                 {/* Schedule Rules */}
                 <div>
                   <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-3">
-                    Schedule Rules
+                    Scheduled Date
                   </h4>
                   <div className="flex flex-col p-4 bg-zinc-50/50 border border-zinc-200/60 rounded-lg">
                     {selectedRecord.scheduleType === "daily" && (
@@ -396,11 +381,10 @@ export default function CleaningDirectoryClient({
                     )}
                     {selectedRecord.scheduleType === "custom" && (
                       <div>
-                        <span className="text-sm font-black text-black tracking-tight">Custom Dates</span>
                         <div className="flex flex-wrap gap-1 mt-2">
                           {selectedRecord.customDates && selectedRecord.customDates.length > 0 ? (
                             selectedRecord.customDates.map((dateStr, idx) => (
-                              <span key={idx} className="px-2 py-1 bg-white border border-zinc-200/60 rounded text-xs font-bold text-zinc-800 shadow-sm">
+                              <span key={idx} className="px-2 py-1 bg-white border  rounded text-xs font-bold text-zinc-800 ">
                                 {format(new Date(dateStr), "MMM d, yyyy")}
                               </span>
                             ))
