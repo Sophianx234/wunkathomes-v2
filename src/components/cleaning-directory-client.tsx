@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef, useEffect } from "react";
 import { format } from "date-fns";
 import {
   Search01Icon,
@@ -28,6 +28,20 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { MoreHorizontalIcon, ViewIcon, ArrowDown01Icon } from "@hugeicons/core-free-icons";
 
 export interface CleaningRecord {
   id: string;
@@ -54,6 +68,23 @@ export default function CleaningDirectoryClient({
   const [searchQuery, setSearchQuery] = useState("");
   const [propertyFilter, setPropertyFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [selectedRecord, setSelectedRecord] = useState<CleaningRecord | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [canScrollMore, setCanScrollMore] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const checkScroll = () => {
+    if (scrollRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
+      setCanScrollMore(scrollHeight > clientHeight && Math.ceil(scrollTop + clientHeight) < scrollHeight);
+    }
+  };
+
+  useEffect(() => {
+    if (isDialogOpen) {
+      setTimeout(checkScroll, 100);
+    }
+  }, [isDialogOpen, selectedRecord]);
 
   const filteredData = useMemo(() => {
     return data.filter((record) => {
@@ -157,6 +188,7 @@ export default function CleaningDirectoryClient({
                 <TableHead className="font-medium text-zinc-500 text-xs h-10">Property</TableHead>
                 <TableHead className="font-medium text-zinc-500 text-xs h-10">Schedule Rule</TableHead>
                 <TableHead className="font-medium text-zinc-500 text-xs h-10">Status</TableHead>
+                <TableHead className="w-[50px]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -187,7 +219,8 @@ export default function CleaningDirectoryClient({
                   <TableCell className="py-3 align-middle">
                     <div className="flex flex-col">
                       <span className="text-[13px] font-medium text-zinc-900 leading-tight flex items-center gap-1.5">
-                        <HugeiconsIcon icon={Building01Icon} size={12} className="text-zinc-400" /> {record.propertyTitle}
+                        
+                         {record.propertyTitle}
                       </span>
                       <span className="text-[11px] text-zinc-500 mt-0.5 max-w-[200px] truncate">{record.propertyLocation}</span>
                     </div>
@@ -200,7 +233,6 @@ export default function CleaningDirectoryClient({
                     )}
                     {record.scheduleType === "weekly" && (
                       <div className="flex flex-col gap-0.5">
-                        <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">Weekly</span>
                         <span className="text-[12px] text-zinc-900 font-medium">
                           {record.weeklyDays?.map((d: number) => dayNames[d]).join(", ")}
                         </span>
@@ -208,7 +240,6 @@ export default function CleaningDirectoryClient({
                     )}
                     {record.scheduleType === "custom" && (
                       <div className="flex flex-col gap-0.5">
-                        <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">Custom Dates</span>
                         <span className="text-[12px] text-zinc-900 font-medium max-w-[250px] truncate" title={formatCustomDates(record.customDates || [])}>
                           {formatCustomDates(record.customDates || [])}
                         </span>
@@ -228,6 +259,29 @@ export default function CleaningDirectoryClient({
                       </Badge>
                     )}
                   </TableCell>
+
+                  {/* ACTIONS */}
+                  <TableCell className="py-3 align-middle text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <HugeiconsIcon icon={MoreHorizontalIcon} size={16} className="text-zinc-500" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-[160px]">
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setSelectedRecord(record);
+                            setIsDialogOpen(true);
+                          }}
+                          className="text-xs font-medium cursor-pointer flex items-center gap-2"
+                        >
+                          <HugeiconsIcon icon={ViewIcon} size={14} className="text-zinc-400" />
+                          View Details
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
                 </TableRow>
               ))}
 
@@ -242,6 +296,136 @@ export default function CleaningDirectoryClient({
           </Table>
         </div>
       </div>
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="bg-white border-zinc-200/60 overflow-hidden max-h-[85vh] sm:max-w-md p-0 rounded-xl gap-0 flex flex-col">
+          {selectedRecord && (
+            <>
+              <DialogHeader className="p-5 border-b border-zinc-100 bg-zinc-50/50 shrink-0">
+                <DialogTitle className="text-xl font-bold tracking-tight text-zinc-900">
+                  Service Request Details
+                </DialogTitle>
+                <DialogDescription className="text-sm font-medium text-zinc-500">
+                  Detailed view of the tenant's cleaning schedule.
+                </DialogDescription>
+              </DialogHeader>
+
+              <div 
+                ref={scrollRef}
+                onScroll={checkScroll}
+                className="p-5 space-y-6 flex-1 overflow-y-auto hide-scrollbar relative"
+              >
+                {/* Status Badge */}
+                <div>
+                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-2">
+                    Current Status
+                  </h4>
+                  {selectedRecord.isDispatchToday ? (
+                    <Badge className="bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/60 border-0 rounded px-2 py-0.5 text-[10px] uppercase tracking-wider font-bold">
+                      Dispatch Today
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="bg-zinc-100/50 text-zinc-600 ring-1 ring-zinc-200/80 border-0 rounded px-2 py-0.5 text-[10px] uppercase tracking-wider font-bold">
+                      Scheduled
+                    </Badge>
+                  )}
+                </div>
+
+                {/* Tenant Details */}
+                <div>
+                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-3">
+                    Tenant Information
+                  </h4>
+                  <div className="flex items-center gap-3 p-3 bg-zinc-50/50 border border-zinc-200/60 rounded-lg">
+                    <Avatar className="h-10 w-10 border border-zinc-200/60 shadow-sm">
+                      <AvatarImage src={selectedRecord.tenantImage} />
+                      <AvatarFallback className="bg-white text-zinc-900 font-bold text-sm">
+                        {selectedRecord.tenantName.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-bold text-zinc-900">
+                        {selectedRecord.tenantName}
+                      </span>
+                      <span className="text-xs font-medium text-zinc-500">
+                        {selectedRecord.tenantEmail}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Property Details */}
+                <div>
+                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-3">
+                    Property Location
+                  </h4>
+                  <div className="flex flex-col p-3 bg-zinc-50/50 border border-zinc-200/60 rounded-lg">
+                    <span className="text-sm font-bold text-zinc-900 flex items-center gap-1.5">
+                      <HugeiconsIcon icon={Building01Icon} size={14} className="text-zinc-400" />
+                      {selectedRecord.propertyTitle}
+                    </span>
+                    <span className="text-xs font-medium text-zinc-500 mt-0.5">
+                      {selectedRecord.propertyLocation}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Schedule Rules */}
+                <div>
+                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-3">
+                    Schedule Rules
+                  </h4>
+                  <div className="flex flex-col p-4 bg-zinc-50/50 border border-zinc-200/60 rounded-lg">
+                    {selectedRecord.scheduleType === "daily" && (
+                      <div>
+                        <span className="text-sm font-black text-black tracking-tight">Daily Cleaning</span>
+                        <p className="text-xs text-zinc-500 font-medium mt-1">Cleaners are dispatched to this property every single day.</p>
+                      </div>
+                    )}
+                    {selectedRecord.scheduleType === "weekly" && (
+                      <div>
+                        <span className="text-sm font-black text-black tracking-tight">Weekly Recurring</span>
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {selectedRecord.weeklyDays?.map((d: number) => (
+                            <span key={d} className="px-2 py-1 bg-white border border-zinc-200/60 rounded text-xs font-bold text-zinc-800 shadow-sm">
+                              {dayNames[d]}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {selectedRecord.scheduleType === "custom" && (
+                      <div>
+                        <span className="text-sm font-black text-black tracking-tight">Custom Dates</span>
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {selectedRecord.customDates && selectedRecord.customDates.length > 0 ? (
+                            selectedRecord.customDates.map((dateStr, idx) => (
+                              <span key={idx} className="px-2 py-1 bg-white border border-zinc-200/60 rounded text-xs font-bold text-zinc-800 shadow-sm">
+                                {format(new Date(dateStr), "MMM d, yyyy")}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="text-xs text-zinc-500 italic">No future dates selected.</span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Scroll Indicator Caret */}
+              {canScrollMore && (
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex justify-center w-full pointer-events-none animate-bounce">
+                  <div className="bg-white/80 backdrop-blur shadow-sm border border-zinc-200 rounded-full p-1 text-zinc-500">
+                    <HugeiconsIcon icon={ArrowDown01Icon} size={16} />
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
