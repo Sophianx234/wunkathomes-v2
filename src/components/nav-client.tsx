@@ -62,14 +62,6 @@ interface NavbarClientProps {
 export default function NavbarClient({ user }: NavbarClientProps) {
   const isLoggedIn = !!user;
 
-  const isKycActionRequired = user?.indicators.hasPaidProperty && user?.indicators.verificationStatus === "Unverified";
-
-  // Master check: Does the avatar need an alert dot?
-  const hasAnyPendingAction = user
-    ? isKycActionRequired ||
-      user.indicators.signaturePending ||
-      user.indicators.newSaved
-    : false;
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -325,17 +317,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                         <HugeiconsIcon icon={UserCircleIcon} size={24} />
                       </div>
                     )}
-                    {/* MASTER AVATAR INDICATOR */}
-                    {hasAnyPendingAction && (
-                      <div className="absolute top-0 right-0 size-2.5">
-                        <motion.span
-                          animate={{ scale: [1, 2.5], opacity: [0, 0.6, 0] }}
-                          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                          className="absolute inset-0 bg-red-500/40 rounded-full"
-                        />
-                        <span className="absolute inset-0 bg-red-600 rounded-full border-2 border-white z-10 shadow-sm" />
-                      </div>
-                    )}
+
                   </div>
 
                   <div className="flex flex-col ">
@@ -487,17 +469,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
 
           {/* 4. Mobile Controls */}
           <div className="flex items-center gap-3 md:hidden z-50">
-            {/* Master indicator for mobile avatar */}
-            {isLoggedIn && hasAnyPendingAction && (
-              <div className="absolute right-14 top-8 size-2.5 z-10 pointer-events-none">
-                <motion.span
-                  animate={{ scale: [1, 2.5], opacity: [0, 0.6, 0] }}
-                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                  className="absolute inset-0 bg-amber-500 rounded-full"
-                />
-                <span className="absolute inset-0 bg-amber-500 rounded-full border-2 border-white z-10 shadow-sm" />
-              </div>
-            )}
+
 
             <motion.button
               onClick={toggleMenu}
