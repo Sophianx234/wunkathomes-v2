@@ -50,14 +50,14 @@ export default function SearchBarClient({ availableAreas, availableTypes }: Sear
   const searchParams = useSearchParams();
 
   const [filters, setFilters] = useState({
-    propertyType: searchParams.get("propertyType") || "",
+    propertyType: searchParams.get("type") || searchParams.get("propertyType") || "",
     location: searchParams.get("location") || "",
     status: searchParams.get("status") || "",
   });
 
   useEffect(() => {
     setFilters({
-      propertyType: searchParams.get("propertyType") || "",
+      propertyType: searchParams.get("type") || searchParams.get("propertyType") || "",
       location: searchParams.get("location") || "",
       status: searchParams.get("status") || "",
     });
@@ -87,7 +87,7 @@ export default function SearchBarClient({ availableAreas, availableTypes }: Sear
     e.preventDefault();
 
     const params = new URLSearchParams();
-    if (filters.propertyType) params.append("propertyType", filters.propertyType);
+    if (filters.propertyType) params.append("type", filters.propertyType);
     if (filters.location) params.append("location", filters.location);
     if (filters.status) params.append("status", filters.status);
 
@@ -264,4 +264,5 @@ export default function SearchBarClient({ availableAreas, availableTypes }: Sear
     </section>
   );
 }
+
 
