@@ -102,8 +102,9 @@ export default function SuccessReceipt({ transaction }: SuccessReceiptProps) {
   }
 
   return (
-    <div className="max-w-[500px] mx-auto w-full font-sans px-4 md:px-0 mt-4 md:mt-10">
-      <motion.div
+    <div className="w-full py-12 md:py-20 px-4 sm:px-6 flex-1">
+      <div className="max-w-[500px] mx-auto w-full font-sans px-4 md:px-0 mt-4 md:mt-10">
+        <motion.div
         initial={{ y: 30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.1, type: "spring", stiffness: 200, damping: 25 }}
@@ -187,6 +188,7 @@ export default function SuccessReceipt({ transaction }: SuccessReceiptProps) {
           </div>
         </div>
       </motion.div>
+    </div>
     </div>
   );
 }
