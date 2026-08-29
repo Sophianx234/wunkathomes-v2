@@ -24,7 +24,13 @@ import PropertyCard from "@/components/property-card";
 import { getPublicProperties } from "@/actions/shared/fetch-properties.action";
 
 // --- Types & Constants ---
-const PROPERTY_TYPES = ["All", "House", "Apartment", "Commercial", "Land"];
+const PROPERTY_TYPES = [
+  { value: "All", label: "All" },
+  { value: "House", label: "House" },
+  { value: "Apartment_Building", label: "Apartment" },
+  { value: "Commercial", label: "Commercial" },
+  { value: "Land", label: "Land" }
+];
 
 interface PropertiesClientProps {
   initialInventory: any[]; 
@@ -111,18 +117,18 @@ export default function PropertiesClient({
           {/* Left: Property Type Pills */}
           <div className="flex items-center gap-1.5 md:gap-2 overflow-x-auto pb-1 md:pb-2 xl:pb-0 hide-scrollbar mask-fade-right w-full min-w-0 box-border">
             {PROPERTY_TYPES.map((type) => (
-              <button
-                key={type}
-                onClick={() => handleTypeChange(type)}
-                className={`whitespace-nowrap px-3 py-1.5 md:px-6 md:py-2.5 rounded-full text-[9px] md:text-xs font-bold uppercase tracking-widest transition-all duration-300 shrink-0 ${
-                  typeFilter.toLowerCase() === type.toLowerCase()
-                    ? "bg-black text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] md:shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)] -translate-y-[1px]"
-                    : "bg-zinc-100/50 text-zinc-500 hover:bg-zinc-200 hover:text-black"
-                }`}
-              >
-                {type}
-              </button>
-            ))}
+                <button
+                  key={type.value}
+                  onClick={() => handleTypeChange(type.value)}
+                  className={`whitespace-nowrap px-3 py-1.5 md:px-6 md:py-2.5 rounded-full text-[9px] md:text-xs font-bold uppercase tracking-widest transition-all duration-300 shrink-0 ${
+                    typeFilter.toLowerCase() === type.value.toLowerCase()
+                      ? "bg-black text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] md:shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)] -translate-y-[1px]"
+                      : "bg-zinc-100/50 text-zinc-500 hover:bg-zinc-200 hover:text-black"
+                  }`}
+                >
+                  {type.label}
+                </button>
+              ))}
           </div>
 
           {/* Right: Dropdown Filters & Count */}
@@ -304,3 +310,5 @@ export default function PropertiesClient({
     </div>
   );
 }
+
+

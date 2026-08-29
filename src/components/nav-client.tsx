@@ -178,7 +178,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                       House
                     </Link>
                     <Link
-                      href="/properties?type=apartment"
+                      href="/properties?type=Apartment_Building"
                       className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-zinc-700 hover:bg-zinc-50/50 hover:text-zinc-900 transition"
                     >
                       <HugeiconsIcon
