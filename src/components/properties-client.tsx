@@ -77,10 +77,35 @@ export default function PropertiesClient({
         status: statusFilter === "All" || statusFilter === "all" ? "" : statusFilter,
       });
       setDynamicAreas(facets.availableAreas);
-      if (facets.availableTypes.length > 0) setDynamicTypes(facets.availableTypes);
-      if (facets.availableStatuses.length > 0) setDynamicStatuses(facets.availableStatuses);
+      if (facets.availableTypes.length > 0) setDynamicTypes(facets.availableTypes);      if (facets.availableStatuses.length > 0) setDynamicStatuses(facets.availableStatuses);
+
+      // Auto-heal URL if filters become invalid
+      const params = new URLSearchParams(searchParams.toString());
+      let hasInvalid = false;
+      
+      const loc = locationFilter === "All" || locationFilter === "all" ? "" : locationFilter;
+      if (loc && !facets.availableAreas.includes(loc)) {
+        params.delete("location");
+        hasInvalid = true;
+      }
+      
+      const type = typeFilter === "All" || typeFilter === "all" ? "" : typeFilter;
+      if (type && !facets.availableTypes.some(t => t.toLowerCase() === type.toLowerCase())) {
+        params.delete("type");
+        hasInvalid = true;
+      }
+      
+      const stat = statusFilter === "All" || statusFilter === "all" ? "" : statusFilter;
+      if (stat && !facets.availableStatuses.some(s => s.toLowerCase() === stat.toLowerCase())) {
+        params.delete("status");
+        hasInvalid = true;
+      }
+      
+      if (hasInvalid) {
+        router.push(`?${params.toString()}`, { scroll: false });
+      }
     });
-  }, [typeFilter, locationFilter, statusFilter]);
+  }, [typeFilter, locationFilter, statusFilter, searchParams, router]);
 
   // Sync state when props change due to URL/Server Component re-render
   useEffect(() => {
@@ -364,6 +389,8 @@ export default function PropertiesClient({
     </div>
   );
 }
+
+
 
 
 
