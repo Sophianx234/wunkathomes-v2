@@ -55,8 +55,12 @@ const userSchema = new mongoose.Schema({
     type: String,
     select: false, // Security: hide by default
   },
+  idDocumentUrl: {
+    type: String, // Link to the front scan of the Ghana Card
+    select: false,
+  },
   idVerificationPhotoUrl: {
-    type: String, // S3/Cloudinary link to the "Selfie with ID" photo
+    type: String, // Link to the security face photo taken in office
     select: false, 
   },
   accountStatus: {

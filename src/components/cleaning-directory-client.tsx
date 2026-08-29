@@ -187,7 +187,7 @@ export default function CleaningDirectoryClient({
                 <TableHead className="font-medium text-zinc-500 text-xs h-10">Tenant Profile</TableHead>
                 <TableHead className="font-medium text-zinc-500 text-xs h-10">Property</TableHead>
                 <TableHead className="font-medium text-zinc-500 text-xs h-10">Scheduled Date</TableHead>
-                <TableHead className="font-medium text-zinc-500 text-xs h-10">Status</TableHead>
+                <TableHead className="font-medium text-zinc-500 text-xs h-10">Action</TableHead>
                 <TableHead className="w-[50px]"></TableHead>
               </TableRow>
             </TableHeader>
@@ -247,18 +247,7 @@ export default function CleaningDirectoryClient({
                     )}
                   </TableCell>
 
-                  {/* STATUS */}
-                  <TableCell className="py-3 align-middle">
-                    {record.isDispatchToday ? (
-                      <Badge variant="outline" className="bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/60 border-0 rounded px-2 py-0.5 text-[10px] uppercase tracking-wider font-bold">
-                        Dispatch Today
-                      </Badge>
-                    ) : (
-                      <Badge variant="outline" className="bg-zinc-100/50 text-zinc-600 ring-1 ring-zinc-200/80 border-0 rounded px-2 py-0.5 text-[10px] uppercase tracking-wider font-bold">
-                        Scheduled
-                      </Badge>
-                    )}
-                  </TableCell>
+                 
 
                   {/* ACTIONS */}
                   <TableCell className="py-3 align-middle text-right">

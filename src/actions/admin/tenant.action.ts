@@ -85,12 +85,110 @@ export async function toggleAccountStatus(rawUserId: string, rawCurrentStatus: s
   } catch (error: any) {
     // 9. Fail securely
     console.error(`[SECURITY LOG] Toggle Account Status Failed (Actor: ${session?.userId || 'Unknown'}):`, error.message);
-    
     // Check if it's our specific escalation error so we can give a clean UI message
     if (error.message.includes("Privilege Escalation")) {
        return { success: false, error: "You do not have permission to modify this staff account." };
     }
 
     return { success: false, error: "An internal error occurred." };
+  }
+}
+
+// ============================================================================
+// 3. ONBOARDING (OFFLINE KYC -> SMART LOCK PIN)
+// ============================================================================
+export async function verifyAndOnboardTenantAction(formData: FormData) {
+  let session;
+  try {
+    session = await getSession();
+    if (!session?.userId || !['Admin', 'Manager'].includes(session.role)) {
+      throw new Error("Unauthorized access attempt.");
+    }
+
+    const rawLeaseId = formData.get("leaseId") as string;
+    const rawUserId = formData.get("userId") as string;
+    const rawGhanaCardNumber = formData.get("ghanaCardNumber") as string;
+    const facePhotoFile = formData.get("facePhoto") as File | null;
+    const cardScanFile = formData.get("cardScan") as File | null;
+
+    if (!rawLeaseId || !rawUserId || !rawGhanaCardNumber || typeof rawGhanaCardNumber !== 'string') {
+      throw new Error("Missing required fields or invalid Ghana Card Number.");
+    }
+
+    // Process files if present
+    const { uploadToCloudinary } = await import("@/lib/cloudinary");
+    let facePhotoUrl = undefined;
+    let cardScanUrl = undefined;
+
+    if (facePhotoFile && facePhotoFile.size > 0) {
+      facePhotoUrl = await uploadToCloudinary(facePhotoFile, `wunkathomes/kyc/faces`);
+    }
+
+    if (cardScanFile && cardScanFile.size > 0) {
+      cardScanUrl = await uploadToCloudinary(cardScanFile, `wunkathomes/kyc/cards`);
+    }
+
+    await connectToDatabase();
+    const Lease = (await import("@/models/lease")).default;
+    const Listing = (await import("@/models/listing")).default;
+    const SmartLock = (await import("@/models/smartlock")).default;
+
+    const updatePayload: any = {
+      kycStatus: 'Verified',
+      idDocumentNumber: rawGhanaCardNumber.trim()
+    };
+    if (facePhotoUrl) updatePayload.idVerificationPhotoUrl = facePhotoUrl;
+    if (cardScanUrl) updatePayload.idDocumentUrl = cardScanUrl;
+
+    // 1. Mark User as Verified and Save the ID Number & Docs
+    const user = await User.findByIdAndUpdate(
+      rawUserId, 
+      updatePayload, 
+      { new: true }
+    );
+    if (!user) throw new Error("User not found.");
+
+    // 2. Fetch Lease and Property
+    const lease = await Lease.findById(rawLeaseId).populate("listingId");
+    if (!lease || !lease.listingId) throw new Error("Lease or Listing not found.");
+
+    // 3. Activate Lease
+    lease.status = "Active";
+    await lease.save();
+    await Listing.findByIdAndUpdate(lease.listingId._id, { status: "Rented" });
+
+    // 4. Tuya Smart Lock Provisioning
+    let pinStr = "";
+    const lock = await SmartLock.findOne({
+      $or: [{ propertyId: lease.listingId.propertyId }, { listingId: lease.listingId._id }],
+    });
+
+    if (lock && lock.tuyaDeviceId) {
+      const { resetTenantPinAction } = await import("./smartlock.action");
+      const res = await resetTenantPinAction(lock.tuyaDeviceId, rawLeaseId);
+      if (res.success && res.pin) {
+        pinStr = res.pin;
+      }
+    }
+
+    // 5. Send Email
+    if (user.email) {
+      const LeaseActivationEmail = (await import("@/components/email/lease-activation-mail")).default;
+      await sendEmail({
+        to: user.email,
+        subject: `Lease Active & Access Granted: ${lease.listingId.title}`,
+        react: React.createElement(LeaseActivationEmail, { 
+          pin: pinStr || "N/A (No Smart Lock Assigned)", 
+          propertyTitle: lease.listingId.title 
+        })
+      }).catch(err => console.error("Failed to send activation email", err));
+    }
+
+    revalidatePath("/admin/manage/tenants");
+    return { success: true, message: "Tenant successfully verified, lease activated, and access credentials dispatched." };
+
+  } catch (error: any) {
+    console.error(`[SECURITY LOG] Onboarding Failed (Actor: ${session?.userId || 'Unknown'}):`, error.message);
+    return { success: false, error: error.message || "An internal error occurred." };
   }
 }

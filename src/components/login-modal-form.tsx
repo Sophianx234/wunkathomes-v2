@@ -40,17 +40,9 @@ export function LoginForm({
             </Button>
           </Field>
           <FieldSeparator className="*:data-[slot=field-separator-content]:bg-background">
-            Or continue with
+            Or 
           </FieldSeparator>
-          <Field>
-            <FieldLabel htmlFor="email">Email</FieldLabel>
-            <Input
-              id="email"
-              type="email"
-              placeholder="m@example.com"
-              required
-            />
-          </Field>
+         
           <Field>
             <div className="flex items-center">
               <FieldLabel htmlFor="password">Password</FieldLabel>

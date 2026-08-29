@@ -105,7 +105,8 @@ export async function getTenantsData() {
         profilePicture: lease.userId.profilePicture || "", 
         kycStatus: lease.userId.kycStatus || "Unverified",
         ghanaCardNumber: lease.userId.idDocumentNumber || "Not Provided",
-        ghanaCardUrl: lease.userId.idVerificationPhotoUrl || "", 
+        ghanaCardUrl: lease.userId.idDocumentUrl || "", 
+        securityPhotoUrl: lease.userId.idVerificationPhotoUrl || "",
         accountStatus: lease.userId.accountStatus || "Active",
       },
       lease: {
