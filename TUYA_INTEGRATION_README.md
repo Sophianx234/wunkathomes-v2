@@ -49,10 +49,23 @@ The following variables are active in `.env`:
 - **Private Data:** In the `Listing` model, `smartLock.accessInstructions` is explicitly configured with `select: false`. This ensures sensitive entry codes are never accidentally leaked in public API queries.
 - **Querying Private Data:** If you ever need to retrieve the instructions (e.g., to display in the secure Tenant Dashboard or the Admin Edit Page), you **MUST** explicitly append `.select('+smartLock.accessInstructions')` to your Mongoose query.
 
-### 8. Admin Tenant Onboarding & Activation
-- The provisioning flow is fully integrated into `src/app/admin/manage/tenants` (Unified Tenant Directory).
-- The "Tenant Profile Modal" automatically adapts to the lease stage. For `Pending_Verification` leases that are fully approved, Admins can click **"Activate Lease & Generate PIN"**.
-- This action triggers `activateLeaseAndGeneratePin()` which provisions the Tuya lock, changes the lease status to Active, and securely stores the PIN.
+### 8. Seamless KYC Onboarding & Digital Signature Flow
+The provisioning flow from User Checkout to Admin Activation is designed as a "White-Glove" concierge experience, completely eliminating in-office paperwork.
+
+**A. User Checkout (The Digital Signature)**
+- During checkout (`src/components/checkout-client.tsx`), the user must read the Tenancy Agreement, check "I agree", type their legal name, and pay via Paystack.
+- The `verifyPaystackPayment` webhook (`src/actions/user/payment.action.ts`) extracts the typed signature, captures the user's IP Address and User-Agent, and computes a secure SHA-256 `documentHash`. 
+- This generates a robust `signatureAudit` object and marks the lease as `isSigned: true`. This serves as a legally binding "Clickwrap" electronic signature.
+
+**B. In-Office Verification (Admin Ratification)**
+- The tenant visits the office with their physical Ghana Card. The admin opens the Tenant Directory (`/admin/manage/tenants`) on a tablet.
+- The Tenant Profile Modal dynamically adapts. Because the lease is already signed digitally, the Admin simply clicks **"Verify Identity & Grant Access"**.
+- **Hardware-Optimized Uploads:** The UI prompts the admin to capture a Face Photo (using the tablet's front camera via `capture="user"`) and scan the Ghana Card (using the rear camera via `capture="environment"`).
+- **VIP Fast-Track:** If the user is already KYC verified in the system, a "VIP Fast-Track" badge appears, and document uploads are bypassed.
+
+**C. Activation & Provisioning**
+- Once the Admin submits the verification form, it triggers `verifyAndOnboardTenantAction`.
+- The Admin's physical ID verification officially ratifies the online signature. The lease status flips to Active, the Tuya smart lock is provisioned, and the access PIN is securely dispatched to the tenant via email/SMS. No secondary in-office signing is required.
 
 ### 9. Admin Emergency Access Control
 - The unified Tenant Directory also features an **Emergency Unlock** button inside the "Occupied Asset" panel for active leases.

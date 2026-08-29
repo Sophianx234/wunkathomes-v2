@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import {
   CheckmarkBadge01Icon,
@@ -9,6 +10,7 @@ import {
   ArrowRight01Icon,
   Shield02Icon,
   Home09Icon,
+  Location01Icon
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { TransactionReceipt } from "./transaction-reciept";
@@ -24,7 +26,7 @@ export default function SuccessReceipt({ transaction }: SuccessReceiptProps) {
     transaction.paidAt || transaction.createdAt,
   ).toLocaleDateString("en-US", {
     year: "numeric",
-    month: "long",
+    month: "short",
     day: "numeric",
     hour: "2-digit",
     minute: "2-digit",
@@ -37,12 +39,13 @@ export default function SuccessReceipt({ transaction }: SuccessReceiptProps) {
       : `${loc.area}, ${loc.city || loc.region}`
     : "Accra, Ghana";
 
+  const propertyImage = transaction.listingId?.images?.[0] || "/a-1.jpg";
+
   // =================================================================
   // ROUTING LOGIC
   // =================================================================
   const isRenewal = transaction.paymentPurpose === "Lease_Renewal";
   const isVerified = transaction.userId?.kycStatus === "Verified";
-  const targetLeaseId = transaction.leaseId || "";
 
   let continueUrl = "";
   let buttonText = "";
@@ -99,187 +102,104 @@ export default function SuccessReceipt({ transaction }: SuccessReceiptProps) {
   }
 
   return (
-    <div className="max-w-2xl mx-auto w-full font-sans px-4 md:px-0">
-      {/* --- 1. MINIMALIST HEADER --- */}
-      <div className="flex flex-col items-center text-center mb-6 md:mb-10 mt-2 md:mt-4">
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ type: "spring", stiffness: 200, damping: 20 }}
-          className="w-8 h-8 md:w-12 md:h-12 bg-zinc-900 rounded-full flex items-center justify-center mb-3 md:mb-6 shadow-sm"
-        >
-          <span className="scale-75 md:scale-100 flex items-center">
-            <HugeiconsIcon
-              icon={CheckmarkBadge01Icon}
-              size={24}
-              className="text-white"
-            />
-          </span>
-        </motion.div>
-
-        <motion.h1
-          initial={{ y: 10, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.1 }}
-          className="text-lg md:text-2xl font-semibold tracking-tight text-zinc-900 mb-1 md:mb-2"
-        >
-          Payment Successful
-        </motion.h1>
-
-        <motion.p
-          initial={{ y: 10, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="text-[10px] md:text-[13px] text-zinc-500 font-medium px-4 md:px-0"
-        >
-          Your payment is confirmed. You can view your receipt anytime in your
-          dashboard.
-        </motion.p>
-      </div>
-
-      {/* --- 2. THE LEDGER RECEIPT --- */}
+    <div className="max-w-[500px] mx-auto w-full font-sans px-4 md:px-0 mt-4 md:mt-10">
       <motion.div
-        initial={{ y: 20, opacity: 0 }}
+        initial={{ y: 30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.3 }}
-        className="bg-white border border-zinc-200/80 rounded-lg md:rounded-lg"
+        transition={{ delay: 0.1, type: "spring", stiffness: 200, damping: 25 }}
+        className="bg-white rounded-[32px] overflow-hidden  border border-zinc-100/80"
       >
-        {/* Top Amount Banner */}
-        <div className="p-5 md:p-10 border-b border-zinc-200/60 flex flex-col items-center justify-center">
-          <p className="text-[8px] md:text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 md:mb-3">
-            Total Amount Paid
-          </p>
-          <h2 className="text-2xl md:text-4xl font-light tracking-tighter text-zinc-900">
-            GHS{" "}
-            {transaction.amount?.toLocaleString(undefined, {
-              minimumFractionDigits: 2,
-            })}
-          </h2>
-          <div className="mt-2 md:mt-4 flex items-center gap-1.5 px-2 py-0.5 md:px-3 md:py-1 bg-green-50 rounded-full border border-green-100/50">
-            <span className="w-1 md:w-1.5 h-1 md:h-1.5 rounded-full bg-green-500 animate-pulse" />
-            <span className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-green-700">
-              Verified
-            </span>
+        {/* --- PINTEREST STYLE HERO IMAGE --- */}
+        <div className="relative w-full h-[280px] md:h-[340px] bg-zinc-100">
+          <Image 
+            src={propertyImage} 
+            alt="Property" 
+            fill 
+            className="object-cover" 
+            priority
+          />
+          {/* Gradient Overlay for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/70" />
+          
+          {/* Floating Success Pill */}
+          <div className="absolute top-5 left-5 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm">
+            <HugeiconsIcon icon={CheckmarkBadge01Icon} size={14} className="text-green-600" />
+            <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-900">Payment Confirmed</span>
+          </div>
+
+          {/* Property Info at Bottom of Image */}
+          <div className="absolute bottom-5 left-5 right-5 text-white">
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight mb-1.5 drop-shadow-sm line-clamp-2 leading-tight">
+              {transaction.listingId?.title || "WunkatHomes Property"}
+            </h1>
+            <div className="flex items-center gap-1.5 text-white/90 text-[12px] font-medium drop-shadow-sm">
+              <HugeiconsIcon icon={Location01Icon} size={14} />
+              <span className="truncate">{locationString}</span>
+            </div>
           </div>
         </div>
 
-        <div className="p-5 md:p-10 space-y-5 md:space-y-8">
-          {/* Section: Transaction Specs */}
-          <div className="space-y-3 md:space-y-4">
-            <ReceiptRow
-              label="Reference ID"
-              value={transaction.reference}
-              isMono
-            />
-            <ReceiptRow label="Date & Time" value={formattedDateTimeFull} />
-            <ReceiptRow
-              label="Payment Method"
-              value={`Paystack (${transaction.channel || "Secure Gateway"})`}
-            />
-            <ReceiptRow
-              label="Transaction Type"
-              value={isRenewal ? "Lease Extension" : "Upfront Rent"}
-            />
+        {/* --- CLEAN RECEIPT DETAILS --- */}
+        <div className="p-6 md:p-8">
+          <div className="flex items-end justify-between mb-8 pb-6 border-b border-zinc-100">
+            <div>
+              <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5">
+                Amount Paid
+              </p>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tighter text-zinc-900">
+                GHS {transaction.amount?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+              </h2>
+            </div>
+            <div className="text-right">
+              <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5">
+                Ref ID
+              </p>
+              <p className="font-mono text-[11px] font-semibold text-zinc-800 bg-zinc-100/80 px-2 py-1 rounded-md">
+                {transaction.reference}
+              </p>
+            </div>
           </div>
 
-          <div className="w-full h-px bg-zinc-100/50" />
-
-          {/* Section: Property & User Specs */}
-          <div className="space-y-3 md:space-y-4">
-            <ReceiptRow
-              label={isRenewal ? "Renewal Property" : "Reserved Property"}
-              value={transaction.listingId?.title || "WunkatHomes Property"}
-              subValue={locationString}
-            />
-            <ReceiptRow
-              label="Tenant Name"
-              value={transaction.userId?.name || "Verified User"}
-            />
-            <ReceiptRow
-              label="Contact Email"
-              value={transaction.userId?.email || "N/A"}
-            />
+          <div className="grid grid-cols-2 gap-y-6 gap-x-4 mb-8">
+            <DetailItem label="Date & Time" value={formattedDateTimeFull} />
+            <DetailItem label="Payment Method" value={`Paystack (${transaction.channel || "Card"})`} />
+            <DetailItem label="Transaction Type" value={isRenewal ? "Lease Extension" : "Upfront Rent"} />
+            <DetailItem label="Tenant Name" value={transaction.userId?.name || "Verified User"} />
           </div>
 
-          <div className="w-full h-px bg-zinc-100/50" />
+          {/* --- ACTIONS --- */}
+          <div className="flex flex-col gap-3">
+            <Link
+              href={continueUrl}
+              className="w-full h-[52px] bg-zinc-900 text-white text-[13px] font-bold rounded-[20px] hover:bg-zinc-800 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-md"
+            >
+              <span>{buttonText}</span>
+              <HugeiconsIcon icon={ButtonIcon} size={16} />
+            </Link>
 
-          {/* Section: Breakdown */}
-          <div className="space-y-3 md:space-y-4">
-            <ReceiptRow
-              label="Subtotal"
-              value={`GHS ${transaction.amount?.toLocaleString()}`}
-            />
-            <ReceiptRow
-              label="Platform & Agency Fees"
-              value="Free"
-              valueClass="text-zinc-400"
-            />
+            <button
+              onClick={() => setIsViewingReceipt(true)}
+              className="w-full h-[52px] bg-white border border-zinc-200/80 text-zinc-700 text-[13px] font-bold rounded-[20px] hover:bg-zinc-50 transition-colors flex items-center justify-center gap-2"
+            >
+              <HugeiconsIcon icon={PrinterIcon} size={16} />
+              <span>View Official Receipt</span>
+            </button>
           </div>
         </div>
-      </motion.div>
-
-      {/* --- 3. ACTIONS --- */}
-      <motion.div
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.4 }}
-        className="flex flex-col sm:flex-row gap-2 md:gap-3 mt-4 md:mt-8 w-full box-border"
-      >
-        <button
-          onClick={() => setIsViewingReceipt(true)}
-          className="w-full sm:flex-1 min-w-0 box-border h-10 md:h-12 px-2 bg-white border border-zinc-200/60 text-zinc-700 text-[10px] md:text-[13px] font-semibold rounded-lg md:rounded-lg hover:bg-zinc-50 transition-colors flex items-center justify-center gap-1.5 md:gap-2 truncate"
-        >
-          <span className="scale-75 md:scale-100 flex items-center shrink-0">
-            <HugeiconsIcon icon={PrinterIcon} size={16} />
-          </span>
-          <span className="truncate">View Official Receipt</span>
-        </button>
-
-        <Link
-          href={continueUrl}
-          className="w-full sm:flex-1 min-w-0 box-border h-10 md:h-12 px-2 bg-zinc-900 text-white text-[10px] md:text-[13px] font-semibold rounded-lg md:rounded-lg hover:bg-zinc-800 transition-colors flex items-center justify-center gap-1.5 md:gap-2 shadow-sm truncate"
-        >
-          <span className="truncate">{buttonText}</span>
-          <span className="scale-75 md:scale-100 flex items-center shrink-0">
-            <HugeiconsIcon icon={ButtonIcon} size={16} />
-          </span>
-        </Link>
       </motion.div>
     </div>
   );
 }
 
-// --- HELPER COMPONENT FOR CLEAN LEDGER ROWS ---
-function ReceiptRow({
-  label,
-  value,
-  subValue,
-  isMono = false,
-  valueClass = "text-zinc-900",
-}: {
-  label: string;
-  value: string;
-  subValue?: string;
-  isMono?: boolean;
-  valueClass?: string;
-}) {
+function DetailItem({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-start justify-between gap-2 md:gap-4">
-      <span className="text-[9px] md:text-[12px] font-medium text-zinc-500 mt-0.5 shrink-0">
+    <div>
+      <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest mb-1">
         {label}
-      </span>
-      <div className="text-right min-w-0">
-        <span
-          className={`block text-[10px] md:text-[13px] ${isMono ? "font-mono font-medium tracking-tight" : "font-semibold"} ${valueClass} break-words`}
-        >
-          {value}
-        </span>
-        {subValue && (
-          <span className="block text-[8px] md:text-[11px] text-zinc-400 mt-0.5 font-medium break-words">
-            {subValue}
-          </span>
-        )}
-      </div>
+      </p>
+      <p className="text-[12px] md:text-[13px] font-semibold text-zinc-900 leading-snug break-words">
+        {value}
+      </p>
     </div>
   );
 }
