@@ -200,7 +200,7 @@ export default function AccountSettingsForm({
 
       <div className="flex flex-col md:flex-row gap-4 md:gap-8 items-start w-full box-border">
         {/* --- NAVIGATION (Mobile Horizontal Scroll / Desktop Sidebar) --- */}
-        <aside className="w-full md:w-64 shrink-0 bg-white border border-zinc-200/60 rounded-lg md:rounded-lg overflow-x-auto md:overflow-hidden box-border scrollbar-hide">
+        <aside className="w-full md:w-64 shrink-0 bg-white border border-zinc-200/60 rounded-lg md:rounded-lg overflow-x-auto md:overflow-hidden box-border hide-scrollbar">
           <nav className="flex flex-row md:flex-col min-w-max md:min-w-0">
             <button
               type="button"

@@ -240,7 +240,7 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
             onValueChange={(val) => setActiveTab(val as any)}
             className="w-full md:w-auto"
           >
-            <TabsList className="h-8 md:h-9 bg-zinc-100/50 border border-zinc-200/60 p-0.5 md:p-0.5 rounded-lg w-full flex overflow-x-auto scrollbar-hide">
+            <TabsList className="h-8 md:h-9 bg-zinc-100/50 border border-zinc-200/60 p-0.5 md:p-0.5 rounded-lg w-full flex overflow-x-auto hide-scrollbar">
               <TabsTrigger
                 value="all"
                 className="text-[10px] md:text-[13px] font-medium data-[state=active]:bg-white rounded-md px-2 md:px-4 shrink-0"
@@ -355,7 +355,7 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
 
         {/* EDGE-TO-EDGE FINANCIAL TABLE */}
         <div className="bg-white border border-zinc-200/60 rounded-lg md:rounded-lg shadow-[0_1px_4px_rgba(0,0,0,0.01)] w-full overflow-hidden box-border">
-          <div className="w-full overflow-x-auto box-border scrollbar-hide">
+          <div className="w-full overflow-x-auto box-border hide-scrollbar">
             <Table className="w-full min-w-full">
               <TableHeader className="bg-zinc-50/30">
                 <TableRow className="border-zinc-200/60 hover:bg-transparent">

@@ -154,8 +154,7 @@ export function UserDashboard({ user, activeLeases, initialSchedule }: Dashboard
     }
   };
 
-  const needsKyc =
-    user.kycStatus === "Unverified" || user.kycStatus === "Rejected";
+  const needsKyc = user.kycStatus !== "Verified";
   const needsSignature = !lease.signatureAudit.isSigned;
   const isPendingAdmin = lease.status === "Awaiting_Admin_Approval";
   const isRestricted = needsKyc || needsSignature || isPendingAdmin;
@@ -279,7 +278,7 @@ export function UserDashboard({ user, activeLeases, initialSchedule }: Dashboard
         </div>
 
         {activeLeases.length > 1 && (
-          <div className="max-w-6xl mx-auto mt-4 md:mt-8 flex items-center gap-1.5 md:gap-2 overflow-x-auto pb-2 scrollbar-hide w-full box-border">
+          <div className="max-w-6xl mx-auto mt-4 md:mt-8 flex items-center gap-1.5 md:gap-2 overflow-x-auto pb-2 hide-scrollbar w-full box-border">
             {activeLeases.map((item, idx) => (
               <button
                 key={item.lease.id}
@@ -305,38 +304,55 @@ export function UserDashboard({ user, activeLeases, initialSchedule }: Dashboard
         {/* ACTION CARDS & ALERTS (PREMIUM MINIMALIST STYLING)        */}
         {/* ========================================================= */}
 
-        {/* 1. KYC BANNER */}
-        {needsKyc && (
-          <div className="bg-white border border-zinc-200/60 p-4 md:p-6 rounded-lg md:rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3 md:gap-6 relative overflow-hidden w-full box-border">
-            <div className="absolute left-0 top-0 bottom-0 w-1 bg-zinc-900" />
+        {/* 1A. KYC BANNER (UNVERIFIED / NEW TENANT) */}
+        {needsKyc && isPendingAdmin && (
+          <div className="bg-white border p-4 md:p-6 rounded-lg md:rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3 md:gap-6 relative overflow-hidden w-full box-border shadow-sm">
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber-500" />
             <div className="flex items-start sm:items-center gap-3 md:gap-4 pl-1 md:pl-2 min-w-0">
-              <div className="w-8 h-8 md:w-10 md:h-10 bg-zinc-50/50 border border-zinc-200/60 rounded-full flex items-center justify-center shrink-0">
+              <div className="w-8 h-8 md:w-10 md:h-10 bg-white border border-amber-200/60 rounded-full flex items-center justify-center shrink-0">
                 <span className="scale-75 md:scale-100 flex items-center">
                   <HugeiconsIcon
                     icon={Shield02Icon}
-                    className="text-zinc-900"
+                    className="text-amber-600"
                     size={20}
                   />
                 </span>
               </div>
               <div className="min-w-0">
-                <h4 className="text-[11px] md:text-sm font-bold text-zinc-900 mb-0.5 md:mb-1 tracking-tight truncate">
-                  Identity Verification Required
+                <h4 className="text-[11px] md:text-sm font-bold text-amber-900 mb-0.5 md:mb-1 tracking-tight">
+                  Payment Successful! Your property is reserved.
                 </h4>
-                <p className="text-[9px] md:text-sm text-zinc-500 font-medium break-words leading-tight">
-                  Please verify your identity to generate your Smart Lock access
-                  credentials.
+                <p className="text-[9px] md:text-sm text-amber-700/80 font-medium break-words leading-tight">
+                  Please visit our main office at <strong className="text-amber-900">Wunkat Homes HQ, Accra</strong> with your physical Ghana Card to complete onboarding and receive your access credentials.
                 </p>
               </div>
             </div>
-            <Link
-              href="/user/leases"
-              className="shrink-0 w-full sm:w-auto px-4 py-2 md:px-6 md:py-2.5 bg-zinc-900 hover:bg-black text-white text-[10px] md:text-sm font-semibold rounded-md md:rounded-lg transition-colors flex items-center justify-center"
-            >
-              Verify Identity
-              <HugeiconsIcon icon={ArrowRight01Icon} size={16} className="ml-1 text-white" />
+          </div>
+        )}
 
-            </Link>
+        {/* 1B. VIP BANNER (VERIFIED / REPEAT TENANT) */}
+        {!needsKyc && isPendingAdmin && (
+          <div className="bg-emerald-50/50 border border-emerald-200/60 p-4 md:p-6 rounded-lg md:rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3 md:gap-6 relative overflow-hidden w-full box-border shadow-sm">
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500" />
+            <div className="flex items-start sm:items-center gap-3 md:gap-4 pl-1 md:pl-2 min-w-0">
+              <div className="w-8 h-8 md:w-10 md:h-10 bg-white border border-emerald-200/60 rounded-full flex items-center justify-center shrink-0">
+                <span className="scale-75 md:scale-100 flex items-center">
+                  <HugeiconsIcon
+                    icon={CheckmarkBadge01Icon}
+                    className="text-emerald-700"
+                    size={20}
+                  />
+                </span>
+              </div>
+              <div className="min-w-0">
+                <h4 className="text-[11px] md:text-sm font-bold text-emerald-900 mb-0.5 md:mb-1 tracking-tight">
+                  Payment Successful!
+                </h4>
+                <p className="text-[9px] md:text-sm text-emerald-700/80 font-medium break-words leading-tight">
+                  Our team is finalizing your new property and will grant you access keys shortly.
+                </p>
+              </div>
+            </div>
           </div>
         )}
 
@@ -374,32 +390,7 @@ export function UserDashboard({ user, activeLeases, initialSchedule }: Dashboard
           </div>
         )}
 
-        {/* 3. ADMIN REVIEW BANNER */}
-        {isPendingAdmin && (
-          <div className="bg-white border border-zinc-200/60 p-4 md:p-6 rounded-lg md:rounded-lg flex flex-col sm:flex-row sm:items-center gap-3 md:gap-4 shadow-sm relative overflow-hidden w-full box-border">
-            <div className="absolute left-0 top-0 bottom-0 w-1 bg-zinc-300" />
-            <div className="flex items-start sm:items-center gap-3 md:gap-4 pl-1 md:pl-2 min-w-0">
-              <div className="w-8 h-8 md:w-10 md:h-10 bg-zinc-50/50 border border-zinc-200/60 rounded-full flex items-center justify-center shrink-0">
-                <span className="scale-75 md:scale-100 flex items-center">
-                  <HugeiconsIcon
-                    icon={Clock01Icon}
-                    className="text-zinc-900"
-                    size={20}
-                  />
-                </span>
-              </div>
-              <div className="min-w-0">
-                <h4 className="text-[11px] md:text-sm font-bold text-zinc-900 mb-0.5 md:mb-1 tracking-tight truncate">
-                  Application Under Review
-                </h4>
-                <p className="text-[9px] md:text-sm text-zinc-500 font-medium break-words leading-tight">
-                  Your documents have been submitted. Our team is finalizing
-                  your verification.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
+
 
         {/* 4. RENEWAL & VACATE ACTION CARD */}
         {isExpiringSoon && !isRestricted && (
