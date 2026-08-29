@@ -151,14 +151,7 @@ export default function SearchBarClient({ availableAreas, availableTypes }: Sear
                 <SelectValue placeholder="What type?" />
               </SelectTrigger>
               <SelectContent className="bg-white border border-zinc-200/80 shadow-sm rounded-lg p-0 w-[calc(100vw-2rem)] md:w-full min-w-[var(--radix-select-trigger-width)]">
-                {isPending ? (
-                  <div className="p-4 flex flex-col gap-3">
-                    <div className="h-3 w-full bg-zinc-100 animate-pulse rounded" />
-                    <div className="h-3 w-2/3 bg-zinc-100 animate-pulse rounded" />
-                    <div className="h-3 w-5/6 bg-zinc-100 animate-pulse rounded" />
-                  </div>
-                ) : (
-                  <div className="divide-y divide-zinc-100 flex flex-col w-full box-border">
+                <div className={`divide-y divide-zinc-100 flex flex-col w-full box-border transition-opacity duration-200 ${isPending ? "opacity-50 pointer-events-none" : ""}`}>
                   <SelectItem value="all" className="cursor-pointer w-full [&>span]:w-full text-[10px] md:text-xs font-medium py-2 md:py-2.5 focus:bg-zinc-50 box-border">
                     <div className="flex w-full text-zinc-700 justify-between items-center pr-1 min-w-0 box-border">
                       <span className="truncate">All Types</span>
@@ -179,8 +172,7 @@ export default function SearchBarClient({ availableAreas, availableTypes }: Sear
                     );
                   })}
                 </div>
-                                )}
-                </SelectContent>
+              </SelectContent>
             </Select>
           </div>
         </div>
@@ -206,14 +198,7 @@ export default function SearchBarClient({ availableAreas, availableTypes }: Sear
                 <SelectValue placeholder="Select Area" />
               </SelectTrigger>
               <SelectContent className="bg-white border border-zinc-200/80 shadow-sm rounded-lg p-0 w-[calc(100vw-2rem)] md:w-full min-w-[var(--radix-select-trigger-width)]">
-                {isPending ? (
-                  <div className="p-4 flex flex-col gap-3">
-                    <div className="h-3 w-full bg-zinc-100 animate-pulse rounded" />
-                    <div className="h-3 w-2/3 bg-zinc-100 animate-pulse rounded" />
-                    <div className="h-3 w-5/6 bg-zinc-100 animate-pulse rounded" />
-                  </div>
-                ) : (
-                  <div className="divide-y divide-zinc-100 flex flex-col w-full box-border">
+                <div className={`divide-y divide-zinc-100 flex flex-col w-full box-border transition-opacity duration-200 ${isPending ? "opacity-50 pointer-events-none" : ""}`}>
                   <SelectGroup className="w-full divide-y divide-zinc-100 flex flex-col box-border">
                     <SelectItem value="all" className="cursor-pointer w-full [&>span]:w-full text-[10px] md:text-xs font-medium py-2 md:py-2.5 focus:bg-zinc-50 box-border">
                       <div className="flex w-full justify-between items-center pr-1 text-zinc-700 min-w-0 box-border">
@@ -240,8 +225,7 @@ export default function SearchBarClient({ availableAreas, availableTypes }: Sear
                     ))}
                   </SelectGroup>
                 </div>
-                                )}
-                </SelectContent>
+              </SelectContent>
             </Select>
           </div>
         </div>
@@ -267,14 +251,7 @@ export default function SearchBarClient({ availableAreas, availableTypes }: Sear
                 <SelectValue placeholder="Rent or Sale?" />
               </SelectTrigger>
               <SelectContent className="bg-white border border-zinc-200/80 shadow-sm rounded-lg p-0 w-[calc(100vw-2rem)] md:w-full min-w-[var(--radix-select-trigger-width)]">
-                {isPending ? (
-                  <div className="p-4 flex flex-col gap-3">
-                    <div className="h-3 w-full bg-zinc-100 animate-pulse rounded" />
-                    <div className="h-3 w-2/3 bg-zinc-100 animate-pulse rounded" />
-                    <div className="h-3 w-5/6 bg-zinc-100 animate-pulse rounded" />
-                  </div>
-                ) : (
-                  <div className="divide-y divide-zinc-100 flex flex-col w-full box-border">
+                <div className={`divide-y divide-zinc-100 flex flex-col w-full box-border transition-opacity duration-200 ${isPending ? "opacity-50 pointer-events-none" : ""}`}>
                   <SelectItem value="all" className="cursor-pointer w-full [&>span]:w-full text-[10px] md:text-xs font-medium py-2 md:py-2.5 focus:bg-zinc-50 box-border">
                     <div className="flex w-full justify-between items-center pr-1 text-zinc-700 min-w-0 box-border">
                       <span className="truncate">Any Status</span>
@@ -298,8 +275,7 @@ export default function SearchBarClient({ availableAreas, availableTypes }: Sear
                   </SelectItem>
 )}
                 </div>
-                                )}
-                </SelectContent>
+              </SelectContent>
             </Select>
           </div>
         </div>
@@ -318,8 +294,6 @@ export default function SearchBarClient({ availableAreas, availableTypes }: Sear
     </section>
   );
 }
-
-
 
 
 
