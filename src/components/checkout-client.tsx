@@ -332,7 +332,7 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="max-w-3xl max-h-[85vh] overflow-hidden p-0 border-0 bg-white shadow-xl sm:rounded-xl flex flex-col relative">
-                    <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
+                    <div className="flex-1 overflow-y-auto hide-scrollbar">
                       <TenancyDocument selectedActivation={draftActivation as any} onBack={() => setIsAgreementOpen(false)} showNav={false} isModal={true} />
                     </div>
                     {/* Fixed Caret Indicator */}

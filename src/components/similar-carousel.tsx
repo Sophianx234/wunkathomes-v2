@@ -54,8 +54,8 @@ export default function SimilarCarousel({
       {/* Scrollable Track (Tailwind trick to hide scrollbars natively) */}
       <div
         ref={scrollRef}
-        className="flex overflow-x-auto gap-6 md:gap-8 snap-x snap-mandatory pb-8 [&::-webkit-scrollbar]:hidden"
-        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+        className="flex overflow-x-auto gap-6 md:gap-8 snap-x snap-mandatory pb-8 hide-scrollbar"
+
       >
         {similar.map((property, index) => (
           <div
