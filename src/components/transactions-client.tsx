@@ -23,6 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { reportTransactionIssueAction } from "@/actions/user/maintenance.action";
 import {
   Table,
   TableBody,
@@ -194,12 +195,20 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
 
   const handleReportIssue = () => {
     if (!selectedTx) return;
+    setIsReportingIssue(true);
     startTransition(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      toast.success(
-        `Support ticket created for transaction #${selectedTx.reference.slice(-6)}.`,
-      );
-      setIsReportingIssue(false);
+      try {
+        const result = await reportTransactionIssueAction(selectedTx.reference);
+        if (result.success) {
+          toast.success(result.message);
+        } else {
+          toast.error(result.error || "Failed to create support ticket.");
+        }
+      } catch (err) {
+        toast.error("An unexpected error occurred.");
+      } finally {
+        setIsReportingIssue(false);
+      }
     });
   };
 

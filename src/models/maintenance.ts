@@ -23,7 +23,7 @@ const maintenanceSchema = new mongoose.Schema({
   },
   category: {
     type: String,
-    enum: ['Plumbing', 'Electrical', 'HVAC', 'Smart_Lock', 'Appliances', 'Structural', 'Other'],
+    enum: ['Plumbing', 'Electrical', 'HVAC', 'Smart_Lock', 'Appliances', 'Structural', 'Billing', 'Other'],
     required: true
   },
   priority: {

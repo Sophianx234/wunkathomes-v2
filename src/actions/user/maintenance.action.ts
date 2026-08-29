@@ -4,6 +4,7 @@ import { getSession } from "@/lib/session";
 import { connectToDatabase } from "@/config/DbConnect";
 import Maintenance from "@/models/maintenance";
 import Lease from "@/models/lease";
+import Transaction from "@/models/transaction";
 import { revalidatePath } from "next/cache";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 import { z } from "zod";
@@ -205,3 +206,64 @@ export async function submitMaintenanceRequest(
     };
   }
 }
+
+
+export async function reportTransactionIssueAction(transactionReference: string): Promise<ActionState> {
+  let session;
+  try {
+    session = await getSession();
+    if (!session?.userId) throw new Error("UNAUTHORIZED");
+
+    await connectToDatabase();
+
+    const transaction = await Transaction.findOne({
+      reference: transactionReference,
+      userId: session.userId,
+    }).lean();
+
+    if (!transaction) {
+      return { success: false, message: "", error: "Transaction not found." };
+    }
+
+    let leaseId = transaction.leaseId;
+    if (!leaseId) {
+       const lease = await Lease.findOne({ listingId: transaction.listingId, userId: session.userId }).lean();
+       leaseId = lease?._id;
+    }
+    
+    if (!leaseId) {
+      return { success: false, message: "", error: "No associated lease found for this transaction. Unable to create support ticket." };
+    }
+
+    const secureHex = crypto.randomBytes(3).toString("hex").toUpperCase();
+    const ticketNumber = `BILL-${Date.now().toString().slice(-4)}-${secureHex}`;
+
+    await Maintenance.create({
+      userId: session.userId,
+      leaseId: leaseId,
+      listingId: transaction.listingId,
+      ticketNumber,
+      category: "Billing",
+      priority: "High",
+      title: `Billing Issue: Transaction ${transactionReference}`,
+      description: `User reported an issue with transaction ${transactionReference} (Amount: GHS ${transaction.amount}). Please review the payment ledger and gateway logs.`,
+      images: [],
+      status: "Pending",
+    });
+
+    revalidatePath("/user/transactions");
+    revalidatePath("/admin/manage/maintenance");
+
+    return {
+      success: true,
+      message: `Support ticket ${ticketNumber} created successfully. Admin has been notified.`,
+    };
+  } catch (error: any) {
+    if (error.message === "UNAUTHORIZED")
+      return { success: false, message: "", error: "Unauthorized access." };
+
+    console.error(`[SECURITY LOG] Transaction Issue Report Error (User: ${session?.userId}):`, error.message);
+    return { success: false, message: "", error: "A server error occurred. Please try again." };
+  }
+}
+
