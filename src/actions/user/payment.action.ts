@@ -230,7 +230,7 @@ export async function verifyPaystackPayment(
 
       revalidatePath("/admin/transactions");
       revalidatePath("/explore");
-      revalidatePath("/user/leases");
+      revalidatePath("/user/dashboard");
       revalidatePath(`/properties/${listingId}`);
 
       return { success: true, message: "Payment secured successfully!" };

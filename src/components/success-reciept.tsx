@@ -60,7 +60,7 @@ export default function SuccessReceipt({ transaction }: SuccessReceiptProps) {
     buttonText = "View Your Lease";
     ButtonIcon = Home09Icon;
   } else {
-    continueUrl = `/user/leases`;
+    continueUrl = `/user/dashboard`;
     buttonText = "Verify Identity to Continue";
     ButtonIcon = Shield02Icon;
   }

@@ -422,34 +422,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                           )}
                         </Link>
 
-                        {/* KYC INDICATOR */}
-                        {user.indicators.hasPaidProperty && user.indicators.verificationStatus === "Unverified" && (
-                          <Link
-                            href="/user/leases"
-                            onClick={() => setProfileOpen(false)}
-                            className="flex items-center justify-between px-4 py-2.5 text-sm font-medium text-zinc-700 hover:bg-amber-50 transition"
-                          >
-                            <div className="flex items-center gap-3">
-                              <ShieldAlert
-                                size={18}
-                                className="text-amber-600"
-                              />{" "}
-                              Verify Identity
-                            </div>
-                            <span className="text-[7px] font-bold uppercase tracking-wider text-amber-600 bg-amber-100/80 px-2 py-0.5 rounded-full">
-                              Action Required
-                            </span>
-                          </Link>
-                        )}
 
-                        {user.indicators.hasPaidProperty && user.indicators.verificationStatus === "Pending" && (
-                          <div className="flex items-center justify-between px-4 py-2.5 text-sm font-medium text-slate-500 bg-slate-50 cursor-default">
-                            <div className="flex items-center gap-3">
-                              <Clock size={18} className="text-slate-400" />
-                              Verification Pending
-                            </div>
-                          </div>
-                        )}
 
                         <Link
                           href="/user/transactions"
@@ -647,31 +620,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                       )}
                     </Link>
 
-                    {/* Leases (KYC Pending) */}
-                    {user.indicators.hasPaidProperty && user.indicators.verificationStatus === "Unverified" && (
-                      <Link
-                        href="/user/leases"
-                        onClick={toggleMenu}
-                        className="flex items-center justify-between text-lg font-medium text-zinc-700 hover:bg-amber-50 px-2 rounded-lg transition"
-                      >
-                        <span className="flex items-center gap-3">
-                          <ShieldAlert size={20} className="text-amber-600" />{" "}
-                          Verify Identity
-                        </span>
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600 bg-amber-100/80 px-2 py-0.5 rounded-full">
-                          Action Required
-                        </span>
-                      </Link>
-                    )}
 
-                    {user.indicators.hasPaidProperty && user.indicators.verificationStatus === "Pending" && (
-                      <div className="flex items-center justify-between text-lg font-medium text-slate-500 bg-slate-50 px-2 py-2 rounded-lg cursor-default mt-1">
-                        <span className="flex items-center gap-3">
-                          <Clock size={20} className="text-slate-400" />{" "}
-                          Verification Pending
-                        </span>
-                      </div>
-                    )}
 
                     <Link
                       href="/user/transactions"

@@ -73,7 +73,7 @@ export default function SubscriptionReminderEmail({
 
       <Section className="mb-10 mt-2">
         <Button
-          href={`${process.env.NEXT_PUBLIC_APP_URL}/user/leases`}
+          href={`${process.env.NEXT_PUBLIC_APP_URL}/user/dashboard`}
           className="bg-[#111827] text-white px-8 py-3.5 rounded-lg text-[14px] font-semibold tracking-wide block w-[240px] text-center"
         >
           {isExpired ? "Resolve Lease Status" : "View Lease Options"}

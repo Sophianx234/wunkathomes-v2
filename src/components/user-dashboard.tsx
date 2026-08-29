@@ -154,7 +154,7 @@ export function UserDashboard({ user, activeLeases, initialSchedule }: Dashboard
     }
   };
 
-  const needsKyc = user.kycStatus !== "Verified";
+  const needsKyc = false;
   const needsSignature = !lease.signatureAudit.isSigned;
   const isPendingAdmin = lease.status === "Awaiting_Admin_Approval";
   const isRestricted = needsKyc || needsSignature || isPendingAdmin;

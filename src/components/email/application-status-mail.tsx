@@ -37,7 +37,7 @@ export default function ApplicationStatusEmail({ userName = "there", propertyTit
         </Text>
       </Section>
 
-      <Button href={`${process.env.NEXT_PUBLIC_APP_URL}/user/leases`} className="bg-[#111827] text-white px-8 py-3.5 rounded-lg text-[14px] font-semibold text-center">
+      <Button href={`${process.env.NEXT_PUBLIC_APP_URL}/user/dashboard`} className="bg-[#111827] text-white px-8 py-3.5 rounded-lg text-[14px] font-semibold text-center">
         {isApproved ? "View Dashboard" : "View Application"}
       </Button>
     </EmailLayout>
