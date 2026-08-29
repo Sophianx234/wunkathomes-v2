@@ -4,6 +4,7 @@ import {
   ArrowDown01Icon,
   Loading03FreeIcons,
   Location01Icon,
+  Cancel01Icon,
   Search01Icon,
   Tag01Icon,
 } from "@hugeicons/core-free-icons";
@@ -100,6 +101,16 @@ export default function PropertiesClient({
     } else {
       params.set(key, value.toLowerCase());
     }
+    router.push(`?${params.toString()}`, { scroll: false });
+  };
+
+  const hasActiveFilters = typeFilter !== "All" || statusFilter !== "all" || locationFilter !== "all";
+
+  const clearFilters = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("type");
+    params.delete("location");
+    params.delete("status");
     router.push(`?${params.toString()}`, { scroll: false });
   };
 
@@ -228,6 +239,17 @@ export default function PropertiesClient({
                 </SelectContent>
               </Select>
             </div>
+            {/* Clear Filters Button */}
+            {hasActiveFilters && (
+              <button
+                onClick={clearFilters}
+                className="flex items-center justify-center size-8 md:size-10 rounded-full bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-colors shrink-0"
+                title="Clear all filters"
+              >
+                <HugeiconsIcon icon={Cancel01Icon} size={18} />
+              </button>
+            )}
+
 
             {/* Results Count Counter */}
             <div className="hidden sm:flex items-center pl-2 md:pl-4 border-l-2 border-zinc-200/60 shrink-0">
@@ -339,6 +361,11 @@ export default function PropertiesClient({
     </div>
   );
 }
+
+
+
+
+
 
 
 
