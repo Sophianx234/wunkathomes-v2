@@ -179,8 +179,8 @@ export default function SearchBarClient({ availableAreas, availableTypes }: Sear
                     );
                   })}
                 </div>
-              </SelectContent>
-                )}
+                                )}
+                </SelectContent>
             </Select>
           </div>
         </div>
@@ -240,8 +240,8 @@ export default function SearchBarClient({ availableAreas, availableTypes }: Sear
                     ))}
                   </SelectGroup>
                 </div>
-              </SelectContent>
-                )}
+                                )}
+                </SelectContent>
             </Select>
           </div>
         </div>
@@ -298,8 +298,8 @@ export default function SearchBarClient({ availableAreas, availableTypes }: Sear
                   </SelectItem>
 )}
                 </div>
-              </SelectContent>
-                )}
+                                )}
+                </SelectContent>
             </Select>
           </div>
         </div>
@@ -318,6 +318,8 @@ export default function SearchBarClient({ availableAreas, availableTypes }: Sear
     </section>
   );
 }
+
+
 
 
 
