@@ -23,6 +23,25 @@ function formatSegment(segment: string) {
     .join(" ")
 }
 
+// Helper to determine if a generated href actually has a page
+function isClickableLink(href: string) {
+  // List of known exact paths that are just layout wrappers without pages
+  const unclickableExact = [
+    "/admin/manage",
+  ]
+  
+  if (unclickableExact.includes(href)) return false
+
+  // Catch dynamic routes that don't have a root page
+  // e.g., /admin/properties/[slug] has no page, only /admin/properties/[slug]/edit does
+  const parts = href.split("/").filter(Boolean)
+  if (parts.length === 3 && parts[0] === "admin" && parts[1] === "properties") {
+    return false
+  }
+
+  return true
+}
+
 export function SiteHeader() {
   const pathname = usePathname()
   
@@ -46,7 +65,7 @@ export function SiteHeader() {
                 <BreadcrumbPage>Dashboard</BreadcrumbPage>
               ) : (
                 <BreadcrumbLink asChild>
-                  <Link href="/">Dashboard</Link>
+                  <Link href="/admin/overview">Dashboard</Link>
                 </BreadcrumbLink>
               )}
             </BreadcrumbItem>
@@ -59,16 +78,21 @@ export function SiteHeader() {
               // Rebuild the URL path up to the current segment
               const href = `/${segments.slice(0, index + 1).join("/")}`
               const title = formatSegment(segment)
+              const clickable = !isLast && isClickableLink(href)
 
               return (
                 <React.Fragment key={href}>
                   <BreadcrumbItem>
                     {isLast ? (
                       <BreadcrumbPage>{title}</BreadcrumbPage>
-                    ) : (
+                    ) : clickable ? (
                       <BreadcrumbLink className="hidden md:block" asChild>
                         <Link href={href}>{title}</Link>
                       </BreadcrumbLink>
+                    ) : (
+                      <BreadcrumbPage className="hidden md:block text-muted-foreground font-normal">
+                        {title}
+                      </BreadcrumbPage>
                     )}
                   </BreadcrumbItem>
                   {!isLast && <BreadcrumbSeparator className="hidden md:block" />}
