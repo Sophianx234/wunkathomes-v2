@@ -15,9 +15,11 @@ import {
   Download01Icon,
   Alert01Icon,
   Loading03Icon,
+  ArrowLeft01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -157,6 +159,7 @@ const getChannelIcon = (channel: string) => {
 
 // --- MAIN CLIENT COMPONENT ---
 export default function TransactionsClient({ data }: TransactionsClientProps) {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<"all" | "success" | "pending">(
     "all",
   );
@@ -229,7 +232,14 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
       <div className="max-w-[1400px] mx-auto space-y-4 md:space-y-6 pt-6 md:pt-16 w-full box-border">
         {/* PAGE HEADER & TABS */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 md:gap-4 pb-2 border-b border-zinc-200/60 w-full box-border">
-          <div>
+          <div className="space-y-2">
+            <button
+              onClick={() => router.back()}
+              className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-zinc-500 hover:text-zinc-900 transition-colors w-fit"
+            >
+              <HugeiconsIcon icon={ArrowLeft01Icon} size={16} />
+              Back
+            </button>
             <h1 className="text-lg md:text-3xl font-semibold tracking-tight text-zinc-900 truncate">
               Payment History
             </h1>
