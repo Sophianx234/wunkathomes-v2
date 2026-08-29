@@ -10,7 +10,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 
 import {
   Select,
@@ -22,6 +22,7 @@ import {
 
 import PropertyCard from "@/components/property-card";
 import { getPublicProperties } from "@/actions/shared/fetch-properties.action";
+import { getDynamicSearchFacets } from "@/actions/public/search.action";
 
 // --- Types & Constants ---
 const PROPERTY_TYPES = [
@@ -61,6 +62,24 @@ export default function PropertiesClient({
   const [typeFilter, setTypeFilter] = useState(initialFilters.typeFilter);
   const [statusFilter, setStatusFilter] = useState(initialFilters.statusFilter);
   const [locationFilter, setLocationFilter] = useState(initialFilters.locationFilter);
+
+  const [dynamicAreas, setDynamicAreas] = useState<string[]>(availableAreas);
+  const [dynamicTypes, setDynamicTypes] = useState<string[]>(["House", "Apartment_Building", "Commercial", "Land"]);
+  const [dynamicStatuses, setDynamicStatuses] = useState<string[]>(["For_Rent", "For_Sale"]);
+  const [isPending, startTransition] = useTransition();
+
+  useEffect(() => {
+    startTransition(async () => {
+      const facets = await getDynamicSearchFacets({
+        propertyType: typeFilter === "All" || typeFilter === "all" ? "" : typeFilter,
+        location: locationFilter === "All" || locationFilter === "all" ? "" : locationFilter,
+        status: statusFilter === "All" || statusFilter === "all" ? "" : statusFilter,
+      });
+      setDynamicAreas(facets.availableAreas);
+      if (facets.availableTypes.length > 0) setDynamicTypes(facets.availableTypes);
+      if (facets.availableStatuses.length > 0) setDynamicStatuses(facets.availableStatuses);
+    });
+  }, [typeFilter, locationFilter, statusFilter]);
 
   // Sync state when props change due to URL/Server Component re-render
   useEffect(() => {
@@ -116,19 +135,25 @@ export default function PropertiesClient({
           
           {/* Left: Property Type Pills */}
           <div className="flex items-center gap-1.5 md:gap-2 overflow-x-auto pb-1 md:pb-2 xl:pb-0 hide-scrollbar mask-fade-right w-full min-w-0 box-border">
-            {PROPERTY_TYPES.map((type) => (
+            {PROPERTY_TYPES.map((type) => {
+                const isAvailable = type.value === "All" || dynamicTypes.includes(type.value);
+                return (
                 <button
                   key={type.value}
-                  onClick={() => handleTypeChange(type.value)}
+                  onClick={() => isAvailable && handleTypeChange(type.value)}
+                  disabled={!isAvailable}
                   className={`whitespace-nowrap px-3 py-1.5 md:px-6 md:py-2.5 rounded-full text-[9px] md:text-xs font-bold uppercase tracking-widest transition-all duration-300 shrink-0 ${
-                    typeFilter.toLowerCase() === type.value.toLowerCase()
+                    !isAvailable
+                      ? "bg-zinc-100/30 text-zinc-300 cursor-not-allowed"
+                      : typeFilter.toLowerCase() === type.value.toLowerCase()
                       ? "bg-black text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] md:shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)] -translate-y-[1px]"
                       : "bg-zinc-100/50 text-zinc-500 hover:bg-zinc-200 hover:text-black"
                   }`}
                 >
                   {type.label}
                 </button>
-              ))}
+              )})}
+
           </div>
 
           {/* Right: Dropdown Filters & Count */}
@@ -156,12 +181,16 @@ export default function PropertiesClient({
                   <SelectItem value="all" className="text-[9px] md:text-xs font-bold uppercase tracking-wider py-2 md:py-3 cursor-pointer">
                     All Statuses
                   </SelectItem>
-                  <SelectItem value="For_Rent" className="text-[9px] md:text-xs font-bold uppercase tracking-wider py-2 md:py-3 cursor-pointer">
-                    For Rent
-                  </SelectItem>
-                  <SelectItem value="For_Sale" className="text-[9px] md:text-xs font-bold uppercase tracking-wider py-2 md:py-3 cursor-pointer">
-                    For Sale
-                  </SelectItem>
+                  {dynamicStatuses.includes("For_Rent") && (
+                      <SelectItem value="For_Rent" className="text-[9px] md:text-xs font-bold uppercase tracking-wider py-2 md:py-3 cursor-pointer">
+                        For Rent
+                      </SelectItem>
+                    )}
+                    {dynamicStatuses.includes("For_Sale") && (
+                      <SelectItem value="For_Sale" className="text-[9px] md:text-xs font-bold uppercase tracking-wider py-2 md:py-3 cursor-pointer">
+                        For Sale
+                      </SelectItem>
+                    )}
                 </SelectContent>
               </Select>
             </div>
@@ -190,7 +219,7 @@ export default function PropertiesClient({
                   </SelectItem>
                   
                   {/* Map over the actual database locations dynamically */}
-                  {availableAreas.map((area) => (
+                  {dynamicAreas.map((area) => (
                     <SelectItem key={area} value={area} className="text-[9px] md:text-xs font-bold uppercase tracking-wider py-2 md:py-3 cursor-pointer">
                       {area}
                     </SelectItem>
@@ -310,5 +339,7 @@ export default function PropertiesClient({
     </div>
   );
 }
+
+
 
 
