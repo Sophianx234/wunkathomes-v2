@@ -21,6 +21,7 @@ import {
   House03Icon,
   Key01Icon,
   Location01Icon,
+  Cancel01Icon,
   MapingIcon,
   Search01Icon,
   Store01Icon,
@@ -75,8 +76,33 @@ export default function SearchBarClient({ availableAreas, availableTypes }: Sear
       if (facets.availableStatuses.length > 0) {
         setDynamicStatuses(facets.availableStatuses);
       }
+
+      setFilters(prev => {
+        let changed = false;
+        let updated = { ...prev };
+        if (prev.location && !facets.availableAreas.includes(prev.location)) {
+          updated.location = "";
+          changed = true;
+        }
+        if (prev.propertyType && !facets.availableTypes.includes(prev.propertyType)) {
+          updated.propertyType = "";
+          changed = true;
+        }
+        if (prev.status && !facets.availableStatuses.includes(prev.status)) {
+          updated.status = "";
+          changed = true;
+        }
+        return changed ? updated : prev;
+      });
     });
   }, [filters]);
+
+  const hasActiveFilters = filters.propertyType !== "" || filters.location !== "" || filters.status !== "";
+
+  const clearFilters = () => {
+    setFilters({ propertyType: "", location: "", status: "" });
+    router.push("/", { scroll: false });
+  };
 
   const handleSelectChange = (name: string, value: string) => {
     const val = value === "all" ? "" : value;
@@ -231,19 +257,23 @@ export default function SearchBarClient({ availableAreas, availableTypes }: Sear
                       <span className="truncate">Any Status</span>
                       <span className="scale-75 md:scale-100 flex items-center shrink-0"><HugeiconsIcon icon={Tag01Icon} size={14} className="text-zinc-400 dropdown-icon" /></span>
                     </div>
-                  </SelectItem>
+                  </SelectItem>{dynamicStatuses.includes("For_Rent") && (
+
                   <SelectItem value="For_Rent" className="cursor-pointer w-full [&>span]:w-full text-[10px] md:text-xs font-medium py-2 md:py-2.5 focus:bg-zinc-50 box-border">
                     <div className="flex w-full justify-between items-center pr-1 text-zinc-700 min-w-0 box-border">
                       <span className="truncate">For Rent</span>
                       <span className="scale-75 md:scale-100 flex items-center shrink-0"><HugeiconsIcon icon={Key01Icon} size={14} className="text-zinc-800 dropdown-icon" /></span>
                     </div>
                   </SelectItem>
+)}{dynamicStatuses.includes("For_Sale") && (
+
                   <SelectItem value="For_Sale" className="cursor-pointer w-full [&>span]:w-full text-[10px] md:text-xs font-medium py-2 md:py-2.5 focus:bg-zinc-50 box-border">
                     <div className="flex w-full justify-between items-center pr-1 text-zinc-700 min-w-0 box-border">
                       <span className="truncate">For Sale</span>
                       <span className="scale-75 md:scale-100 flex items-center shrink-0"><HugeiconsIcon icon={Tag01Icon} size={14} className="text-zinc-800 dropdown-icon" /></span>
                     </div>
                   </SelectItem>
+)}
                 </div>
               </SelectContent>
             </Select>
@@ -264,5 +294,8 @@ export default function SearchBarClient({ availableAreas, availableTypes }: Sear
     </section>
   );
 }
+
+
+
 
 
