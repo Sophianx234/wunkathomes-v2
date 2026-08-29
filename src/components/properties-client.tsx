@@ -99,7 +99,7 @@ export default function PropertiesClient({
     if (value === "All" || value === "all") {
       params.delete(key);
     } else {
-      params.set(key, value.toLowerCase());
+      params.set(key, value);
     }
     router.push(`?${params.toString()}`, { scroll: false });
   };
@@ -155,7 +155,7 @@ export default function PropertiesClient({
                   disabled={!isAvailable}
                   className={`whitespace-nowrap px-3 py-1.5 md:px-6 md:py-2.5 rounded-full text-[9px] md:text-xs font-bold uppercase tracking-widest transition-all duration-300 shrink-0 ${
                     !isAvailable
-                      ? "bg-zinc-100/30 text-zinc-300 cursor-not-allowed"
+                      ? "bg-zinc-100/30 hidden text-zinc-300 cursor-not-allowed"
                       : typeFilter.toLowerCase() === type.value.toLowerCase()
                       ? "bg-black text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] md:shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)] -translate-y-[1px]"
                       : "bg-zinc-100/50 text-zinc-500 hover:bg-zinc-200 hover:text-black"
@@ -176,7 +176,7 @@ export default function PropertiesClient({
                 onValueChange={(val) => {
                   updateUrl("status", val);
                 }}
-                value={statusFilter}
+                value={statusFilter === "All" || statusFilter === "all" ? "all" : (dynamicStatuses.find(s => s.toLowerCase() === statusFilter.toLowerCase()) || statusFilter)}
               >
                 <SelectTrigger className="w-full bg-zinc-50/50 border-zinc-200/60 rounded-full h-8 md:h-11 text-[9px] md:text-xs font-bold uppercase tracking-widest focus:ring-0 focus:ring-offset-0 [&_.dropdown-icon]:hidden min-w-0 box-border px-2 md:px-3">
                   <span className="scale-75 md:scale-100 flex items-center shrink-0">
@@ -212,7 +212,7 @@ export default function PropertiesClient({
                 onValueChange={(val) => {
                   updateUrl("location", val);
                 }}
-                value={locationFilter}
+                value={locationFilter === "All" || locationFilter === "all" ? "all" : (dynamicAreas.find(a => a.toLowerCase() === locationFilter.toLowerCase()) || locationFilter)}
               >
                 <SelectTrigger className="w-full bg-zinc-50/50 border-zinc-200/60 rounded-full h-8 md:h-11 text-[9px] md:text-xs font-bold uppercase tracking-widest focus:ring-0 focus:ring-offset-0 [&_.dropdown-icon]:hidden min-w-0 box-border px-2 md:px-3">
                   <span className="scale-75 md:scale-100 flex items-center shrink-0">
@@ -243,7 +243,7 @@ export default function PropertiesClient({
             {hasActiveFilters && (
               <button
                 onClick={clearFilters}
-                className="flex items-center justify-center size-8 md:size-10 rounded-full bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-colors shrink-0"
+                className="flex items-center justify-center size-8 md:size-10 rounded-full  transition-colors shrink-0"
                 title="Clear all filters"
               >
                 <HugeiconsIcon icon={Cancel01Icon} size={18} />
@@ -361,6 +361,9 @@ export default function PropertiesClient({
     </div>
   );
 }
+
+
+
 
 
 
