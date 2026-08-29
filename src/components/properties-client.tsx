@@ -189,6 +189,14 @@ export default function PropertiesClient({
                   <SelectValue placeholder="Status" className="truncate" />
                 </SelectTrigger>
                 <SelectContent className="bg-white rounded-lg md:rounded-lg">
+                {isPending ? (
+                  <div className="p-3 w-32 flex flex-col gap-2">
+                    <div className="h-3 w-full bg-zinc-100 animate-pulse rounded" />
+                    <div className="h-3 w-2/3 bg-zinc-100 animate-pulse rounded" />
+                    <div className="h-3 w-5/6 bg-zinc-100 animate-pulse rounded" />
+                  </div>
+                ) : (
+                  <>
                   <SelectItem value="all" className="text-[9px] md:text-xs font-bold uppercase tracking-wider py-2 md:py-3 cursor-pointer">
                     All Statuses
                   </SelectItem>
@@ -202,6 +210,8 @@ export default function PropertiesClient({
                         For Sale
                       </SelectItem>
                     )}
+                  </>
+                )}
                 </SelectContent>
               </Select>
             </div>
@@ -225,6 +235,14 @@ export default function PropertiesClient({
                   <SelectValue placeholder="Location" className="truncate" />
                 </SelectTrigger>
                 <SelectContent className="bg-white rounded-lg md:rounded-lg w-[calc(100vw-1rem)] sm:w-auto">
+                {isPending ? (
+                  <div className="p-3 w-32 flex flex-col gap-2">
+                    <div className="h-3 w-full bg-zinc-100 animate-pulse rounded" />
+                    <div className="h-3 w-2/3 bg-zinc-100 animate-pulse rounded" />
+                    <div className="h-3 w-5/6 bg-zinc-100 animate-pulse rounded" />
+                  </div>
+                ) : (
+                  <>
                   <SelectItem value="all" className="text-[9px] md:text-xs font-bold uppercase tracking-wider py-2 md:py-3 cursor-pointer">
                     All Areas
                   </SelectItem>
@@ -235,7 +253,8 @@ export default function PropertiesClient({
                       {area}
                     </SelectItem>
                   ))}
-                  
+                  </>
+                )}
                 </SelectContent>
               </Select>
             </div>
@@ -361,6 +380,7 @@ export default function PropertiesClient({
     </div>
   );
 }
+
 
 
 
