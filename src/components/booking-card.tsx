@@ -89,12 +89,12 @@ export default function BookingCard({ listing, isRent, hasBookedTour, bookedTour
   }
 
   return (
-    <div className="lg:col-span-4 lg:-translate-y-8 w-full lg:w-[300px] lg:ml-auto relative">
+    <div className="lg:col-span-4 lg:-translate-y-8 w-full lg:w-[350px] lg:ml-auto relative">
       
       {/* Unified Responsive Container */}
       <div className="
         fixed bottom-0 left-0 right-0 z-50 bg-white border-t-2 border-black p-4 rounded-t-2xl shadow-[0_-10px_40px_rgba(0,0,0,0.15)] transition-all duration-300 box-border w-full max-w-[100vw]
-        lg:sticky lg:top-32 lg:min-h-[460px] lg:p-8 lg:border-2 lg:border-black lg:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] lg:flex lg:flex-col lg:rounded-lg lg:bottom-auto lg:left-auto lg:right-auto lg:z-auto lg:max-w-none
+        lg:sticky lg:top-32 lg:min-h-[460px] lg:p-6 lg:border-2 lg:border-black lg:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] lg:flex lg:flex-col lg:rounded-lg lg:bottom-auto lg:left-auto lg:right-auto lg:z-auto lg:max-w-none
       ">
         
         {/* === Mobile Only: Header / Condensed View === */}
@@ -236,7 +236,7 @@ export default function BookingCard({ listing, isRent, hasBookedTour, bookedTour
                 <label className="text-[10px] lg:text-xs font-bold uppercase tracking-widest text-black">
                   Select a Date
                 </label>
-                <div className="w-full box-border border-2 border-black rounded-lg bg-white overflow-hidden flex justify-center p-2">
+                <div className="w-full box-border border-2 border-black rounded-lg bg-white overflow-hidden flex justify-center items-center p-1 md:p-2 [&>div]:scale-[0.85] [&>div]:origin-top sm:[&>div]:scale-100">
                     <Calendar
                       mode="single"
                       selected={selectedDate}
@@ -373,6 +373,7 @@ export default function BookingCard({ listing, isRent, hasBookedTour, bookedTour
     </div>
   );
 }
+
 
 
 
