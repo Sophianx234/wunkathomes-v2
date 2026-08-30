@@ -29,7 +29,7 @@ const initialState: TourActionState = { success: false, message: "" };
 
 import { Calendar } from "@/components/ui/calendar";
 
-export default function BookingCard({ listing, isRent, hasBookedTour, bookedTourDate, availableDays = [1, 2, 3, 4, 5] }: BookingCardProps & { availableDays?: number[], tourPrice?: number }) {
+export default function BookingCard({ listing, isRent, hasBookedTour, bookedTourDate, availableDays = [1, 2, 3, 4, 5], tourPrice = 50 }: BookingCardProps & { availableDays?: number[], tourPrice?: number }) {
   const [state, formAction, isPending] = useActionState(
     createTourAction,
     initialState,
@@ -168,6 +168,7 @@ export default function BookingCard({ listing, isRent, hasBookedTour, bookedTour
     </div>
   );
 }
+
 
 
 
