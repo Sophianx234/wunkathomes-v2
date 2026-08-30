@@ -16,6 +16,7 @@ import {
   Shield02Icon,
   Building03Icon,
   File01Icon,
+  CheckmarkBadge01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 

@@ -21,6 +21,7 @@ import {
   Shield02Icon,
   Logout01Icon,
   SparklesIcon,
+  CheckmarkBadge01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import Image from "next/image";
