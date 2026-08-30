@@ -724,14 +724,14 @@ export default function TenantDirectoryClient({
                 </section>
 
                 {/* Identity & Documents (Crucial for Onboarding, shown always but actionable in pending) */}
-                  <section>
+                  <section id="identity-documents-section" className="scroll-mt-4">
                     <div className="flex justify-between items-center mb-4">
                       <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-0">Identity & Documents</h3>
                       {!isEditingDetails && (
                         <Button 
-                          variant="ghost" 
+                          variant="outline" 
                           size="sm"
-                          className="h-7 text-[10px] font-bold uppercase tracking-widest text-zinc-500 hover:text-black"
+                          className="h-8 text-[11px] font-semibold text-zinc-700 bg-white hover:bg-zinc-50 border-zinc-200/80 rounded-md px-3"
                           onClick={() => {
                             setEditPhone(selectedTenant.user.phone || "");
                             setEditGhanaCard(selectedTenant.user.ghanaCardNumber || "");
@@ -919,9 +919,28 @@ export default function TenantDirectoryClient({
                         <strong className="text-zinc-900 block mb-1">Final Review & Identity Verification</strong>
                         Please review the signed Tenancy Agreement above. Ensure the tenant is physically present in the office with their original Ghana Card. Verify their identity to activate the lease and provision digital access for <span className="font-semibold text-zinc-900">{selectedTenant.lease.propertyName} ({selectedTenant.lease.unitNumber})</span>.
                       </p>
-                      <Button className="w-full h-10 bg-zinc-900 text-white hover:bg-zinc-800 text-[13px] font-medium rounded-lg" onClick={() => requestAction("verifyAndOnboard")}>
-                        <HugeiconsIcon icon={Key01Icon} size={14} className="mr-2" /> Verify Ghana Card & Grant Access
-                      </Button>
+                      <div className="flex flex-col sm:flex-row gap-3">
+                        <Button className="flex-1 h-10 bg-zinc-900 text-white hover:bg-zinc-800 text-[13px] font-medium rounded-lg shadow-sm" onClick={() => requestAction("verifyAndOnboard")}>
+                          <HugeiconsIcon icon={Key01Icon} size={14} className="mr-2" /> Verify & Grant Access
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          className="flex-1 sm:flex-none sm:w-auto h-10 text-[13px] font-medium rounded-lg bg-white border-zinc-200/80 shadow-sm hover:bg-zinc-50" 
+                          onClick={() => {
+                            setEditPhone(selectedTenant.user.phone || "");
+                            setEditGhanaCard(selectedTenant.user.ghanaCardNumber || "");
+                            setEditFacePhoto(null);
+                            setEditCardScan(null);
+                            setIsEditingDetails(true);
+                            setRemoveExistingFace(false);
+                            setRemoveExistingCard(false);
+                            const el = document.getElementById("identity-documents-section");
+                            if(el) el.scrollIntoView({ behavior: 'smooth' });
+                          }}
+                        >
+                          <HugeiconsIcon icon={Alert01Icon} size={14} className="mr-2" /> Edit Information
+                        </Button>
+                      </div>
                     </div>
                   </section>
                 )}
