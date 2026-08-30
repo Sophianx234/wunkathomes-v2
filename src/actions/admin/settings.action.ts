@@ -9,21 +9,22 @@ export async function getGlobalSettings() {
   let settings = await Settings.findOne({ id: "global" }).lean();
   
   if (!settings) {
-    settings = await Settings.create({ id: "global", tourAvailableDays: [1, 2, 3, 4, 5, 6] });
+    settings = await Settings.create({ id: "global", tourAvailableDays: [1, 2, 3, 4, 5, 6], tourPrice: 50 });
   }
   
   return JSON.parse(JSON.stringify(settings));
 }
 
-export async function updateTourAvailableDays(days: number[]) {
+export async function updateTourSettings(days: number[], price: number) {
   await connectToDatabase();
   await Settings.findOneAndUpdate(
     { id: "global" },
-    { tourAvailableDays: days },
+    { tourAvailableDays: days, tourPrice: price },
     { upsert: true, new: true }
   );
   
   revalidatePath("/", "layout");
   return { success: true };
 }
+
 

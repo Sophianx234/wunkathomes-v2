@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Body, Container, Head, Html, Tailwind, Hr, Img, Section, Text } from "react-email";
 
-const LOGO_URL = "https://wunkathomes.com/static/logo.png";
+const LOGO_URL = "https://res.cloudinary.com/dtytb8qrc/image/upload/v1761591015/home_yevjdg.png";
 
 export function EmailLayout({ children }: { children: React.ReactNode }) {
   return (

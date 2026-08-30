@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 
 async function SettingsLoader() {
   const settings = await getGlobalSettings();
-  return <TourSettingsClient initialDays={settings.tourAvailableDays} />;
+  return <TourSettingsClient initialDays={settings.tourAvailableDays} initialPrice={settings.tourPrice} />;
 }
 
 function TourTableSkeleton() {
@@ -99,4 +99,5 @@ export default async function TourManagementPage({
     </div>
   );
 }
+
 
