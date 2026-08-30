@@ -302,7 +302,15 @@ export default function BookingCard({ listing, isRent, hasBookedTour, bookedTour
                 </label>
                 <div className="relative w-full max-w-full box-border">
                   <input type="hidden" name="listingId" value={listing.id} />
-                  <input type="hidden" name="scheduledDate" value={selectedDate ? selectedDate.toISOString() : ""} />
+                  <input 
+                    type="hidden" 
+                    name="scheduledDate" 
+                    value={
+                      selectedDate 
+                        ? `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}` 
+                        : ""
+                    } 
+                  />
                   <input type="hidden" name="scheduledTime" value={selectedTime} />
                   
                   {/* Combine the country code with raw digits for the backend */}
