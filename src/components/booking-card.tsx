@@ -27,14 +27,16 @@ type SchedulingStep = "IDLE" | "DATE" | "PHONE" | "SUCCESS";
 
 const initialState: TourActionState = { success: false, message: "" };
 
-export default function BookingCard({ listing, isRent, hasBookedTour, bookedTourDate }: BookingCardProps) {
+import { Calendar } from "@/components/ui/calendar";
+
+export default function BookingCard({ listing, isRent, hasBookedTour, bookedTourDate, availableDays = [1, 2, 3, 4, 5] }: BookingCardProps & { availableDays?: number[] }) {
   const [state, formAction, isPending] = useActionState(
     createTourAction,
     initialState,
   );
 
   const [step, setStep] = useState<SchedulingStep>(hasBookedTour ? "SUCCESS" : "IDLE");
-  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedTime, setSelectedTime] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [countryCode, setCountryCode] = useState("+233");
@@ -53,7 +55,7 @@ export default function BookingCard({ listing, isRent, hasBookedTour, bookedTour
   const resetFlow = () => {
     if (hasBookedTour) return;
     setStep("IDLE");
-    setSelectedDate("");
+    setSelectedDate(undefined);
     setSelectedTime("");
     setPhoneNumber("");
   };
@@ -67,7 +69,7 @@ export default function BookingCard({ listing, isRent, hasBookedTour, bookedTour
     }
   }, [state]);
 
-  const displayDate = bookedTourDate || selectedDate;
+  const displayDate = bookedTourDate || (selectedDate ? selectedDate.toLocaleDateString() : "");
 
   const isSale = listing.listingType === "For_Sale";
   const isShortLet = listing.listingType === "Short_Let";
@@ -234,18 +236,19 @@ export default function BookingCard({ listing, isRent, hasBookedTour, bookedTour
                 <label className="text-[10px] lg:text-xs font-bold uppercase tracking-widest text-black">
                   Select a Date
                 </label>
-                <div className="relative w-full min-w-0 max-w-full box-border">
-                  <span className="absolute left-3 lg:left-4 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none scale-90 lg:scale-100 flex items-center">
-                    <HugeiconsIcon icon={Calendar01Icon} size={16} />
-                  </span>
-                  <input
-                    type="date"
-                    value={selectedDate}
-                    onChange={(e) => setSelectedDate(e.target.value)}
-                    className="block w-full min-w-0 max-w-full box-border py-2.5 lg:py-3.5 pl-9 lg:pl-10 pr-3 lg:pr-4 border-2 border-black rounded-lg text-xs lg:text-sm font-bold focus:outline-none focus:ring-2 focus:ring-black/20 text-black bg-white m-0 appearance-none"
-                    min={new Date().toISOString().split("T")[0]}
-                  />
-                </div>
+                <div className="w-full box-border border-2 border-black rounded-lg bg-white overflow-hidden flex justify-center p-2">
+                    <Calendar
+                      mode="single"
+                      selected={selectedDate}
+                      onSelect={setSelectedDate}
+                      disabled={(date) => {
+                        const isPast = date < new Date(new Date().setHours(0, 0, 0, 0));
+                        const day = date.getDay();
+                        return isPast || !availableDays.includes(day);
+                      }}
+                      className="rounded-md border-0 pointer-events-auto"
+                    />
+                  </div>
               </div>
 
               <div className="flex flex-col gap-1 w-full min-w-0 max-w-full box-border">
@@ -294,7 +297,7 @@ export default function BookingCard({ listing, isRent, hasBookedTour, bookedTour
                 </label>
                 <div className="relative w-full max-w-full box-border">
                   <input type="hidden" name="listingId" value={listing.id} />
-                  <input type="hidden" name="scheduledDate" value={selectedDate} />
+                  <input type="hidden" name="scheduledDate" value={selectedDate ? selectedDate.toISOString() : ""} />
                   <input type="hidden" name="scheduledTime" value={selectedTime} />
                   
                   {/* Combine the country code with raw digits for the backend */}
@@ -370,3 +373,6 @@ export default function BookingCard({ listing, isRent, hasBookedTour, bookedTour
     </div>
   );
 }
+
+
+

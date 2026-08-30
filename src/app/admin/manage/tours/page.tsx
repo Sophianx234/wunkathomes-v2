@@ -3,9 +3,16 @@ import { connectToDatabase } from "@/config/DbConnect";
 import Tour from "@/models/tour";
 import Listing from "@/models/listing";
 import Property from "@/models/property";
+import TourSettingsClient from "@/components/tour-settings-client";
+import { getGlobalSettings } from "@/actions/admin/settings.action";
 import TourTable, { TourRecord } from "@/components/tour-table"; 
 
 export const dynamic = "force-dynamic";
+
+async function SettingsLoader() {
+  const settings = await getGlobalSettings();
+  return <TourSettingsClient initialDays={settings.tourAvailableDays} />;
+}
 
 function TourTableSkeleton() {
   return (
@@ -83,6 +90,8 @@ export default async function TourManagementPage({
   return (
     <div className="min-h-screen bg-[#FAFAFA] p-6 lg:pb-10 font-sans">
       <div className="max-w-[1400px] mx-auto">
+        <Suspense fallback={<div className="h-32 bg-zinc-100 rounded-xl mb-6 animate-pulse" />}><SettingsLoader />
+        </Suspense>
         <Suspense key={currentPage} fallback={<TourTableSkeleton />}>
           <DataLoader page={currentPage} />
         </Suspense>
@@ -90,3 +99,4 @@ export default async function TourManagementPage({
     </div>
   );
 }
+

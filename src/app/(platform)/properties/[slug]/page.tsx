@@ -27,6 +27,7 @@ import { notFound } from "next/navigation";
 
 import { connectToDatabase } from "@/config/DbConnect";
 import Review from "@/models/review";
+import { getGlobalSettings } from "@/actions/admin/settings.action";
 
 import BookingCard from "@/components/booking-card";
 import ImageGallery from "@/components/image-gallery";
