@@ -101,9 +101,16 @@ The provisioning flow from User Checkout to Admin Activation is designed as a "W
 - **The 5-Second Standard:** When an Admin or Tenant clicks "Unlock", the command is fired instantly and the UI transitions into a green "Unlocked (5s)" countdown timer, mimicking the physical clutch disengaging and re-engaging 5 seconds later. The UI specifically avoids saying "Status: Unlocked" because the data would instantly become stale.
 - The `Lock State` and `Door State` columns in the Live Monitoring dashboard gracefully render "Auto (Clutch)" and "No Sensor" badges for these devices instead of displaying confusing "Unknown" states.
 
+### 14. Additional UI & Platform Enhancements (August)
+While working on this branch, several critical platform improvements were made alongside the Tuya integration:
+- **Search Auto-Healing:** Added intelligent URL and state auto-healing to both the Home Page search bar and the `/properties` page filters. If a user selects a combination of filters that yields 0 results (e.g. restrictive property type + invalid location), the UI instantly self-heals by aggressively pruning the invalid parameter, preventing "no results" dead ends.
+- **Dynamic Tour Scheduling:** Created a global `Settings` collection for the platform. Admins can now explicitly select their `tourAvailableDays` (e.g., Mon, Wed, Fri) via the `/admin/manage/tours` dashboard.
+- **Booking Calendar Constraints:** Ripped out the native HTML date inputs from `BookingCard` and integrated the Shadcn `<Calendar />`. The component is piped directly to the admin settings, physically disabling and graying out past dates and any days of the week the admin is unavailable. The `BookingCard` responsive styling was also rebuilt to seamlessly fit the Calendar without horizontal clipping (`lg:w-[350px]`, `lg:p-6`, and mobile scaling).
+- **Cache Synchronization:** Implemented global `revalidatePath("/", "layout")` logic inside the settings update action to perfectly sync the database state with the heavily cached public routing tree.
+
 ---
 
-## 🚀 Next Steps (For the Next Agent/Developer)
+## ?? Next Steps (For the Next Agent/Developer)
 
 The Admin Phase (Fleet Management, Tenant PIN Provisioning, and Emergency Access) is **100% complete**. 
 If you are picking up this project, you need to build the **User/Tenant Phase**:
@@ -115,3 +122,5 @@ Create a reusable React component (e.g., `src/components/smartlock/tenant-contro
 
 ### Step 2: Subscription & Lease Verification Middleware
 Before the server executes the Tuya "Unlock" command triggered by a user, you must query the database to ensure that the `User` has an **Active Lease** or **Subscription** for the `Property` linked to that specific `SmartLock`. If their lease is expired, suspended, or unpaid, the backend must firmly reject the unlock request.
+
+
