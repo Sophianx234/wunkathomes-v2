@@ -186,9 +186,9 @@ export default function TenantDirectoryClient({
   const [confirmAction, setConfirmAction] = useState<ActionType | null>(null);
   const [vendorPinName, setVendorPinName] = useState("");
   const [vendorPinHours, setVendorPinHours] = useState(2);
-  const [adminGhanaCardNumber, setAdminGhanaCardNumber] = useState("");
-  const [adminFacePhoto, setAdminFacePhoto] = useState<File | null>(null);
-  const [adminCardScan, setAdminCardScan] = useState<File | null>(null);
+  // Removed old verify modal states
+  const [removeExistingFace, setRemoveExistingFace] = useState(false);
+  const [removeExistingCard, setRemoveExistingCard] = useState(false);
   const [pinToRevoke, setPinToRevoke] = useState<{ pinId: string; name: string } | null>(null);
   const [newPinResult, setNewPinResult] = useState<{ pin: string; name: string } | null>(null);
 
@@ -257,6 +257,8 @@ export default function TenantDirectoryClient({
       if (editGhanaCard !== (selectedTenant.user.ghanaCardNumber || "")) formData.append("ghanaCardNumber", editGhanaCard);
       if (editFacePhoto) formData.append("facePhoto", editFacePhoto);
       if (editCardScan) formData.append("cardScan", editCardScan);
+      if (removeExistingFace && !editFacePhoto) formData.append("removeFacePhoto", "true");
+      if (removeExistingCard && !editCardScan) formData.append("removeCardScan", "true");
 
       const result = await updateTenantDetailsAction(formData);
       if (result.success) {
@@ -264,6 +266,8 @@ export default function TenantDirectoryClient({
         setIsEditingDetails(false);
         setEditFacePhoto(null);
         setEditCardScan(null);
+        setRemoveExistingFace(false);
+        setRemoveExistingCard(false);
       } else {
         toast.error(result.error || "Failed to update tenant details.");
       }
@@ -277,26 +281,12 @@ export default function TenantDirectoryClient({
     startTransition(async () => {
       let result;
       if (confirmAction === "verifyAndOnboard") {
-        const isAlreadyVerified = selectedTenant.user.kycStatus === "Verified";
-        
-        if (!isAlreadyVerified && !adminGhanaCardNumber.trim()) {
-          toast.error("Please enter the physical Ghana Card number.");
-          setConfirmAction(null);
-          return;
-        }
-        
-        const formData = new FormData();
-        formData.append("leaseId", selectedTenant.id);
-        formData.append("userId", selectedTenant.user.id);
-        formData.append("ghanaCardNumber", isAlreadyVerified ? selectedTenant.user.ghanaCardNumber : adminGhanaCardNumber.trim());
-        
-        if (!isAlreadyVerified) {
-          if (adminFacePhoto) formData.append("facePhoto", adminFacePhoto);
-          if (adminCardScan) formData.append("cardScan", adminCardScan);
-        }
-        
-        result = await verifyAndOnboardTenantAction(formData);
-      } else if (confirmAction === "approve") {
+          const formData = new FormData();
+          formData.append("leaseId", selectedTenant.id);
+          formData.append("userId", selectedTenant.user.id);
+          formData.append("ghanaCardNumber", selectedTenant.user.ghanaCardNumber || "");
+          result = await verifyAndOnboardTenantAction(formData);
+        } else if (confirmAction === "approve") {
         result = await approveTenantPaperwork(selectedTenant.id, selectedTenant.user.id);
       } else if (confirmAction === "reject") {
         result = await rejectTenantPaperwork(selectedTenant.id, selectedTenant.user.id);
@@ -737,7 +727,7 @@ export default function TenantDirectoryClient({
                   <section>
                     <div className="flex justify-between items-center mb-4">
                       <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-0">Identity & Documents</h3>
-                      {selectedTenant.pipelineStage === "active" && !isEditingDetails && (
+                      {!isEditingDetails && (
                         <Button 
                           variant="ghost" 
                           size="sm"
@@ -748,6 +738,8 @@ export default function TenantDirectoryClient({
                             setEditFacePhoto(null);
                             setEditCardScan(null);
                             setIsEditingDetails(true);
+                            setRemoveExistingFace(false);
+                            setRemoveExistingCard(false);
                           }}
                         >
                           <HugeiconsIcon icon={Alert01Icon} size={12} className="mr-1.5" /> Edit Details
@@ -759,7 +751,7 @@ export default function TenantDirectoryClient({
                             variant="ghost" 
                             size="sm"
                             className="h-7 text-[10px] font-bold uppercase tracking-widest text-zinc-500 hover:text-black"
-                            onClick={() => setIsEditingDetails(false)}
+                            onClick={() => { setIsEditingDetails(false); setRemoveExistingFace(false); setRemoveExistingCard(false); }}
                             disabled={isSavingEdit}
                           >
                             Cancel
@@ -815,36 +807,81 @@ export default function TenantDirectoryClient({
                       {/* Identity Photos */}
                       {(selectedTenant.user.securityPhotoUrl || selectedTenant.user.ghanaCardUrl || isEditingDetails) && (
                         <div className="flex flex-col sm:flex-row gap-3">
-                          {(selectedTenant.user.securityPhotoUrl || isEditingDetails) && (
-                            <div className="flex-1 p-3.5 rounded-lg border border-zinc-200/60 bg-white">
-                              <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest mb-2.5">Security Photo (Face)</p>
-                              {isEditingDetails ? (
-                                <Input 
-                                  type="file" 
-                                  accept="image/*" 
-                                  onChange={(e) => setEditFacePhoto(e.target.files?.[0] || null)}
-                                  className="text-[10px] file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-zinc-100 file:text-zinc-700" 
-                                />
+                          {/* Face Photo */}
+                          {(!removeExistingFace && selectedTenant.user.securityPhotoUrl || isEditingDetails) && (
+                            <div className="flex-1 p-3.5 rounded-lg border border-zinc-200/60 bg-white flex flex-col">
+                              <div className="flex justify-between items-center mb-2.5">
+                                <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest">Security Photo (Face)</p>
+                                {isEditingDetails && (selectedTenant.user.securityPhotoUrl || editFacePhoto) && (
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm"
+                                    className="h-5 px-1.5 text-[9px] text-rose-500 hover:text-rose-600 hover:bg-rose-50"
+                                    onClick={() => {
+                                      setEditFacePhoto(null);
+                                      if (selectedTenant.user.securityPhotoUrl) setRemoveExistingFace(true);
+                                    }}
+                                  >
+                                    Remove
+                                  </Button>
+                                )}
+                              </div>
+                              
+                              {isEditingDetails && !editFacePhoto && (!selectedTenant.user.securityPhotoUrl || removeExistingFace) ? (
+                                <div className="flex-1 flex flex-col justify-center items-center p-4 border-2 border-dashed border-zinc-200 rounded-lg bg-zinc-50 hover:bg-zinc-100 transition-colors relative cursor-pointer group">
+                                  <HugeiconsIcon icon={Alert01Icon} size={20} className="text-zinc-400 group-hover:text-zinc-500 mb-2" />
+                                  <p className="text-[10px] font-medium text-zinc-500 text-center">Tap to Take Selfie or Upload</p>
+                                  <Input 
+                                    type="file" 
+                                    accept="image/*" 
+                                    capture="user"
+                                    onChange={(e) => setEditFacePhoto(e.target.files?.[0] || null)}
+                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+                                  />
+                                </div>
                               ) : (
-                                <div className="h-40 w-full bg-zinc-50 rounded-md border border-zinc-200/60 overflow-hidden cursor-pointer hover:opacity-90 transition-opacity" onClick={() => setExpandedImage(selectedTenant.user.securityPhotoUrl)}>
-                                  <img src={selectedTenant.user.securityPhotoUrl} alt="Security Photo" className="w-full h-full object-cover" />
+                                <div className="h-40 w-full bg-zinc-50 rounded-md border border-zinc-200/60 overflow-hidden cursor-pointer hover:opacity-90 transition-opacity" onClick={() => !isEditingDetails && setExpandedImage(editFacePhoto ? URL.createObjectURL(editFacePhoto) : selectedTenant.user.securityPhotoUrl!)}>
+                                  <img src={editFacePhoto ? URL.createObjectURL(editFacePhoto) : selectedTenant.user.securityPhotoUrl} alt="Security Photo" className="w-full h-full object-cover" />
                                 </div>
                               )}
                             </div>
                           )}
-                          {(selectedTenant.user.ghanaCardUrl || isEditingDetails) && (
-                            <div className="flex-1 p-3.5 rounded-lg border border-zinc-200/60 bg-white">
-                              <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest mb-2.5">Ghana Card Scan</p>
-                              {isEditingDetails ? (
-                                <Input 
-                                  type="file" 
-                                  accept="image/*" 
-                                  onChange={(e) => setEditCardScan(e.target.files?.[0] || null)}
-                                  className="text-[10px] file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-zinc-100 file:text-zinc-700" 
-                                />
+                          
+                          {/* Card Scan */}
+                          {(!removeExistingCard && selectedTenant.user.ghanaCardUrl || isEditingDetails) && (
+                            <div className="flex-1 p-3.5 rounded-lg border border-zinc-200/60 bg-white flex flex-col">
+                              <div className="flex justify-between items-center mb-2.5">
+                                <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest">Ghana Card Scan</p>
+                                {isEditingDetails && (selectedTenant.user.ghanaCardUrl || editCardScan) && (
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm"
+                                    className="h-5 px-1.5 text-[9px] text-rose-500 hover:text-rose-600 hover:bg-rose-50"
+                                    onClick={() => {
+                                      setEditCardScan(null);
+                                      if (selectedTenant.user.ghanaCardUrl) setRemoveExistingCard(true);
+                                    }}
+                                  >
+                                    Remove
+                                  </Button>
+                                )}
+                              </div>
+                              
+                              {isEditingDetails && !editCardScan && (!selectedTenant.user.ghanaCardUrl || removeExistingCard) ? (
+                                <div className="flex-1 flex flex-col justify-center items-center p-4 border-2 border-dashed border-zinc-200 rounded-lg bg-zinc-50 hover:bg-zinc-100 transition-colors relative cursor-pointer group">
+                                  <HugeiconsIcon icon={Alert01Icon} size={20} className="text-zinc-400 group-hover:text-zinc-500 mb-2" />
+                                  <p className="text-[10px] font-medium text-zinc-500 text-center">Tap to Take Photo or Upload</p>
+                                  <Input 
+                                    type="file" 
+                                    accept="image/*" 
+                                    capture="environment"
+                                    onChange={(e) => setEditCardScan(e.target.files?.[0] || null)}
+                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+                                  />
+                                </div>
                               ) : (
-                                <div className="h-40 w-full bg-zinc-50 rounded-md border border-zinc-200/60 overflow-hidden cursor-pointer hover:opacity-90 transition-opacity" onClick={() => setExpandedImage(selectedTenant.user.ghanaCardUrl)}>
-                                  <img src={selectedTenant.user.ghanaCardUrl} alt="Ghana Card Scan" className="w-full h-full object-cover" />
+                                <div className="h-40 w-full bg-zinc-50 rounded-md border border-zinc-200/60 overflow-hidden cursor-pointer hover:opacity-90 transition-opacity" onClick={() => !isEditingDetails && setExpandedImage(editCardScan ? URL.createObjectURL(editCardScan) : selectedTenant.user.ghanaCardUrl!)}>
+                                  <img src={editCardScan ? URL.createObjectURL(editCardScan) : selectedTenant.user.ghanaCardUrl} alt="Ghana Card Scan" className="w-full h-full object-cover" />
                                 </div>
                               )}
                             </div>
@@ -974,70 +1011,6 @@ export default function TenantDirectoryClient({
                         This tenant is already verified with a valid Ghana Card on file. You do not need to re-upload their documents.
                       </p>
                     </div>
-                  </div>
-                </div>
-              )}
-
-              {confirmAction === "verifyAndOnboard" && selectedTenant?.user.kycStatus !== "Verified" && (
-                <div className="mt-4 space-y-4">
-                  <div>
-                    <label className="text-xs font-semibold text-zinc-700 mb-1.5 block">Physical Ghana Card Number</label>
-                    <Input 
-                      value={adminGhanaCardNumber} 
-                      onChange={e => setAdminGhanaCardNumber(e.target.value)} 
-                      placeholder="e.g. GHA-123456789-0" 
-                      className="h-10 text-[13px] border-zinc-200/80 bg-white" 
-                    />
-                    <p className="text-[11px] text-zinc-500 mt-1.5">For legal compliance, record the exact ID number shown on the physical card.</p>
-                  </div>
-                  <div>
-                    <label className="text-xs font-semibold text-zinc-700 mb-1.5 block">Security Photo (Tenant's Face)</label>
-                    <Input 
-                      type="file"
-                      accept="image/*"
-                      capture="user"
-                      onChange={e => setAdminFacePhoto(e.target.files?.[0] || null)}
-                      className="text-[13px] border-zinc-200/80 bg-white file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-zinc-100 file:text-zinc-700 hover:file:bg-zinc-200 cursor-pointer" 
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs font-semibold text-zinc-700 mb-1.5 block">Ghana Card Scan (Front)</label>
-                    <Input 
-                      type="file"
-                      accept="image/*"
-                      capture="environment"
-                      onChange={e => setAdminCardScan(e.target.files?.[0] || null)}
-                      className="text-[13px] border-zinc-200/80 bg-white file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-zinc-100 file:text-zinc-700 hover:file:bg-zinc-200 cursor-pointer" 
-                    />
-                  </div>
-                </div>
-              )}
-
-              {confirmAction === "vendorPin" && (
-                <div className="mt-4 space-y-4">
-                  <div>
-                    <label className="text-xs font-semibold text-zinc-700 mb-1.5 block">Visitor / Vendor Name</label>
-                    <Input 
-                      value={vendorPinName} 
-                      onChange={e => setVendorPinName(e.target.value)} 
-                      placeholder="e.g. John - Plumber" 
-                      className="h-9 text-[13px] border-zinc-200/80 bg-white" 
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs font-semibold text-zinc-700 mb-1.5 block">Access Duration</label>
-                    <Select value={vendorPinHours.toString()} onValueChange={v => setVendorPinHours(Number(v))}>
-                      <SelectTrigger className="h-9 text-[13px] border-zinc-200/80 bg-white">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="1">1 Hour</SelectItem>
-                        <SelectItem value="2">2 Hours</SelectItem>
-                        <SelectItem value="4">4 Hours</SelectItem>
-                        <SelectItem value="8">8 Hours</SelectItem>
-                        <SelectItem value="24">24 Hours</SelectItem>
-                      </SelectContent>
-                    </Select>
                   </div>
                 </div>
               )}

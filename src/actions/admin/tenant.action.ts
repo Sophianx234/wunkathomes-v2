@@ -110,6 +110,8 @@ export async function verifyAndOnboardTenantAction(formData: FormData) {
     const rawGhanaCardNumber = formData.get("ghanaCardNumber") as string;
     const facePhotoFile = formData.get("facePhoto") as File | null;
     const cardScanFile = formData.get("cardScan") as File | null;
+    const removeFacePhoto = formData.get("removeFacePhoto") === "true";
+    const removeCardScan = formData.get("removeCardScan") === "true";
 
     if (!rawLeaseId || !rawUserId || !rawGhanaCardNumber || typeof rawGhanaCardNumber !== 'string') {
       throw new Error("Missing required fields or invalid Ghana Card Number.");
@@ -221,12 +223,16 @@ export async function updateTenantDetailsAction(formData: FormData) {
 
     const { uploadToCloudinary } = await import("@/lib/cloudinary");
 
-    if (facePhotoFile && facePhotoFile.size > 0) {
+    if (removeFacePhoto) {
+      user.securityPhotoUrl = "";
+    } else if (facePhotoFile && facePhotoFile.size > 0) {
       const facePhotoUrl = await uploadToCloudinary(facePhotoFile, "wunkathomes/kyc/faces");
       user.securityPhotoUrl = facePhotoUrl;
     }
 
-    if (cardScanFile && cardScanFile.size > 0) {
+    if (removeCardScan) {
+      user.ghanaCardUrl = "";
+    } else if (cardScanFile && cardScanFile.size > 0) {
       const cardScanUrl = await uploadToCloudinary(cardScanFile, "wunkathomes/kyc/cards");
       user.ghanaCardUrl = cardScanUrl;
     }
