@@ -62,7 +62,7 @@ import { formatCurrency } from "./transactions-client";
 import { DocumentViewer } from "./ui/document-viewer";
 import { TenancyDocument } from "./lease-document viewer";
 
-import { toggleAccountStatus, verifyAndOnboardTenantAction } from "@/actions/admin/tenant.action";
+import { toggleAccountStatus, verifyAndOnboardTenantAction, updateTenantDetailsAction } from "@/actions/admin/tenant.action";
 import {
   activateLeaseAndGeneratePin,
   approveTenantPaperwork,
@@ -191,7 +191,15 @@ export default function TenantDirectoryClient({
   const [adminCardScan, setAdminCardScan] = useState<File | null>(null);
   const [pinToRevoke, setPinToRevoke] = useState<{ pinId: string; name: string } | null>(null);
   const [newPinResult, setNewPinResult] = useState<{ pin: string; name: string } | null>(null);
-  
+
+  // Edit-in-place state
+  const [isEditingDetails, setIsEditingDetails] = useState(false);
+  const [editPhone, setEditPhone] = useState("");
+  const [editGhanaCard, setEditGhanaCard] = useState("");
+  const [editFacePhoto, setEditFacePhoto] = useState<File | null>(null);
+  const [editCardScan, setEditCardScan] = useState<File | null>(null);
+  const [isSavingEdit, startEditTransition] = useTransition();
+
   const [isPending, startTransition] = useTransition();
 
   const [unlockCountdown, setUnlockCountdown] = useState<number | null>(null);
@@ -239,6 +247,28 @@ export default function TenantDirectoryClient({
   const isLegalApproved =
     selectedTenant?.checklist.ghanaCardVerified === "Verified" &&
     selectedTenant?.checklist.leaseSigned === "Signed";
+
+  const saveEditedDetails = () => {
+    if (!selectedTenant) return;
+    startEditTransition(async () => {
+      const formData = new FormData();
+      formData.append("userId", selectedTenant.user.id);
+      if (editPhone !== selectedTenant.user.phone) formData.append("phone", editPhone);
+      if (editGhanaCard !== (selectedTenant.user.ghanaCardNumber || "")) formData.append("ghanaCardNumber", editGhanaCard);
+      if (editFacePhoto) formData.append("facePhoto", editFacePhoto);
+      if (editCardScan) formData.append("cardScan", editCardScan);
+
+      const result = await updateTenantDetailsAction(formData);
+      if (result.success) {
+        toast.success(result.message);
+        setIsEditingDetails(false);
+        setEditFacePhoto(null);
+        setEditCardScan(null);
+      } else {
+        toast.error(result.error || "Failed to update tenant details.");
+      }
+    });
+  };
 
   const executeConfirmedAction = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -704,46 +734,125 @@ export default function TenantDirectoryClient({
                 </section>
 
                 {/* Identity & Documents (Crucial for Onboarding, shown always but actionable in pending) */}
-                <section>
-                  <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-4">Identity & Documents</h3>
-                  <div className="space-y-3">
-                    {/* ID Card */}
-                    <div className="flex items-center justify-between p-3.5 rounded-lg border border-zinc-200/60 bg-white">
-                      <div className="flex items-center gap-4">
-                        <div className="h-12 w-12 bg-zinc-50 rounded-md border border-zinc-200/60 flex items-center justify-center">
-                          <HugeiconsIcon icon={selectedTenant.user.ghanaCardNumber && selectedTenant.user.ghanaCardNumber !== "Not Provided" ? CheckmarkCircle01Icon : Clock01Icon} size={18} className="text-zinc-400" />
+                  <section>
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-0">Identity & Documents</h3>
+                      {selectedTenant.pipelineStage === "active" && !isEditingDetails && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          className="h-7 text-[10px] font-bold uppercase tracking-widest text-zinc-500 hover:text-black"
+                          onClick={() => {
+                            setEditPhone(selectedTenant.user.phone || "");
+                            setEditGhanaCard(selectedTenant.user.ghanaCardNumber || "");
+                            setEditFacePhoto(null);
+                            setEditCardScan(null);
+                            setIsEditingDetails(true);
+                          }}
+                        >
+                          <HugeiconsIcon icon={Alert01Icon} size={12} className="mr-1.5" /> Edit Details
+                        </Button>
+                      )}
+                      {isEditingDetails && (
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            className="h-7 text-[10px] font-bold uppercase tracking-widest text-zinc-500 hover:text-black"
+                            onClick={() => setIsEditingDetails(false)}
+                            disabled={isSavingEdit}
+                          >
+                            Cancel
+                          </Button>
+                          <Button 
+                            size="sm"
+                            className="h-7 text-[10px] font-bold uppercase tracking-widest bg-black text-white hover:bg-zinc-800"
+                            onClick={saveEditedDetails}
+                            disabled={isSavingEdit}
+                          >
+                            {isSavingEdit ? "Saving..." : "Save Changes"}
+                          </Button>
                         </div>
-                        <div>
-                          <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest mb-0.5">National ID</p>
-                          <p className="font-mono text-[13px] font-medium text-zinc-900 tracking-tight">{selectedTenant.user.ghanaCardNumber || "Not Provided"}</p>
-                        </div>
-                      </div>
-                      <div>{selectedTenant.checklist.ghanaCardVerified === "Verified" ? <HugeiconsIcon icon={CheckmarkCircle01Icon} size={18} /> : <HugeiconsIcon icon={Clock01Icon} size={18} />}</div>
+                      )}
                     </div>
+                    
+                    <div className="space-y-3">
+                      {isEditingDetails && (
+                        <div className="p-3.5 rounded-lg border border-zinc-200/60 bg-white space-y-3">
+                          <div>
+                            <label className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest mb-1.5 block">Phone Number</label>
+                            <Input 
+                              value={editPhone} 
+                              onChange={(e) => setEditPhone(e.target.value)} 
+                              className="h-9 text-[13px]"
+                            />
+                          </div>
+                        </div>
+                      )}
 
-                    {/* Identity Photos */}
-                    {(selectedTenant.user.securityPhotoUrl || selectedTenant.user.ghanaCardUrl) && (
-                      <div className="flex flex-col sm:flex-row gap-3">
-                        {selectedTenant.user.securityPhotoUrl && (
-                          <div className="flex-1 p-3.5 rounded-lg border border-zinc-200/60 bg-white">
-                            <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest mb-2.5">Security Photo (Face)</p>
-                            <div className="h-40 w-full bg-zinc-50 rounded-md border border-zinc-200/60 overflow-hidden cursor-pointer hover:opacity-90 transition-opacity" onClick={() => setExpandedImage(selectedTenant.user.securityPhotoUrl)}>
-                              <img src={selectedTenant.user.securityPhotoUrl} alt="Security Photo" className="w-full h-full object-cover" />
-                            </div>
+                      {/* ID Card */}
+                      <div className="flex items-center justify-between p-3.5 rounded-lg border border-zinc-200/60 bg-white">
+                        <div className="flex items-center gap-4 w-full">
+                          <div className="h-12 w-12 shrink-0 bg-zinc-50 rounded-md border border-zinc-200/60 flex items-center justify-center">
+                            <HugeiconsIcon icon={selectedTenant.user.ghanaCardNumber && selectedTenant.user.ghanaCardNumber !== "Not Provided" ? CheckmarkCircle01Icon : Clock01Icon} size={18} className="text-zinc-400" />
                           </div>
-                        )}
-                        {selectedTenant.user.ghanaCardUrl && (
-                          <div className="flex-1 p-3.5 rounded-lg border border-zinc-200/60 bg-white">
-                            <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest mb-2.5">Ghana Card Scan</p>
-                            <div className="h-40 w-full bg-zinc-50 rounded-md border border-zinc-200/60 overflow-hidden cursor-pointer hover:opacity-90 transition-opacity" onClick={() => setExpandedImage(selectedTenant.user.ghanaCardUrl)}>
-                              <img src={selectedTenant.user.ghanaCardUrl} alt="Ghana Card Scan" className="w-full h-full object-cover" />
-                            </div>
+                          <div className="w-full">
+                            <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest mb-0.5">National ID</p>
+                            {isEditingDetails ? (
+                              <Input 
+                                value={editGhanaCard} 
+                                onChange={(e) => setEditGhanaCard(e.target.value)} 
+                                className="h-8 text-[13px] font-mono mt-1"
+                              />
+                            ) : (
+                              <p className="font-mono text-[13px] font-medium text-zinc-900 tracking-tight">{selectedTenant.user.ghanaCardNumber || "Not Provided"}</p>
+                            )}
                           </div>
-                        )}
+                        </div>
+                        {!isEditingDetails && <div>{selectedTenant.checklist.ghanaCardVerified === "Verified" ? <HugeiconsIcon icon={CheckmarkCircle01Icon} size={18} /> : <HugeiconsIcon icon={Clock01Icon} size={18} />}</div>}
                       </div>
-                    )}
-
-                    {/* Lease Agreement */}
+  
+                      {/* Identity Photos */}
+                      {(selectedTenant.user.securityPhotoUrl || selectedTenant.user.ghanaCardUrl || isEditingDetails) && (
+                        <div className="flex flex-col sm:flex-row gap-3">
+                          {(selectedTenant.user.securityPhotoUrl || isEditingDetails) && (
+                            <div className="flex-1 p-3.5 rounded-lg border border-zinc-200/60 bg-white">
+                              <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest mb-2.5">Security Photo (Face)</p>
+                              {isEditingDetails ? (
+                                <Input 
+                                  type="file" 
+                                  accept="image/*" 
+                                  onChange={(e) => setEditFacePhoto(e.target.files?.[0] || null)}
+                                  className="text-[10px] file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-zinc-100 file:text-zinc-700" 
+                                />
+                              ) : (
+                                <div className="h-40 w-full bg-zinc-50 rounded-md border border-zinc-200/60 overflow-hidden cursor-pointer hover:opacity-90 transition-opacity" onClick={() => setExpandedImage(selectedTenant.user.securityPhotoUrl)}>
+                                  <img src={selectedTenant.user.securityPhotoUrl} alt="Security Photo" className="w-full h-full object-cover" />
+                                </div>
+                              )}
+                            </div>
+                          )}
+                          {(selectedTenant.user.ghanaCardUrl || isEditingDetails) && (
+                            <div className="flex-1 p-3.5 rounded-lg border border-zinc-200/60 bg-white">
+                              <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest mb-2.5">Ghana Card Scan</p>
+                              {isEditingDetails ? (
+                                <Input 
+                                  type="file" 
+                                  accept="image/*" 
+                                  onChange={(e) => setEditCardScan(e.target.files?.[0] || null)}
+                                  className="text-[10px] file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-zinc-100 file:text-zinc-700" 
+                                />
+                              ) : (
+                                <div className="h-40 w-full bg-zinc-50 rounded-md border border-zinc-200/60 overflow-hidden cursor-pointer hover:opacity-90 transition-opacity" onClick={() => setExpandedImage(selectedTenant.user.ghanaCardUrl)}>
+                                  <img src={selectedTenant.user.ghanaCardUrl} alt="Ghana Card Scan" className="w-full h-full object-cover" />
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )}
+  
+                      {/* Lease Agreement */}
                     <div className="flex items-center justify-between p-3.5 rounded-lg border border-zinc-200/60 bg-white">
                       <div className="flex items-center gap-4">
                         <div className="h-12 w-12 bg-zinc-50 rounded-md border border-zinc-200/60 flex items-center justify-center">

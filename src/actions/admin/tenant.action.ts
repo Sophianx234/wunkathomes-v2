@@ -192,3 +192,54 @@ export async function verifyAndOnboardTenantAction(formData: FormData) {
     return { success: false, error: error.message || "An internal error occurred." };
   }
 }
+
+export async function updateTenantDetailsAction(formData: FormData) {
+  try {
+    const { getSession } = await import("@/lib/session");
+    const session = await getSession();
+    if (!session?.userId || !['Admin', 'Manager'].includes(session.role)) {
+      return { success: false, error: "Unauthorized access attempt." };
+    }
+
+    const userId = formData.get("userId") as string;
+    const phone = formData.get("phone") as string;
+    const ghanaCardNumber = formData.get("ghanaCardNumber") as string;
+    const facePhotoFile = formData.get("facePhoto") as File | null;
+    const cardScanFile = formData.get("cardScan") as File | null;
+
+    if (!userId) return { success: false, error: "User ID is required." };
+
+    const { connectToDatabase } = await import("@/config/DbConnect");
+    await connectToDatabase();
+    
+    const User = (await import("@/models/user")).default;
+    const user = await User.findById(userId);
+    if (!user) return { success: false, error: "User not found." };
+
+    if (phone) user.phone = phone.trim();
+    if (ghanaCardNumber) user.ghanaCardNumber = ghanaCardNumber.trim();
+
+    const { uploadToCloudinary } = await import("@/lib/cloudinary");
+
+    if (facePhotoFile && facePhotoFile.size > 0) {
+      const facePhotoUrl = await uploadToCloudinary(facePhotoFile, "wunkathomes/kyc/faces");
+      user.securityPhotoUrl = facePhotoUrl;
+    }
+
+    if (cardScanFile && cardScanFile.size > 0) {
+      const cardScanUrl = await uploadToCloudinary(cardScanFile, "wunkathomes/kyc/cards");
+      user.ghanaCardUrl = cardScanUrl;
+    }
+
+    await user.save();
+    
+    const { revalidatePath } = await import("next/cache");
+    revalidatePath("/admin/tenants");
+    revalidatePath("/admin/manage/tenants");
+
+    return { success: true, message: "Tenant details successfully updated." };
+  } catch (error: any) {
+    console.error("[UPDATE_TENANT_DETAILS]", error);
+    return { success: false, error: error.message || "An unexpected error occurred." };
+  }
+}
