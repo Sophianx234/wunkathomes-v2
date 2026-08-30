@@ -161,6 +161,9 @@ export default async function PropertyDetailsPage({
   const tourCookie = cookieStore.get(`tour_booked_${listing.id}`);
 
   const hasBookedTour = !!tourCookie;
+  
+  const settings = await getGlobalSettings();
+  const availableTourDays = settings.tourAvailableDays;
   const bookedTourDate = tourCookie ? tourCookie.value : null;
   let isSaved = false;
   
@@ -444,6 +447,7 @@ export default async function PropertyDetailsPage({
           isRent={isRent}
           hasBookedTour={hasBookedTour}
           bookedTourDate={bookedTourDate}
+          availableDays={availableTourDays}
         />
       </section>
 
@@ -463,3 +467,4 @@ export default async function PropertyDetailsPage({
     </main>
   );
 }
+
