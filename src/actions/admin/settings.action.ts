@@ -23,7 +23,7 @@ export async function updateTourAvailableDays(days: number[]) {
     { upsert: true, new: true }
   );
   
-  revalidatePath("/admin/manage/tours");
-  revalidatePath("/properties/[slug]");
+  revalidatePath("/", "layout");
   return { success: true };
 }
+
