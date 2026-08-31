@@ -107,6 +107,7 @@ While working on this branch, several critical platform improvements were made a
 - **Dynamic Tour Scheduling:** Created a global `Settings` collection for the platform. Admins can now explicitly select their `tourAvailableDays` (e.g., Mon, Wed, Fri) via the `/admin/manage/tours` dashboard.
 - **Booking Calendar Constraints:** Ripped out the native HTML date inputs from `BookingCard` and integrated the Shadcn `<Calendar />`. The component is piped directly to the admin settings, physically disabling and graying out past dates and any days of the week the admin is unavailable. The `BookingCard` responsive styling was also rebuilt to seamlessly fit the Calendar without horizontal clipping (`lg:w-[350px]`, `lg:p-6`, and mobile scaling).
 - **Cache Synchronization:** Implemented global `revalidatePath("/", "layout")` logic inside the settings update action to perfectly sync the database state with the heavily cached public routing tree.
+- **KYC & Identity Verification Overhaul:** Decoupled the Tenant Identity/KYC data entry from the final "Verify Identity & Grant Access" modal action. Implemented a robust Edit-in-Place flow directly on the Tenant Directory slide-over allowing Admins to dynamically update phone numbers, Ghana Card details, and upload/remove identity photos (with live native camera support on mobile via `capture="user"` and `capture="environment"` and image previews via `URL.createObjectURL`). Enhanced the UI to make the "Edit Information" button highly prominent within the Pending review block.
 
 ---
 
