@@ -384,6 +384,11 @@ export default function BookingCard({ listing, isRent, hasBookedTour, bookedTour
               >
                 Reschedule Tour
               </button>
+              <Link href={`/checkout/${listing.slug}?type=deposit`} className="w-full">
+                  <button className="px-5 py-3 bg-black text-white font-black uppercase tracking-widest text-[10px] rounded-lg hover:bg-black/90 transition-colors whitespace-nowrap w-full">
+                    {ctaText}
+                  </button>
+                </Link>
               
               {!hasBookedTour && (
                 <button
