@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, useTransition, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
   Alert01Icon,
@@ -175,6 +176,7 @@ export default function TenantDirectoryClient({
   availableProperties,
   initialTab = "active",
 }: TenantDirectoryClientProps) {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabStage>(initialTab);
   const [searchQuery, setSearchQuery] = useState("");
   const [propertyFilter, setPropertyFilter] = useState("all");
@@ -580,8 +582,8 @@ export default function TenantDirectoryClient({
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-48 rounded-lg shadow-sm border-zinc-200/80 font-sans p-1">
-                        <DropdownMenuItem onClick={() => setSelectedTenantId(tenant.id)} className="text-[12px] font-medium cursor-pointer h-8">
-                          View Full Profile
+                        <DropdownMenuItem onClick={() => tenant.pipelineStage === "pending" ? router.push(`/admin/manage/tenants/${tenant.id}/onboard`) : setSelectedTenantId(tenant.id)} className="text-[12px] font-medium cursor-pointer h-8">
+                          {tenant.pipelineStage === "pending" ? "Review & Onboard" : "View Full Profile"}
                         </DropdownMenuItem>
                         {tenant.pipelineStage === "active" && (
                           <>
@@ -618,24 +620,49 @@ export default function TenantDirectoryClient({
           {selectedTenant && (
             <>
               {/* Header */}
-              <div className="px-6 py-6 border-b border-zinc-200/60 bg-zinc-50/30 flex items-start justify-between">
-                <div className="flex items-center gap-4">
-                  <Avatar className={`h-12 w-12 border border-zinc-200/60 shadow-sm ${selectedTenant.user.accountStatus !== "Active" ? "opacity-50 grayscale" : ""}`}>
-                    <AvatarImage src={selectedTenant.user.profilePicture} />
-                    <AvatarFallback className="bg-zinc-100/50 text-zinc-600 font-medium">
-                      {selectedTenant.user.name.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h2 className="text-base font-semibold text-zinc-900 tracking-tight">{selectedTenant.user.name}</h2>
-                      <Badge variant="outline" className={`px-1.5 py-0 border-0 rounded text-[9px] uppercase tracking-wider font-bold h-4 ${getLeaseBadgeStyle(selectedTenant.status)}`}>
-                        {selectedTenant.status.replace(/_/g, " ")}
-                      </Badge>
+              <div className="px-6 py-4 border-b border-zinc-200/60 bg-zinc-50/30 flex flex-col gap-4">
+                {selectedTenant.pipelineStage === "pending" && (
+                  <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-zinc-500">
+                    <span>Onboarding Review</span>
+                  </div>
+                )}
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-4">
+                    <Avatar className={`h-12 w-12 border border-zinc-200/60 shadow-sm ${selectedTenant.user.accountStatus !== "Active" ? "opacity-50 grayscale" : ""}`}>
+                      <AvatarImage src={selectedTenant.user.profilePicture} />
+                      <AvatarFallback className="bg-zinc-100/50 text-zinc-600 font-medium">
+                        {selectedTenant.user.name.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h2 className="text-base font-semibold text-zinc-900 tracking-tight">{selectedTenant.user.name}</h2>
+                        <Badge variant="outline" className={`px-1.5 py-0 border-0 rounded text-[9px] uppercase tracking-wider font-bold h-4 ${getLeaseBadgeStyle(selectedTenant.status)}`}>
+                          {selectedTenant.status.replace(/_/g, " ")}
+                        </Badge>
+                      </div>
+                      <p className="text-[13px] text-zinc-500 mt-0.5">{selectedTenant.user.email} • {selectedTenant.user.phone}</p>
                     </div>
-                    <p className="text-[13px] text-zinc-500 mt-0.5">{selectedTenant.user.email} • {selectedTenant.user.phone}</p>
                   </div>
                 </div>
+                
+                {selectedTenant.pipelineStage === "pending" && (
+                  <div className="flex items-center gap-2 pt-2 pb-1">
+                    <div className="flex items-center gap-1.5 flex-1">
+                      <div className={`h-6 flex items-center justify-center rounded-full bg-emerald-50 text-emerald-700 px-2.5 text-[10px] font-bold border border-emerald-200/60`}>
+                        <HugeiconsIcon icon={CheckmarkCircle01Icon} size={12} className="mr-1" /> Lease Signed
+                      </div>
+                      <div className="h-px bg-zinc-200 flex-1"></div>
+                      <div className={`h-6 flex items-center justify-center rounded-full ${selectedTenant.checklist.ghanaCardVerified === "Verified" ? "bg-emerald-50 text-emerald-700 border-emerald-200/60" : "bg-white text-zinc-500 border-zinc-200/60 shadow-sm"} px-2.5 text-[10px] font-bold border`}>
+                        {selectedTenant.checklist.ghanaCardVerified === "Verified" && <HugeiconsIcon icon={CheckmarkCircle01Icon} size={12} className="mr-1" />} ID Uploaded
+                      </div>
+                      <div className="h-px bg-zinc-200 flex-1"></div>
+                      <div className="h-6 flex items-center justify-center rounded-full bg-zinc-50 text-zinc-400 px-2.5 text-[10px] font-bold border border-zinc-200/60">
+                        Office Verification
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Scrollable Body */}
@@ -646,84 +673,8 @@ export default function TenantDirectoryClient({
                   </div>
                 )}
 
-                {/* Property & Lease Details */}
-                <section>
-                  <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-4">Occupied Asset</h3>
-                  <div className="rounded-lg border border-zinc-200/60 overflow-hidden bg-white">
-                    <div className="p-4 bg-zinc-50/50 flex gap-4 border-b border-zinc-200/60">
-                      <div className="h-12 w-12 shrink-0 bg-white rounded-md overflow-hidden border border-zinc-200/60 shadow-sm">
-                        {selectedTenant.lease.propertyImage ? (
-                          <img src={selectedTenant.lease.propertyImage} alt="Property" className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center"><HugeiconsIcon icon={Building03Icon} size={16} className="text-zinc-300"/></div>
-                        )}
-                      </div>
-                      <div className="flex flex-col justify-center">
-                        <h4 className="text-sm font-semibold tracking-tight text-zinc-900">{selectedTenant.lease.propertyName}</h4>
-                        <p className="text-[12px] text-zinc-500 mt-0.5">{selectedTenant.lease.location} · <span className="font-medium text-zinc-700">{selectedTenant.lease.unitNumber}</span></p>
-                      </div>
-                    </div>
-                    <dl className="grid grid-cols-2 gap-x-4 gap-y-4 p-4 text-[13px]">
-                      <div><dt className="text-zinc-500 mb-1">Lease Start</dt><dd className="font-medium text-zinc-900">{formatDate(selectedTenant.lease.startDate)}</dd></div>
-                      <div><dt className="text-zinc-500 mb-1">Lease End</dt><dd className="font-medium text-zinc-900">{formatDate(selectedTenant.lease.endDate)}</dd></div>
-                      <div><dt className="text-zinc-500 mb-1">Total Rent</dt><dd className="font-medium text-zinc-900 font-tabular-nums">{formatCurrency(selectedTenant.lease.totalRentAmount).replace("GH", "")}</dd></div>
-                      <div><dt className="text-zinc-500 mb-1">Access PIN</dt><dd className="font-mono font-medium tracking-widest text-zinc-900">{selectedTenant.smartLockPin || "N/A"}</dd></div>
-                    </dl>
-                    {selectedTenant.pipelineStage === "active" && selectedTenant.smartLock && (
-                      <div className="p-4 border-t border-zinc-200/60 bg-zinc-50/50 flex flex-col gap-4">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                          <div>
-                            <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest mb-1.5">Hardware Link</p>
-                            <div className="flex items-center gap-2 text-[12px] font-medium text-zinc-700">
-                               {selectedTenant.smartLock.online ? (
-                                 <span className="text-emerald-600 flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-emerald-600"></span> Online</span>
-                               ) : (
-                                 <span className="text-rose-600 flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-rose-600"></span> Offline</span>
-                               )}
-                               <span className="text-zinc-300">•</span>
-                               <span className={`capitalize ${selectedTenant.smartLock.batteryLevel === 'low' ? 'text-rose-600 animate-pulse font-bold' : ''}`}>
-                                 🔋 {selectedTenant.smartLock.batteryLevel} Battery
-                               </span>
-                            </div>
-                          </div>
-                          
-                          <div className="flex flex-wrap gap-2">
-                            <Button 
-                              variant="ghost" 
-                              className={`h-8 px-3 rounded-md text-[10px] font-bold uppercase tracking-widest border-0 shadow-none transition-colors ${
-                                unlockCountdown !== null 
-                                  ? 'bg-emerald-50 text-emerald-700 w-36 text-center hover:bg-emerald-50 hover:text-emerald-700' 
-                                  : 'bg-amber-50 text-amber-600 hover:bg-amber-100 hover:text-amber-700'
-                              }`}
-                              onClick={() => handleInlineRemoteUnlock(selectedTenant.smartLock!.tuyaDeviceId)}
-                              disabled={!selectedTenant.smartLock.online || isPending || unlockCountdown !== null}
-                            >
-                              {isPending ? 'Working...' : unlockCountdown !== null ? `Unlocked (${unlockCountdown}s)` : <><HugeiconsIcon icon={Key01Icon} size={12} className="mr-1.5" /> Unlock</>}
-                            </Button>
-                            <Button 
-                              variant="ghost" 
-                              className="h-8 px-3 rounded-md text-[10px] font-bold uppercase tracking-widest bg-zinc-100/80 text-zinc-600 hover:bg-zinc-200/80 hover:text-zinc-900 border-0 shadow-none transition-colors" 
-                              onClick={() => requestAction("vendorPin")}
-                              disabled={!selectedTenant.smartLock.online}
-                            >
-                              <HugeiconsIcon icon={Clock01Icon} size={12} className="mr-1.5" /> Temp PIN
-                            </Button>
-                            <Button 
-                              variant="ghost" 
-                              className="h-8 px-3 rounded-md text-[10px] font-bold uppercase tracking-widest bg-rose-50 text-rose-600 hover:bg-rose-100 hover:text-rose-700 border-0 shadow-none transition-colors" 
-                              onClick={() => requestAction("resetPin")}
-                              disabled={!selectedTenant.smartLock.online}
-                            >
-                              <HugeiconsIcon icon={Shield02Icon} size={12} className="mr-1.5" /> Reset PIN
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </section>
-
                 {/* Identity & Documents (Crucial for Onboarding, shown always but actionable in pending) */}
+                {(selectedTenant.pipelineStage !== "pending" || isEditingDetails) && (
                   <section id="identity-documents-section" className="scroll-mt-4">
                     <div className="flex justify-between items-center mb-4">
                       <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-0">Identity & Documents</h3>
@@ -742,30 +693,10 @@ export default function TenantDirectoryClient({
                             setRemoveExistingCard(false);
                           }}
                         >
-                          <HugeiconsIcon icon={Alert01Icon} size={12} className="mr-1.5" /> Edit Details
+                          {selectedTenant.pipelineStage === "pending" && (!selectedTenant.user.ghanaCardUrl || !selectedTenant.user.securityPhotoUrl) ? "Capture ID Documents" : "Edit Details"}
                         </Button>
                       )}
-                      {isEditingDetails && (
-                        <div className="flex gap-2">
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            className="h-7 text-[10px] font-bold uppercase tracking-widest text-zinc-500 hover:text-black"
-                            onClick={() => { setIsEditingDetails(false); setRemoveExistingFace(false); setRemoveExistingCard(false); }}
-                            disabled={isSavingEdit}
-                          >
-                            Cancel
-                          </Button>
-                          <Button 
-                            size="sm"
-                            className="h-7 text-[10px] font-bold uppercase tracking-widest bg-black text-white hover:bg-zinc-800"
-                            onClick={saveEditedDetails}
-                            disabled={isSavingEdit}
-                          >
-                            {isSavingEdit ? "Saving..." : "Save Changes"}
-                          </Button>
-                        </div>
-                      )}
+
                     </div>
                     
                     <div className="space-y-3">
@@ -889,6 +820,8 @@ export default function TenantDirectoryClient({
                         </div>
                       )}
   
+                      {selectedTenant.pipelineStage !== "pending" && (
+                        <>
                       {/* Lease Agreement */}
                     <div className="flex items-center justify-between p-3.5 rounded-lg border border-zinc-200/60 bg-white">
                       <div className="flex items-center gap-4">
@@ -908,42 +841,177 @@ export default function TenantDirectoryClient({
                       </div>
                       <div>{selectedTenant.checklist.leaseSigned === "Signed" ? <HugeiconsIcon icon={CheckmarkCircle01Icon} size={18} /> : <HugeiconsIcon icon={Clock01Icon} size={18} />}</div>
                     </div>
+                        </>
+                      )}
+                      {isEditingDetails && (
+                        <div className="flex gap-3 mt-5 pt-5 border-t border-zinc-200/60 justify-end">
+                          <Button 
+                            variant="outline" 
+                            className="h-10 px-5 text-[13px] font-medium rounded-lg shadow-sm border-zinc-200/80 hover:bg-zinc-50"
+                            onClick={() => { setIsEditingDetails(false); setRemoveExistingFace(false); setRemoveExistingCard(false); }}
+                            disabled={isSavingEdit}
+                          >
+                            Cancel
+                          </Button>
+                          <Button 
+                            className="h-10 px-5 text-[13px] font-medium rounded-lg shadow-sm bg-zinc-900 text-white hover:bg-zinc-800"
+                            onClick={saveEditedDetails}
+                            disabled={isSavingEdit}
+                          >
+                            {isSavingEdit ? "Saving..." : "Save Changes"}
+                          </Button>
+                        </div>
+                      )}
                   </div>
                 </section>
+                )}
+
 
                 {/* DYNAMIC SECTIONS BASED ON STAGE */}
-                {selectedTenant.pipelineStage === "pending" && (
+                {selectedTenant.pipelineStage === "pending" && !isEditingDetails && (
                   <section>
                     <div className="p-5 rounded-lg border border-zinc-200/60 bg-zinc-50/50">
                       <p className="text-[13px] text-zinc-600 leading-relaxed mb-5">
                         <strong className="text-zinc-900 block mb-1">Final Review & Identity Verification</strong>
-                        Please review the signed Tenancy Agreement above. Ensure the tenant is physically present in the office with their original Ghana Card. Verify their identity to activate the lease and provision digital access for <span className="font-semibold text-zinc-900">{selectedTenant.lease.propertyName} ({selectedTenant.lease.unitNumber})</span>.
+                        Please review the signed Tenancy Agreement below. Ensure the tenant is physically present in the office with their original Ghana Card. Verify their identity to activate the lease and provision digital access for <span className="font-semibold text-zinc-900">{selectedTenant.lease.propertyName} ({selectedTenant.lease.unitNumber})</span>.
                       </p>
-                      <div className="flex flex-col sm:flex-row gap-3">
-                        <Button className="flex-1 h-10 bg-zinc-900 text-white hover:bg-zinc-800 text-[13px] font-medium rounded-lg shadow-sm" onClick={() => requestAction("verifyAndOnboard")}>
-                          <HugeiconsIcon icon={Key01Icon} size={14} className="mr-2" /> Verify & Grant Access
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          className="flex-1 sm:flex-none sm:w-auto h-10 text-[13px] font-medium rounded-lg bg-white border-zinc-200/80 shadow-sm hover:bg-zinc-50" 
-                          onClick={() => {
-                            setEditPhone(selectedTenant.user.phone || "");
-                            setEditGhanaCard(selectedTenant.user.ghanaCardNumber || "");
-                            setEditFacePhoto(null);
-                            setEditCardScan(null);
-                            setIsEditingDetails(true);
-                            setRemoveExistingFace(false);
-                            setRemoveExistingCard(false);
-                            const el = document.getElementById("identity-documents-section");
-                            if(el) el.scrollIntoView({ behavior: 'smooth' });
-                          }}
-                        >
-                          <HugeiconsIcon icon={Alert01Icon} size={14} className="mr-2" /> Edit Information
-                        </Button>
+                      
+                      <div className="mb-6">
+                      {/* Lease Agreement */}
+                    <div className="flex items-center justify-between p-3.5 rounded-lg border border-zinc-200/60 bg-white">
+                      <div className="flex items-center gap-4">
+                        <div className="h-12 w-12 bg-zinc-50 rounded-md border border-zinc-200/60 flex items-center justify-center">
+                          <HugeiconsIcon icon={FileDownloadIcon} size={18} className="text-zinc-400" />
+                        </div>
+                        <div>
+                          <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest mb-0.5">Tenancy Agreement</p>
+                          <button
+                            onClick={() => setIsViewingDocument(true)}
+                            disabled={selectedTenant.checklist.leaseSigned !== "Signed"}
+                            className="text-[13px] font-medium text-zinc-900 hover:underline underline-offset-4 disabled:no-underline disabled:text-zinc-400"
+                          >
+                            {selectedTenant.checklist.leaseSigned === "Signed" ? "View Signed Document" : "Awaiting Tenant Signature"}
+                          </button>
+                        </div>
                       </div>
+                      <div>{selectedTenant.checklist.leaseSigned === "Signed" ? <HugeiconsIcon icon={CheckmarkCircle01Icon} size={18} /> : <HugeiconsIcon icon={Clock01Icon} size={18} />}</div>
+                    </div>
+                      </div>
+                      {(() => {
+                        const needsDocs = selectedTenant.user.kycStatus !== "Verified" && (!selectedTenant.user.ghanaCardUrl || !selectedTenant.user.securityPhotoUrl);
+                        return (
+                          <div className="flex flex-col sm:flex-row gap-3">
+                            {!needsDocs && (
+                              <Button 
+                                className="flex-1 h-10 bg-zinc-900 text-white hover:bg-zinc-800 text-[13px] font-medium rounded-lg shadow-sm" 
+                                onClick={() => requestAction("verifyAndOnboard")}
+                              >
+                                Verify & Grant Access
+                              </Button>
+                            )}
+
+                            <Button 
+                              variant={needsDocs ? "default" : "outline"}
+                              className={`flex-1 sm:flex-none sm:w-auto h-10 text-[13px] font-medium rounded-lg shadow-sm ${needsDocs ? "bg-zinc-900 text-white hover:bg-zinc-800 border-transparent" : "bg-white border-zinc-200/80 hover:bg-zinc-50 text-zinc-700"}`} 
+                              onClick={() => {
+                                setEditPhone(selectedTenant.user.phone || "");
+                                setEditGhanaCard(selectedTenant.user.ghanaCardNumber || "");
+                                setEditFacePhoto(null);
+                                setEditCardScan(null);
+                                setIsEditingDetails(true);
+                                setRemoveExistingFace(false);
+                                setRemoveExistingCard(false);
+                              }}
+                            >
+                              {needsDocs ? "Capture ID Documents" : "Update Documents"}
+                            </Button>
+                          </div>
+                        );
+                      })()}
                     </div>
                   </section>
                 )}
+
+                {/* Property & Lease Details */}
+                <section>
+                  <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-4">Occupied Asset</h3>
+                  <div className="rounded-lg border border-zinc-200/60 overflow-hidden bg-white">
+                    <div className="p-4 bg-zinc-50/50 flex gap-4 border-b border-zinc-200/60">
+                      <div className="h-12 w-12 shrink-0 bg-white rounded-md overflow-hidden border border-zinc-200/60 shadow-sm">
+                        {selectedTenant.lease.propertyImage ? (
+                          <img src={selectedTenant.lease.propertyImage} alt="Property" className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center"><HugeiconsIcon icon={Building03Icon} size={16} className="text-zinc-300"/></div>
+                        )}
+                      </div>
+                      <div className="flex flex-col justify-center">
+                        <h4 className="text-sm font-semibold tracking-tight text-zinc-900">{selectedTenant.lease.propertyName}</h4>
+                        <p className="text-[12px] text-zinc-500 mt-0.5">{selectedTenant.lease.location} · <span className="font-medium text-zinc-700">{selectedTenant.lease.unitNumber}</span></p>
+                      </div>
+                    </div>
+                    <dl className="grid grid-cols-2 gap-x-4 gap-y-4 p-4 text-[13px]">
+                      <div><dt className="text-zinc-500 mb-1">Lease Start</dt><dd className="font-medium text-zinc-900">{formatDate(selectedTenant.lease.startDate)}</dd></div>
+                      <div><dt className="text-zinc-500 mb-1">Lease End</dt><dd className="font-medium text-zinc-900">{formatDate(selectedTenant.lease.endDate)}</dd></div>
+                      <div><dt className="text-zinc-500 mb-1">Total Rent</dt><dd className="font-medium text-zinc-900 font-tabular-nums">{formatCurrency(selectedTenant.lease.totalRentAmount).replace("GH", "")}</dd></div>
+                      <div><dt className="text-zinc-500 mb-1">Access PIN</dt><dd className="font-mono font-medium tracking-widest text-zinc-900">{selectedTenant.smartLockPin || "N/A"}</dd></div>
+                    </dl>
+                    {selectedTenant.pipelineStage === "active" && selectedTenant.smartLock && (
+                      <div className="p-4 border-t border-zinc-200/60 bg-zinc-50/50 flex flex-col gap-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                          <div>
+                            <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest mb-1.5">Hardware Link</p>
+                            <div className="flex items-center gap-2 text-[12px] font-medium text-zinc-700">
+                               {selectedTenant.smartLock.online ? (
+                                 <span className="text-emerald-600 flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-emerald-600"></span> Online</span>
+                               ) : (
+                                 <span className="text-rose-600 flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-rose-600"></span> Offline</span>
+                               )}
+                               <span className="text-zinc-300">•</span>
+                               <span className={`capitalize ${selectedTenant.smartLock.batteryLevel === 'low' ? 'text-rose-600 animate-pulse font-bold' : ''}`}>
+                                 🔋 {selectedTenant.smartLock.batteryLevel} Battery
+                               </span>
+                            </div>
+                          </div>
+                          
+                          <div className="flex flex-wrap gap-2">
+                            <Button 
+                              variant="ghost" 
+                              className={`h-8 px-3 rounded-md text-[10px] font-bold uppercase tracking-widest border-0 shadow-none transition-colors ${
+                                unlockCountdown !== null 
+                                  ? 'bg-emerald-50 text-emerald-700 w-36 text-center hover:bg-emerald-50 hover:text-emerald-700' 
+                                  : 'bg-amber-50 text-amber-600 hover:bg-amber-100 hover:text-amber-700'
+                              }`}
+                              onClick={() => handleInlineRemoteUnlock(selectedTenant.smartLock!.tuyaDeviceId)}
+                              disabled={!selectedTenant.smartLock.online || isPending || unlockCountdown !== null}
+                            >
+                              {isPending ? 'Working...' : unlockCountdown !== null ? `Unlocked (${unlockCountdown}s)` : <><HugeiconsIcon icon={Key01Icon} size={12} className="mr-1.5" /> Unlock</>}
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              className="h-8 px-3 rounded-md text-[10px] font-bold uppercase tracking-widest bg-zinc-100/80 text-zinc-600 hover:bg-zinc-200/80 hover:text-zinc-900 border-0 shadow-none transition-colors" 
+                              onClick={() => requestAction("vendorPin")}
+                              disabled={!selectedTenant.smartLock.online}
+                            >
+                              <HugeiconsIcon icon={Clock01Icon} size={12} className="mr-1.5" /> Temp PIN
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              className="h-8 px-3 rounded-md text-[10px] font-bold uppercase tracking-widest bg-rose-50 text-rose-600 hover:bg-rose-100 hover:text-rose-700 border-0 shadow-none transition-colors" 
+                              onClick={() => requestAction("resetPin")}
+                              disabled={!selectedTenant.smartLock.online}
+                            >
+                              <HugeiconsIcon icon={Shield02Icon} size={12} className="mr-1.5" /> Reset PIN
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </section>
+
+
+
+
 
                 {selectedTenant.pipelineStage === "active" && (
                   <>
