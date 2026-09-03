@@ -139,7 +139,7 @@ export default function TenantOnboardClient({ tenant }: { tenant: TenantRecord }
         </div>
 
         {/* Card 1: Header Box */}
-        <div className="bg-white border border-zinc-200/80 shadow rounded-xl p-6 md:p-8 flex flex-col gap-6">
+        <div className="bg-white border border-zinc-200/80  rounded-xl p-6 md:p-8 flex flex-col gap-6">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-4">
               <Avatar className="h-16 w-16 border border-zinc-200/60 ">
@@ -179,10 +179,10 @@ export default function TenantOnboardClient({ tenant }: { tenant: TenantRecord }
         </div>
 
         {/* Card 2: Identity & Documents */}
-        <div className="bg-white border border-zinc-200/80 shadow rounded-xl p-6 md:p-8">
+        <div className="bg-white border border-zinc-200/80  rounded-xl p-6 md:p-8">
           <section>
             <div className="mb-6">
-              <h3 className="text-base font-bold text-zinc-900 tracking-tight mb-1">1. Identity Capture & Documents</h3>
+              <h3 className="text-base font-bold text-zinc-900 tracking-tight mb-1"> Identity Capture & Documents</h3>
               <p className="text-[14px] text-zinc-500">Capture or update the tenant's physical identification documents. These are required before granting access.</p>
             </div>
             
@@ -322,10 +322,10 @@ export default function TenantOnboardClient({ tenant }: { tenant: TenantRecord }
           </div>
 
         {/* Card 3: Tenancy Agreement */}
-        <div className="bg-white border border-zinc-200/80 shadow rounded-xl p-6 md:p-8">
+        <div className="bg-white border border-zinc-200/80  rounded-xl p-6 md:p-8">
           <section>
             <div className="mb-6">
-              <h3 className="text-base font-bold text-zinc-900 tracking-tight mb-1">2. Tenancy Agreement</h3>
+              <h3 className="text-base font-bold text-zinc-900 tracking-tight mb-1">Tenancy Agreement</h3>
               <p className="text-[14px] text-zinc-500">Review the legally binding lease agreement that has been electronically signed by the tenant.</p>
             </div>
             
@@ -352,10 +352,10 @@ export default function TenantOnboardClient({ tenant }: { tenant: TenantRecord }
         </div>
 
         {/* Card 4: Final Verification */}
-        <div className="bg-white border border-zinc-200/80 shadow rounded-xl p-6 md:p-8">
+        <div className="bg-white border border-zinc-200/80  rounded-xl p-6 md:p-8">
           <section>
             <div className="mb-6">
-              <h3 className="text-base font-bold text-zinc-900 tracking-tight mb-1">3. Final Review & Grant Access</h3>
+              <h3 className="text-base font-bold text-zinc-900 tracking-tight mb-1">Final Review & Grant Access</h3>
               <p className="text-[14px] text-zinc-500 leading-relaxed">Ensure the tenant is physically present in the office with their original Ghana Card. Verify their identity to activate the lease and provision property access (digital or physical keys) for <strong className="text-zinc-900 font-semibold">{tenant.lease.propertyName} ({tenant.lease.unitNumber})</strong>.</p>
             </div>
             

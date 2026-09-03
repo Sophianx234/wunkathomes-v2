@@ -105,7 +105,7 @@ export default function TenantEditClient({ tenant }: { tenant: TenantRecord }) {
         </div>
 
         {/* Card 1: Header Box */}
-        <div className="bg-white border border-zinc-200/80 shadow rounded-xl p-6 md:p-8 flex flex-col gap-6">
+        <div className="bg-white border border-zinc-200/80  rounded-xl p-6 md:p-8 flex flex-col gap-6">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-4">
               <Avatar className="h-16 w-16 border border-zinc-200/60 ">
@@ -117,11 +117,11 @@ export default function TenantEditClient({ tenant }: { tenant: TenantRecord }) {
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <h2 className="text-xl font-semibold text-zinc-900 tracking-tight">{tenant.user.name}</h2>
-                  <Badge variant="outline" className="px-2 py-0 border-0 rounded text-[10px] uppercase tracking-wider font-bold h-5 bg-zinc-50 text-zinc-700 ring-1 ring-zinc-200/60">
+                  <Badge variant="outline" className="px-2 shadow-none py-0 border-0 rounded text-[10px] uppercase tracking-wider font-bold h-5 bg-zinc-50 text-zinc-700 ring-1 ring-zinc-200/60">
                     Pending
                   </Badge>
                 </div>
-                <p className="text-[14px] text-zinc-500">{tenant.user.email} � {tenant.user.phone}</p>
+                <p className="text-[14px] text-zinc-500">{tenant.user.email} • {tenant.user.phone}</p>
               </div>
             </div>
           </div>
@@ -145,21 +145,21 @@ export default function TenantEditClient({ tenant }: { tenant: TenantRecord }) {
         </div>
 
         {/* Card 2: Identity & Documents */}
-        <div className="bg-white border border-zinc-200/80 shadow rounded-xl p-6 md:p-8">
+        <div className="bg-white border border-zinc-200/80  rounded-xl p-6 md:p-8">
           <section>
             <div className="mb-6">
-              <h3 className="text-base font-bold text-zinc-900 tracking-tight mb-1">1. Identity Capture & Documents</h3>
+              <h3 className="text-base font-bold text-zinc-900 tracking-tight mb-1">Identity Capture & Documents</h3>
               <p className="text-[14px] text-zinc-500">Capture or update the tenant's physical identification documents. These are required before granting access.</p>
             </div>
             
             <div className="space-y-6">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 <div className="p-4 rounded-lg border border-zinc-200/60 bg-zinc-50/50">
-                  <label className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest mb-2 block">Full Legal Name</label>
+                  <label className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest mb-2 block">FullLegal Name</label>
                   <Input 
                     value={editName} 
                     onChange={(e) => setEditName(e.target.value)} 
-                    className="h-10 text-[14px] bg-white font-medium"
+                    className="h-10 text-[14px] rounded-md bg-white font-medium"
                     placeholder="Enter full legal name"
                   />
                 </div>
@@ -169,13 +169,13 @@ export default function TenantEditClient({ tenant }: { tenant: TenantRecord }) {
                   <Input 
                     value={editPhone} 
                     onChange={(e) => setEditPhone(e.target.value)} 
-                    className="h-10 text-[14px] bg-white"
+                    className="h-10 rounded-md text-[14px] bg-white"
                   />
                 </div>
 
                 <div className="p-4 rounded-lg border border-zinc-200/60 bg-zinc-50/50">
                   <label className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest mb-2 flex items-center justify-between">
-                    <span>National ID Number</span>
+                    <span>National ID</span>
                     {tenant.user.ghanaCardNumber && tenant.user.ghanaCardNumber !== "Not Provided" && (
                       <span className="text-emerald-600 flex items-center gap-1 text-[9px]"><HugeiconsIcon icon={CheckmarkCircle01Icon} size={12} /> VERIFIED</span>
                     )}
@@ -288,10 +288,10 @@ export default function TenantEditClient({ tenant }: { tenant: TenantRecord }) {
           </div>
 
         {/* Card 3: Tenancy Agreement */}
-        <div className="bg-white border border-zinc-200/80 shadow rounded-xl p-6 md:p-8">
+        <div className="bg-white border border-zinc-200/80  rounded-xl p-6 md:p-8">
           <section>
             <div className="mb-6">
-              <h3 className="text-base font-bold text-zinc-900 tracking-tight mb-1">2. Tenancy Agreement</h3>
+              <h3 className="text-base font-bold text-zinc-900 tracking-tight mb-1">Tenancy Agreement</h3>
               <p className="text-[14px] text-zinc-500">Review the legally binding lease agreement that has been electronically signed by the tenant.</p>
             </div>
             
@@ -301,18 +301,17 @@ export default function TenantEditClient({ tenant }: { tenant: TenantRecord }) {
                   <HugeiconsIcon icon={FileDownloadIcon} size={18} className="text-zinc-600" />
                 </div>
                 <div>
-                  <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest mb-0.5">Signed Lease Document</p>
-                  <button
+                  <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest mb-0.5">Tenancy <br /> Agreement </p>
+                  
+                </div>
+              </div>
+              <button
                     onClick={() => setIsViewingDocument(true)}
                     disabled={tenant.checklist.leaseSigned !== "Signed"}
                     className="flex items-center gap-1.5 text-[14px] font-medium text-zinc-900 hover:underline underline-offset-4 disabled:no-underline disabled:text-zinc-400"
                   >
-                    <HugeiconsIcon icon={ViewIcon} size={16} />
-                    {tenant.checklist.leaseSigned === "Signed" ? "View Signed Document" : "Awaiting Tenant Signature"}
+                    {tenant.checklist.leaseSigned === "Signed" ? "View " : "Awaiting Tenant Signature"}
                   </button>
-                </div>
-              </div>
-              <div>{tenant.checklist.leaseSigned === "Signed" ? <HugeiconsIcon icon={CheckmarkCircle01Icon} size={22} className="text-emerald-600" /> : <HugeiconsIcon icon={Clock01Icon} size={22} className="text-zinc-500" />}</div>
             </div>
           </section>
         </div>

@@ -428,7 +428,7 @@ export default function TenantDirectoryClient({
         </div>
 
         {/* SEARCH & FILTER BAR */}
-        <section className="flex flex-col xl:flex-row items-center gap-4 bg-white p-1.5 border border-zinc-200/60 rounded-lg shadow-sm w-full">
+        <section className="flex flex-col xl:flex-row items-center gap-4 bg-white p-1.5 border border-zinc-200/60 rounded-lg  w-full">
           <div className="relative flex-1 w-full">
             <HugeiconsIcon icon={Search01Icon} size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
             <Input
@@ -470,7 +470,7 @@ export default function TenantDirectoryClient({
         </section>
 
         {/* DATA TABLE */}
-        <div className="bg-white border border-zinc-200/60 rounded-lg overflow-hidden shadow-sm">
+        <div className="bg-white border border-zinc-200/60 rounded-lg overflow-hidden ">
           <Table>
             <TableHeader className="bg-zinc-50/30">
               <TableRow className="border-zinc-200/60 hover:bg-transparent">
