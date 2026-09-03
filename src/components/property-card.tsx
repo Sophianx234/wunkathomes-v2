@@ -404,7 +404,7 @@ export default function PropertyCard({
               <span className="font-bold text-zinc-900">{property.title}</span>,
               including all media, smart lock configurations, and listing data from the database. 
               <br/><br/>
-              <span className="text-red-700 font-medium">Warning:</span> If there are active leases tied to this asset, they will be orphaned.
+              <span className="text-zinc-700 font-medium">Warning:</span> If there are active leases tied to this asset, they will be orphaned.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="mt-4 md:mt-6 w-full flex gap-16 sm:gap-0">

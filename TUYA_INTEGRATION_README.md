@@ -101,27 +101,37 @@ The provisioning flow from User Checkout to Admin Activation is designed as a "W
 - **The 5-Second Standard:** When an Admin or Tenant clicks "Unlock", the command is fired instantly and the UI transitions into a green "Unlocked (5s)" countdown timer, mimicking the physical clutch disengaging and re-engaging 5 seconds later. The UI specifically avoids saying "Status: Unlocked" because the data would instantly become stale.
 - The `Lock State` and `Door State` columns in the Live Monitoring dashboard gracefully render "Auto (Clutch)" and "No Sensor" badges for these devices instead of displaying confusing "Unknown" states.
 
-### 14. Additional UI & Platform Enhancements (August)
+### 14. Additional UI & Platform Enhancements (August & September)
 While working on this branch, several critical platform improvements were made alongside the Tuya integration:
 - **Search Auto-Healing:** Added intelligent URL and state auto-healing to both the Home Page search bar and the `/properties` page filters. If a user selects a combination of filters that yields 0 results (e.g. restrictive property type + invalid location), the UI instantly self-heals by aggressively pruning the invalid parameter, preventing "no results" dead ends.
 - **Dynamic Tour Scheduling:** Created a global `Settings` collection for the platform. Admins can now explicitly select their `tourAvailableDays` (e.g., Mon, Wed, Fri) via the `/admin/manage/tours` dashboard.
 - **Booking Calendar Constraints:** Ripped out the native HTML date inputs from `BookingCard` and integrated the Shadcn `<Calendar />`. The component is piped directly to the admin settings, physically disabling and graying out past dates and any days of the week the admin is unavailable. The `BookingCard` responsive styling was also rebuilt to seamlessly fit the Calendar without horizontal clipping (`lg:w-[350px]`, `lg:p-6`, and mobile scaling).
 - **Cache Synchronization:** Implemented global `revalidatePath("/", "layout")` logic inside the settings update action to perfectly sync the database state with the heavily cached public routing tree.
-- **KYC & Identity Verification Overhaul:** Decoupled the Tenant Identity/KYC data entry from the final "Verify Identity & Grant Access" modal action. Implemented a robust Edit-in-Place flow directly on the Tenant Directory slide-over allowing Admins to dynamically update phone numbers, Ghana Card details, and upload/remove identity photos (with live native camera support on mobile via `capture="user"` and `capture="environment"` and image previews via `URL.createObjectURL`). Enhanced the UI to make the "Edit Information" button highly prominent within the Pending review block.
+- **KYC & Identity Verification Architecture:** 
+  - The UI for Identity capture was completely split into two highly-specialized routes to prevent logical overlaps and bugs.
+  - `/admin/manage/tenants/[id]/onboarding` is now strictly an activation wizard for **pending** tenants to grant them lease access.
+  - `/admin/manage/tenants/[id]/edit` is a dedicated identity management page for correcting data (like typos in Legal Names) on **active** tenants, without exposing dangerous lease-activation triggers.
+  - The tenant directory dynamically routes the admin to the correct page based on the tenant's pipeline stage.
+- **Mongoose Security & Schema Patching:** Discovered and fixed a silent bug where Ghana Card image uploads successfully reached Cloudinary and the database, but failed to render on the UI because the MongoDB schema had `idDocumentUrl` flagged with `select: false`. The backend queries in `tenant.service.ts` were forcefully patched with `+idDocumentUrl` to expose this data cleanly to the admin.
 
 ---
 
 ## ?? Next Steps (For the Next Agent/Developer)
 
 The Admin Phase (Fleet Management, Tenant PIN Provisioning, and Emergency Access) is **100% complete**. 
-If you are picking up this project, you need to build the **User/Tenant Phase**:
+If you are picking up this project, you have two crucial workflows to finish:
 
-### Step 1: User Dashboard UI Component
+### Step 1: Fix Lifecycle Email Templates for Non-Smart Lock Properties
+While `lease-activation-mail.tsx` has already been adapted, the system still sends automated lifecycle emails assuming every property has a Tuya Smart Lock. You must update:
+1. `move-out-confirmation-mail.tsx`
+2. `subscription-reminder-mail.tsx`
+
+*Implementation Detail:* These React Email components currently hardcode warnings like "Smart Lock PIN expiration". They need to conditionally render physical key vs digital key messages. You must inject a `hasSmartLock` boolean prop into them, and then update their respective caller actions (`src/actions/user/lease.action.ts` and the cron job `src/app/api/cron/check-subscriptions/route.ts`) to determine the lock status and pass that boolean down.
+
+### Step 2: Build the Tenant Dashboard (User Phase)
 Create a reusable React component (e.g., `src/components/smartlock/tenant-controls.tsx`) meant for the tenant's digital portal. It should contain:
 1. A large "Unlock Door" button that calls the existing `remoteUnlockAction` (or a tenant-specific version).
 2. A form to call the existing `createTemporaryPin()` function so users can generate time-bound access for guests.
 
-### Step 2: Subscription & Lease Verification Middleware
-Before the server executes the Tuya "Unlock" command triggered by a user, you must query the database to ensure that the `User` has an **Active Lease** or **Subscription** for the `Property` linked to that specific `SmartLock`. If their lease is expired, suspended, or unpaid, the backend must firmly reject the unlock request.
-
-
+### Step 3: Subscription & Lease Verification Middleware
+Before the server executes the Tuya "Unlock" command triggered by a user in Step 2, you must query the database to ensure that the `User` has an **Active Lease** or **Subscription** for the `Property` linked to that specific `SmartLock`. If their lease is expired, suspended, or unpaid, the backend must firmly reject the unlock request.

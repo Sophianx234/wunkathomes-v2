@@ -239,7 +239,7 @@ export default function CreatePropertyForm({ unassignedLocks = [] }: { unassigne
                 required
               />
               {listingType === "For_Rent" && (
-                  <span className="text-[10px] text-amber-600 font-medium">
+                  <span className="text-[10px] text-zinc-600 font-medium">
                     Note: Checkout will automatically enforce a {roomType === "Furnished" ? "2-day" : "2-month"} security deposit.
                   </span>
                 )}

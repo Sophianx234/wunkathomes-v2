@@ -56,7 +56,7 @@ export default async function SavedPropertiesPage() {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl md:text-3xl uppercase font-black  text-zinc-900 flex items-center gap-3">
-              {/* <HugeiconsIcon icon={FavouriteIcon} size={28} className="text-red-500 fill-red-500" /> */}
+              {/* <HugeiconsIcon icon={FavouriteIcon} size={28} className="text-zinc-500 fill-zinc-500" /> */}
               My Saved Homes
             </h1>
            

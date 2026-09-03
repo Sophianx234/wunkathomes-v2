@@ -106,13 +106,14 @@ export async function verifyAndOnboardTenantAction(formData: FormData) {
     }
 
     const rawLeaseId = formData.get("leaseId") as string;
+    const rawName = formData.get("name") as string;
+    const rawPhone = formData.get("phone") as string;
     const rawUserId = formData.get("userId") as string;
     const rawGhanaCardNumber = formData.get("ghanaCardNumber") as string;
     const facePhotoFile = formData.get("facePhoto") as File | null;
     const cardScanFile = formData.get("cardScan") as File | null;
-    const removeFacePhoto = formData.get("removeFacePhoto") === "true";
-    const removeCardScan = formData.get("removeCardScan") === "true";
-
+    const removeFacePhoto = formData.get("removeFacePhoto") === "true" || formData.get("removeFace") === "true";
+    const removeCardScan = formData.get("removeCardScan") === "true" || formData.get("removeCard") === "true";
     if (!rawLeaseId || !rawUserId || !rawGhanaCardNumber || typeof rawGhanaCardNumber !== 'string') {
       throw new Error("Missing required fields or invalid Ghana Card Number.");
     }
@@ -139,8 +140,13 @@ export async function verifyAndOnboardTenantAction(formData: FormData) {
       kycStatus: 'Verified',
       idDocumentNumber: rawGhanaCardNumber.trim()
     };
-    if (facePhotoUrl) updatePayload.idVerificationPhotoUrl = facePhotoUrl;
-    if (cardScanUrl) updatePayload.idDocumentUrl = cardScanUrl;
+    if (rawName) updatePayload.name = rawName.trim();
+    if (rawPhone) updatePayload.phone = rawPhone.trim();
+    if (removeFacePhoto) updatePayload.idVerificationPhotoUrl = "";
+    else if (facePhotoUrl) updatePayload.idVerificationPhotoUrl = facePhotoUrl;
+    
+    if (removeCardScan) updatePayload.idDocumentUrl = "";
+    else if (cardScanUrl) updatePayload.idDocumentUrl = cardScanUrl;
 
     // 1. Mark User as Verified and Save the ID Number & Docs
     const user = await User.findByIdAndUpdate(
@@ -204,10 +210,13 @@ export async function updateTenantDetailsAction(formData: FormData) {
     }
 
     const userId = formData.get("userId") as string;
+    const name = formData.get("name") as string;
     const phone = formData.get("phone") as string;
     const ghanaCardNumber = formData.get("ghanaCardNumber") as string;
     const facePhotoFile = formData.get("facePhoto") as File | null;
     const cardScanFile = formData.get("cardScan") as File | null;
+    const removeFacePhoto = formData.get("removeFace") === "true" || formData.get("removeFacePhoto") === "true";
+    const removeCardScan = formData.get("removeCard") === "true" || formData.get("removeCardScan") === "true";
 
     if (!userId) return { success: false, error: "User ID is required." };
 
@@ -218,23 +227,24 @@ export async function updateTenantDetailsAction(formData: FormData) {
     const user = await User.findById(userId);
     if (!user) return { success: false, error: "User not found." };
 
+    if (name) user.name = name.trim();
     if (phone) user.phone = phone.trim();
-    if (ghanaCardNumber) user.ghanaCardNumber = ghanaCardNumber.trim();
+    if (ghanaCardNumber) user.idDocumentNumber = ghanaCardNumber.trim();
 
     const { uploadToCloudinary } = await import("@/lib/cloudinary");
 
     if (removeFacePhoto) {
-      user.securityPhotoUrl = "";
+      user.idVerificationPhotoUrl = "";
     } else if (facePhotoFile && facePhotoFile.size > 0) {
       const facePhotoUrl = await uploadToCloudinary(facePhotoFile, "wunkathomes/kyc/faces");
-      user.securityPhotoUrl = facePhotoUrl;
+      user.idVerificationPhotoUrl = facePhotoUrl;
     }
 
     if (removeCardScan) {
-      user.ghanaCardUrl = "";
+      user.idDocumentUrl = "";
     } else if (cardScanFile && cardScanFile.size > 0) {
       const cardScanUrl = await uploadToCloudinary(cardScanFile, "wunkathomes/kyc/cards");
-      user.ghanaCardUrl = cardScanUrl;
+      user.idDocumentUrl = cardScanUrl;
     }
 
     await user.save();

@@ -195,7 +195,6 @@ export default function TenantDirectoryClient({
   const [newPinResult, setNewPinResult] = useState<{ pin: string; name: string } | null>(null);
 
   // Edit-in-place state
-  const [isEditingDetails, setIsEditingDetails] = useState(false);
   const [editPhone, setEditPhone] = useState("");
   const [editGhanaCard, setEditGhanaCard] = useState("");
   const [editFacePhoto, setEditFacePhoto] = useState<File | null>(null);
@@ -249,32 +248,6 @@ export default function TenantDirectoryClient({
   const isLegalApproved =
     selectedTenant?.checklist.ghanaCardVerified === "Verified" &&
     selectedTenant?.checklist.leaseSigned === "Signed";
-
-  const saveEditedDetails = () => {
-    if (!selectedTenant) return;
-    startEditTransition(async () => {
-      const formData = new FormData();
-      formData.append("userId", selectedTenant.user.id);
-      if (editPhone !== selectedTenant.user.phone) formData.append("phone", editPhone);
-      if (editGhanaCard !== (selectedTenant.user.ghanaCardNumber || "")) formData.append("ghanaCardNumber", editGhanaCard);
-      if (editFacePhoto) formData.append("facePhoto", editFacePhoto);
-      if (editCardScan) formData.append("cardScan", editCardScan);
-      if (removeExistingFace && !editFacePhoto) formData.append("removeFacePhoto", "true");
-      if (removeExistingCard && !editCardScan) formData.append("removeCardScan", "true");
-
-      const result = await updateTenantDetailsAction(formData);
-      if (result.success) {
-        toast.success(result.message);
-        setIsEditingDetails(false);
-        setEditFacePhoto(null);
-        setEditCardScan(null);
-        setRemoveExistingFace(false);
-        setRemoveExistingCard(false);
-      } else {
-        toast.error(result.error || "Failed to update tenant details.");
-      }
-    });
-  };
 
   const executeConfirmedAction = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -674,44 +647,23 @@ export default function TenantDirectoryClient({
                 )}
 
                 {/* Identity & Documents (Crucial for Onboarding, shown always but actionable in pending) */}
-                {(selectedTenant.pipelineStage !== "pending" || isEditingDetails) && (
+                {true && (
                   <section id="identity-documents-section" className="scroll-mt-4">
                     <div className="flex justify-between items-center mb-4">
                       <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-0">Identity & Documents</h3>
-                      {!isEditingDetails && (
-                        <Button 
+                      <Button 
                           variant="outline" 
                           size="sm"
                           className="h-8 text-[11px] font-semibold text-zinc-700 bg-white hover:bg-zinc-50 border-zinc-200/80 rounded-md px-3"
-                          onClick={() => {
-                            setEditPhone(selectedTenant.user.phone || "");
-                            setEditGhanaCard(selectedTenant.user.ghanaCardNumber || "");
-                            setEditFacePhoto(null);
-                            setEditCardScan(null);
-                            setIsEditingDetails(true);
-                            setRemoveExistingFace(false);
-                            setRemoveExistingCard(false);
-                          }}
+                          onClick={() => router.push(`/admin/manage/tenants/${selectedTenant.id}/${selectedTenant.pipelineStage === "pending" ? "onboarding" : "edit"}`)}
                         >
                           {selectedTenant.pipelineStage === "pending" && (!selectedTenant.user.ghanaCardUrl || !selectedTenant.user.securityPhotoUrl) ? "Capture ID Documents" : "Edit Details"}
                         </Button>
-                      )}
 
                     </div>
                     
                     <div className="space-y-3">
-                      {isEditingDetails && (
-                        <div className="p-3.5 rounded-lg border border-zinc-200/60 bg-white space-y-3">
-                          <div>
-                            <label className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest mb-1.5 block">Phone Number</label>
-                            <Input 
-                              value={editPhone} 
-                              onChange={(e) => setEditPhone(e.target.value)} 
-                              className="h-9 text-[13px]"
-                            />
-                          </div>
-                        </div>
-                      )}
+                      
 
                       {/* ID Card */}
                       <div className="flex items-center justify-between p-3.5 rounded-lg border border-zinc-200/60 bg-white">
@@ -721,105 +673,42 @@ export default function TenantDirectoryClient({
                           </div>
                           <div className="w-full">
                             <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest mb-0.5">National ID</p>
-                            {isEditingDetails ? (
-                              <Input 
-                                value={editGhanaCard} 
-                                onChange={(e) => setEditGhanaCard(e.target.value)} 
-                                className="h-8 text-[13px] font-mono mt-1"
-                              />
-                            ) : (
-                              <p className="font-mono text-[13px] font-medium text-zinc-900 tracking-tight">{selectedTenant.user.ghanaCardNumber || "Not Provided"}</p>
-                            )}
+                            <p className="font-mono text-[13px] font-medium text-zinc-900 tracking-tight">{selectedTenant.user.ghanaCardNumber || "Not Provided"}</p>
                           </div>
                         </div>
-                        {!isEditingDetails && <div>{selectedTenant.checklist.ghanaCardVerified === "Verified" ? <HugeiconsIcon icon={CheckmarkCircle01Icon} size={18} /> : <HugeiconsIcon icon={Clock01Icon} size={18} />}</div>}
+                        <div>{selectedTenant.checklist.ghanaCardVerified === "Verified" ? <HugeiconsIcon icon={CheckmarkCircle01Icon} size={18} /> : <HugeiconsIcon icon={Clock01Icon} size={18} />}</div>
                       </div>
   
                       {/* Identity Photos */}
-                      {(selectedTenant.user.securityPhotoUrl || selectedTenant.user.ghanaCardUrl || isEditingDetails) && (
-                        <div className="flex flex-col sm:flex-row gap-3">
-                          {/* Face Photo */}
-                          {(!removeExistingFace && selectedTenant.user.securityPhotoUrl || isEditingDetails) && (
-                            <div className="flex-1 p-3.5 rounded-lg border border-zinc-200/60 bg-white flex flex-col">
-                              <div className="flex justify-between items-center mb-2.5">
-                                <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest">Security Photo (Face)</p>
-                                {isEditingDetails && (selectedTenant.user.securityPhotoUrl || editFacePhoto) && (
-                                  <Button 
-                                    variant="ghost" 
-                                    size="sm"
-                                    className="h-5 px-1.5 text-[9px] text-rose-500 hover:text-rose-600 hover:bg-rose-50"
-                                    onClick={() => {
-                                      setEditFacePhoto(null);
-                                      if (selectedTenant.user.securityPhotoUrl) setRemoveExistingFace(true);
-                                    }}
-                                  >
-                                    Remove
-                                  </Button>
-                                )}
-                              </div>
-                              
-                              {isEditingDetails && !editFacePhoto && (!selectedTenant.user.securityPhotoUrl || removeExistingFace) ? (
-                                <div className="flex-1 flex flex-col justify-center items-center p-4 border-2 border-dashed border-zinc-200 rounded-lg bg-zinc-50 hover:bg-zinc-100 transition-colors relative cursor-pointer group">
-                                  <HugeiconsIcon icon={Alert01Icon} size={20} className="text-zinc-400 group-hover:text-zinc-500 mb-2" />
-                                  <p className="text-[10px] font-medium text-zinc-500 text-center">Tap to Take Selfie or Upload</p>
-                                  <Input 
-                                    type="file" 
-                                    accept="image/*" 
-                                    capture="user"
-                                    onChange={(e) => setEditFacePhoto(e.target.files?.[0] || null)}
-                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
-                                  />
-                                </div>
-                              ) : (
-                                <div className="h-40 w-full bg-zinc-50 rounded-md border border-zinc-200/60 overflow-hidden cursor-pointer hover:opacity-90 transition-opacity" onClick={() => !isEditingDetails && setExpandedImage(editFacePhoto ? URL.createObjectURL(editFacePhoto) : selectedTenant.user.securityPhotoUrl!)}>
-                                  <img src={editFacePhoto ? URL.createObjectURL(editFacePhoto) : selectedTenant.user.securityPhotoUrl} alt="Security Photo" className="w-full h-full object-cover" />
-                                </div>
-                              )}
+                      <div className="flex flex-col sm:flex-row gap-3 mb-6 mt-3">
+                        <div className="flex-1 p-3.5 rounded-lg border border-zinc-200/60 bg-white flex flex-col">
+                          <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest mb-2.5">Security Photo (Face)</p>
+                          {selectedTenant.user.securityPhotoUrl ? (
+                            <div className="h-40 w-full bg-zinc-50 rounded-md border border-zinc-200/60 overflow-hidden cursor-pointer hover:opacity-90" onClick={() => setExpandedImage(selectedTenant.user.securityPhotoUrl!)}>
+                              <img src={selectedTenant.user.securityPhotoUrl} alt="Face" className="w-full h-full object-cover" />
                             </div>
-                          )}
-                          
-                          {/* Card Scan */}
-                          {(!removeExistingCard && selectedTenant.user.ghanaCardUrl || isEditingDetails) && (
-                            <div className="flex-1 p-3.5 rounded-lg border border-zinc-200/60 bg-white flex flex-col">
-                              <div className="flex justify-between items-center mb-2.5">
-                                <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest">Ghana Card Scan</p>
-                                {isEditingDetails && (selectedTenant.user.ghanaCardUrl || editCardScan) && (
-                                  <Button 
-                                    variant="ghost" 
-                                    size="sm"
-                                    className="h-5 px-1.5 text-[9px] text-rose-500 hover:text-rose-600 hover:bg-rose-50"
-                                    onClick={() => {
-                                      setEditCardScan(null);
-                                      if (selectedTenant.user.ghanaCardUrl) setRemoveExistingCard(true);
-                                    }}
-                                  >
-                                    Remove
-                                  </Button>
-                                )}
-                              </div>
-                              
-                              {isEditingDetails && !editCardScan && (!selectedTenant.user.ghanaCardUrl || removeExistingCard) ? (
-                                <div className="flex-1 flex flex-col justify-center items-center p-4 border-2 border-dashed border-zinc-200 rounded-lg bg-zinc-50 hover:bg-zinc-100 transition-colors relative cursor-pointer group">
-                                  <HugeiconsIcon icon={Alert01Icon} size={20} className="text-zinc-400 group-hover:text-zinc-500 mb-2" />
-                                  <p className="text-[10px] font-medium text-zinc-500 text-center">Tap to Take Photo or Upload</p>
-                                  <Input 
-                                    type="file" 
-                                    accept="image/*" 
-                                    capture="environment"
-                                    onChange={(e) => setEditCardScan(e.target.files?.[0] || null)}
-                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
-                                  />
-                                </div>
-                              ) : (
-                                <div className="h-40 w-full bg-zinc-50 rounded-md border border-zinc-200/60 overflow-hidden cursor-pointer hover:opacity-90 transition-opacity" onClick={() => !isEditingDetails && setExpandedImage(editCardScan ? URL.createObjectURL(editCardScan) : selectedTenant.user.ghanaCardUrl!)}>
-                                  <img src={editCardScan ? URL.createObjectURL(editCardScan) : selectedTenant.user.ghanaCardUrl} alt="Ghana Card Scan" className="w-full h-full object-cover" />
-                                </div>
-                              )}
+                          ) : (
+                            <div className="h-40 w-full flex flex-col items-center justify-center bg-zinc-50 rounded-md border border-zinc-200/60 border-dashed">
+                              <HugeiconsIcon icon={Alert01Icon} size={20} className="text-zinc-400 mb-2" />
+                              <p className="text-[10px] font-medium text-zinc-500">Not Uploaded</p>
                             </div>
                           )}
                         </div>
-                      )}
-  
+                        <div className="flex-1 p-3.5 rounded-lg border border-zinc-200/60 bg-white flex flex-col">
+                          <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest mb-2.5">Ghana Card Scan</p>
+                          {selectedTenant.user.ghanaCardUrl ? (
+                            <div className="h-40 w-full bg-zinc-50 rounded-md border border-zinc-200/60 overflow-hidden cursor-pointer hover:opacity-90" onClick={() => setExpandedImage(selectedTenant.user.ghanaCardUrl!)}>
+                              <img src={selectedTenant.user.ghanaCardUrl} alt="Card Scan" className="w-full h-full object-cover" />
+                            </div>
+                          ) : (
+                            <div className="h-40 w-full flex flex-col items-center justify-center bg-zinc-50 rounded-md border border-zinc-200/60 border-dashed">
+                              <HugeiconsIcon icon={Alert01Icon} size={20} className="text-zinc-400 mb-2" />
+                              <p className="text-[10px] font-medium text-zinc-500">Not Uploaded</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      
                       {selectedTenant.pipelineStage !== "pending" && (
                         <>
                       {/* Lease Agreement */}
@@ -843,32 +732,13 @@ export default function TenantDirectoryClient({
                     </div>
                         </>
                       )}
-                      {isEditingDetails && (
-                        <div className="flex gap-3 mt-5 pt-5 border-t border-zinc-200/60 justify-end">
-                          <Button 
-                            variant="outline" 
-                            className="h-10 px-5 text-[13px] font-medium rounded-lg shadow-sm border-zinc-200/80 hover:bg-zinc-50"
-                            onClick={() => { setIsEditingDetails(false); setRemoveExistingFace(false); setRemoveExistingCard(false); }}
-                            disabled={isSavingEdit}
-                          >
-                            Cancel
-                          </Button>
-                          <Button 
-                            className="h-10 px-5 text-[13px] font-medium rounded-lg shadow-sm bg-zinc-900 text-white hover:bg-zinc-800"
-                            onClick={saveEditedDetails}
-                            disabled={isSavingEdit}
-                          >
-                            {isSavingEdit ? "Saving..." : "Save Changes"}
-                          </Button>
-                        </div>
-                      )}
                   </div>
                 </section>
                 )}
 
 
                 {/* DYNAMIC SECTIONS BASED ON STAGE */}
-                {selectedTenant.pipelineStage === "pending" && !isEditingDetails && (
+                {selectedTenant.pipelineStage === "pending" && (
                   <section>
                     <div className="p-5 rounded-lg border border-zinc-200/60 bg-zinc-50/50">
                       <p className="text-[13px] text-zinc-600 leading-relaxed mb-5">
@@ -913,15 +783,7 @@ export default function TenantDirectoryClient({
                             <Button 
                               variant={needsDocs ? "default" : "outline"}
                               className={`flex-1 sm:flex-none sm:w-auto h-10 text-[13px] font-medium rounded-lg shadow-sm ${needsDocs ? "bg-zinc-900 text-white hover:bg-zinc-800 border-transparent" : "bg-white border-zinc-200/80 hover:bg-zinc-50 text-zinc-700"}`} 
-                              onClick={() => {
-                                setEditPhone(selectedTenant.user.phone || "");
-                                setEditGhanaCard(selectedTenant.user.ghanaCardNumber || "");
-                                setEditFacePhoto(null);
-                                setEditCardScan(null);
-                                setIsEditingDetails(true);
-                                setRemoveExistingFace(false);
-                                setRemoveExistingCard(false);
-                              }}
+                              onClick={() => router.push(`/admin/manage/tenants/${selectedTenant.id}/${selectedTenant.pipelineStage === "pending" ? "onboarding" : "edit"}`)}
                             >
                               {needsDocs ? "Capture ID Documents" : "Update Documents"}
                             </Button>

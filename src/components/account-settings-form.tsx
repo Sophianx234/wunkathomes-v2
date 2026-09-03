@@ -311,7 +311,7 @@ export default function AccountSettingsForm({
                       variant="outline"
                       onClick={removeAvatar}
                       disabled={!avatarPreview}
-                      className="text-zinc-600 hover:bg-red-50 rounded-md hover:text-red-600 hover:border-red-200 transition-colors text-[10px] md:text-sm h-8 md:h-10 px-3 md:px-4 w-full sm:w-auto truncate shrink-0"
+                      className="text-zinc-600 hover:bg-zinc-50 rounded-md hover:text-zinc-600 hover:border-zinc-200 transition-colors text-[10px] md:text-sm h-8 md:h-10 px-3 md:px-4 w-full sm:w-auto truncate shrink-0"
                     >
                       Delete avatar
                     </Button>
@@ -544,10 +544,10 @@ export default function AccountSettingsForm({
                 <div className="pt-1 md:pt-2 pb-1 md:pb-2 w-full box-border">
                   <div className="flex gap-1 md:gap-2 h-1 md:h-1.5 w-full box-border">
                     <div
-                      className={`flex-1 rounded-full transition-colors duration-300 ${newPassword.length === 0 ? "bg-zinc-200" : strengthCount >= 1 ? (strengthCount === 1 ? "bg-red-500" : strengthCount === 2 ? "bg-amber-400" : "bg-green-500") : "bg-red-500"}`}
+                      className={`flex-1 rounded-full transition-colors duration-300 ${newPassword.length === 0 ? "bg-zinc-200" : strengthCount >= 1 ? (strengthCount === 1 ? "bg-zinc-500" : strengthCount === 2 ? "bg-zinc-400" : "bg-green-500") : "bg-zinc-500"}`}
                     />
                     <div
-                      className={`flex-1 rounded-full transition-colors duration-300 ${newPassword.length === 0 ? "bg-zinc-200" : strengthCount >= 2 ? (strengthCount === 2 ? "bg-amber-400" : "bg-green-500") : "bg-zinc-200"}`}
+                      className={`flex-1 rounded-full transition-colors duration-300 ${newPassword.length === 0 ? "bg-zinc-200" : strengthCount >= 2 ? (strengthCount === 2 ? "bg-zinc-400" : "bg-green-500") : "bg-zinc-200"}`}
                     />
                     <div
                       className={`flex-1 rounded-full transition-colors duration-300 ${newPassword.length === 0 ? "bg-zinc-200" : strengthCount >= 3 ? "bg-green-500" : "bg-zinc-200"}`}

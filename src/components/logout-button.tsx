@@ -9,7 +9,7 @@ export function LogoutButton() {
     <button 
       type="submit" 
       disabled={pending}
-      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium  hover:bg-red-50 transition disabled:opacity-70 disabled:cursor-not-allowed"
+      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium  hover:bg-zinc-50 transition disabled:opacity-70 disabled:cursor-not-allowed"
     >
       {pending ? (
         <HugeiconsIcon icon={Loading03Icon} size={18} className="animate-spin" />

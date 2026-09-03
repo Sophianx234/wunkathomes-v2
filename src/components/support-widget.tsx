@@ -264,21 +264,21 @@ export default function SupportWidget() {
 
                 {activeTab === "emergency" && (
                   <div className="flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                    <div className="bg-red-50 border border-red-100 rounded-xl p-5 text-center">
-                      <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-red-100 text-red-600 mb-4">
+                    <div className="bg-zinc-50 border border-zinc-100 rounded-xl p-5 text-center">
+                      <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-zinc-100 text-zinc-600 mb-4">
                         <HugeiconsIcon icon={Alert02Icon} size={24} />
                       </div>
-                      <h4 className="text-[14px] font-bold text-red-800 mb-2">
+                      <h4 className="text-[14px] font-bold text-zinc-800 mb-2">
                         Urgent Maintenance & Lockouts
                       </h4>
-                      <p className="text-xs text-red-700/80 font-medium leading-relaxed mb-6">
+                      <p className="text-xs text-zinc-700/80 font-medium leading-relaxed mb-6">
                         Are you locked out or experiencing a critical physical infrastructure failure? 
                         Use our dedicated emergency line for immediate assistance.
                       </p>
                       
                       <a 
                         href="tel:+233241234567"
-                        className="w-full py-3.5 bg-white text-red-700 font-bold text-[13px] border border-red-200 rounded-xl hover:bg-red-50 transition-colors flex items-center justify-center gap-2 shadow-sm"
+                        className="w-full py-3.5 bg-white text-zinc-700 font-bold text-[13px] border border-zinc-200 rounded-xl hover:bg-zinc-50 transition-colors flex items-center justify-center gap-2 shadow-sm"
                       >
                         <HugeiconsIcon icon={Key01Icon} size={18} />
                         Request Lock Override

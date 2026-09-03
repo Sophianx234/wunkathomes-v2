@@ -43,13 +43,13 @@ export default function UserCommandCenter() {
           {/* TASK-FIRST BLOCK: The Contract Signature */}
           <div className="bg-white border-2 border-black rounded-lg p-6 md:p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative overflow-hidden">
             {/* Warning Strip */}
-            <div className="absolute top-0 left-0 w-2 h-full bg-amber-400"></div>
+            <div className="absolute top-0 left-0 w-2 h-full bg-zinc-400"></div>
 
             <div className="flex items-center gap-3 mb-6">
-              <div className="bg-amber-100 text-amber-700 p-2 rounded-lg">
+              <div className="bg-zinc-100 text-zinc-700 p-2 rounded-lg">
                 <HugeiconsIcon icon={Alert02Icon} size={20} />
               </div>
-              <span className="text-xs font-black uppercase tracking-widest text-amber-700">
+              <span className="text-xs font-black uppercase tracking-widest text-zinc-700">
                 Action Required
               </span>
             </div>
@@ -75,7 +75,7 @@ export default function UserCommandCenter() {
                 <HugeiconsIcon
                   icon={Clock01Icon}
                   size={14}
-                  className="text-amber-500"
+                  className="text-zinc-500"
                 />
                 Hold Expires in:{" "}
                 <span className="text-black">{activeTask.holdExpiry}</span>
@@ -130,7 +130,7 @@ export default function UserCommandCenter() {
               />
               <div className="absolute top-4 right-4 z-20">
                 <span className="bg-white/90 backdrop-blur-sm text-black text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded shadow-sm flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 animate-pulse"></span>
                   Reserved
                 </span>
               </div>

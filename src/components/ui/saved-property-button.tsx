@@ -48,7 +48,7 @@ export default function SavePropertyButton({
         icon={BookmarkAdd01Icon} 
         size={24} 
         // Fill red if saved, otherwise outline black
-        className={`transition-colors duration-200 ${isSaved ? "text-red-500 fill-red-500" : "text-black"}`} 
+        className={`transition-colors duration-200 ${isSaved ? "text-zinc-500 fill-zinc-500" : "text-black"}`} 
       />
       <span className="underline underline-offset-4 hidden sm:inline-block">
         {isSaved ? "Saved" : "Save"}

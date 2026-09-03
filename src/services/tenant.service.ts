@@ -14,7 +14,7 @@ export async function getTenantsData() {
     .populate({ 
       path: 'userId', 
       model: User,
-      select: '+idDocumentNumber +idVerificationPhotoUrl' 
+      select: '+idDocumentNumber +idVerificationPhotoUrl +idDocumentUrl' 
     })
     .populate({
       path: 'listingId',

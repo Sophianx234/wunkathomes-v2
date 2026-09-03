@@ -185,7 +185,7 @@ export default function SmartLockManager({
             ) : apiHealth === 'online' ? (
               <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
             ) : apiHealth === 'offline' ? (
-              <span className="h-2 w-2 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]"></span>
+              <span className="h-2 w-2 rounded-full bg-zinc-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]"></span>
             ) : (
               <span className="h-2 w-2 rounded-full bg-zinc-300"></span>
             )}
@@ -489,7 +489,7 @@ export default function SmartLockManager({
                   <td className="px-6 py-4">
                     <span className="font-medium text-zinc-900">{lock.name}</span>
                     {lock.activeAlarms && lock.activeAlarms.length > 0 && (
-                      <span className="ml-2 inline-flex animate-pulse items-center gap-1 rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-bold text-rose-700">
+                      <span className="ml-2 inline-flex animate-pulse items-center gap-1 rounded-full bg-zinc-100 px-2 py-0.5 text-[10px] font-bold text-zinc-700">
                         {lock.activeAlarms.length} ALARM(S)
                       </span>
                     )}
@@ -500,7 +500,7 @@ export default function SmartLockManager({
                       <div className="flex items-center gap-2">
                         <div className="w-16 h-1.5 bg-zinc-200 rounded-full overflow-hidden">
                           <div 
-                            className={`h-full ${lock.batteryPercentage <= 20 ? 'bg-rose-500' : 'bg-emerald-500'}`} 
+                            className={`h-full ${lock.batteryPercentage <= 20 ? 'bg-zinc-500' : 'bg-emerald-500'}`} 
                             style={{ width: `${lock.batteryPercentage}%` }} 
                           />
                         </div>
@@ -509,7 +509,7 @@ export default function SmartLockManager({
                     ) : lock.batteryLevel ? (
                       <div className="flex items-center gap-1.5 text-zinc-600">
                         {lock.batteryLevel === 'low' ? (
-                          <BatteryWarning className="h-3.5 w-3.5 text-rose-600" />
+                          <BatteryWarning className="h-3.5 w-3.5 text-zinc-600" />
                         ) : (
                           <Battery className="h-3.5 w-3.5" />
                         )}
@@ -594,7 +594,7 @@ export default function SmartLockManager({
                   <li key={idx} className="p-4 hover:bg-zinc-50 transition-colors text-sm flex items-start gap-4">
                     <div className="shrink-0 mt-1">
                       {act.action === 'ALARM_TRIGGERED' ? (
-                        <div className="h-2 w-2 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.8)]" />
+                        <div className="h-2 w-2 rounded-full bg-zinc-500 shadow-[0_0_8px_rgba(244,63,94,0.8)]" />
                       ) : act.action === 'ALARM_CLEARED' ? (
                         <div className="h-2 w-2 rounded-full bg-emerald-500" />
                       ) : (

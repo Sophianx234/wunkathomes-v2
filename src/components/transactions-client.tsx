@@ -109,12 +109,12 @@ const getStatusBadge = (status: string) => {
     case "Success":
       return "text-emerald-700 ring-1 ring-emerald-200/50 bg-emerald-50/50";
     case "Pending":
-      return "text-amber-700 ring-1 ring-amber-300/50 bg-amber-50/50";
+      return "text-zinc-700 ring-1 ring-zinc-300/50 bg-zinc-50/50";
     case "Failed":
     case "Abandoned":
       return "text-zinc-500 ring-1 ring-zinc-200/60 bg-zinc-50/50 line-through decoration-zinc-300";
     case "Refunded":
-      return "text-rose-700 ring-1 ring-rose-200/50 bg-rose-50/50";
+      return "text-zinc-700 ring-1 ring-zinc-200/50 bg-zinc-50/50";
     default:
       return "text-zinc-600 ring-1 ring-zinc-200/60 bg-zinc-50/50";
   }

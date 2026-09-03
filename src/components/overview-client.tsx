@@ -110,7 +110,7 @@ const renderStars = (rating: number) => {
           key={star} 
           icon={StarIcon} 
           size={12} 
-          className={star <= rating ? "fill-amber-500 text-amber-500" : "fill-muted text-muted-foreground opacity-30"} 
+          className={star <= rating ? "fill-zinc-500 text-zinc-500" : "fill-muted text-muted-foreground opacity-30"} 
         />
       ))}
     </div>
@@ -182,10 +182,10 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
       id: 'maintenance',
       icon: Wrench01Icon,
       title: "Urgent Maintenance",
-      message: `There are ${metrics.urgentMaintenance} urgent maintenance request${metrics.urgentMaintenance>1&&'s'} waiting to be resolved.`,
+      message: `There are ${metrics.urgentMaintenance} urgent maintenance request${metrics.urgentMaintenance>1?'s':''} waiting to be resolved.`,
       link: "/admin/maintenance",
-      containerClass: "bg-rose-50 border-rose-200 text-rose-900",
-      iconClass: "bg-rose-100 text-rose-600",
+      containerClass: "bg-zinc-50 border-zinc-200 text-zinc-900",
+      iconClass: "bg-zinc-100 text-zinc-600",
       btnClass: "bg-zinc-950 hover:bg-zinc-800 text-white border-transparent shadow-sm",
     });
   }
@@ -197,9 +197,9 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
       icon: UserIdVerificationIcon,
       title: "New Tenant Approvals",
       message: `${metrics.pendingKYC} ID verification${metrics.pendingKYC>1?'s':''} and ${metrics.pendingLeases} lease${metrics.pendingLeases>1?'s':''} need your approval before the tenants can move in.`,
-      link: "/admin/manage/tenants/onboarding",
-      containerClass: "bg-amber-50 border-amber-200 text-amber-900",
-      iconClass: "bg-amber-100 text-amber-600",
+      link: "/admin/manage/tenants",
+      containerClass: "bg-zinc-50 border-zinc-200 text-zinc-900",
+      iconClass: "bg-zinc-100 text-zinc-600",
       btnClass: "bg-zinc-950 hover:bg-zinc-800 text-white border-transparent shadow-sm",
     });
   }
@@ -295,7 +295,7 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
                           {metrics.revenueTrend}%
                         </span>
                       ) : metrics.revenueTrend < 0 ? (
-                        <span className="mr-1.5 flex items-center font-medium text-rose-600">
+                        <span className="mr-1.5 flex items-center font-medium text-zinc-600">
                           <HugeiconsIcon icon={ArrowDownRight01Icon} strokeWidth={2.5} className="mr-0.5 size-3" />
                           {Math.abs(metrics.revenueTrend)}%
                         </span>
@@ -370,7 +370,7 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
                       {metrics.openWorkOrders}
                     </span>
                     <div className="mt-2 flex items-center text-xs text-muted-foreground">
-                      <span className="mx-1 font-medium text-rose-600">{metrics.urgentMaintenance}</span> require{metrics.urgentMaintenance === 1 ? 's' : ''} urgent attention
+                      <span className="mx-1 font-medium text-zinc-600">{metrics.urgentMaintenance}</span> require{metrics.urgentMaintenance === 1 ? 's' : ''} urgent attention
                     </div>
                   </div>
                 </div>
@@ -503,8 +503,8 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
                           <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 mr-1"></span>
                           {metrics.onlineLocks} Online
                         </span>
-                        <span className="flex items-center text-rose-600">
-                          <span className="h-1.5 w-1.5 rounded-full bg-rose-500 mr-1"></span>
+                        <span className="flex items-center text-zinc-600">
+                          <span className="h-1.5 w-1.5 rounded-full bg-zinc-500 mr-1"></span>
                           {metrics.offlineLocks} Offline
                         </span>
                       </div>
@@ -565,7 +565,7 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
                         </TableCell>
                         <TableCell className="py-3 px-5 text-right">
                           <Badge variant="secondary" className={`rounded-md px-2 py-0.5 text-[10px] font-medium hover:bg-transparent border-none ${
-                            payment.status === "Pending_Verification" ? "bg-amber-50 text-amber-700" : "bg-emerald-50 text-emerald-700"
+                            payment.status === "Pending_Verification" ? "bg-zinc-50 text-zinc-700" : "bg-emerald-50 text-emerald-700"
                           }`}>
                             {payment.status === "Pending_Verification" ? "Pending" : "Processed"}
                           </Badge>
@@ -623,7 +623,7 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
                         <TableCell className="py-3 ">
                           <Badge variant="secondary" className={`rounded-md px-2 py-0.5 text-[10px] font-medium hover:bg-transparent border-none ${
                             listing.status === "Available" ? "bg-emerald-50 text-emerald-700" :
-                            listing.status === "Pending" ? "bg-amber-50 text-amber-700" :
+                            listing.status === "Pending" ? "bg-zinc-50 text-zinc-700" :
                             "bg-zinc-100/50 text-zinc-600"
                           }`}>
                             {listing.status}
@@ -680,8 +680,8 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
                         </TableCell>
                         <TableCell className="py-3 px-5 text-right">
                           <Badge variant="secondary" className={`rounded-md px-2 py-0.5 text-[10px] font-medium hover:bg-transparent border-none ${
-                            rent.status === "Overdue" ? "bg-rose-50 text-rose-700" :
-                            rent.status === "Due_Today" ? "bg-amber-50 text-amber-700" :
+                            rent.status === "Overdue" ? "bg-zinc-50 text-zinc-700" :
+                            rent.status === "Due_Today" ? "bg-zinc-50 text-zinc-700" :
                             "bg-zinc-100/50 text-zinc-600"
                           }`}>
                             {rent.dueDate}
@@ -847,7 +847,7 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
                             <DropdownMenuItem className="text-xs">View Full</DropdownMenuItem>
                             <DropdownMenuItem className="text-xs">Contact Tenant</DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-xs text-rose-600 focus:text-rose-700">Delete Review</DropdownMenuItem>
+                            <DropdownMenuItem className="text-xs text-zinc-600 focus:text-zinc-700">Delete Review</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
@@ -912,7 +912,7 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
                       </TableCell>
                       <TableCell className="py-3 px-5">
                         <Badge variant="secondary" className={`rounded px-1.5 py-0.5 text-[10px] font-bold border-none tracking-wider ${
-                          event.isAlarm ? 'bg-rose-100 text-rose-700' : 'bg-zinc-100/50 text-zinc-700'
+                          event.isAlarm ? 'bg-zinc-100 text-zinc-700' : 'bg-zinc-100/50 text-zinc-700'
                         }`}>
                           {event.action.replace(/_/g, ' ')}
                         </Badge>

@@ -59,7 +59,7 @@ export default function AdminOverviewPage() {
           <CardContent className="p-6">
             <div className="text-xs text-muted-foreground">Active Holds (72h)</div>
             <div className="mt-2 text-2xl font-medium tracking-tight">14</div>
-            <div className="mt-1 text-xs text-red-500">-3.0%</div>
+            <div className="mt-1 text-xs text-zinc-500">-3.0%</div>
           </CardContent>
 
         </div>

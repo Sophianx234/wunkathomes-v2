@@ -381,7 +381,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                             My Dashboard
                           </div>
                           {user.indicators.signaturePending && (
-                            <span className="size-2 bg-red-500 rounded-full animate-pulse shadow-sm" />
+                            <span className="size-2 bg-zinc-500 rounded-full animate-pulse shadow-sm" />
                           )}
                         </Link>
 
@@ -571,7 +571,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                         My Dashboard
                       </span>
                       {user.indicators.signaturePending && (
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-red-600 bg-red-50 px-2 py-0.5 rounded-full">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-600 bg-zinc-50 px-2 py-0.5 rounded-full">
                           Sign Lease
                         </span>
                       )}

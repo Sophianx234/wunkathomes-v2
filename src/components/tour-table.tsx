@@ -111,7 +111,7 @@ const getStatusBadge = (status: TourStatus) => {
     Pending_Time: "bg-zinc-100/50 text-zinc-600 ring-1 ring-zinc-200",
     Confirmed: "bg-zinc-900 text-zinc-50 ring-1 ring-zinc-950",
     Completed: "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/50",
-    No_Show: "bg-rose-50 text-rose-700 ring-1 ring-rose-200/50",
+    No_Show: "bg-zinc-50 text-zinc-700 ring-1 ring-zinc-200/50",
     Converted: "bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200/50",
   };
   return styles[status] || "bg-zinc-100/50 text-zinc-600";

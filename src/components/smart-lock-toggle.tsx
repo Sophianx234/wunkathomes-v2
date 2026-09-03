@@ -43,7 +43,7 @@ export function SmartLockToggle({
             <div className="space-y-2">
               <Label htmlFor="smartLockId" className="text-[13px] font-medium text-zinc-700">Assign Tuya Lock</Label>
               {availableLocks.length === 0 ? (
-                <div className="p-3 bg-amber-50 text-amber-700 rounded-md text-[13px] border border-amber-200">
+                <div className="p-3 bg-zinc-50 text-zinc-700 rounded-md text-[13px] border border-zinc-200">
                   No unassigned locks found in the system. Please register hardware in the Smart Locks admin page first.
                 </div>
               ) : (

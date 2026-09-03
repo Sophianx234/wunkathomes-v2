@@ -35,11 +35,10 @@ import { DocumentViewer } from "@/components/ui/document-viewer";
 import { verifyAndOnboardTenantAction, updateTenantDetailsAction } from "@/actions/admin/tenant.action";
 import type { TenantRecord } from "@/components/tenant-directory-client";
 
-export default function TenantOnboardClient({ tenant }: { tenant: TenantRecord }) {
+export default function TenantEditClient({ tenant }: { tenant: TenantRecord }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [confirmAction, setConfirmAction] = useState<"verifyAndOnboard" | null>(null);
-  
+    
   // Media Viewer
   const [expandedImage, setExpandedImage] = useState<string | null>(null);
   const [isViewingDocument, setIsViewingDocument] = useState(false);
@@ -54,40 +53,6 @@ export default function TenantOnboardClient({ tenant }: { tenant: TenantRecord }
   const [removeExistingFace, setRemoveExistingFace] = useState(false);
   const [removeExistingCard, setRemoveExistingCard] = useState(false);
   const [isSavingEdit, setIsSavingEdit] = useState(false);
-
-  const executeConfirmedAction = () => {
-    if (confirmAction === "verifyAndOnboard") {
-      startTransition(async () => {
-        try {
-          const formData = new FormData();
-          formData.append("leaseId", tenant.lease.id);
-          
-          // Inject identity modifications from Card 1
-          formData.append("name", editName);
-          formData.append("phone", editPhone);
-          if (editFacePhoto) formData.append("facePhoto", editFacePhoto);
-          if (editCardScan) formData.append("cardScan", editCardScan);
-          formData.append("removeFace", String(removeExistingFace));
-          formData.append("removeCard", String(removeExistingCard));
-          formData.append("userId", tenant.user.id);
-          formData.append("ghanaCardNumber", editGhanaCard || tenant.user.ghanaCardNumber || "");
-          
-          const res = await verifyAndOnboardTenantAction(formData);
-          if (res.success) {
-            toast.success(res.message);
-            router.push("/admin/manage/tenants");
-            router.refresh();
-          } else {
-            toast.error(res.error || "Failed to complete onboarding.");
-          }
-        } catch (error) {
-          toast.error("An unexpected error occurred.");
-        } finally {
-          setConfirmAction(null);
-        }
-      });
-    }
-  };
 
   const saveEditedDetails = async () => {
     setIsSavingEdit(true);
@@ -351,62 +316,21 @@ export default function TenantOnboardClient({ tenant }: { tenant: TenantRecord }
           </section>
         </div>
 
-        {/* Card 4: Final Verification */}
-        <div className="bg-white border border-zinc-200/80 shadow rounded-xl p-6 md:p-8">
-          <section>
-            <div className="mb-6">
-              <h3 className="text-base font-bold text-zinc-900 tracking-tight mb-1">3. Final Review & Grant Access</h3>
-              <p className="text-[14px] text-zinc-500 leading-relaxed">Ensure the tenant is physically present in the office with their original Ghana Card. Verify their identity to activate the lease and provision property access (digital or physical keys) for <strong className="text-zinc-900 font-semibold">{tenant.lease.propertyName} ({tenant.lease.unitNumber})</strong>.</p>
-            </div>
-            
-            <div className="pt-2">
-              <Button 
-                disabled={needsDocs}
-                className="w-full h-14 bg-zinc-900 text-white hover:bg-zinc-800 text-[15px] font-semibold rounded-xl  transition-all disabled:opacity-50" 
-                onClick={() => setConfirmAction("verifyAndOnboard")}
-              >
-                {needsDocs ? "Complete Identity Capture to Continue" : "Verify & Grant Access"}
-              </Button>
-            </div>
-          </section>
+        
+        <div className="pt-4 flex justify-end">
+          <Button 
+            disabled={isSavingEdit}
+            onClick={saveEditedDetails}
+            className="h-12 px-8 bg-zinc-900 text-white hover:bg-zinc-800 text-[14px] font-semibold rounded-xl transition-all disabled:opacity-50" 
+          >
+            {isSavingEdit ? "Saving Changes..." : "Save Changes"}
+          </Button>
         </div>
-
       </div>
 
       <DocumentViewer imageUrl={expandedImage} onClose={() => setExpandedImage(null)} />
 
-      <AlertDialog open={!!confirmAction} onOpenChange={(open) => !open && setConfirmAction(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-lg font-bold text-zinc-900">Verify Identity & Dispatch Keys</AlertDialogTitle>
-            <AlertDialogDescription className="text-[13px] text-zinc-500 leading-relaxed">
-              By confirming, you verify that the tenant's physical Ghana Card matches the person present in the office. This action will activate their lease and dispatch property access credentials (via Smart Lock PIN or Physical Keys).
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          
-          {tenant.user.kycStatus === "Verified" && (
-            <div className="mt-4 p-4 bg-emerald-50 border border-emerald-200/60 rounded-lg">
-              <div className="flex items-start gap-3">
-                <HugeiconsIcon icon={CheckmarkBadge01Icon} className="text-emerald-600 shrink-0" size={20} />
-                <div>
-                  <h4 className="text-[13px] font-bold text-emerald-900 mb-1">VIP Fast-Track Available</h4>
-                  <p className="text-[11px] text-emerald-700/90 leading-relaxed">
-                    This tenant is already verified with a valid Ghana Card on file. You do not need to re-upload their documents.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <AlertDialogFooter className="mt-6 gap-2 sm:gap-0">
-            <AlertDialogCancel disabled={isPending} className="h-10 text-[13px] font-semibold border-zinc-200/60 hover:bg-zinc-50 rounded-lg">Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={executeConfirmedAction} disabled={isPending} className="h-10 text-[13px] font-semibold rounded-lg bg-zinc-900 text-white hover:bg-zinc-800">
-              {isPending ? <><HugeiconsIcon icon={Loading03Icon} className="animate-spin mr-2" size={14} /> Processing...</> : 
-               (tenant.user.kycStatus === "Verified") ? "Approve & Dispatch Keys" : "Verify & Grant Access"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      
 
     </div>
   );

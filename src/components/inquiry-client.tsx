@@ -71,7 +71,7 @@ const getStatusBadge = (status: string) => {
     case "Open":
       return "bg-slate-100 text-slate-800 border-slate-200";
     case "In_Progress":
-      return "bg-amber-100 text-amber-800 border-amber-200";
+      return "bg-zinc-100 text-zinc-800 border-zinc-200";
     case "Resolved":
     case "Closed":
       return "bg-emerald-100 text-emerald-800 border-emerald-200";
@@ -411,7 +411,7 @@ export default function InquiryClient({ initialInquiries }: InquiryClientProps) 
           </AlertDialogHeader>
           <AlertDialogFooter className="mt-4">
             <AlertDialogCancel disabled={isPending} className="border border-slate-200 bg-slate-50 hover:bg-slate-100 font-medium h-9 text-[13px]">Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} disabled={isPending} className="h-9 bg-red-600 hover:bg-red-700 text-white font-medium text-[13px]">
+            <AlertDialogAction onClick={confirmDelete} disabled={isPending} className="h-9 bg-zinc-600 hover:bg-zinc-700 text-white font-medium text-[13px]">
               {isPending ? "Deleting..." : "Delete Permanently"}
             </AlertDialogAction>
           </AlertDialogFooter>

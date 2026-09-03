@@ -51,8 +51,8 @@ export default function FinancialLedgerPage() {
         );
       case 'PENDING':
         return (
-          <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest bg-amber-50 text-amber-700 px-2 py-1 rounded border border-amber-200">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span> Processing
+          <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest bg-zinc-50 text-zinc-700 px-2 py-1 rounded border border-zinc-200">
+            <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 animate-pulse"></span> Processing
           </span>
         );
       case 'REFUNDED':

@@ -110,8 +110,8 @@ const getPriorityDot = (priority: MaintenancePriority) => {
   const colors = {
     Low: "bg-emerald-400",
     Routine: "bg-blue-400",
-    High: "bg-amber-400",
-    Emergency: "bg-rose-500 animate-pulse ring-2 ring-rose-500/20",
+    High: "bg-zinc-400",
+    Emergency: "bg-zinc-500 animate-pulse ring-2 ring-zinc-500/20",
   };
   return colors[priority];
 };

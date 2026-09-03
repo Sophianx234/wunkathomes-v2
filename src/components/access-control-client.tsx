@@ -316,16 +316,16 @@ const getAccessBadgeStyle = (rights: AccessRights) => {
     case "Access_Granted":
       return "bg-emerald-50/50 text-emerald-700 border-emerald-200/60 rounded-lg font-medium";
     case "Manually_Revoked":
-      return "bg-rose-50 text-rose-700 font-bold border-rose-300 rounded-lg";
+      return "bg-zinc-50 text-zinc-700 font-bold border-zinc-300 rounded-lg";
     case "Grace_Period_Override":
-      return "bg-amber-50/50 text-amber-700 border-amber-200/60 rounded-lg font-medium";
+      return "bg-zinc-50/50 text-zinc-700 border-zinc-200/60 rounded-lg font-medium";
   }
 };
 
 const getBatteryColor = (level: number) => {
   if (level > 50) return "text-emerald-500";
-  if (level > 20) return "text-amber-500";
-  return "text-rose-500";
+  if (level > 20) return "text-zinc-500";
+  return "text-zinc-500";
 };
 
 export default function AccessControlDashboard() {
@@ -758,11 +758,11 @@ export default function AccessControlDashboard() {
                             <HugeiconsIcon
                               icon={WifiDisconnected01Icon}
                               size={14}
-                              className="text-rose-500"
+                              className="text-zinc-500"
                             />
                           )}
                           <span
-                            className={`text-[12px] font-medium ${unit.connection === "Online" ? "text-emerald-700" : "text-rose-700"}`}
+                            className={`text-[12px] font-medium ${unit.connection === "Online" ? "text-emerald-700" : "text-zinc-700"}`}
                           >
                             {unit.connection}
                           </span>
@@ -948,11 +948,11 @@ export default function AccessControlDashboard() {
                     />
                   </div>
                   {sheetAccessStatus === "Manually_Revoked" && (
-                    <div className="p-3 bg-rose-50 border border-rose-200/50 rounded-lg flex items-start gap-2.5 text-rose-800 text-[11px] font-medium animate-in fade-in duration-200">
+                    <div className="p-3 bg-zinc-50 border border-zinc-200/50 rounded-lg flex items-start gap-2.5 text-zinc-800 text-[11px] font-medium animate-in fade-in duration-200">
                       <HugeiconsIcon
                         icon={Alert01Icon}
                         size={14}
-                        className="mt-0.5 shrink-0 text-rose-600"
+                        className="mt-0.5 shrink-0 text-zinc-600"
                       />
                       <div>
                         <span className="font-bold uppercase tracking-wider block mb-1">
@@ -1163,11 +1163,11 @@ export default function AccessControlDashboard() {
                         <HugeiconsIcon
                           icon={WifiDisconnected01Icon}
                           size={16}
-                          className="text-rose-500"
+                          className="text-zinc-500"
                         />
                       )}
                       <span
-                        className={`text-[13px] font-semibold ${selectedUnitAccess.connection === "Online" ? "text-emerald-700" : "text-rose-700"}`}
+                        className={`text-[13px] font-semibold ${selectedUnitAccess.connection === "Online" ? "text-emerald-700" : "text-zinc-700"}`}
                       >
                         {selectedUnitAccess.connection}
                       </span>

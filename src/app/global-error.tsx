@@ -35,7 +35,7 @@ export default function GlobalError({
           >
             {/* macOS Style Window Header */}
             <div className="flex items-center gap-2 border-b border-slate-100 bg-slate-50 px-4 py-3">
-              <div className="h-3 w-3 rounded-full bg-red-500"></div>
+              <div className="h-3 w-3 rounded-full bg-zinc-500"></div>
               <div className="h-3 w-3 rounded-full bg-yellow-400"></div>
               <div className="h-3 w-3 rounded-full bg-green-500"></div>
             </div>

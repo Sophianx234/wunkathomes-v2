@@ -92,9 +92,9 @@ const getRoleBadgeStyle = (role: string) => {
 
 const getStatusBadgeStyle = (status: string) => {
   if (status === "Suspended")
-    return "bg-rose-50 text-rose-700 border-rose-200/60";
+    return "bg-zinc-50 text-zinc-700 border-zinc-200/60";
   if (status === "Pending_Invite")
-    return "bg-amber-50 text-amber-700 border-amber-200/60";
+    return "bg-zinc-50 text-zinc-700 border-zinc-200/60";
   return "bg-teal-50 text-teal-700 border-teal-200/60"; // Active
 };
 
@@ -453,7 +453,7 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
                                     handleCancelInvite(member.id),
                                 })
                               }
-                              className="text-sm cursor-pointer text-rose-600 focus:bg-rose-50 focus:text-rose-700 rounded-lg"
+                              className="text-sm cursor-pointer text-zinc-600 focus:bg-zinc-50 focus:text-zinc-700 rounded-lg"
                             >
                               Cancel Invitation
                             </DropdownMenuItem>
@@ -578,7 +578,7 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
               }}
               className={
                 confirmDialog.isDestructive
-                  ? "bg-rose-600 text-white hover:bg-rose-700 min-w-[120px]"
+                  ? "bg-zinc-600 text-white hover:bg-zinc-700 min-w-[120px]"
                   : "bg-zinc-900 text-white hover:bg-zinc-800 min-w-[120px]"
               }
             >

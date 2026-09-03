@@ -11,12 +11,21 @@ export default function LeaseActivationEmail({ pin, propertyTitle }: { pin: stri
       <Text className="text-[14px] leading-[22px] text-[#4B5563] mb-6">
         Your lease for <strong>{propertyTitle}</strong> is now officially active.
       </Text>
-      <Text className="text-[14px] leading-[22px] text-[#4B5563] mb-4">
-        Your secure smart lock PIN for property access:
-      </Text>
-      <Section className="bg-black rounded-lg p-6 text-center mb-6">
-        <Text className="text-white text-[32px] font-mono font-bold m-0 tracking-[0.2em]">{pin}</Text>
-      </Section>
+      {(!pin || pin.includes("N/A")) ? (
+        <Section className="bg-zinc-50 border border-zinc-200 rounded-lg p-6 text-center mb-6">
+          <Text className="text-[16px] font-semibold text-[#111827] m-0 mb-2">Physical Keys Required</Text>
+          <Text className="text-[14px] text-[#4B5563] m-0">This property uses traditional physical keys for access. Please collect them from the property manager or front desk.</Text>
+        </Section>
+      ) : (
+        <>
+          <Text className="text-[14px] leading-[22px] text-[#4B5563] mb-4">
+            Your secure smart lock PIN for property access:
+          </Text>
+          <Section className="bg-black rounded-lg p-6 text-center mb-6">
+            <Text className="text-white text-[32px] font-mono font-bold m-0 tracking-[0.2em]">{pin}</Text>
+          </Section>
+        </>
+      )}
       <Text className="text-[12px] text-[#9CA3AF]">
         Keep this PIN secure and do not share it with unauthorized individuals.
       </Text>
