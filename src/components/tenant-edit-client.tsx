@@ -34,6 +34,7 @@ import {
 import { DocumentViewer } from "@/components/ui/document-viewer";
 import { verifyAndOnboardTenantAction, updateTenantDetailsAction } from "@/actions/admin/tenant.action";
 import type { TenantRecord } from "@/components/tenant-directory-client";
+import Image from "next/image";
 
 export default function TenantEditClient({ tenant }: { tenant: TenantRecord }) {
   const router = useRouter();
@@ -231,8 +232,8 @@ export default function TenantEditClient({ tenant }: { tenant: TenantRecord }) {
                       />
                     </div>
                   ) : (
-                    <div className="h-48 w-full bg-zinc-50 rounded-md border border-zinc-200/60 overflow-hidden cursor-pointer hover:opacity-90 transition-opacity relative group" onClick={() => setExpandedImage(editFacePhoto ? URL.createObjectURL(editFacePhoto) : tenant.user.securityPhotoUrl!)}>
-                      <img src={editFacePhoto ? URL.createObjectURL(editFacePhoto) : tenant.user.securityPhotoUrl} alt="Security Photo" className="w-full h-full object-contain" />
+                    <div className="h-48 relative w-full bg-zinc-50 rounded-md border border-zinc-200/60 overflow-hidden cursor-pointer hover:opacity-90 transition-opacity  group" onClick={() => setExpandedImage(editFacePhoto ? URL.createObjectURL(editFacePhoto) : tenant.user.securityPhotoUrl!)}>
+                      <Image fill src={editFacePhoto ? URL.createObjectURL(editFacePhoto) : tenant.user.securityPhotoUrl} alt="Security Photo" className="w-full h-full object-contain" />
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                         <span className="text-white text-xs font-medium bg-black/60 px-3 py-1.5 rounded-md backdrop-blur-sm">Click to Enlarge</span>
                       </div>

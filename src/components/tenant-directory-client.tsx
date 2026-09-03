@@ -491,7 +491,7 @@ export default function TenantDirectoryClient({
                   {/* TENANT PROFILE */}
                   <TableCell className="py-3 align-middle">
                     <div className="flex items-center gap-3">
-                      <Avatar className={`h-9 w-9 border shadow-sm ${tenant.user.accountStatus !== "Active" ? "opacity-50 grayscale border-zinc-200/60" : "border-zinc-200/60"}`}>
+                      <Avatar className={`h-9 w-9 border  ${tenant.user.accountStatus !== "Active" ? "opacity-50 grayscale border-zinc-200/60" : "border-zinc-200/60"}`}>
                         <AvatarImage src={tenant.user.profilePicture} />
                         <AvatarFallback className="bg-zinc-100/50 text-zinc-600 text-xs font-medium">
                           {tenant.user.name.charAt(0)}
@@ -601,7 +601,7 @@ export default function TenantDirectoryClient({
                 )}
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-4">
-                    <Avatar className={`h-12 w-12 border border-zinc-200/60 shadow-sm ${selectedTenant.user.accountStatus !== "Active" ? "opacity-50 grayscale" : ""}`}>
+                    <Avatar className={`h-12 w-12 border border-zinc-200/60  ${selectedTenant.user.accountStatus !== "Active" ? "opacity-50 grayscale" : ""}`}>
                       <AvatarImage src={selectedTenant.user.profilePicture} />
                       <AvatarFallback className="bg-zinc-100/50 text-zinc-600 font-medium">
                         {selectedTenant.user.name.charAt(0)}
@@ -650,7 +650,7 @@ export default function TenantDirectoryClient({
                 {true && (
                   <section id="identity-documents-section" className="scroll-mt-4">
                     <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-0">Identity & Documents</h3>
+                      <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-0">Documents</h3>
                       <Button 
                           variant="outline" 
                           size="sm"
@@ -668,24 +668,21 @@ export default function TenantDirectoryClient({
                       {/* ID Card */}
                       <div className="flex items-center justify-between p-3.5 rounded-lg border border-zinc-200/60 bg-white">
                         <div className="flex items-center gap-4 w-full">
-                          <div className="h-12 w-12 shrink-0 bg-zinc-50 rounded-md border border-zinc-200/60 flex items-center justify-center">
-                            <HugeiconsIcon icon={selectedTenant.user.ghanaCardNumber && selectedTenant.user.ghanaCardNumber !== "Not Provided" ? CheckmarkCircle01Icon : Clock01Icon} size={18} className="text-zinc-400" />
-                          </div>
+                          
                           <div className="w-full">
                             <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest mb-0.5">National ID</p>
                             <p className="font-mono text-[13px] font-medium text-zinc-900 tracking-tight">{selectedTenant.user.ghanaCardNumber || "Not Provided"}</p>
                           </div>
                         </div>
-                        <div>{selectedTenant.checklist.ghanaCardVerified === "Verified" ? <HugeiconsIcon icon={CheckmarkCircle01Icon} size={18} /> : <HugeiconsIcon icon={Clock01Icon} size={18} />}</div>
                       </div>
   
                       {/* Identity Photos */}
                       <div className="flex flex-col sm:flex-row gap-3 mb-6 mt-3">
                         <div className="flex-1 p-3.5 rounded-lg border border-zinc-200/60 bg-white flex flex-col">
-                          <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest mb-2.5">Security Photo (Face)</p>
+                          <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest mb-2.5">Identity Photo</p>
                           {selectedTenant.user.securityPhotoUrl ? (
                             <div className="h-40 w-full bg-zinc-50 rounded-md border border-zinc-200/60 overflow-hidden cursor-pointer hover:opacity-90" onClick={() => setExpandedImage(selectedTenant.user.securityPhotoUrl!)}>
-                              <img src={selectedTenant.user.securityPhotoUrl} alt="Face" className="w-full h-full object-cover" />
+                              <img src={selectedTenant.user.securityPhotoUrl} alt="Face" className="w-full h-full object-contain" />
                             </div>
                           ) : (
                             <div className="h-40 w-full flex flex-col items-center justify-center bg-zinc-50 rounded-md border border-zinc-200/60 border-dashed">
@@ -695,7 +692,7 @@ export default function TenantDirectoryClient({
                           )}
                         </div>
                         <div className="flex-1 p-3.5 rounded-lg border border-zinc-200/60 bg-white flex flex-col">
-                          <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest mb-2.5">Ghana Card Scan</p>
+                          <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest mb-2.5">Ghana Card </p>
                           {selectedTenant.user.ghanaCardUrl ? (
                             <div className="h-40 w-full bg-zinc-50 rounded-md border border-zinc-200/60 overflow-hidden cursor-pointer hover:opacity-90" onClick={() => setExpandedImage(selectedTenant.user.ghanaCardUrl!)}>
                               <img src={selectedTenant.user.ghanaCardUrl} alt="Card Scan" className="w-full h-full object-cover" />
@@ -718,17 +715,17 @@ export default function TenantDirectoryClient({
                           <HugeiconsIcon icon={FileDownloadIcon} size={18} className="text-zinc-400" />
                         </div>
                         <div>
-                          <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest mb-0.5">Tenancy Agreement</p>
-                          <button
+                          <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest mb-0.5">Tenancy <br /> Agreement</p>
+                          
+                        </div>
+                      </div>
+                      <button
                             onClick={() => setIsViewingDocument(true)}
                             disabled={selectedTenant.checklist.leaseSigned !== "Signed"}
                             className="text-[13px] font-medium text-zinc-900 hover:underline underline-offset-4 disabled:no-underline disabled:text-zinc-400"
                           >
-                            {selectedTenant.checklist.leaseSigned === "Signed" ? "View Signed Document" : "Awaiting Tenant Signature"}
+                            {selectedTenant.checklist.leaseSigned === "Signed" ? "View " : "Awaiting Tenant Signature"}
                           </button>
-                        </div>
-                      </div>
-                      <div>{selectedTenant.checklist.leaseSigned === "Signed" ? <HugeiconsIcon icon={CheckmarkCircle01Icon} size={18} /> : <HugeiconsIcon icon={Clock01Icon} size={18} />}</div>
                     </div>
                         </>
                       )}
