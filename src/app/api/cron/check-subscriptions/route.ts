@@ -52,7 +52,21 @@ export async function GET(request: Request) {
           : `${emailSubjectPrefix}: ${daysLeft} days left on your lease`;
 
         try {
-          // Fire the email
+          // 1. Data Enrichment: Check if this lease/property has a Smart Lock
+          let hasSmartLock = false;
+          let lock = null;
+          try {
+            lock = await SmartLock.findOne({
+              $or: [{ propertyId: lease.listingId.propertyId }, { listingId: lease.listingId._id }],
+            });
+            if (lock && lock.tuyaDeviceId) {
+              hasSmartLock = true;
+            }
+          } catch (lockError) {
+            console.error(`[CRON WARNING] Failed to query SmartLock for Lease ${lease._id}:`, lockError);
+          }
+
+          // 2. Fire the email conditionally customized by hasSmartLock
           await sendEmail({
             to: lease.userId.email,
             subject: subject,
@@ -60,23 +74,20 @@ export async function GET(request: Request) {
               userName: lease.userId.name,
               propertyTitle: lease.listingId.title,
               daysRemaining: daysLeft,
-              endDate: lease.endDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+              endDate: lease.endDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }),
+              hasSmartLock: hasSmartLock
             })
           });
 
-          // Mark as sent (Idempotency)
+          // 3. Mark as sent (Idempotency)
           lease.reminders[milestoneKey].sent = true;
           
-          // If expired, automatically update the lease status & physically revoke access
+          // 4. Decoupled Hardware Action (Smart Locks Only) & Lease Status Update
           if (milestoneKey === "expired") {
             lease.status = "Expired";
             
-            try {
-              const lock = await SmartLock.findOne({
-                $or: [{ propertyId: lease.listingId.propertyId }, { listingId: lease.listingId._id }],
-              });
-
-              if (lock && lock.tuyaDeviceId) {
+            if (hasSmartLock && lock) {
+              try {
                 // Wipe any active temporary PINs from the physical Tuya lock
                 if (lock.activeTempPins && lock.activeTempPins.length > 0) {
                   for (const pin of lock.activeTempPins) {
@@ -102,9 +113,9 @@ export async function GET(request: Request) {
                   performedBy: 'System Cron',
                   metadata: { reason: "Lease Expired", autoRevokedPins: true }
                 });
+              } catch (lockError) {
+                console.error(`[CRON ERROR] Smart Lock Revocation Failed for Lease ${lease._id}:`, lockError);
               }
-            } catch (lockError) {
-              console.error(`[CRON ERROR] Smart Lock Revocation Failed for Lease ${lease._id}:`, lockError);
             }
           }
 
