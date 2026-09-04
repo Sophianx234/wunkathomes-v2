@@ -80,8 +80,6 @@ export default function AccountSettingsForm({
   };
 
   // --- Profile State ---
-  const [name, setName] = useState(initialUser.name);
-  const [email, setEmail] = useState(initialUser.email);
   const [phone, setPhone] = useState(formatPhoneNumber(initialUser.phone));
   const [countryCode, setCountryCode] = useState(initialUser.countryCode);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
@@ -124,7 +122,6 @@ export default function AccountSettingsForm({
     currentPassword.length > 0 && newPassword.length > 0;
 
   const isProfileDirty =
-    name !== initialUser.name ||
     phone.replace(/\D/g, "") !== (initialUser.phone || "").replace(/\D/g, "") ||
     countryCode !== initialUser.countryCode ||
     avatarPreview !== initialUser.profilePicture ||
@@ -173,8 +170,8 @@ export default function AccountSettingsForm({
 
     try {
       const formData = new FormData();
-      formData.append("name", name);
-      formData.append("email", email);
+      formData.append("name", initialUser.name);
+      formData.append("email", initialUser.email);
       formData.append("phoneNumber", phone.replace(/\D/g, ""));
       formData.append("countryCode", countryCode);
       if (avatarFile) formData.append("profilePicture", avatarFile);
@@ -333,10 +330,11 @@ export default function AccountSettingsForm({
                   </FieldLabel>
                   <Input
                     id="name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    value={initialUser.name}
+                    readOnly
+                    disabled
                     placeholder="Enter your full name"
-                    className="h-9 md:h-11 bg-slate-50/50 rounded-lg md:rounded-lg border-zinc-200/60 focus:ring-zinc-950 text-[11px] md:text-sm block w-full min-w-0 max-w-full box-border appearance-none m-0 px-3"
+                    className="h-9 md:h-11 bg-zinc-50/50 text-zinc-500 cursor-not-allowed rounded-lg md:rounded-lg border-zinc-200/60 focus:ring-0 text-[11px] md:text-sm block w-full min-w-0 max-w-full box-border appearance-none m-0 px-3 opacity-80"
                     required
                   />
                 </Field>
@@ -351,11 +349,11 @@ export default function AccountSettingsForm({
                   <Input
                     id="email"
                     type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="h-9 md:h-11 bg-slate-50/50 rounded-lg md:rounded-lg border-zinc-200/60 focus:ring-zinc-950 disabled:opacity-60 text-[11px] md:text-sm block w-full min-w-0 max-w-full box-border appearance-none m-0 px-3"
-                    required
+                    value={initialUser.email}
+                    readOnly
                     disabled
+                    className="h-9 md:h-11 bg-zinc-50/50 text-zinc-500 cursor-not-allowed rounded-lg md:rounded-lg border-zinc-200/60 focus:ring-0 text-[11px] md:text-sm block w-full min-w-0 max-w-full box-border appearance-none m-0 px-3 opacity-80"
+                    required
                   />
                 </Field>
 
@@ -379,6 +377,12 @@ export default function AccountSettingsForm({
                   </div>
                   <input type="hidden" name="countryCode" value={countryCode} />
                 </Field>
+              </div>
+
+              <div className="w-full box-border px-1 mt-[-8px] mb-2">
+                <p className="text-[12px] text-zinc-500 leading-relaxed">
+                  <strong className="font-semibold text-zinc-700">Note:</strong> Your name and email are locked to match your verified identity and active lease documents. Please contact support to request a legal name or email change.
+                </p>
               </div>
 
               <div className="pt-3 md:pt-4 border-t border-zinc-200/60 w-full box-border">
