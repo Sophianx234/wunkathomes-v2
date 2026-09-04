@@ -3,7 +3,7 @@
 import React, { useState, useMemo, useTransition, useEffect } from "react";
 import Link from "next/link";
 import {
-  WhatsappIcon,
+  MoreHorizontalIcon,
   Calendar01Icon,
   Clock01Icon,
   LinkSquare01Icon,
@@ -27,6 +27,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table,
@@ -117,6 +123,11 @@ const getStatusBadge = (status: TourStatus) => {
   return styles[status] || "bg-zinc-100/50 text-zinc-600";
 };
 
+const getStatusLabel = (status: TourStatus) => {
+  if (status === "Pending_Time") return "Pending";
+  return status.replace("_", " ");
+};
+
 // --- ISOLATED NOTES EDITOR ---
 function AdminNotesEditor({
   initialNotes,
@@ -142,7 +153,7 @@ function AdminNotesEditor({
         placeholder="Log feedback, negotiation details, or specific client requests..."
         value={notes}
         onChange={(e) => setNotes(e.target.value)}
-        className="text-[13px] min-h-[120px] resize-none focus-visible:ring-zinc-500/20 focus-visible:border-zinc-500 bg-white shadow-sm"
+        className="text-[13px] min-h-[120px] resize-none focus-visible:ring-zinc-500/20 focus-visible:border-zinc-500 bg-white"
       />
       <div className="flex justify-end mt-3">
         <Button
@@ -150,7 +161,7 @@ function AdminNotesEditor({
           variant="ghost"
           disabled={isPending}
           onClick={() => onSave(notes)}
-          className="h-8 text-[11px] bg-black text-white rounded-md hover:bg-zinc-800 transition-all shadow-sm"
+          className="h-8 text-[11px] bg-black text-white rounded-md hover:bg-zinc-800 transition-all"
         >
           {isPending ? "Saving..." : "Save Notes"}
         </Button>
@@ -319,7 +330,7 @@ export default function TourTable({
       </div>
 
       {/* DYNAMIC FILTER BAR */}
-      <section className="flex flex-col xl:flex-row items-center gap-4 bg-white p-1.5 border border-zinc-200/60 rounded-lg shadow-[0_1px_4px_rgba(0,0,0,0.01)] w-full">
+      <section className="flex flex-col xl:flex-row items-center gap-4 bg-white p-1.5 border border-zinc-200/60 rounded-lg w-full">
         <div className="relative flex-1 w-full">
           <HugeiconsIcon
             icon={Search01Icon}
@@ -348,7 +359,7 @@ export default function TourTable({
               <SelectItem value="all">All Statuses</SelectItem>
               {availableStatuses.map((status) => (
                 <SelectItem key={status} value={status}>
-                  {status.replace("_", " ")}
+                  {getStatusLabel(status)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -380,7 +391,7 @@ export default function TourTable({
       </section>
 
       {/* DATA TABLE */}
-      <div className="bg-white border border-zinc-200/60 rounded-lg overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.01)]">
+      <div className="bg-white border border-zinc-200/60 rounded-lg overflow-hidden">
         <Table>
           <TableHeader className="bg-zinc-50/30">
             <TableRow className="border-zinc-200/60">
@@ -419,25 +430,11 @@ export default function TourTable({
                 </TableCell>
                 <TableCell
                   className="py-3 align-middle"
-                  onClick={(e) => e.stopPropagation()}
                 >
                   <div className="flex items-center gap-2">
                     <span className="text-[13px] font-mono font-medium text-zinc-800 tracking-tight">
                       {tour.phoneNumber}
                     </span>
-                    <a
-                      href={`https://wa.me/${tour.phoneNumber.replace(/[^0-9]/g, "")}`}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 text-[#25D366] hover:bg-[#25D366]/10 rounded-full shrink-0"
-                      >
-                        <HugeiconsIcon icon={WhatsappIcon} size={14} />
-                      </Button>
-                    </a>
                   </div>
                 </TableCell>
                 <TableCell className="py-3 align-middle">
@@ -456,17 +453,22 @@ export default function TourTable({
                     variant="outline"
                     className={`px-2 py-0 border-0 rounded text-[10px] uppercase tracking-wider font-bold h-5 ${getStatusBadge(tour.status)}`}
                   >
-                    {tour.status.replace("_", " ")}
+                    {getStatusLabel(tour.status)}
                   </Badge>
                 </TableCell>
-                <TableCell className="py-3 align-middle text-right">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-8 text-[11px] font-semibold border-zinc-200/60 text-zinc-700 rounded-lg"
-                  >
-                    {activeTab === "active" ? "View Detail" : "View Details"}
-                  </Button>
+                <TableCell className="py-3 align-middle text-right" onClick={(e) => e.stopPropagation()}>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-md text-zinc-500 hover:text-zinc-900">
+                        <HugeiconsIcon icon={MoreHorizontalIcon} size={16} />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => handleOpenSheet(tour)}>
+                        {activeTab === "active" ? "View Detail" : "View Details"}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </TableCell>
               </TableRow>
             ))}
@@ -492,7 +494,7 @@ export default function TourTable({
         open={!!selectedTour}
         onOpenChange={(open) => !open && setSelectedTour(null)}
       >
-        <DialogContent className="w-full sm:max-w-xl md:max-w-2xl p-0 bg-white border border-slate-200/80 flex flex-col font-sans shadow-sm rounded-lg max-h-[85vh] overflow-hidden">
+        <DialogContent className="w-full sm:max-w-xl md:max-w-2xl p-0 bg-white border border-slate-200/80 flex flex-col font-sans rounded-lg max-h-[85vh] overflow-hidden">
           {selectedTour && (
             <>
               {/* Header Profile Section */}
@@ -517,20 +519,6 @@ export default function TourTable({
                       </div>
                     </div>
                   </div>
-                  
-                  <a
-                    href={`https://wa.me/${selectedTour.phoneNumber.replace(/[^0-9]/g, "")}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="-translate-x-8"
-                  >
-                    <Button
-                      size="icon"
-                      className="h-10 w-10 shadow-none  rounded-full bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20 transition-colors shrink-0 "
-                    >
-                      <HugeiconsIcon icon={WhatsappIcon} size={20} strokeWidth={2} />
-                    </Button>
-                  </a>
                 </div>
               </div>
 
@@ -544,13 +532,13 @@ export default function TourTable({
                       Target Property
                     </h3>
                     <Badge variant="outline" className={`px-2 py-0 border-0 rounded text-[9px] uppercase tracking-wider font-bold h-5 ${getStatusBadge(selectedTour.status)}`}>
-                      {selectedTour.status.replace(/_/g, " ")}
+                      {getStatusLabel(selectedTour.status)}
                     </Badge>
                   </div>
                   
-                  <div className="rounded-lg border border-zinc-200/60 overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.01)]">
+                  <div className="rounded-lg border border-zinc-200/60 overflow-hidden">
                     <div className="p-4 bg-zinc-50/50 flex gap-4 border-b border-zinc-200/60">
-                      <div className="h-12 w-12 shrink-0 bg-white rounded-md overflow-hidden border border-zinc-200/60 shadow-sm">
+                      <div className="h-12 w-12 shrink-0 bg-white rounded-md overflow-hidden border border-zinc-200/60">
                         {selectedTour.listing.image ? (
                           <img src={selectedTour.listing.image} alt="Property" className="w-full h-full object-cover" />
                         ) : (
@@ -621,11 +609,11 @@ export default function TourTable({
                         onClick={() => requestStatusChange(status)}
                         className={`flex-1 min-w-[30%] py-2 text-[11px] font-bold uppercase tracking-wider rounded-lg transition-all duration-200 ${
                           sheetStatus === status
-                            ? "bg-white text-zinc-900 shadow-sm ring-1 ring-zinc-200/80"
+                            ? "bg-white text-zinc-900 ring-1 ring-zinc-200/80"
                             : "text-zinc-500 hover:bg-zinc-200/50 hover:text-zinc-700 disabled:opacity-50"
                         }`}
                       >
-                        {status.replace("_", " ")}
+                        {getStatusLabel(status)}
                       </button>
                     ))}
                   </div>
@@ -669,7 +657,7 @@ export default function TourTable({
             <AlertDialogDescription className="text-[13px] text-zinc-500 leading-relaxed mt-2">
               Are you sure you want to transition this tour to{" "}
               <span className="font-bold text-zinc-900">
-                {pendingStatusChange?.replace("_", " ")}
+                {pendingStatusChange ? getStatusLabel(pendingStatusChange) : ""}
               </span>
               ? This action updates the system immediately.
             </AlertDialogDescription>
@@ -705,3 +693,4 @@ export default function TourTable({
     </div>
   );
 }
+

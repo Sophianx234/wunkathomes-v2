@@ -3,8 +3,6 @@
 import { useState } from "react";
 import { updateTourSettings } from "@/actions/admin/settings.action";
 import { toast } from "sonner";
-import { HugeiconsIcon } from "@hugeicons/react";
-import { Calendar01Icon, CheckmarkBadge01Icon } from "@hugeicons/core-free-icons";
 
 const DAYS_OF_WEEK = [
   { value: 1, label: "Mon" },
@@ -47,11 +45,10 @@ export default function TourSettingsClient({ initialDays, initialPrice }: { init
   const hasChanged = JSON.stringify(initialDays.slice().sort()) !== JSON.stringify(selectedDays.slice().sort()) || initialPrice !== tourPrice;
 
   return (
-    <div className="w-full bg-white border border-zinc-200/60 rounded-xl p-5 md:p-6 mb-6 shadow-sm">
+    <div className="w-full bg-white border border-zinc-200/60 rounded-xl p-5 md:p-6 mb-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
         <div>
-          <h2 className="text-sm font-bold text-zinc-900 flex items-center gap-2">
-            <HugeiconsIcon icon={Calendar01Icon} size={18} />
+          <h2 className="text-sm font-bold text-zinc-900 tracking-tight">
             Tour Availability Schedule
           </h2>
           <p className="text-xs text-zinc-500 mt-1">
@@ -61,10 +58,9 @@ export default function TourSettingsClient({ initialDays, initialPrice }: { init
         <button
           onClick={handleSave}
           disabled={!hasChanged || isSaving}
-          className="bg-black text-white text-xs font-bold px-5 py-2.5 rounded-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-zinc-800 transition-colors shrink-0 justify-center w-full md:w-auto"
+          className="bg-black text-white text-xs font-bold px-5 py-2.5 rounded-lg flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed hover:bg-zinc-800 transition-colors shrink-0 w-full md:w-auto"
         >
           {isSaving ? "Saving..." : "Save Settings"}
-          {!isSaving && <HugeiconsIcon icon={CheckmarkBadge01Icon} size={14} />}
         </button>
       </div>
 
