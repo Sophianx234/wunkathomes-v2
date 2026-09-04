@@ -3,6 +3,7 @@
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import {
+  MoreHorizontalIcon,
   Search01Icon,
   FilterIcon,
   ArrowUpRight01Icon,
@@ -37,6 +38,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { TransactionReceipt } from "./transaction-reciept";
@@ -68,7 +75,7 @@ export interface TransactionRecord {
     price: number;
     image: string;
     features: { bedrooms: number; bathrooms: number; sizeSqm: number };
-    property: { propertyType: string; location: string };
+    property: { propertyType: string; location: string; propertyName?: string };
   };
 }
 
@@ -256,7 +263,7 @@ export default function TransactionsClient({
         </div>
 
         {/* INLINE FILTER CHROME */}
-        <section className="flex flex-col xl:flex-row items-center gap-4 bg-white p-1.5 border border-zinc-200/60 rounded-lg shadow-[0_1px_4px_rgba(0,0,0,0.01)] w-full">
+        <section className="flex flex-col xl:flex-row items-center gap-4 bg-white p-1.5 border border-zinc-200/60 rounded-lg w-full">
           <div className="relative flex-1 w-full">
             <HugeiconsIcon
               icon={Search01Icon}
@@ -329,7 +336,7 @@ export default function TransactionsClient({
         </section>
 
         {/* DATA TABLE */}
-        <div className="bg-white border border-zinc-200/60 rounded-lg overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.01)]">
+        <div className="bg-white border border-zinc-200/60 rounded-lg overflow-hidden">
           <Table>
             <TableHeader className="bg-zinc-50/30">
               <TableRow className="border-zinc-200/60 hover:bg-transparent">
@@ -351,14 +358,14 @@ export default function TransactionsClient({
                 <TableHead className="font-medium text-zinc-500 text-xs h-10 w-[140px] ">
                   Status
                 </TableHead>
+                <TableHead className="w-[50px]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredData.map((tx) => (
                 <TableRow
                   key={tx.id}
-                  className="group border-zinc-200/60 hover:bg-zinc-50/50 transition-colors cursor-pointer"
-                  onClick={() => setSelectedTx(tx)}
+                  className="group border-zinc-200/60 hover:bg-zinc-50/50 transition-colors"
                 >
                   {/* Col 1: ID & Date */}
                   <TableCell className="py-3 align-middle">
@@ -378,7 +385,7 @@ export default function TransactionsClient({
                   {/* Col 2: Client */}
                   <TableCell className="py-3 align-middle">
                     <div className="flex items-center gap-2.5">
-                      <Avatar className="h-7 w-7 border border-zinc-200/60 shadow-sm">
+                      <Avatar className="h-7 w-7 border border-zinc-200/60">
                         <AvatarImage src={tx.user.profilePicture} />
                         <AvatarFallback className="bg-zinc-100/50 text-zinc-600 text-[10px] font-medium">
                           {tx.user.name.charAt(0)}
@@ -423,13 +430,29 @@ export default function TransactionsClient({
                       {tx.status}
                     </Badge>
                   </TableCell>
+                  
+                  {/* Col 7: Actions */}
+                  <TableCell className="py-3 align-middle text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-md text-zinc-500 hover:text-zinc-900">
+                          <HugeiconsIcon icon={MoreHorizontalIcon} size={16} />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => setSelectedTx(tx)}>
+                          View Details
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
                 </TableRow>
               ))}
 
               {filteredData.length === 0 && (
                 <TableRow>
                   <TableCell
-                    colSpan={6}
+                    colSpan={7}
                     className="h-32 text-center text-zinc-500 text-sm"
                   >
                     No transactions match your current filters.
@@ -446,52 +469,76 @@ export default function TransactionsClient({
         open={!!selectedTx && !isViewingReceipt}
         onOpenChange={(open) => !open && setSelectedTx(null)}
       >
-        <DialogContent className="w-full sm:max-w-xl md:max-w-2xl p-0 bg-[#FAFAFA] border border-slate-200/80 flex flex-col font-sans shadow-sm rounded-lg max-h-[85vh] overflow-hidden">
+        <DialogContent className="w-full sm:max-w-xl md:max-w-4xl p-0 bg-white border border-slate-200/80 flex flex-col md:flex-row font-sans rounded-lg max-h-[85vh] overflow-hidden">
           {selectedTx && (
             <>
-              {/* Header Context Section */}
-              <div className="px-6 py-8 border-b border-zinc-200/60 bg-zinc-50/30">
-                <div className="flex items-center justify-between mb-6">
-                  <Badge
-                    variant="outline"
-                    className={`px-2 py-0 border-0 rounded text-[9px] uppercase tracking-wider font-bold h-5 ${getStatusBadge(selectedTx.status)}`}
-                  >
-                    {selectedTx.status}
-                  </Badge>
-                  <span
-                    className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${getPurposeBadge(selectedTx.paymentPurpose)}`}
-                  >
-                    {selectedTx.paymentPurpose.replace(/_/g, " ")}
-                  </span>
+              {/* Left Column: Financials & Context */}
+              <div className="w-full md:w-[340px] shrink-0 bg-zinc-50/50 flex flex-col border-b md:border-b-0 md:border-r border-zinc-200/60">
+                <div className="p-6 md:p-8 flex-1 flex flex-col">
+                  <div className="flex flex-wrap items-center gap-2 mb-8">
+                    <Badge
+                      variant="outline"
+                      className={`px-2 py-0 border-0 rounded text-[9px] uppercase tracking-wider font-bold h-5 ${getStatusBadge(selectedTx.status)}`}
+                    >
+                      {selectedTx.status}
+                    </Badge>
+                    <span
+                      className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${getPurposeBadge(selectedTx.paymentPurpose)}`}
+                    >
+                      {selectedTx.paymentPurpose.replace(/_/g, " ")}
+                    </span>
+                  </div>
+
+                  <div className="mb-10">
+                    <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-2">Total Amount</p>
+                    <h2 className="text-4xl font-semibold tracking-tighter text-zinc-900 font-tabular-nums leading-none">
+                      {formatCurrency(
+                        selectedTx.amount,
+                        selectedTx.currency,
+                      ).replace("GH", "")}
+                    </h2>
+                  </div>
+
+                  <div className="mt-auto pt-8 border-t border-zinc-200/60">
+                    <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-4">Paid By</p>
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-10 w-10 border border-zinc-200/60">
+                        <AvatarImage src={selectedTx.user.profilePicture} />
+                        <AvatarFallback className="bg-white text-zinc-600 font-medium text-xs">
+                          {selectedTx.user.name.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col min-w-0">
+                        <h3 className="text-sm font-semibold tracking-tight text-zinc-900 leading-none truncate">
+                          {selectedTx.user.name}
+                        </h3>
+                        <p className="text-[12px] text-zinc-500 mt-1 leading-none truncate">
+                          {selectedTx.user.email}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                <h2 className="text-3xl font-semibold tracking-tighter text-zinc-900 font-tabular-nums mb-6 leading-none">
-                  {formatCurrency(
-                    selectedTx.amount,
-                    selectedTx.currency,
-                  ).replace("GH", "")}
-                </h2>
-
-                <div className="flex items-center gap-4">
-                  <Avatar className="h-12 w-12 border border-zinc-200/60 shadow-sm">
-                    <AvatarImage src={selectedTx.user.profilePicture} />
-                    <AvatarFallback className="bg-zinc-100/50 text-zinc-600 font-medium text-sm">
-                      {selectedTx.user.name.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex flex-col pt-0.5">
-                    <h3 className="text-base font-semibold tracking-tight text-zinc-900 leading-none">
-                      {selectedTx.user.name}
-                    </h3>
-                    <p className="text-[13px] text-zinc-500 mt-1.5 leading-none">
-                      {selectedTx.user.email}
-                    </p>
-                  </div>
+                {/* Left Column Bottom Action */}
+                <div className="p-4 border-t border-zinc-200/60 bg-white md:bg-zinc-50/50 mt-auto">
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsViewingReceipt(true)}
+                    className="h-10 w-full text-[12px] font-medium border-zinc-200/60 hover:bg-white md:hover:bg-white rounded-lg flex items-center justify-center gap-2 text-zinc-700 bg-white md:bg-transparent"
+                  >
+                    View Official Receipt
+                    <HugeiconsIcon
+                      icon={ArrowUpRight01Icon}
+                      size={14}
+                      className="text-zinc-400"
+                    />
+                  </Button>
                 </div>
               </div>
 
-              {/* Scrollable Data Body */}
-              <div className="flex-1 overflow-y-auto px-6 py-8 space-y-10">
+              {/* Right Column: Scrollable Data Body */}
+              <div className="flex-1 overflow-y-auto bg-white p-6 md:p-8 space-y-8">
                 {/* 1. Property Context Card */}
                 <section>
                   <div className="flex items-center justify-between mb-4">
@@ -508,9 +555,9 @@ export default function TransactionsClient({
                     </Link>
                   </div>
 
-                  <div className="rounded-lg border border-zinc-200/60 overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.01)]">
+                  <div className="rounded-lg border border-zinc-200/60 overflow-hidden">
                     <div className="p-4 bg-zinc-50/50 flex gap-4 border-b border-zinc-200/60">
-                      <div className="h-12 w-12 shrink-0 bg-white rounded-md overflow-hidden border border-zinc-200/60 shadow-sm">
+                      <div className="h-12 w-12 shrink-0 bg-white rounded-md overflow-hidden border border-zinc-200/60">
                         {selectedTx.listing.image ? (
                           <img
                             src={selectedTx.listing.image}
@@ -527,7 +574,7 @@ export default function TransactionsClient({
                           </div>
                         )}
                       </div>
-                      <div className="flex flex-col justify-center">
+                      <div className="flex flex-col justify-center min-w-0">
                         <h4 className="text-sm font-semibold tracking-tight text-zinc-900 truncate">
                           {selectedTx.listing.title}
                         </h4>
@@ -558,7 +605,7 @@ export default function TransactionsClient({
                       </div>
                       <div className="col-span-2">
                         <dt className="text-zinc-500 mb-1.5">Configurations</dt>
-                        <dd className="flex items-center gap-4 text-zinc-700 font-medium">
+                        <dd className="flex items-center gap-4 text-zinc-700 font-medium flex-wrap">
                           <span className="flex items-center gap-1.5">
                             <HugeiconsIcon
                               icon={BedSingle01Icon}
@@ -596,9 +643,9 @@ export default function TransactionsClient({
                   <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-4">
                     Audit Log
                   </h3>
-                  <div className="bg-white border border-zinc-200/60 rounded-lg overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.01)]">
+                  <div className="bg-white border border-zinc-200/60 rounded-lg overflow-hidden">
                     <dl className="divide-y divide-zinc-100 text-[13px]">
-                      <div className="flex justify-between py-3 px-4">
+                      <div className="flex justify-between items-center py-3 px-4 hover:bg-zinc-50/50 transition-colors">
                         <dt className="text-zinc-500 font-medium">
                           Reference ID
                         </dt>
@@ -606,7 +653,7 @@ export default function TransactionsClient({
                           {selectedTx.reference}
                         </dd>
                       </div>
-                      <div className="flex justify-between py-3 px-4">
+                      <div className="flex justify-between items-center py-3 px-4 hover:bg-zinc-50/50 transition-colors">
                         <dt className="text-zinc-500 font-medium">
                           Created At
                         </dt>
@@ -615,7 +662,7 @@ export default function TransactionsClient({
                         </dd>
                       </div>
                       {selectedTx.paidAt && (
-                        <div className="flex justify-between py-3 px-4">
+                        <div className="flex justify-between items-center py-3 px-4 hover:bg-zinc-50/50 transition-colors">
                           <dt className="text-zinc-500 font-medium">
                             Cleared At
                           </dt>
@@ -624,7 +671,7 @@ export default function TransactionsClient({
                           </dd>
                         </div>
                       )}
-                      <div className="flex justify-between py-3 px-4">
+                      <div className="flex justify-between items-center py-3 px-4 hover:bg-zinc-50/50 transition-colors">
                         <dt className="text-zinc-500 font-medium">Channel</dt>
                         <dd className="text-zinc-900 capitalize text-right flex items-center gap-1.5 font-medium">
                           {getChannelIcon(selectedTx.channel)}
@@ -632,7 +679,7 @@ export default function TransactionsClient({
                         </dd>
                       </div>
                       {selectedTx.leaseId && (
-                        <div className="flex justify-between py-3 px-4 bg-zinc-50/50">
+                        <div className="flex justify-between items-center py-3 px-4 bg-zinc-50/50 border-t-zinc-200/60">
                           <dt className="text-zinc-500 font-medium">
                             Lease Link
                           </dt>
@@ -652,22 +699,6 @@ export default function TransactionsClient({
                   </div>
                 </section>
               </div>
-
-              {/* Fixed Bottom Action Bar */}
-              <div className="p-4 border-t border-zinc-200/60 bg-white">
-                <Button
-                  variant="outline"
-                  onClick={() => setIsViewingReceipt(true)}
-                  className="h-10 w-full text-[12px] font-medium border-zinc-200/60 hover:bg-zinc-50 rounded-lg flex items-center justify-center gap-2 shadow-none text-zinc-700"
-                >
-                  View Official Receipt
-                  <HugeiconsIcon
-                    icon={ArrowUpRight01Icon}
-                    size={14}
-                    className="text-zinc-400"
-                  />
-                </Button>
-              </div>
             </>
           )}
         </DialogContent>
@@ -675,3 +706,4 @@ export default function TransactionsClient({
     </div>
   );
 }
+
