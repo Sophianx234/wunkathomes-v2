@@ -529,7 +529,7 @@ export default function TourTable({
                 <section>
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
-                      Target Property
+                       Property
                     </h3>
                     <Badge variant="outline" className={`px-2 py-0 border-0 rounded text-[9px] uppercase tracking-wider font-bold h-5 ${getStatusBadge(selectedTour.status)}`}>
                       {getStatusLabel(selectedTour.status)}
@@ -590,33 +590,33 @@ export default function TourTable({
 
                 {/* 2. Status Pipeline */}
                 <section>
-                  <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-4">
+                  <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-3">
                     Tour Status
                   </h3>
-                  <div className="bg-zinc-100/60 border border-zinc-200/60 p-1 rounded-lg flex flex-wrap gap-1">
-                    {(
-                      [
-                        "Pending_Time",
-                        "Confirmed",
-                        "Completed",
-                        "No_Show",
-                        "Converted",
-                      ] as TourStatus[]
-                    ).map((status) => (
-                      <button
-                        key={status}
-                        disabled={isPending}
-                        onClick={() => requestStatusChange(status)}
-                        className={`flex-1 min-w-[30%] py-2 text-[11px] font-bold uppercase tracking-wider rounded-lg transition-all duration-200 ${
-                          sheetStatus === status
-                            ? "bg-white text-zinc-900 ring-1 ring-zinc-200/80"
-                            : "text-zinc-500 hover:bg-zinc-200/50 hover:text-zinc-700 disabled:opacity-50"
-                        }`}
-                      >
-                        {getStatusLabel(status)}
-                      </button>
-                    ))}
-                  </div>
+                  <Select
+                    disabled={isPending}
+                    value={sheetStatus}
+                    onValueChange={(val) => requestStatusChange(val as TourStatus)}
+                  >
+                    <SelectTrigger className="w-full h-10 border-zinc-200/60 bg-zinc-50/50 focus:ring-zinc-500/20 text-[13px] font-medium">
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(
+                        [
+                          "Pending_Time",
+                          "Confirmed",
+                          "Completed",
+                          "No_Show",
+                          "Converted",
+                        ] as TourStatus[]
+                      ).map((status) => (
+                        <SelectItem key={status} value={status} className="text-[13px]">
+                          {getStatusLabel(status)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </section>
 
                 {/* 3. Notes Section */}
@@ -628,14 +628,14 @@ export default function TourTable({
               </div>
 
               {/* Fixed Bottom Action Bar */}
-              <div className="p-4 border-t border-zinc-200/60 bg-white">
+              <div className="p-4 border-t border-zinc-200/60 flex items-center justify-between bg-white">
+              <div></div>
                 <Link href={`/admin/properties/${selectedTour.listing.slug}`} target="_blank">
                   <Button
                     variant="outline"
-                    className="h-10 w-full text-[12px] font-medium border-zinc-200/60 hover:bg-zinc-50 rounded-lg flex items-center justify-center gap-2"
+                    className="h-10  text-[12px] bg-black text-white font-medium border-zinc-200/60  rounded-lg flex  items-center justify-center gap-2"
                   >
-                    View Property Details
-                    <HugeiconsIcon icon={LinkSquare01Icon} size={14} />
+                    View Property 
                   </Button>
                 </Link>
               </div>

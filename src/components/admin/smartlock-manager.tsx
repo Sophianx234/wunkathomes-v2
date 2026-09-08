@@ -9,7 +9,7 @@ import { SmartLockManageDialog } from './smartlock-manage-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
-import { MoreHorizontal, Battery, BatteryWarning, Wifi, WifiOff, Lock, Unlock, DoorOpen, DoorClosed, Settings2, Edit2, Link as LinkIcon } from 'lucide-react';
+import { MoreHorizontal, Battery, BatteryWarning, Wifi, WifiOff, Lock, Unlock, DoorOpen, DoorClosed, Settings2, Edit2, Link as LinkIcon, Loader2 } from 'lucide-react';
 
 export default function SmartLockManager({ 
   allLocks,
@@ -148,18 +148,39 @@ export default function SmartLockManager({
 
   // API Health Check
   const [apiHealth, setApiHealth] = useState<'checking' | 'online' | 'offline' | null>(null);
+  const [checkingStep, setCheckingStep] = useState(0);
   
   const checkApiHealth = async () => {
     setApiHealth('checking');
+    setCheckingStep(0);
+    
+    // Cycle loading text
+    const loadingTexts = ['Establishing connection...', 'Authenticating...', 'Awaiting response...'];
+    let step = 0;
+    const interval = setInterval(() => {
+      step = (step + 1) % loadingTexts.length;
+      setCheckingStep(step);
+    }, 1500);
+
     try {
-      const res = await fetch('/api/tuya/health');
+      // Small artificial delay if the API is too fast, so the user actually sees the loading state
+      const [res] = await Promise.all([
+        fetch('/api/tuya/health'),
+        new Promise(r => setTimeout(r, 2000))
+      ]);
+
+      clearInterval(interval);
+
       if (res.ok) {
         setApiHealth('online');
       } else {
         setApiHealth('offline');
+        setTimeout(() => setApiHealth(null), 3000);
       }
     } catch (e) {
+      clearInterval(interval);
       setApiHealth('offline');
+      setTimeout(() => setApiHealth(null), 3000);
     }
   };
 
@@ -168,34 +189,51 @@ export default function SmartLockManager({
       <Tabs defaultValue="directory" className="space-y-6">
         <div className="flex items-center justify-between">
           <TabsList className="bg-zinc-100/50 border border-zinc-200/60 p-0.5 rounded-lg inline-flex">
-            <TabsTrigger value="directory" className="text-[13px] font-medium data-[state=active]:bg-white rounded-sm px-6 data-[state=active]:shadow-sm">
+            <TabsTrigger value="directory" className="text-[13px] font-medium data-[state=active]:bg-white rounded-sm px-6 data-[state=active]:shadow-xs">
               Fleet Directory
             </TabsTrigger>
-            <TabsTrigger value="monitoring" className="text-[13px] font-medium data-[state=active]:bg-white rounded-sm px-6 data-[state=active]:shadow-sm">
+            <TabsTrigger value="monitoring" className="text-[13px] font-medium data-[state=active]:bg-white rounded-sm px-6 data-[state=active]:shadow-xs">
               Live Monitoring
             </TabsTrigger>
           </TabsList>
-
+{/* tuya test button */}
           <button 
-            onClick={checkApiHealth} 
-            className="text-xs bg-white border border-zinc-200 shadow-sm px-3 py-1.5 rounded-md hover:bg-zinc-50 flex items-center gap-2 transition-colors"
+            onClick={apiHealth === 'checking' ? undefined : checkApiHealth} 
+            disabled={apiHealth === 'checking'}
+            className="text-xs bg-white border border-zinc-200 px-3 py-1.5 rounded-md hover:bg-zinc-50 flex items-center gap-2 transition-all w-48 justify-center disabled:opacity-90 disabled:cursor-not-allowed"
           >
             {apiHealth === 'checking' ? (
-              <span className="flex h-2 w-2 relative"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-zinc-400 opacity-75"></span><span className="relative inline-flex rounded-full h-2 w-2 bg-zinc-500"></span></span>
+              <>
+                <Loader2 className="h-3.5 w-3.5 animate-spin text-zinc-500 shrink-0" />
+                <span className="font-medium text-zinc-600 truncate">
+                  {['Establishing connection...', 'Authenticating...', 'Awaiting response...'][checkingStep]}
+                </span>
+              </>
             ) : apiHealth === 'online' ? (
-              <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
+              <>
+                <span className="flex h-2 w-2 relative shrink-0">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <span className="font-medium  truncate">Connection Successful</span>
+              </>
             ) : apiHealth === 'offline' ? (
-              <span className="h-2 w-2 rounded-full bg-zinc-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]"></span>
+              <>
+                <span className="h-2 w-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(244,63,94,0.5)] shrink-0"></span>
+                <span className="font-medium  truncate">Connection Failed</span>
+              </>
             ) : (
-              <span className="h-2 w-2 rounded-full bg-zinc-300"></span>
+              <>
+                <span className="h-2 w-2 rounded-full bg-zinc-300 shrink-0"></span>
+                <span className="font-medium text-zinc-700 truncate">Test Tuya API Connection</span>
+              </>
             )}
-            <span className="font-medium text-zinc-700">Test Tuya API Connection</span>
           </button>
         </div>
 
         <TabsContent value="directory" className="space-y-6 outline-none">
         {/* Top Action Bar (Sync + Search/Filter) */}
-        <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-white p-4 rounded-lg border border-zinc-200 shadow-sm">
+        <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-white p-4 rounded-lg border border-zinc-200 ">
           <div className="flex items-center gap-4 w-full md:w-auto">
             <button 
               onClick={handleSync}
@@ -231,7 +269,7 @@ export default function SmartLockManager({
         {syncMessage && <p className="text-sm text-zinc-600 block md:hidden">{syncMessage}</p>}
 
         {/* Fleet Table */}
-        <div className={`bg-white rounded-lg border border-zinc-200 overflow-hidden transition-opacity shadow-sm ${isPending ? 'opacity-50' : 'opacity-100'}`}>
+        <div className={`bg-white rounded-lg border border-zinc-200 overflow-hidden transition-opacity  ${isPending ? 'opacity-50' : 'opacity-100'}`}>
           <table className="w-full text-left text-sm">
             <thead className="bg-zinc-50 border-b border-zinc-200 text-zinc-600">
               <tr>
@@ -368,7 +406,7 @@ export default function SmartLockManager({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           
           {/* Offline Alerts */}
-          <div className="bg-white rounded-lg border border-zinc-200 overflow-hidden shadow-sm">
+          <div className="bg-white rounded-lg border border-zinc-200 overflow-hidden ">
             <div className="p-4 border-b border-zinc-200 bg-zinc-50 flex items-center justify-between">
               <h3 className="font-semibold text-zinc-900 flex items-center gap-2">
                 <WifiOff className="h-4 w-4 text-zinc-500" />
@@ -398,7 +436,7 @@ export default function SmartLockManager({
           </div>
 
           {/* Low Battery Alerts */}
-          <div className="bg-white rounded-lg border border-zinc-200 overflow-hidden shadow-sm">
+          <div className="bg-white rounded-lg border border-zinc-200 overflow-hidden ">
             <div className="p-4 border-b border-zinc-200 bg-zinc-50 flex items-center justify-between">
               <h3 className="font-semibold text-zinc-900 flex items-center gap-2">
                 <BatteryWarning className="h-4 w-4 text-zinc-500" />
@@ -431,17 +469,13 @@ export default function SmartLockManager({
           </div>
         </div>
 
-        <div className="bg-white rounded-lg border border-zinc-200 overflow-hidden shadow-sm mt-8">
+        <div className="bg-white rounded-lg border border-zinc-200 overflow-hidden  mt-8">
           <div className="p-4 border-b border-zinc-200 bg-zinc-50 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
             <div className="flex items-center gap-4">
               <h3 className="font-semibold text-zinc-900 flex items-center gap-2">
-                <span className="relative flex h-2.5 w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-zinc-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-zinc-900"></span>
-                </span>
-                Live Device Status
+                
+                Device Status
               </h3>
-              <span className="text-xs text-zinc-500 bg-white border border-zinc-200 px-2 py-1 rounded shadow-sm">Live (Pusher)</span>
             </div>
             
             <div className="flex items-center gap-3 w-full md:w-auto">
@@ -572,51 +606,7 @@ export default function SmartLockManager({
           </table>
         </div>
 
-        {/* Live Activity Stream */}
-        <div className="bg-white rounded-lg border border-zinc-200 overflow-hidden shadow-sm mt-8">
-          <div className="p-4 border-b border-zinc-200 bg-zinc-50">
-            <h3 className="font-semibold text-zinc-900 flex items-center gap-2">
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-              </span>
-              Security & Access Event Feed
-            </h3>
-          </div>
-          <div className="p-0">
-            {liveActivities.length === 0 ? (
-              <div className="p-8 text-center text-sm text-zinc-500">
-                Listening for hardware events from Tuya Cloud...
-              </div>
-            ) : (
-              <ul className="divide-y divide-zinc-100 max-h-[400px] overflow-y-auto">
-                {liveActivities.map((act, idx) => (
-                  <li key={idx} className="p-4 hover:bg-zinc-50 transition-colors text-sm flex items-start gap-4">
-                    <div className="shrink-0 mt-1">
-                      {act.action === 'ALARM_TRIGGERED' ? (
-                        <div className="h-2 w-2 rounded-full bg-zinc-500 shadow-[0_0_8px_rgba(244,63,94,0.8)]" />
-                      ) : act.action === 'ALARM_CLEARED' ? (
-                        <div className="h-2 w-2 rounded-full bg-emerald-500" />
-                      ) : (
-                        <div className="h-2 w-2 rounded-full bg-blue-500" />
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-zinc-900 font-medium">{act.lockName} <span className="text-zinc-400 font-normal">({act.tuyaDeviceId})</span></p>
-                      <p className="text-zinc-600 mt-0.5">
-                        <span className="font-semibold text-zinc-800">{act.action}</span> - {act.performedBy} 
-                        {act.metadata?.targetName && <code className="ml-2 text-[10px] bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-500">{act.metadata.targetName}</code>}
-                      </p>
-                      <p className="text-[10px] text-zinc-400 font-mono mt-1">
-                        {new Date(act.timestamp).toLocaleTimeString()}
-                      </p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </div>
+       
       </TabsContent>
 
       <SmartLockManageDialog 
