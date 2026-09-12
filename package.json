@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "seed": "tsx scripts/seed.ts",
-    "seed:destroy": "tsx scripts/seed.ts -d"
+    "seed:destroy": "tsx scripts/seed.ts -d",
+    "email": "email dev --dir src/components/email"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

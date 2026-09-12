@@ -14,11 +14,14 @@ export function EmailLayout({ children }: { children: React.ReactNode }) {
             <Section className="mb-10">
               <Img
                 src={LOGO_URL}
-                width="160"
+                width="80"
                 height="auto"
                 alt="WunkatHomes"
                 className="block outline-none border-none"
               />
+               <span className="pt-2 text-primary text-2xl  font-bold tracking-tight text-zinc-800">
+              Wunkat<span className="text-zinc-500">Homes</span>
+            </span>
             </Section>
 
             {/* CONTENT INJECTION */}

@@ -11,9 +11,9 @@ interface MaintenanceUpdateProps {
 
 export default function MaintenanceUpdateEmail({
   userName = "Tenant",
-  ticketNumber,
-  ticketTitle,
-  newStatus,
+  ticketNumber = "REQ-12345678",
+  ticketTitle = "Plumbing Issue / Leaking Pipe",
+  newStatus = "In_Progress",
 }: MaintenanceUpdateProps) {
   return (
     <EmailLayout>
