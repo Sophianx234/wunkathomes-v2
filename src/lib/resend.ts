@@ -6,8 +6,8 @@ export const resend = new Resend(process.env.RESEND_API_KEY);
 
 // 2. Define your verified sender domain (Must be verified in your Resend Dashboard)
 // If you haven't verified a domain yet, use "onboarding@resend.dev" for testing.
-// const SENDER_EMAIL = "WunkatHomes <hello@wunkathomes.com>";
-const SENDER_EMAIL = "WunkatHomes <onboarding@resend.dev>";
+const SENDER_EMAIL = "WunkatHomes <hello@wunkathomes.com>";
+// const SENDER_EMAIL = "WunkatHomes <onboarding@resend.dev>";
 
 
 interface SendEmailParams {
