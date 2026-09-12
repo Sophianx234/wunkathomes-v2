@@ -77,7 +77,7 @@ import {
 } from "@/actions/admin/smartlock.action";
 
 // --- TYPES ---
-type TabStage = "all" | "pending" | "active";
+type TabStage = "all" | "pending";
 type ActionType = "approve" | "reject" | "pin" | "suspend" | "restore" | "remoteUnlock" | "vendorPin" | "resetPin" | "revokePin" | "verifyAndOnboard";
 
 export interface TenantRecord {
@@ -177,9 +177,10 @@ export default function TenantDirectoryClient({
   initialTab = "active",
 }: TenantDirectoryClientProps) {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<TabStage>(initialTab);
+  const [activeTab, setActiveTab] = useState<"all" | "pending">(initialTab === "active" ? "all" : initialTab as any);
   const [searchQuery, setSearchQuery] = useState("");
   const [propertyFilter, setPropertyFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
   
   const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
   const [expandedImage, setExpandedImage] = useState<string | null>(null);
@@ -238,10 +239,11 @@ export default function TenantDirectoryClient({
         record.lease.propertyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
         record.user.email.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesProperty = propertyFilter === "all" || record.lease.propertyName === propertyFilter;
+      const matchesStatus = statusFilter === "all" || record.status === statusFilter;
 
-      return matchesTab && matchesSearch && matchesProperty;
+      return matchesTab && matchesSearch && matchesProperty && matchesStatus;
     });
-  }, [data, activeTab, searchQuery, propertyFilter]);
+  }, [data, activeTab, searchQuery, propertyFilter, statusFilter]);
 
   const awaitingCount = data.filter((r) => r.pipelineStage === "pending").length;
 
@@ -412,16 +414,13 @@ export default function TenantDirectoryClient({
             )}
           </div>
 
-          <Tabs value={activeTab} onValueChange={(val) => setActiveTab(val as TabStage)} className="w-full md:w-auto">
+          <Tabs value={activeTab} onValueChange={(val) => setActiveTab(val as "all" | "pending")} className="w-full md:w-auto">
             <TabsList className="h-9 bg-zinc-100/50 border border-zinc-200/60 p-0.5 rounded-lg">
               <TabsTrigger value="all" className="text-[13px] font-medium data-[state=active]:bg-white rounded-sm px-6">
                 All Tenants
               </TabsTrigger>
               <TabsTrigger value="pending" className="text-[13px] font-medium data-[state=active]:bg-white rounded-sm px-6">
                 Onboarding
-              </TabsTrigger>
-              <TabsTrigger value="active" className="text-[13px] font-medium data-[state=active]:bg-white rounded-sm px-6">
-                Active Leases
               </TabsTrigger>
             </TabsList>
           </Tabs>
@@ -452,6 +451,20 @@ export default function TenantDirectoryClient({
               </SelectContent>
             </Select>
 
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-full md:w-[130px] h-8 border-0 bg-zinc-50/50 hover:bg-zinc-100/50 text-[12px] font-medium text-zinc-700 shadow-none focus:ring-0 rounded-md">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value="Active">Active</SelectItem>
+                <SelectItem value="Pending_Balance">Pending Balance</SelectItem>
+                <SelectItem value="Pending_Deposit">Pending Deposit</SelectItem>
+                <SelectItem value="Expired">Expired</SelectItem>
+                <SelectItem value="Cancelled">Cancelled</SelectItem>
+              </SelectContent>
+            </Select>
+
             <div className="h-4 w-px bg-zinc-200 hidden md:block mx-1" />
             <div className="hidden md:flex items-center gap-2 pl-1 pr-2">
               <span className="text-[18px] font-semibold text-zinc-900 leading-none font-tabular-nums">{filteredData.length}</span>
@@ -461,7 +474,7 @@ export default function TenantDirectoryClient({
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => { setSearchQuery(""); setPropertyFilter("all"); }}
+              onClick={() => { setSearchQuery(""); setPropertyFilter("all"); setStatusFilter("all"); }}
               className="h-8 w-8 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100/50 rounded-md"
             >
               <HugeiconsIcon icon={FilterIcon} size={14} />

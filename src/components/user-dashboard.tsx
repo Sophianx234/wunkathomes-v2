@@ -350,7 +350,8 @@ export function UserDashboard({ user, activeLeases, initialSchedule }: Dashboard
                   Payment Successful!
                 </h4>
                 <p className="text-[9px] md:text-sm text-emerald-700/80 font-medium break-words leading-tight">
-                  Our team is finalizing your new property and will grant you access keys shortly.
+                  Our team is finalizing your new property.
+                  Please visit our main office at <strong className="text-zinc-900">Wunkat Homes HQ, Hatso Accra</strong> with your physical Ghana Card to complete onboarding and receive your access credentials.
                 </p>
               </div>
             </div>

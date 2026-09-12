@@ -86,8 +86,7 @@ interface ManageTeamClientProps {
 
 // --- UTILS ---
 const getRoleBadgeStyle = (role: string) => {
-  if (role === "Admin") return "bg-zinc-900 text-zinc-50 hover:bg-zinc-800";
-  return "bg-blue-50/80 text-blue-700 border-blue-200 hover:bg-blue-100";
+  return "bg-gray-50 border border-gray/30 ";
 };
 
 const getStatusBadgeStyle = (status: string) => {
@@ -332,7 +331,7 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
                   Team Member
                 </TableHead>
                 <TableHead className="font-medium text-zinc-500 text-xs h-10">
-                  System Role
+                  Role
                 </TableHead>
                 <TableHead className="font-medium text-zinc-500 text-xs h-10">
                   Status
@@ -383,13 +382,7 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
                       variant="outline"
                       className={`px-2 py-0.5 rounded-sm font-semibold text-[11px] uppercase tracking-widest border-transparent ${getRoleBadgeStyle(member.role)}`}
                     >
-                      {member.role === "Admin" && (
-                        <HugeiconsIcon
-                          icon={Shield02Icon}
-                          size={12}
-                          className="mr-1.5"
-                        />
-                      )}
+                     
                       {member.role}
                     </Badge>
                   </TableCell>

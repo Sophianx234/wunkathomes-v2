@@ -374,7 +374,7 @@ export default function TenantOnboardClient({ tenant }: { tenant: TenantRecord }
                 className="w-full h-14 bg-zinc-900 text-white hover:bg-zinc-800 text-[15px] font-semibold rounded-xl  transition-all disabled:opacity-50" 
                 onClick={() => setConfirmAction("verifyAndOnboard")}
               >
-                {needsDocs ? "Complete Identity Capture to Continue" : "Verify & Grant Access"}
+                {needsDocs ? "Complete Identity Capture to Continue" : (tenant.smartLock?.tuyaDeviceId || tenant.lease.smartLockCode ? "Verify & Grant Smart Lock Access" : "Verify & Complete Onboarding")}
               </Button>
             </div>
           </section>
@@ -411,7 +411,7 @@ export default function TenantOnboardClient({ tenant }: { tenant: TenantRecord }
             <AlertDialogCancel disabled={isPending} className="h-10 text-[13px] font-semibold border-zinc-200/60 hover:bg-zinc-50 rounded-lg">Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={executeConfirmedAction} disabled={isPending} className="h-10 text-[13px] font-semibold rounded-lg bg-zinc-900 text-white hover:bg-zinc-800">
               {isPending ? <><HugeiconsIcon icon={Loading03Icon} className="animate-spin mr-2" size={14} /> Processing...</> : 
-               (tenant.user.kycStatus === "Verified") ? "Approve & Dispatch Keys" : "Verify & Grant Access"}
+               (tenant.user.kycStatus === "Verified") ? "Approve & Dispatch Keys" : (tenant.smartLock?.tuyaDeviceId || tenant.lease.smartLockCode ? "Verify & Grant Smart Lock Access" : "Verify & Complete Onboarding")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

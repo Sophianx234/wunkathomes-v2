@@ -22,7 +22,7 @@ export type TourActionState = {
 const tourSchema = z.object({
   // Enforce strict 24-character hex to prevent ObjectId crashes
   listingId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid Property ID format"),
-  phoneNumber: z.string().min(9).max(15).regex(/^\+?[\d\s-]+$/, "Invalid phone format").trim(),
+  phoneNumber: z.string().min(9).max(50).regex(/^\+?[\d\s-]+$/, "Invalid phone format").trim(),
   // Ensure date and time strings follow exact formats
   scheduledDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format"),
   scheduledTime: z.string().regex(/^\d{2}:\d{2}$/, "Invalid time format"),

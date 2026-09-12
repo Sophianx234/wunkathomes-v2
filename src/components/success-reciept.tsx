@@ -61,7 +61,7 @@ export default function SuccessReceipt({ transaction }: SuccessReceiptProps) {
     ButtonIcon = Home09Icon;
   } else {
     continueUrl = `/user/dashboard`;
-    buttonText = "Verify Identity to Continue";
+    buttonText = "Continue to Dashboard";
     ButtonIcon = Shield02Icon;
   }
 

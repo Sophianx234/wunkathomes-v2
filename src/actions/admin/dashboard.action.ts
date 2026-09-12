@@ -25,9 +25,11 @@ export async function getDashboardData() {
     await connectToDatabase();
 
     const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+    
+    // 30-Day Rolling Window
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
+    
     const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
     // 2. Metrics & Aggregations (Running in parallel)
@@ -45,12 +47,12 @@ export async function getDashboardData() {
       smartLockStats
     ] = await Promise.all([
       Transaction.aggregate([
-        { $match: { status: "Success", paidAt: { $gte: startOfMonth } } },
+        { $match: { status: "Success", paidAt: { $gte: thirtyDaysAgo } } },
         { $group: { _id: null, total: { $sum: "$amount" } } }
       ]),
 
       Transaction.aggregate([
-        { $match: { status: "Success", paidAt: { $gte: startOfLastMonth, $lte: endOfLastMonth } } },
+        { $match: { status: "Success", paidAt: { $gte: sixtyDaysAgo, $lt: thirtyDaysAgo } } },
         { $group: { _id: null, total: { $sum: "$amount" } } }
       ]),
       
@@ -88,9 +90,11 @@ export async function getDashboardData() {
 
     const currentRevenue = monthlyRevenueRes[0]?.total || 0;
     const lastRevenue = lastMonthRevenueRes[0]?.total || 0;
+    const revenueDifference = currentRevenue - lastRevenue;
+    
     let revTrend = 0;
     if (lastRevenue > 0) {
-      revTrend = Number((((currentRevenue - lastRevenue) / lastRevenue) * 100).toFixed(1));
+      revTrend = Number(((revenueDifference / lastRevenue) * 100).toFixed(1));
     } else if (currentRevenue > 0) {
       revTrend = 100;
     }
@@ -98,6 +102,8 @@ export async function getDashboardData() {
     const metrics = {
       monthlyRevenue: currentRevenue,
       revenueTrend: revTrend, 
+      revenueDifference: revenueDifference,
+      timeframeLabel: "vs previous 30 days",
       activeTenancies: activeTenanciesCount,
       openWorkOrders: openWorkOrdersCount,
       totalListings: listingStats[0]?.total || 0,

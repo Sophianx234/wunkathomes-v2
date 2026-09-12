@@ -44,7 +44,7 @@ const cancelInviteSchema = z.object({
 const acceptInviteSchema = z.object({
   token: z.string().min(32, "Invalid token length").trim(),
   name: z.string().min(2, "Name is too short").trim().max(100),
-  phone: z.string().min(10, "Invalid phone number").trim().max(15),
+  phone: z.string().min(10, "Invalid phone number").trim().max(50),
   password: z.string().min(8, "Password must be at least 8 characters"),
 });
 

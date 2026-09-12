@@ -123,6 +123,8 @@ type DashboardProps = {
     metrics: {
       monthlyRevenue: number;
       revenueTrend: number;
+      revenueDifference: number;
+      timeframeLabel: string;
       rentedListings: number;
       totalListings: number;
       unverifiedFunds: number;
@@ -132,6 +134,9 @@ type DashboardProps = {
       onlineLocks: number;
       activeTours: number;
       toursToday: number;
+      activeTenancies: number;
+      openWorkOrders: number;
+      offlineLocks: number;
       // DYNAMIC ALERT METRICS (Ensure these are passed from server)
       pendingBankTransfers: number;
       pendingToursToday: number;
@@ -182,8 +187,8 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
       id: 'maintenance',
       icon: Wrench01Icon,
       title: "Urgent Maintenance",
-      message: `There are ${metrics.urgentMaintenance} urgent maintenance request${metrics.urgentMaintenance>1?'s':''} waiting to be resolved.`,
-      link: "/admin/maintenance",
+      message: `There are ${metrics.urgentMaintenance} urgent maintenance request${metrics.urgentMaintenance > 1 ? 's' : ''} waiting to be resolved.`,
+      link: "/admin/manage/maintenance",
       containerClass: "bg-zinc-50 border-zinc-200 text-zinc-900",
       iconClass: "bg-zinc-100 text-zinc-600",
       btnClass: "bg-zinc-950 hover:bg-zinc-800 text-white border-transparent shadow-sm",
@@ -192,11 +197,21 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
 
   // 2. Onboarding Bottlenecks (KYC & Leases)
   if (metrics.pendingKYC > 0 || metrics.pendingLeases > 0) {
+    let onboardingMessage = "";
+    
+    if (metrics.pendingKYC > 0 && metrics.pendingLeases > 0) {
+      onboardingMessage = `${metrics.pendingKYC} ID verification${metrics.pendingKYC > 1 ? 's' : ''} and ${metrics.pendingLeases} lease${metrics.pendingLeases > 1 ? 's' : ''} need your approval before the tenants can move in.`;
+    } else if (metrics.pendingKYC > 0) {
+      onboardingMessage = `${metrics.pendingKYC} ID verification${metrics.pendingKYC > 1 ? 's' : ''} need${metrics.pendingKYC === 1 ? 's' : ''} your approval before the tenant${metrics.pendingKYC === 1 ? '' : 's'} can move in.`;
+    } else {
+      onboardingMessage = `${metrics.pendingLeases} lease${metrics.pendingLeases > 1 ? 's' : ''} need${metrics.pendingLeases === 1 ? 's' : ''} your approval before the tenant${metrics.pendingLeases === 1 ? '' : 's'} can move in.`;
+    }
+
     activeAlerts.push({
       id: 'onboarding',
       icon: UserIdVerificationIcon,
       title: "New Tenant Approvals",
-      message: `${metrics.pendingKYC} ID verification${metrics.pendingKYC>1?'s':''} and ${metrics.pendingLeases} lease${metrics.pendingLeases>1?'s':''} need your approval before the tenants can move in.`,
+      message: onboardingMessage,
       link: "/admin/manage/tenants",
       containerClass: "bg-zinc-50 border-zinc-200 text-zinc-900",
       iconClass: "bg-zinc-100 text-zinc-600",
@@ -210,7 +225,7 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
       id: 'finance',
       icon: BankIcon,
       title: "Pending Bank Transfers",
-      message: `${metrics.pendingBankTransfers} bank transfer${metrics.pendingBankTransfers>1?'s':''} need to be reviewed and confirmed.`,
+      message: `${metrics.pendingBankTransfers} bank transfer${metrics.pendingBankTransfers > 1 ? 's' : ''} need to be reviewed and confirmed.`,
       link: "/admin/manage/transactions",
       containerClass: "bg-blue-50 border-blue-200 text-blue-900",
       iconClass: "bg-blue-100 text-blue-600",
@@ -224,10 +239,25 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
       id: 'tours',
       icon: Calendar01Icon,
       title: "Today's Tours",
-      message: `You have ${metrics.pendingToursToday} property tour${metrics.pendingToursToday>1?'s':''} happening today.`,
+      message: `You have ${metrics.pendingToursToday} property tour${metrics.pendingToursToday > 1 ? 's' : ''} happening today.`,
       link: "/admin/manage/tours",
       containerClass: "bg-zinc-100/50 border-zinc-200/60 text-zinc-900",
       iconClass: "bg-white text-zinc-600",
+      btnClass: "bg-zinc-950 hover:bg-zinc-800 text-white border-transparent shadow-sm",
+    });
+  }
+
+  // 5. Smart Lock Operations (Offline Locks)
+  const offlineLocksCount = metrics.offlineLocks ?? (metrics.totalLocks - metrics.onlineLocks);
+  if (offlineLocksCount > 0) {
+    activeAlerts.push({
+      id: 'locks',
+      icon: Shield02Icon,
+      title: "Offline Smart Locks",
+      message: `There ${offlineLocksCount > 1 ? 'are' : 'is'} ${offlineLocksCount} smart lock${offlineLocksCount > 1 ? 's' : ''} currently offline that require${offlineLocksCount === 1 ? 's' : ''} attention.`,
+      link: "/admin/manage/locks",
+      containerClass: "bg-rose-50 border-rose-200 text-rose-900",
+      iconClass: "bg-rose-100 text-rose-600",
       btnClass: "bg-zinc-950 hover:bg-zinc-800 text-white border-transparent shadow-sm",
     });
   }
@@ -288,23 +318,29 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
                       {formatCurrency(metrics.monthlyRevenue).replace("GH", "")}
                     </span>
                     {/* quik info */}
-                    <div className="mt-2 flex items-center text-xs text-muted-foreground">
+                    <div className="mt-2 flex flex-col  text-xs text-muted-foreground">
                       {metrics.revenueTrend > 0 ? (
                         <span className="mr-1.5 flex items-center font-medium text-emerald-600">
                           <HugeiconsIcon icon={ArrowUpRight01Icon} strokeWidth={2.5} className="mr-0.5 size-3" />
                           {metrics.revenueTrend}%
+                          <span className="opacity-80 ml-1 font-normal tracking-tight">
+                            (+{formatCurrency(Math.abs(metrics.revenueDifference)).replace("GH", "")})
+                          </span>
                         </span>
                       ) : metrics.revenueTrend < 0 ? (
-                        <span className="mr-1.5 flex items-center font-medium text-zinc-600">
+                        <span className="mr-1.5 flex items-center font-medium text-rose-600">
                           <HugeiconsIcon icon={ArrowDownRight01Icon} strokeWidth={2.5} className="mr-0.5 size-3" />
                           {Math.abs(metrics.revenueTrend)}%
+                          <span className="opacity-80 ml-1 font-normal tracking-tight">
+                            (-{formatCurrency(Math.abs(metrics.revenueDifference)).replace("GH", "")})
+                          </span>
                         </span>
                       ) : (
                         <span className="mr-1.5 flex items-center font-medium text-zinc-500">
-                          0%
+                          No change
                         </span>
                       )}
-                      since last month
+                      <div className="ml-1 block">{metrics.timeframeLabel || "vs previous 30 days"}</div>
                     </div>
                   </div>
                 </div>
