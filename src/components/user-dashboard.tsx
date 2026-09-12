@@ -20,12 +20,15 @@ import {
   ArrowRight01Icon,
   Shield02Icon,
   Logout01Icon,
+  SparklesIcon,
+  CheckmarkBadge01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import CleaningScheduleClient from "./cleaning-schedule-client";
 import { useRouter } from "next/navigation";
 import { submitNoticeToVacate } from "@/actions/user/lease.action";
 
@@ -41,6 +44,19 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 const getDaysDifference = (start: Date, end: Date) => {
   const utc1 = Date.UTC(start.getFullYear(), start.getMonth(), start.getDate());
@@ -71,10 +87,20 @@ export interface DashboardProps {
       sizeSqm: number;
       amenities: string[];
     };
+    lock: {
+      activeTempPins: Array<{
+        pinId: string;
+        name: string;
+        pinMasked: string;
+        validFrom: string;
+        expiresAt: string;
+      }>;
+    } | null;
   }>;
+  initialSchedule?: any;
 }
 
-export function UserDashboard({ user, activeLeases }: DashboardProps) {
+export function UserDashboard({ user, activeLeases, initialSchedule }: DashboardProps) {
   const router = useRouter();
   const [selectedIndex, setSelectedIndex] = useState(0);
   const currentData = activeLeases[selectedIndex];
@@ -86,9 +112,50 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
   >("LOCKED");
   const [isRenewing, setIsRenewing] = useState(false);
   const [isVacating, setIsVacating] = useState(false);
+  
+  const hasActiveSchedule = initialSchedule && 
+    (initialSchedule.scheduleType === 'daily' || 
+     (initialSchedule.customDates && initialSchedule.customDates.length > 0) || 
+     (initialSchedule.weeklyDays && initialSchedule.weeklyDays.length > 0));
+     
+  const [showCleaning, setShowCleaning] = useState(!!hasActiveSchedule);
+  
+  const [isGuestModalOpen, setIsGuestModalOpen] = useState(false);
+  const [guestName, setGuestName] = useState("");
+  const [guestDuration, setGuestDuration] = useState("24");
 
-  const needsKyc =
-    user.kycStatus === "Unverified" || user.kycStatus === "Rejected";
+  const handleGenerateGuestPin = async () => {
+    if (!guestName.trim()) {
+      toast.error("Please enter a guest name.");
+      return;
+    }
+    const duration = parseInt(guestDuration, 10);
+    if (isNaN(duration) || duration <= 0 || duration > 48) {
+      toast.error("Duration must be between 1 and 48 hours.");
+      return;
+    }
+
+    const toastId = toast.loading("Generating guest PIN...");
+    setIsGuestModalOpen(false);
+    
+    try {
+      const { tenantCreateGuestPinAction } = await import("@/actions/user/smartlock.action");
+      const result = await tenantCreateGuestPinAction(lease.id, guestName.trim(), duration);
+      
+      if (result.success) {
+        toast.success(`Guest PIN: ${result.pin} (Valid for ${duration}h)`, { id: toastId, duration: 10000 });
+        setGuestName("");
+        setGuestDuration("24");
+        router.refresh();
+      } else {
+        toast.error(result.error || "Failed to generate PIN.", { id: toastId });
+      }
+    } catch (error) {
+      toast.error("An unexpected error occurred.", { id: toastId });
+    }
+  };
+
+  const needsKyc = false;
   const needsSignature = !lease.signatureAudit.isSigned;
   const isPendingAdmin = lease.status === "Awaiting_Admin_Approval";
   const isRestricted = needsKyc || needsSignature || isPendingAdmin;
@@ -143,20 +210,29 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
   }
 
   const toggleSmartLock = async () => {
-    if (lockStatus === "LOADING" || isRestricted) return;
-    const action = lockStatus === "LOCKED" ? "unlocking" : "locking";
+    if (lockStatus === "LOADING" || lockStatus === "UNLOCKED" || isRestricted || today < startDate) return;
+    
     setLockStatus("LOADING");
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      const newStatus = action === "unlocking" ? "UNLOCKED" : "LOCKED";
-      setLockStatus(newStatus);
-      toast.success(`Door securely ${newStatus.toLowerCase()}.`);
+      const { tenantRemoteUnlockAction } = await import("@/actions/user/smartlock.action");
+      const result = await tenantRemoteUnlockAction(lease.id);
+      
+      if (result.success) {
+        toast.success(result.message || "Door unlocked (5s).");
+        setLockStatus("UNLOCKED");
+        
+        // Auto-lock clutch UI fallback (5 seconds)
+        setTimeout(() => {
+          setLockStatus("LOCKED");
+        }, 5000);
+      } else {
+        toast.error(result.error || "Failed to unlock door. Check connection.");
+        setLockStatus("LOCKED");
+      }
     } catch (error) {
-      toast.error(
-        `Failed to ${action.replace("ing", "e")} door. Check connection.`,
-      );
-      setLockStatus(action === "unlocking" ? "LOCKED" : "UNLOCKED");
+      toast.error("An unexpected error occurred.");
+      setLockStatus("LOCKED");
     }
   };
 
@@ -194,7 +270,7 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
 
           <div className="hidden md:flex items-center gap-2 bg-white/10 px-4 py-2 rounded-md border border-white/10 shrink-0">
             <span
-              className={`w-2 h-2 rounded-full ${isRestricted ? "bg-gray-500" : lockStatus === "LOCKED" ? "bg-green-500" : "bg-red-500"} ${!isRestricted && "animate-pulse"}`}
+              className={`w-2 h-2 rounded-full ${isRestricted ? "bg-gray-500" : lockStatus === "LOCKED" ? "bg-green-500" : "bg-zinc-500"} ${!isRestricted && "animate-pulse"}`}
             />
             <span className="text-xs font-bold uppercase tracking-widest text-white">
               {isRestricted ? "System Restricted" : `Door ${lockStatus}`}
@@ -203,7 +279,7 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
         </div>
 
         {activeLeases.length > 1 && (
-          <div className="max-w-6xl mx-auto mt-4 md:mt-8 flex items-center gap-1.5 md:gap-2 overflow-x-auto pb-2 scrollbar-hide w-full box-border">
+          <div className="max-w-6xl mx-auto mt-4 md:mt-8 flex items-center gap-1.5 md:gap-2 overflow-x-auto pb-2 hide-scrollbar w-full box-border">
             {activeLeases.map((item, idx) => (
               <button
                 key={item.lease.id}
@@ -229,38 +305,55 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
         {/* ACTION CARDS & ALERTS (PREMIUM MINIMALIST STYLING)        */}
         {/* ========================================================= */}
 
-        {/* 1. KYC BANNER */}
-        {needsKyc && (
-          <div className="bg-white border border-zinc-200/60 p-4 md:p-6 rounded-lg md:rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3 md:gap-6 relative overflow-hidden w-full box-border">
-            <div className="absolute left-0 top-0 bottom-0 w-1 bg-zinc-900" />
+        {/* 1A. KYC BANNER (UNVERIFIED / NEW TENANT) */}
+        {needsKyc && isPendingAdmin && (
+          <div className="bg-white border p-4 md:p-6 rounded-lg md:rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3 md:gap-6 relative overflow-hidden w-full box-border shadow-sm">
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-zinc-500" />
             <div className="flex items-start sm:items-center gap-3 md:gap-4 pl-1 md:pl-2 min-w-0">
-              <div className="w-8 h-8 md:w-10 md:h-10 bg-zinc-50/50 border border-zinc-200/60 rounded-full flex items-center justify-center shrink-0">
+              <div className="w-8 h-8 md:w-10 md:h-10 bg-white border border-zinc-200/60 rounded-full flex items-center justify-center shrink-0">
                 <span className="scale-75 md:scale-100 flex items-center">
                   <HugeiconsIcon
                     icon={Shield02Icon}
-                    className="text-zinc-900"
+                    className="text-zinc-600"
                     size={20}
                   />
                 </span>
               </div>
-              <div className="min-w-0">
-                <h4 className="text-[11px] md:text-sm font-bold text-zinc-900 mb-0.5 md:mb-1 tracking-tight truncate">
-                  Identity Verification Required
+              <div className="min-w-0 bg-white">
+                <h4 className="text-[11px] md:text-sm font-bold text-zinc-900 mb-0.5 md:mb-1 tracking-tight">
+                  Payment Successful! Your property is reserved.
                 </h4>
-                <p className="text-[9px] md:text-sm text-zinc-500 font-medium break-words leading-tight">
-                  Please verify your identity to generate your Smart Lock access
-                  credentials.
+                <p className="text-[9px] md:text-sm text-zinc-700/80 font-medium break-words leading-tight">
+                  Please visit our main office at <strong className="text-zinc-900">Wunkat Homes HQ, Accra</strong> with your physical Ghana Card to complete onboarding and receive your access credentials.
                 </p>
               </div>
             </div>
-            <Link
-              href="/user/leases"
-              className="shrink-0 w-full sm:w-auto px-4 py-2 md:px-6 md:py-2.5 bg-zinc-900 hover:bg-black text-white text-[10px] md:text-sm font-semibold rounded-md md:rounded-lg transition-colors flex items-center justify-center"
-            >
-              Verify Identity
-              <HugeiconsIcon icon={ArrowRight01Icon} size={16} className="ml-1 text-white" />
+          </div>
+        )}
 
-            </Link>
+        {/* 1B. VIP BANNER (VERIFIED / REPEAT TENANT) */}
+        {!needsKyc && isPendingAdmin && (
+          <div className="bg-white border border-emerald-200/60 p-4 md:p-6 rounded-lg md:rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3 md:gap-6 relative overflow-hidden w-full box-border shadow-sm">
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500" />
+            <div className="flex items-start sm:items-center gap-3 md:gap-4 pl-1 md:pl-2 min-w-0">
+              <div className="w-8 h-8 md:w-10 md:h-10 bg-white border border-emerald-200/60 rounded-full flex items-center justify-center shrink-0">
+                <span className="scale-75 md:scale-100 flex items-center">
+                  <HugeiconsIcon
+                    icon={CheckmarkBadge01Icon}
+                    className="text-emerald-700"
+                    size={20}
+                  />
+                </span>
+              </div>
+              <div className="min-w-0 ">
+                <h4 className="text-[11px] md:text-sm font-bold text-emerald-900 mb-0.5 md:mb-1 tracking-tight">
+                  Payment Successful!
+                </h4>
+                <p className="text-[9px] md:text-sm text-emerald-700/80 font-medium break-words leading-tight">
+                  Our team is finalizing your new property and will grant you access keys shortly.
+                </p>
+              </div>
+            </div>
           </div>
         )}
 
@@ -298,32 +391,7 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
           </div>
         )}
 
-        {/* 3. ADMIN REVIEW BANNER */}
-        {isPendingAdmin && (
-          <div className="bg-white border border-zinc-200/60 p-4 md:p-6 rounded-lg md:rounded-lg flex flex-col sm:flex-row sm:items-center gap-3 md:gap-4 shadow-sm relative overflow-hidden w-full box-border">
-            <div className="absolute left-0 top-0 bottom-0 w-1 bg-zinc-300" />
-            <div className="flex items-start sm:items-center gap-3 md:gap-4 pl-1 md:pl-2 min-w-0">
-              <div className="w-8 h-8 md:w-10 md:h-10 bg-zinc-50/50 border border-zinc-200/60 rounded-full flex items-center justify-center shrink-0">
-                <span className="scale-75 md:scale-100 flex items-center">
-                  <HugeiconsIcon
-                    icon={Clock01Icon}
-                    className="text-zinc-900"
-                    size={20}
-                  />
-                </span>
-              </div>
-              <div className="min-w-0">
-                <h4 className="text-[11px] md:text-sm font-bold text-zinc-900 mb-0.5 md:mb-1 tracking-tight truncate">
-                  Application Under Review
-                </h4>
-                <p className="text-[9px] md:text-sm text-zinc-500 font-medium break-words leading-tight">
-                  Your documents have been submitted. Our team is finalizing
-                  your verification.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
+
 
         {/* 4. RENEWAL & VACATE ACTION CARD */}
         {isExpiringSoon && !isRestricted && (
@@ -578,7 +646,7 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
             </div>
           </div>
 
-          {/* DIGITAL KEYS BLOCK */}
+          {currentData.lock ? (
           <div
             className={`rounded-lg md:rounded-lg p-5 md:p-8 flex flex-col justify-center relative overflow-hidden transition-colors duration-500 w-full box-border ${isRestricted ? "bg-zinc-900 border border-zinc-800" : lockStatus === "UNLOCKED" ? "bg-zinc-800 border border-zinc-700" : "bg-zinc-950 border border-black"}`}
           >
@@ -601,7 +669,7 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
                 </div>
                 {!isRestricted && (
                   <span
-                    className={`text-[8px] md:text-[10px] font-bold uppercase tracking-widest px-2 py-1 md:px-3 md:py-1.5 rounded-full border truncate ml-2 ${lockStatus === "LOCKED" ? "bg-green-500/10 text-green-400 border-green-500/20" : lockStatus === "UNLOCKED" ? "bg-red-500/10 text-red-400 border-red-500/20" : "bg-white/10 text-white border-white/20"}`}
+                    className={`text-[8px] md:text-[10px] font-bold uppercase tracking-widest px-2 py-1 md:px-3 md:py-1.5 rounded-full border truncate ml-2 ${lockStatus === "LOCKED" ? "bg-green-500/10 text-green-400 border-green-500/20" : lockStatus === "UNLOCKED" ? "bg-zinc-500/10 text-zinc-400 border-zinc-500/20" : "bg-white/10 text-white border-white/20"}`}
                   >
                     Door is {lockStatus}
                   </span>
@@ -652,7 +720,7 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
                         ? "bg-white/10 text-zinc-400 cursor-wait"
                         : lockStatus === "LOCKED"
                           ? "bg-white text-black hover:bg-zinc-200"
-                          : "bg-red-500 text-white hover:bg-red-600"
+                          : "bg-zinc-500 text-white hover:bg-zinc-600"
                 }`}
               >
                 {needsKyc ? (
@@ -705,13 +773,156 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
                     <span className="scale-75 md:scale-100 flex items-center shrink-0">
                       <HugeiconsIcon icon={LockKeyIcon} size={18} />
                     </span>{" "}
-                    <span className="truncate">Lock Door Securely</span>
+                    <span className="truncate">Unlocked (5s)...</span>
                   </>
                 )}
               </button>
+              
+              {!isRestricted && today >= startDate && (
+                <button
+                  onClick={() => setIsGuestModalOpen(true)}
+                  className="w-full mt-3 py-2 md:py-3 rounded-lg md:rounded-lg border border-white/20 text-white font-bold uppercase tracking-widest text-[8px] md:text-[10px] hover:bg-white/10 transition-colors flex items-center justify-center gap-1.5 min-w-0 box-border px-2 truncate"
+                >
+                  <span className="scale-75 md:scale-100 flex items-center shrink-0">
+                    <HugeiconsIcon icon={Key01Icon} size={14} />
+                  </span>
+                  Generate Guest Pass
+                </button>
+              )}
             </div>
           </div>
+          ) : (
+          <div
+            className="rounded-lg md:rounded-lg p-5 md:p-8 flex flex-col justify-center relative overflow-hidden transition-colors duration-500 w-full box-border bg-zinc-950 border border-black"
+          >
+            <div className="absolute top-0 right-0 p-3 md:p-6 opacity-5 pointer-events-none">
+              <span className="scale-[0.5] md:scale-100 flex items-center origin-top-right">
+                <HugeiconsIcon icon={Key01Icon} size={150} />
+              </span>
+            </div>
+
+            <div className="relative z-10 h-full flex flex-col w-full box-border items-center text-center justify-center pt-8 pb-4">
+              <div className="w-12 h-12 md:w-16 md:h-16 bg-white/10 rounded-full flex items-center justify-center border border-white/20 shrink-0 mb-4">
+                <span className="scale-75 md:scale-100 flex items-center">
+                  <HugeiconsIcon icon={Key01Icon} size={28} className="text-white" />
+                </span>
+              </div>
+              <h4 className="text-sm md:text-base font-bold text-white uppercase tracking-widest mb-2">Physical Keys</h4>
+              <p className="text-xs md:text-sm text-zinc-400 leading-relaxed max-w-[200px] mx-auto">
+                This property uses standard physical keys for access. Please keep them secure.
+              </p>
+            </div>
+          </div>
+          )}
         </div>
+
+        {/* ACTIVE GUEST PASSES */}
+        {!isRestricted && currentData.lock && currentData.lock.activeTempPins.length > 0 && (
+          <div className="mb-4 md:mb-6 w-full box-border bg-white rounded-lg border border-zinc-200/60 overflow-hidden">
+            <div className="p-4 md:p-6 border-b border-zinc-100 flex items-center justify-between">
+              <h3 className="text-sm font-bold uppercase tracking-widest text-zinc-900">
+                Active Guest Passes
+              </h3>
+              <span className="text-xs font-bold text-zinc-500 bg-zinc-100 px-2 py-1 rounded">
+                {currentData.lock.activeTempPins.length} / 5
+              </span>
+            </div>
+            <div className="divide-y divide-zinc-100">
+              {currentData.lock.activeTempPins.map((pin) => (
+                <div key={pin.pinId} className="p-4 md:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="flex flex-col">
+                    <span className="text-sm font-bold text-zinc-900 mb-1">{pin.name}</span>
+                    <div className="flex items-center gap-3 text-xs text-zinc-500 font-medium">
+                      <span className="font-mono bg-zinc-100 px-1.5 py-0.5 rounded">{pin.pinMasked}</span>
+                      <span>Expires: {new Date(pin.expiresAt).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</span>
+                    </div>
+                  </div>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <button
+                        className="text-xs font-bold uppercase tracking-widest text-zinc-600 hover:text-white border border-zinc-200 hover:border-zinc-600 hover:bg-zinc-600 transition-colors px-4 py-2 rounded"
+                      >
+                        Revoke
+                      </button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent className="bg-white border-zinc-200">
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Revoke Guest Pass?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to revoke the guest pass for <span className="font-bold text-zinc-800">{pin.name}</span>? This will immediately delete the PIN from the smart lock and prevent entry.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel className="border-zinc-200 text-zinc-700">Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          className="bg-zinc-600 text-white hover:bg-zinc-700"
+                          onClick={async () => {
+                            const toastId = toast.loading("Revoking guest pass...");
+                            try {
+                              const { tenantRevokeGuestPinAction } = await import("@/actions/user/smartlock.action");
+                              const res = await tenantRevokeGuestPinAction(lease.id, pin.pinId);
+                              if (res.success) {
+                                toast.success(res.message, { id: toastId });
+                                router.refresh();
+                              } else {
+                                toast.error(res.error || "Failed to revoke.", { id: toastId });
+                              }
+                            } catch (e) {
+                              toast.error("Error revoking pin.", { id: toastId });
+                            }
+                          }}
+                        >
+                          Yes, Revoke
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* CLEANING SERVICES */}
+        {!isRestricted && (
+          <div className="mb-4 md:mb-6 w-full ">
+            {!showCleaning ? (
+              <div className="bg-white border border-zinc-200/60 p-6 md:p-8 rounded-[20px]  flex flex-col sm:flex-row items-center justify-between gap-6 w-full max-w-4xl mx-auto overflow-hidden relative">
+                <div className="flex items-start sm:items-center gap-4 min-w-0">
+                  
+                  <div className="min-w-0">
+                    <h4 className="text-[15px] font-semibold text-zinc-900 tracking-tight mb-1 truncate">
+                      Professional Cleaning Services
+                    </h4>
+                    <p className="text-[13px] font-medium text-zinc-500 break-words leading-relaxed">
+                      Would you like to request property cleaning service? Payment is collected by the cleaner after service.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-3 shrink-0 w-full sm:w-auto">
+                  <button
+                    onClick={() => setShowCleaning(true)}
+                    className="w-full sm:w-auto px-6 py-2.5 bg-black hover:bg-zinc-800 text-white text-[13px] font-medium rounded-lg transition-colors shadow-sm"
+                  >
+                    Yes, Request Cleaning
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3 w-full max-w-4xl mx-auto">
+                <div className="flex justify-end px-2">
+                  <button
+                    onClick={() => setShowCleaning(false)}
+                    className="text-[12px] font-bold text-zinc-400 hover:text-zinc-600 tracking-widest uppercase transition-colors flex items-center gap-1"
+                  >
+                    Hide Service
+                  </button>
+                </div>
+                <CleaningScheduleClient initialSchedule={initialSchedule} />
+              </div>
+            )}
+          </div>
+        )}
 
         {/* UTILITIES & ACTIONS */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 w-full box-border">
@@ -778,6 +989,57 @@ export function UserDashboard({ user, activeLeases }: DashboardProps) {
           )}
         </div>
       </div>
+      
+      {/* Generate Guest PIN Modal */}
+      <Dialog open={isGuestModalOpen} onOpenChange={setIsGuestModalOpen}>
+        <DialogContent className="sm:max-w-md bg-white border border-zinc-200">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold tracking-tight text-zinc-900">Create Guest Pass</DialogTitle>
+            <DialogDescription className="text-zinc-500 font-medium text-sm">
+              Generate a temporary PIN for visitors, cleaners, or contractors. Valid for up to 48 hours.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-4 py-4">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="guestName" className="text-xs font-bold uppercase tracking-widest text-zinc-900">
+                Guest Name
+              </Label>
+              <Input
+                id="guestName"
+                placeholder="e.g. Cleaner, John Doe"
+                value={guestName}
+                onChange={(e) => setGuestName(e.target.value)}
+                className="bg-zinc-50 border-zinc-200 text-zinc-900 focus-visible:ring-zinc-400"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="guestDuration" className="text-xs font-bold uppercase tracking-widest text-zinc-900">
+                Valid For (Hours)
+              </Label>
+              <Input
+                id="guestDuration"
+                type="number"
+                min="1"
+                max="48"
+                placeholder="24"
+                value={guestDuration}
+                onChange={(e) => setGuestDuration(e.target.value)}
+                className="bg-zinc-50 border-zinc-200 text-zinc-900 focus-visible:ring-zinc-400"
+              />
+            </div>
+          </div>
+          <DialogFooter className="sm:justify-end gap-2">
+            <DialogClose asChild>
+              <Button type="button" variant="outline" className="border-zinc-200 text-zinc-700 hover:bg-zinc-100">
+                Cancel
+              </Button>
+            </DialogClose>
+            <Button type="button" onClick={handleGenerateGuestPin} className="bg-zinc-900 text-white hover:bg-zinc-800">
+              Generate PIN
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </main>
   );
 }

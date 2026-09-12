@@ -62,14 +62,6 @@ interface NavbarClientProps {
 export default function NavbarClient({ user }: NavbarClientProps) {
   const isLoggedIn = !!user;
 
-  const isKycActionRequired = user?.indicators.hasPaidProperty && user?.indicators.verificationStatus === "Unverified";
-
-  // Master check: Does the avatar need an alert dot?
-  const hasAnyPendingAction = user
-    ? isKycActionRequired ||
-      user.indicators.signaturePending ||
-      user.indicators.newSaved
-    : false;
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -109,7 +101,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
 
   return (
     <header
-      className={`sticky top-0 sm:h-20 z-50 transition-colors duration-300 ${
+      className={`print:hidden sticky top-0 sm:h-20 z-50 transition-colors duration-300 ${
         isScrolled
           ? "bg-white border-b border-border shadow-sm"
           : "bg-background"
@@ -186,7 +178,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                       House
                     </Link>
                     <Link
-                      href="/properties?type=apartment"
+                      href="/properties?type=Apartment_Building"
                       className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-zinc-700 hover:bg-zinc-50/50 hover:text-zinc-900 transition"
                     >
                       <HugeiconsIcon
@@ -325,17 +317,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                         <HugeiconsIcon icon={UserCircleIcon} size={24} />
                       </div>
                     )}
-                    {/* MASTER AVATAR INDICATOR */}
-                    {hasAnyPendingAction && (
-                      <div className="absolute top-0 right-0 size-2.5">
-                        <motion.span
-                          animate={{ scale: [1, 2.5], opacity: [0, 0.6, 0] }}
-                          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                          className="absolute inset-0 bg-red-500/40 rounded-full"
-                        />
-                        <span className="absolute inset-0 bg-red-600 rounded-full border-2 border-white z-10 shadow-sm" />
-                      </div>
-                    )}
+
                   </div>
 
                   <div className="flex flex-col ">
@@ -399,7 +381,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                             My Dashboard
                           </div>
                           {user.indicators.signaturePending && (
-                            <span className="size-2 bg-red-500 rounded-full animate-pulse shadow-sm" />
+                            <span className="size-2 bg-zinc-500 rounded-full animate-pulse shadow-sm" />
                           )}
                         </Link>
 
@@ -422,34 +404,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                           )}
                         </Link>
 
-                        {/* KYC INDICATOR */}
-                        {user.indicators.hasPaidProperty && user.indicators.verificationStatus === "Unverified" && (
-                          <Link
-                            href="/user/leases"
-                            onClick={() => setProfileOpen(false)}
-                            className="flex items-center justify-between px-4 py-2.5 text-sm font-medium text-zinc-700 hover:bg-amber-50 transition"
-                          >
-                            <div className="flex items-center gap-3">
-                              <ShieldAlert
-                                size={18}
-                                className="text-amber-600"
-                              />{" "}
-                              Verify Identity
-                            </div>
-                            <span className="text-[7px] font-bold uppercase tracking-wider text-amber-600 bg-amber-100/80 px-2 py-0.5 rounded-full">
-                              Action Required
-                            </span>
-                          </Link>
-                        )}
 
-                        {user.indicators.hasPaidProperty && user.indicators.verificationStatus === "Pending" && (
-                          <div className="flex items-center justify-between px-4 py-2.5 text-sm font-medium text-slate-500 bg-slate-50 cursor-default">
-                            <div className="flex items-center gap-3">
-                              <Clock size={18} className="text-slate-400" />
-                              Verification Pending
-                            </div>
-                          </div>
-                        )}
 
                         <Link
                           href="/user/transactions"
@@ -514,17 +469,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
 
           {/* 4. Mobile Controls */}
           <div className="flex items-center gap-3 md:hidden z-50">
-            {/* Master indicator for mobile avatar */}
-            {isLoggedIn && hasAnyPendingAction && (
-              <div className="absolute right-14 top-8 size-2.5 z-10 pointer-events-none">
-                <motion.span
-                  animate={{ scale: [1, 2.5], opacity: [0, 0.6, 0] }}
-                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                  className="absolute inset-0 bg-amber-500 rounded-full"
-                />
-                <span className="absolute inset-0 bg-amber-500 rounded-full border-2 border-white z-10 shadow-sm" />
-              </div>
-            )}
+
 
             <motion.button
               onClick={toggleMenu}
@@ -626,7 +571,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                         My Dashboard
                       </span>
                       {user.indicators.signaturePending && (
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-red-600 bg-red-50 px-2 py-0.5 rounded-full">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-600 bg-zinc-50 px-2 py-0.5 rounded-full">
                           Sign Lease
                         </span>
                       )}
@@ -647,31 +592,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                       )}
                     </Link>
 
-                    {/* Leases (KYC Pending) */}
-                    {user.indicators.hasPaidProperty && user.indicators.verificationStatus === "Unverified" && (
-                      <Link
-                        href="/user/leases"
-                        onClick={toggleMenu}
-                        className="flex items-center justify-between text-lg font-medium text-zinc-700 hover:bg-amber-50 px-2 rounded-lg transition"
-                      >
-                        <span className="flex items-center gap-3">
-                          <ShieldAlert size={20} className="text-amber-600" />{" "}
-                          Verify Identity
-                        </span>
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600 bg-amber-100/80 px-2 py-0.5 rounded-full">
-                          Action Required
-                        </span>
-                      </Link>
-                    )}
 
-                    {user.indicators.hasPaidProperty && user.indicators.verificationStatus === "Pending" && (
-                      <div className="flex items-center justify-between text-lg font-medium text-slate-500 bg-slate-50 px-2 py-2 rounded-lg cursor-default mt-1">
-                        <span className="flex items-center gap-3">
-                          <Clock size={20} className="text-slate-400" />{" "}
-                          Verification Pending
-                        </span>
-                      </div>
-                    )}
 
                     <Link
                       href="/user/transactions"

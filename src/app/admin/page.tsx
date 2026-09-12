@@ -40,13 +40,13 @@ export default function AdminOverviewPage() {
           
           <CardContent className="p-6">
             <div className="text-xs text-muted-foreground">Total Revenue</div>
-            <div className="mt-2 text-2xl font-medium tracking-tight">$341,000</div>
+            <div className="mt-2 text-2xl font-medium tracking-tight">GHS 341,000</div>
             <div className="mt-1 text-xs text-emerald-600">+14.2%</div>
           </CardContent>
 
           <CardContent className="p-6">
             <div className="text-xs text-muted-foreground">Escrow Holds</div>
-            <div className="mt-2 text-2xl font-medium tracking-tight">$12,500</div>
+            <div className="mt-2 text-2xl font-medium tracking-tight">GHS 12,500</div>
             <div className="mt-1 text-xs text-emerald-600">+5.4%</div>
           </CardContent>
 
@@ -59,7 +59,7 @@ export default function AdminOverviewPage() {
           <CardContent className="p-6">
             <div className="text-xs text-muted-foreground">Active Holds (72h)</div>
             <div className="mt-2 text-2xl font-medium tracking-tight">14</div>
-            <div className="mt-1 text-xs text-red-500">-3.0%</div>
+            <div className="mt-1 text-xs text-zinc-500">-3.0%</div>
           </CardContent>
 
         </div>
@@ -83,7 +83,7 @@ export default function AdminOverviewPage() {
               axisLine={false} 
               tickLine={false} 
               tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
-              tickFormatter={(value) => `$${value / 1000}k`}
+              tickFormatter={(value) => `GHS ${value / 1000}k`}
             />
             <Tooltip 
               cursor={{ fill: 'hsl(var(--muted-foreground))', opacity: 0.1 }}

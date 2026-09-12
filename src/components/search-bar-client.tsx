@@ -1,7 +1,8 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useTransition } from "react";
+import { getDynamicSearchFacets } from "@/actions/public/search.action";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -20,6 +21,7 @@ import {
   House03Icon,
   Key01Icon,
   Location01Icon,
+  Cancel01Icon,
   MapingIcon,
   Search01Icon,
   Store01Icon,
@@ -49,18 +51,58 @@ export default function SearchBarClient({ availableAreas, availableTypes }: Sear
   const searchParams = useSearchParams();
 
   const [filters, setFilters] = useState({
-    propertyType: searchParams.get("propertyType") || "",
+    propertyType: searchParams.get("type") || searchParams.get("propertyType") || "",
     location: searchParams.get("location") || "",
     status: searchParams.get("status") || "",
   });
 
   useEffect(() => {
     setFilters({
-      propertyType: searchParams.get("propertyType") || "",
+      propertyType: searchParams.get("type") || searchParams.get("propertyType") || "",
       location: searchParams.get("location") || "",
       status: searchParams.get("status") || "",
     });
   }, [searchParams]);
+  const [dynamicAreas, setDynamicAreas] = useState<string[]>(availableAreas);
+  const [dynamicTypes, setDynamicTypes] = useState<string[]>(availableTypes);
+  const [dynamicStatuses, setDynamicStatuses] = useState<string[]>(["For_Rent", "For_Sale"]);
+  const [isPending, startTransition] = useTransition();
+
+  useEffect(() => {
+    startTransition(async () => {
+      const facets = await getDynamicSearchFacets(filters);
+      setDynamicAreas(facets.availableAreas);
+      setDynamicTypes(facets.availableTypes);
+      if (facets.availableStatuses.length > 0) {
+        setDynamicStatuses(facets.availableStatuses);
+      }
+
+      setFilters(prev => {
+        let changed = false;
+        let updated = { ...prev };
+        if (prev.location && !facets.availableAreas.includes(prev.location)) {
+          updated.location = "";
+          changed = true;
+        }
+        if (prev.propertyType && !facets.availableTypes.includes(prev.propertyType)) {
+          updated.propertyType = "";
+          changed = true;
+        }
+        if (prev.status && !facets.availableStatuses.includes(prev.status)) {
+          updated.status = "";
+          changed = true;
+        }
+        return changed ? updated : prev;
+      });
+    });
+  }, [filters]);
+
+  const hasActiveFilters = filters.propertyType !== "" || filters.location !== "" || filters.status !== "";
+
+  const clearFilters = () => {
+    setFilters({ propertyType: "", location: "", status: "" });
+    router.push("/", { scroll: false });
+  };
 
   const handleSelectChange = (name: string, value: string) => {
     const val = value === "all" ? "" : value;
@@ -71,7 +113,7 @@ export default function SearchBarClient({ availableAreas, availableTypes }: Sear
     e.preventDefault();
 
     const params = new URLSearchParams();
-    if (filters.propertyType) params.append("propertyType", filters.propertyType);
+    if (filters.propertyType) params.append("type", filters.propertyType);
     if (filters.location) params.append("location", filters.location);
     if (filters.status) params.append("status", filters.status);
 
@@ -109,7 +151,7 @@ export default function SearchBarClient({ availableAreas, availableTypes }: Sear
                 <SelectValue placeholder="What type?" />
               </SelectTrigger>
               <SelectContent className="bg-white border border-zinc-200/80 shadow-sm rounded-lg p-0 w-[calc(100vw-2rem)] md:w-full min-w-[var(--radix-select-trigger-width)]">
-                <div className="divide-y divide-zinc-100 flex flex-col w-full box-border">
+                <div className={`divide-y divide-zinc-100 flex flex-col w-full box-border transition-opacity duration-200 ${isPending ? "opacity-50 pointer-events-none" : ""}`}>
                   <SelectItem value="all" className="cursor-pointer w-full [&>span]:w-full text-[10px] md:text-xs font-medium py-2 md:py-2.5 focus:bg-zinc-50 box-border">
                     <div className="flex w-full text-zinc-700 justify-between items-center pr-1 min-w-0 box-border">
                       <span className="truncate">All Types</span>
@@ -118,7 +160,7 @@ export default function SearchBarClient({ availableAreas, availableTypes }: Sear
                   </SelectItem>
                   
                   {/* Dynamic Database Values */}
-                  {availableTypes.map((type) => {
+                  {dynamicTypes.map((type) => {
                     const { label, icon: Icon } = getTypeDetails(type);
                     return (
                       <SelectItem key={type} value={type} className="cursor-pointer w-full [&>span]:w-full text-[10px] md:text-xs font-medium py-2 md:py-2.5 focus:bg-zinc-50 box-border">
@@ -156,7 +198,7 @@ export default function SearchBarClient({ availableAreas, availableTypes }: Sear
                 <SelectValue placeholder="Select Area" />
               </SelectTrigger>
               <SelectContent className="bg-white border border-zinc-200/80 shadow-sm rounded-lg p-0 w-[calc(100vw-2rem)] md:w-full min-w-[var(--radix-select-trigger-width)]">
-                <div className="divide-y divide-zinc-100 flex flex-col w-full box-border">
+                <div className={`divide-y divide-zinc-100 flex flex-col w-full box-border transition-opacity duration-200 ${isPending ? "opacity-50 pointer-events-none" : ""}`}>
                   <SelectGroup className="w-full divide-y divide-zinc-100 flex flex-col box-border">
                     <SelectItem value="all" className="cursor-pointer w-full [&>span]:w-full text-[10px] md:text-xs font-medium py-2 md:py-2.5 focus:bg-zinc-50 box-border">
                       <div className="flex w-full justify-between items-center pr-1 text-zinc-700 min-w-0 box-border">
@@ -165,7 +207,7 @@ export default function SearchBarClient({ availableAreas, availableTypes }: Sear
                       </div>
                     </SelectItem>
                     
-                    {availableAreas.length > 0 && (
+                    {dynamicAreas.length > 0 && (
                       <div className="bg-zinc-50/60 py-1 px-2 md:px-3 w-full box-border">
                         <SelectLabel className="text-[7px] md:text-[9px] uppercase tracking-widest text-zinc-400 font-bold p-0 m-0 truncate">
                           Active Areas
@@ -174,7 +216,7 @@ export default function SearchBarClient({ availableAreas, availableTypes }: Sear
                     )}
                     
                     {/* Dynamic Database Values */}
-                    {availableAreas.map((area) => (
+                    {dynamicAreas.map((area) => (
                       <SelectItem key={area} value={area} className="cursor-pointer w-full [&>span]:w-full text-[10px] md:text-xs font-medium py-2 md:py-2.5 focus:bg-zinc-50 box-border">
                         <div className="flex w-full justify-between items-center pr-1 text-zinc-700 min-w-0 box-border">
                           <span className="truncate">{area}</span>
@@ -209,25 +251,29 @@ export default function SearchBarClient({ availableAreas, availableTypes }: Sear
                 <SelectValue placeholder="Rent or Sale?" />
               </SelectTrigger>
               <SelectContent className="bg-white border border-zinc-200/80 shadow-sm rounded-lg p-0 w-[calc(100vw-2rem)] md:w-full min-w-[var(--radix-select-trigger-width)]">
-                <div className="divide-y divide-zinc-100 flex flex-col w-full box-border">
+                <div className={`divide-y divide-zinc-100 flex flex-col w-full box-border transition-opacity duration-200 ${isPending ? "opacity-50 pointer-events-none" : ""}`}>
                   <SelectItem value="all" className="cursor-pointer w-full [&>span]:w-full text-[10px] md:text-xs font-medium py-2 md:py-2.5 focus:bg-zinc-50 box-border">
                     <div className="flex w-full justify-between items-center pr-1 text-zinc-700 min-w-0 box-border">
                       <span className="truncate">Any Status</span>
                       <span className="scale-75 md:scale-100 flex items-center shrink-0"><HugeiconsIcon icon={Tag01Icon} size={14} className="text-zinc-400 dropdown-icon" /></span>
                     </div>
-                  </SelectItem>
+                  </SelectItem>{dynamicStatuses.includes("For_Rent") && (
+
                   <SelectItem value="For_Rent" className="cursor-pointer w-full [&>span]:w-full text-[10px] md:text-xs font-medium py-2 md:py-2.5 focus:bg-zinc-50 box-border">
                     <div className="flex w-full justify-between items-center pr-1 text-zinc-700 min-w-0 box-border">
                       <span className="truncate">For Rent</span>
                       <span className="scale-75 md:scale-100 flex items-center shrink-0"><HugeiconsIcon icon={Key01Icon} size={14} className="text-zinc-800 dropdown-icon" /></span>
                     </div>
                   </SelectItem>
+)}{dynamicStatuses.includes("For_Sale") && (
+
                   <SelectItem value="For_Sale" className="cursor-pointer w-full [&>span]:w-full text-[10px] md:text-xs font-medium py-2 md:py-2.5 focus:bg-zinc-50 box-border">
                     <div className="flex w-full justify-between items-center pr-1 text-zinc-700 min-w-0 box-border">
                       <span className="truncate">For Sale</span>
                       <span className="scale-75 md:scale-100 flex items-center shrink-0"><HugeiconsIcon icon={Tag01Icon} size={14} className="text-zinc-800 dropdown-icon" /></span>
                     </div>
                   </SelectItem>
+)}
                 </div>
               </SelectContent>
             </Select>
@@ -248,3 +294,9 @@ export default function SearchBarClient({ availableAreas, availableTypes }: Sear
     </section>
   );
 }
+
+
+
+
+
+

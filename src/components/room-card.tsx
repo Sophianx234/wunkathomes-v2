@@ -42,7 +42,7 @@ export default function RoomCard({ room, type = "user" }: propertyCardProps) {
       case "available":
         return "bg-green-100 text-green-700";
       case "booked":
-        return "bg-red-100 text-red-700";
+        return "bg-zinc-100 text-zinc-700";
       case "pending":
         return "bg-yellow-100 text-yellow-700";
       default:
@@ -93,7 +93,7 @@ export default function RoomCard({ room, type = "user" }: propertyCardProps) {
             <Button
               onClick={handleDelete}
               size="icon"
-              className="h-7 w-7 bg-red-100 hover:bg-red-200 text-red-600 border border-red-200"
+              className="h-7 w-7 bg-zinc-100 hover:bg-zinc-200 text-zinc-600 border border-zinc-200"
             >
               <HugeiconsIcon icon={Trash} className="w-4 h-4" />
             </Button>

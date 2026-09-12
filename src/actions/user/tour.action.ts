@@ -178,3 +178,55 @@ export async function updateTourAction(rawTourId: string, data: { status?: strin
     return { success: false, error: "Failed to update tour." };
   }
 }
+
+export async function rescheduleTourAction(
+  prevState: TourActionState, 
+  formData: FormData
+): Promise<TourActionState> {
+  try {
+    const rawData = {
+      listingId: formData.get("listingId"),
+      phoneNumber: formData.get("phoneNumber"),
+      scheduledDate: formData.get("scheduledDate"),
+      scheduledTime: formData.get("scheduledTime"),
+    };
+
+    const validation = tourSchema.safeParse(rawData);
+    if (!validation.success) {
+      return { success: false, message: "", error: validation.error.issues[0].message };
+    }
+
+    const { listingId, phoneNumber, scheduledDate, scheduledTime } = validation.data;
+    const combinedDateTime = new Date(`${scheduledDate}T${scheduledTime}:00`);
+    if (isNaN(combinedDateTime.getTime()) || combinedDateTime < new Date()) {
+      return { success: false, message: "", error: "Invalid or past date provided." };
+    }
+
+    await connectToDatabase();
+
+    const existingTour = await Tour.findOneAndUpdate(
+      { listingId, phoneNumber, status: { $nin: ["Completed", "No_Show"] } },
+      { scheduledDate: combinedDateTime, status: "Pending_Time" },
+      { new: true }
+    );
+
+    if (!existingTour) {
+      return { success: false, message: "", error: "No pending tour found with this phone number to reschedule." };
+    }
+
+    const cookieStore = await cookies();
+    const expireTime = new Date(combinedDateTime.getTime() + (2 * 60 * 60 * 1000));
+    cookieStore.set(`tour_booked_${listingId}`, combinedDateTime.toISOString(), {
+      expires: expireTime, 
+      path: "/",
+      httpOnly: true, 
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+    });
+
+    return { success: true, message: "Tour successfully rescheduled!" };
+  } catch (error: any) {
+    return { success: false, message: "", error: "Failed to reschedule tour. Please try again." };
+  }
+}
+

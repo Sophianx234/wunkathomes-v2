@@ -149,7 +149,7 @@ export default function NewsLetter() {
               className={`text-sm mt-2 pl-4 ${
                 status.includes("successfully")
                   ? "text-green-600"
-                  : "text-red-600"
+                  : "text-zinc-600"
               }`}
               initial={{ opacity: 0 }}
               animate={{ opacity: status ? 1 : 0 }}

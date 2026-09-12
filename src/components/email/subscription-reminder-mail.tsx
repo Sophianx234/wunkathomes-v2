@@ -7,6 +7,7 @@ interface DynamicReminderEmailProps {
   propertyTitle: string;
   daysRemaining: number;
   endDate: string;
+  hasSmartLock?: boolean;
 }
 
 export default function SubscriptionReminderEmail({
@@ -14,6 +15,7 @@ export default function SubscriptionReminderEmail({
   propertyTitle,
   daysRemaining,
   endDate,
+  hasSmartLock = false,
 }: DynamicReminderEmailProps) {
   const firstName = userName.split(" ")[0];
   const isExpired = daysRemaining === 0;
@@ -37,9 +39,15 @@ export default function SubscriptionReminderEmail({
       {/* DYNAMIC INTRODUCTORY TEXT */}
       <Text className="text-[14px] leading-[22px] text-[#4B5563] mb-6">
         {isExpired ? (
-          "This is an official notice that your lease agreement has officially expired. To avoid uninterrupted access to the property and potential smart-lock restrictions, immediate action is required."
+          hasSmartLock
+            ? "This is an official notice that your lease agreement has officially expired. To avoid losing digital access to your door and having your PIN revoked, immediate action is required."
+            : "This is an official notice that your lease agreement has officially expired. To maintain your lease standing and avoid late fees or facility management intervention, immediate action is required."
         ) : isApproaching ? (
-          `Your lease agreement is approaching its conclusion in just ${daysRemaining} days. We are reaching out to ensure you have ample time to review your renewal options.`
+          `Your lease agreement is approaching its conclusion in just ${daysRemaining} days. We are reaching out to ensure you have ample time to review your renewal options. Please renew in time to ${
+            hasSmartLock
+              ? "ensure your digital door PIN remains active."
+              : "avoid late fees or physical lockout."
+          }`
         ) : (
           "We hope you are enjoying your stay. This is a routine check-in to provide you with your current lease standing."
         )}
@@ -73,7 +81,7 @@ export default function SubscriptionReminderEmail({
 
       <Section className="mb-10 mt-2">
         <Button
-          href={`${process.env.NEXT_PUBLIC_APP_URL}/user/leases`}
+          href={`${process.env.NEXT_PUBLIC_APP_URL}/user/dashboard`}
           className="bg-[#111827] text-white px-8 py-3.5 rounded-lg text-[14px] font-semibold tracking-wide block w-[240px] text-center"
         >
           {isExpired ? "Resolve Lease Status" : "View Lease Options"}

@@ -130,6 +130,7 @@ export async function proxy(request: NextRequest) {
       const allowedDomains = [
         process.env.NEXT_PUBLIC_APP_URL, // From Vercel Env Vars
         "https://wunkathomes.com",       // Future production domain
+        "https://www.wunkathomes.com",   // WWW production domain
         "https://wunkathomes-v2-t5wg.vercel.app" // Fallback temp domain
       ].filter(Boolean) as string[];
       const isOriginAllowed = origin && allowedDomains.some(domain => origin.startsWith(domain));

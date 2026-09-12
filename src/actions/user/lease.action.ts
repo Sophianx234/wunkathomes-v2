@@ -200,7 +200,7 @@ export async function submitNoticeToVacate(rawLeaseId: string) {
     }
 
     // 7. Revalidate UI
-    revalidatePath("/user/leases");
+    revalidatePath("/user/dashboard");
     revalidatePath("/admin/activations");
 
     return {

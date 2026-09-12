@@ -5,7 +5,6 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import {
   Loading03Icon,
   StarIcon,
-  cancelIcon,
 } from "@hugeicons/core-free-icons";
 import {
   submitReviewAction,

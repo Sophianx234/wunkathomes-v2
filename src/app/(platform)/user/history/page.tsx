@@ -15,7 +15,7 @@ export default function FinancialLedgerPage() {
     {
       id: "txn_8942301",
       date: "May 02, 2026",
-      amount: "$11,500.00",
+      amount: "GHS 11,500.00",
       type: "WIRE_TRANSFER",
       description: "Annual Balance Clearance",
       property: "The Glasshouse Villa",
@@ -24,7 +24,7 @@ export default function FinancialLedgerPage() {
     {
       id: "txn_8942250",
       date: "May 01, 2026",
-      amount: "$500.00",
+      amount: "GHS 500.00",
       type: "CARD_PAYMENT",
       description: "Refundable Hold",
       property: "The Glasshouse Villa",
@@ -33,7 +33,7 @@ export default function FinancialLedgerPage() {
     {
       id: "txn_8941002",
       date: "Apr 15, 2026",
-      amount: "$500.00",
+      amount: "GHS 500.00",
       type: "MOBILE_MONEY",
       description: "Refundable Hold",
       property: "Cantonments Penthouse",
@@ -51,8 +51,8 @@ export default function FinancialLedgerPage() {
         );
       case 'PENDING':
         return (
-          <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest bg-amber-50 text-amber-700 px-2 py-1 rounded border border-amber-200">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span> Processing
+          <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest bg-zinc-50 text-zinc-700 px-2 py-1 rounded border border-zinc-200">
+            <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 animate-pulse"></span> Processing
           </span>
         );
       case 'REFUNDED':

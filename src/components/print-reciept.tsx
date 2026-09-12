@@ -146,11 +146,9 @@ export default function PrintReceipt({ transaction }: PrintReceiptProps) {
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-1">
-                    Amount
-                  </p>
-                  <p className="font-black text-lg text-zinc-900">
-                    ${transaction.amount?.toLocaleString()}
+                  <p className="text-xs text-zinc-500 font-medium uppercase tracking-widest">Amount Paid</p>
+                  <p className="text-lg font-black text-black">
+                    GHS {transaction.amount?.toLocaleString()}
                   </p>
                 </div>
               </div>

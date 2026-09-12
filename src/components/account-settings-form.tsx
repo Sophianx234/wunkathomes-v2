@@ -80,8 +80,6 @@ export default function AccountSettingsForm({
   };
 
   // --- Profile State ---
-  const [name, setName] = useState(initialUser.name);
-  const [email, setEmail] = useState(initialUser.email);
   const [phone, setPhone] = useState(formatPhoneNumber(initialUser.phone));
   const [countryCode, setCountryCode] = useState(initialUser.countryCode);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
@@ -124,7 +122,6 @@ export default function AccountSettingsForm({
     currentPassword.length > 0 && newPassword.length > 0;
 
   const isProfileDirty =
-    name !== initialUser.name ||
     phone.replace(/\D/g, "") !== (initialUser.phone || "").replace(/\D/g, "") ||
     countryCode !== initialUser.countryCode ||
     avatarPreview !== initialUser.profilePicture ||
@@ -173,8 +170,8 @@ export default function AccountSettingsForm({
 
     try {
       const formData = new FormData();
-      formData.append("name", name);
-      formData.append("email", email);
+      formData.append("name", initialUser.name);
+      formData.append("email", initialUser.email);
       formData.append("phoneNumber", phone.replace(/\D/g, ""));
       formData.append("countryCode", countryCode);
       if (avatarFile) formData.append("profilePicture", avatarFile);
@@ -200,7 +197,7 @@ export default function AccountSettingsForm({
 
       <div className="flex flex-col md:flex-row gap-4 md:gap-8 items-start w-full box-border">
         {/* --- NAVIGATION (Mobile Horizontal Scroll / Desktop Sidebar) --- */}
-        <aside className="w-full md:w-64 shrink-0 bg-white border border-zinc-200/60 rounded-lg md:rounded-lg overflow-x-auto md:overflow-hidden box-border scrollbar-hide">
+        <aside className="w-full md:w-64 shrink-0 bg-white border border-zinc-200/60 rounded-lg md:rounded-lg overflow-x-auto md:overflow-hidden box-border hide-scrollbar">
           <nav className="flex flex-row md:flex-col min-w-max md:min-w-0">
             <button
               type="button"
@@ -311,7 +308,7 @@ export default function AccountSettingsForm({
                       variant="outline"
                       onClick={removeAvatar}
                       disabled={!avatarPreview}
-                      className="text-zinc-600 hover:bg-red-50 rounded-md hover:text-red-600 hover:border-red-200 transition-colors text-[10px] md:text-sm h-8 md:h-10 px-3 md:px-4 w-full sm:w-auto truncate shrink-0"
+                      className="text-zinc-600 hover:bg-zinc-50 rounded-md hover:text-zinc-600 hover:border-zinc-200 transition-colors text-[10px] md:text-sm h-8 md:h-10 px-3 md:px-4 w-full sm:w-auto truncate shrink-0"
                     >
                       Delete avatar
                     </Button>
@@ -333,10 +330,11 @@ export default function AccountSettingsForm({
                   </FieldLabel>
                   <Input
                     id="name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    value={initialUser.name}
+                    readOnly
+                    disabled
                     placeholder="Enter your full name"
-                    className="h-9 md:h-11 bg-slate-50/50 rounded-lg md:rounded-lg border-zinc-200/60 focus:ring-zinc-950 text-[11px] md:text-sm block w-full min-w-0 max-w-full box-border appearance-none m-0 px-3"
+                    className="h-9 md:h-11 bg-zinc-50/50 text-zinc-500 cursor-not-allowed rounded-lg md:rounded-lg border-zinc-200/60 focus:ring-0 text-[11px] md:text-sm block w-full min-w-0 max-w-full box-border appearance-none m-0 px-3 opacity-80"
                     required
                   />
                 </Field>
@@ -351,11 +349,11 @@ export default function AccountSettingsForm({
                   <Input
                     id="email"
                     type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="h-9 md:h-11 bg-slate-50/50 rounded-lg md:rounded-lg border-zinc-200/60 focus:ring-zinc-950 disabled:opacity-60 text-[11px] md:text-sm block w-full min-w-0 max-w-full box-border appearance-none m-0 px-3"
-                    required
+                    value={initialUser.email}
+                    readOnly
                     disabled
+                    className="h-9 md:h-11 bg-zinc-50/50 text-zinc-500 cursor-not-allowed rounded-lg md:rounded-lg border-zinc-200/60 focus:ring-0 text-[11px] md:text-sm block w-full min-w-0 max-w-full box-border appearance-none m-0 px-3 opacity-80"
+                    required
                   />
                 </Field>
 
@@ -379,6 +377,12 @@ export default function AccountSettingsForm({
                   </div>
                   <input type="hidden" name="countryCode" value={countryCode} />
                 </Field>
+              </div>
+
+              <div className="w-full box-border px-1 mt-[-8px] mb-2">
+                <p className="text-[12px] text-zinc-500 leading-relaxed">
+                  <strong className="font-semibold text-zinc-700">Note:</strong> Your name and email are locked to match your verified identity and active lease documents. Please contact support to request a legal name or email change.
+                </p>
               </div>
 
               <div className="pt-3 md:pt-4 border-t border-zinc-200/60 w-full box-border">
@@ -544,10 +548,10 @@ export default function AccountSettingsForm({
                 <div className="pt-1 md:pt-2 pb-1 md:pb-2 w-full box-border">
                   <div className="flex gap-1 md:gap-2 h-1 md:h-1.5 w-full box-border">
                     <div
-                      className={`flex-1 rounded-full transition-colors duration-300 ${newPassword.length === 0 ? "bg-zinc-200" : strengthCount >= 1 ? (strengthCount === 1 ? "bg-red-500" : strengthCount === 2 ? "bg-amber-400" : "bg-green-500") : "bg-red-500"}`}
+                      className={`flex-1 rounded-full transition-colors duration-300 ${newPassword.length === 0 ? "bg-zinc-200" : strengthCount >= 1 ? (strengthCount === 1 ? "bg-zinc-500" : strengthCount === 2 ? "bg-zinc-400" : "bg-green-500") : "bg-zinc-500"}`}
                     />
                     <div
-                      className={`flex-1 rounded-full transition-colors duration-300 ${newPassword.length === 0 ? "bg-zinc-200" : strengthCount >= 2 ? (strengthCount === 2 ? "bg-amber-400" : "bg-green-500") : "bg-zinc-200"}`}
+                      className={`flex-1 rounded-full transition-colors duration-300 ${newPassword.length === 0 ? "bg-zinc-200" : strengthCount >= 2 ? (strengthCount === 2 ? "bg-zinc-400" : "bg-green-500") : "bg-zinc-200"}`}
                     />
                     <div
                       className={`flex-1 rounded-full transition-colors duration-300 ${newPassword.length === 0 ? "bg-zinc-200" : strengthCount >= 3 ? "bg-green-500" : "bg-zinc-200"}`}

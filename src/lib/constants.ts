@@ -29,11 +29,11 @@ export const AMENITIES = [
 export const BEDROOM_OPTIONS = [1, 2, 3, 4, 5]
 
 export const PRICE_RANGES = [
-  { min: 0, max: 500, label: "Under $500" },
-  { min: 500, max: 1000, label: "$500 - $1000" },
-  { min: 1000, max: 1500, label: "$1000 - $1500" },
-  { min: 1500, max: 2000, label: "$1500 - $2000" },
-  { min: 2000, max: Number.POSITIVE_INFINITY, label: "$2000+" },
+  { min: 0, max: 500, label: "Under GHS 500" },
+  { min: 500, max: 1000, label: "GHS 500 - GHS 1000" },
+  { min: 1000, max: 1500, label: "GHS 1000 - GHS 1500" },
+  { min: 1500, max: 2000, label: "GHS 1500 - GHS 2000" },
+  { min: 2000, max: Number.POSITIVE_INFINITY, label: "GHS 2000+" },
 ]
 
 export const GHANA_REGIONS = ["Ahafo", "Ashanti", "Bono", "Bono East", "Central", "Eastern", "Greater Accra", "Northern", "Volta"];

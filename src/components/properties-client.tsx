@@ -4,13 +4,14 @@ import {
   ArrowDown01Icon,
   Loading03FreeIcons,
   Location01Icon,
+  Cancel01Icon,
   Search01Icon,
   Tag01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 
 import {
   Select,
@@ -22,9 +23,16 @@ import {
 
 import PropertyCard from "@/components/property-card";
 import { getPublicProperties } from "@/actions/shared/fetch-properties.action";
+import { getDynamicSearchFacets } from "@/actions/public/search.action";
 
 // --- Types & Constants ---
-const PROPERTY_TYPES = ["All", "House", "Apartment", "Commercial", "Land"];
+const PROPERTY_TYPES = [
+  { value: "All", label: "All" },
+  { value: "House", label: "House" },
+  { value: "Apartment_Building", label: "Apartment" },
+  { value: "Commercial", label: "Commercial" },
+  { value: "Land", label: "Land" }
+];
 
 interface PropertiesClientProps {
   initialInventory: any[]; 
@@ -56,6 +64,49 @@ export default function PropertiesClient({
   const [statusFilter, setStatusFilter] = useState(initialFilters.statusFilter);
   const [locationFilter, setLocationFilter] = useState(initialFilters.locationFilter);
 
+  const [dynamicAreas, setDynamicAreas] = useState<string[]>(availableAreas);
+  const [dynamicTypes, setDynamicTypes] = useState<string[]>(["House", "Apartment_Building", "Commercial", "Land"]);
+  const [dynamicStatuses, setDynamicStatuses] = useState<string[]>(["For_Rent", "For_Sale"]);
+  const [isPending, startTransition] = useTransition();
+
+  useEffect(() => {
+    startTransition(async () => {
+      const facets = await getDynamicSearchFacets({
+        propertyType: typeFilter === "All" || typeFilter === "all" ? "" : typeFilter,
+        location: locationFilter === "All" || locationFilter === "all" ? "" : locationFilter,
+        status: statusFilter === "All" || statusFilter === "all" ? "" : statusFilter,
+      });
+      setDynamicAreas(facets.availableAreas);
+      if (facets.availableTypes.length > 0) setDynamicTypes(facets.availableTypes);      if (facets.availableStatuses.length > 0) setDynamicStatuses(facets.availableStatuses);
+
+      // Auto-heal URL if filters become invalid
+      const params = new URLSearchParams(searchParams.toString());
+      let hasInvalid = false;
+      
+      const loc = locationFilter === "All" || locationFilter === "all" ? "" : locationFilter;
+      if (loc && !facets.availableAreas.includes(loc)) {
+        params.delete("location");
+        hasInvalid = true;
+      }
+      
+      const type = typeFilter === "All" || typeFilter === "all" ? "" : typeFilter;
+      if (type && !facets.availableTypes.some(t => t.toLowerCase() === type.toLowerCase())) {
+        params.delete("type");
+        hasInvalid = true;
+      }
+      
+      const stat = statusFilter === "All" || statusFilter === "all" ? "" : statusFilter;
+      if (stat && !facets.availableStatuses.some(s => s.toLowerCase() === stat.toLowerCase())) {
+        params.delete("status");
+        hasInvalid = true;
+      }
+      
+      if (hasInvalid) {
+        router.push(`?${params.toString()}`, { scroll: false });
+      }
+    });
+  }, [typeFilter, locationFilter, statusFilter, searchParams, router]);
+
   // Sync state when props change due to URL/Server Component re-render
   useEffect(() => {
     setItems(initialInventory);
@@ -73,8 +124,18 @@ export default function PropertiesClient({
     if (value === "All" || value === "all") {
       params.delete(key);
     } else {
-      params.set(key, value.toLowerCase());
+      params.set(key, value);
     }
+    router.push(`?${params.toString()}`, { scroll: false });
+  };
+
+  const hasActiveFilters = typeFilter !== "All" || statusFilter !== "all" || locationFilter !== "all";
+
+  const clearFilters = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("type");
+    params.delete("location");
+    params.delete("status");
     router.push(`?${params.toString()}`, { scroll: false });
   };
 
@@ -110,19 +171,25 @@ export default function PropertiesClient({
           
           {/* Left: Property Type Pills */}
           <div className="flex items-center gap-1.5 md:gap-2 overflow-x-auto pb-1 md:pb-2 xl:pb-0 hide-scrollbar mask-fade-right w-full min-w-0 box-border">
-            {PROPERTY_TYPES.map((type) => (
-              <button
-                key={type}
-                onClick={() => handleTypeChange(type)}
-                className={`whitespace-nowrap px-3 py-1.5 md:px-6 md:py-2.5 rounded-full text-[9px] md:text-xs font-bold uppercase tracking-widest transition-all duration-300 shrink-0 ${
-                  typeFilter.toLowerCase() === type.toLowerCase()
-                    ? "bg-black text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] md:shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)] -translate-y-[1px]"
-                    : "bg-zinc-100/50 text-zinc-500 hover:bg-zinc-200 hover:text-black"
-                }`}
-              >
-                {type}
-              </button>
-            ))}
+            {PROPERTY_TYPES.map((type) => {
+                const isAvailable = type.value === "All" || dynamicTypes.includes(type.value);
+                return (
+                <button
+                  key={type.value}
+                  onClick={() => isAvailable && handleTypeChange(type.value)}
+                  disabled={!isAvailable}
+                  className={`whitespace-nowrap px-3 py-1.5 md:px-6 md:py-2.5 rounded-full text-[9px] md:text-xs font-bold uppercase tracking-widest transition-all duration-300 shrink-0 ${
+                    !isAvailable
+                      ? "bg-zinc-100/30 hidden text-zinc-300 cursor-not-allowed"
+                      : typeFilter.toLowerCase() === type.value.toLowerCase()
+                      ? "bg-black text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] md:shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)] -translate-y-[1px]"
+                      : "bg-zinc-100/50 text-zinc-500 hover:bg-zinc-200 hover:text-black"
+                  }`}
+                >
+                  {type.label}
+                </button>
+              )})}
+
           </div>
 
           {/* Right: Dropdown Filters & Count */}
@@ -134,7 +201,7 @@ export default function PropertiesClient({
                 onValueChange={(val) => {
                   updateUrl("status", val);
                 }}
-                value={statusFilter}
+                value={statusFilter === "All" || statusFilter === "all" ? "all" : (dynamicStatuses.find(s => s.toLowerCase() === statusFilter.toLowerCase()) || statusFilter)}
               >
                 <SelectTrigger className="w-full bg-zinc-50/50 border-zinc-200/60 rounded-full h-8 md:h-11 text-[9px] md:text-xs font-bold uppercase tracking-widest focus:ring-0 focus:ring-offset-0 [&_.dropdown-icon]:hidden min-w-0 box-border px-2 md:px-3">
                   <span className="scale-75 md:scale-100 flex items-center shrink-0">
@@ -147,15 +214,21 @@ export default function PropertiesClient({
                   <SelectValue placeholder="Status" className="truncate" />
                 </SelectTrigger>
                 <SelectContent className="bg-white rounded-lg md:rounded-lg">
+                <div className={`flex flex-col w-full box-border transition-opacity ${isPending ? "opacity-50 pointer-events-none" : ""}`}>
                   <SelectItem value="all" className="text-[9px] md:text-xs font-bold uppercase tracking-wider py-2 md:py-3 cursor-pointer">
                     All Statuses
                   </SelectItem>
-                  <SelectItem value="For_Rent" className="text-[9px] md:text-xs font-bold uppercase tracking-wider py-2 md:py-3 cursor-pointer">
-                    For Rent
-                  </SelectItem>
-                  <SelectItem value="For_Sale" className="text-[9px] md:text-xs font-bold uppercase tracking-wider py-2 md:py-3 cursor-pointer">
-                    For Sale
-                  </SelectItem>
+                  {dynamicStatuses.includes("For_Rent") && (
+                      <SelectItem value="For_Rent" className="text-[9px] md:text-xs font-bold uppercase tracking-wider py-2 md:py-3 cursor-pointer">
+                        For Rent
+                      </SelectItem>
+                    )}
+                    {dynamicStatuses.includes("For_Sale") && (
+                      <SelectItem value="For_Sale" className="text-[9px] md:text-xs font-bold uppercase tracking-wider py-2 md:py-3 cursor-pointer">
+                        For Sale
+                      </SelectItem>
+                    )}
+                </div>
                 </SelectContent>
               </Select>
             </div>
@@ -166,7 +239,7 @@ export default function PropertiesClient({
                 onValueChange={(val) => {
                   updateUrl("location", val);
                 }}
-                value={locationFilter}
+                value={locationFilter === "All" || locationFilter === "all" ? "all" : (dynamicAreas.find(a => a.toLowerCase() === locationFilter.toLowerCase()) || locationFilter)}
               >
                 <SelectTrigger className="w-full bg-zinc-50/50 border-zinc-200/60 rounded-full h-8 md:h-11 text-[9px] md:text-xs font-bold uppercase tracking-widest focus:ring-0 focus:ring-offset-0 [&_.dropdown-icon]:hidden min-w-0 box-border px-2 md:px-3">
                   <span className="scale-75 md:scale-100 flex items-center shrink-0">
@@ -179,20 +252,32 @@ export default function PropertiesClient({
                   <SelectValue placeholder="Location" className="truncate" />
                 </SelectTrigger>
                 <SelectContent className="bg-white rounded-lg md:rounded-lg w-[calc(100vw-1rem)] sm:w-auto">
+                <div className={`flex flex-col w-full box-border transition-opacity ${isPending ? "opacity-50 pointer-events-none" : ""}`}>
                   <SelectItem value="all" className="text-[9px] md:text-xs font-bold uppercase tracking-wider py-2 md:py-3 cursor-pointer">
                     All Areas
                   </SelectItem>
                   
                   {/* Map over the actual database locations dynamically */}
-                  {availableAreas.map((area) => (
+                  {dynamicAreas.map((area) => (
                     <SelectItem key={area} value={area} className="text-[9px] md:text-xs font-bold uppercase tracking-wider py-2 md:py-3 cursor-pointer">
                       {area}
                     </SelectItem>
                   ))}
-                  
+                </div>
                 </SelectContent>
               </Select>
             </div>
+            {/* Clear Filters Button */}
+            {hasActiveFilters && (
+              <button
+                onClick={clearFilters}
+                className="flex items-center justify-center size-8 md:size-10 rounded-full  transition-colors shrink-0"
+                title="Clear all filters"
+              >
+                <HugeiconsIcon icon={Cancel01Icon} size={18} />
+              </button>
+            )}
+
 
             {/* Results Count Counter */}
             <div className="hidden sm:flex items-center pl-2 md:pl-4 border-l-2 border-zinc-200/60 shrink-0">
@@ -304,3 +389,19 @@ export default function PropertiesClient({
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -34,7 +34,7 @@ import { PropertyMap } from "@/components/property-map-dynamic";
 import SimilarCarousel from "@/components/similar-carousel";
 import ThingsToKnow from "@/components/things-to-know";
 import ReviewForm from "@/components/review-form";
-import { formatLeaseTerm, getNeighborhoodDescription } from "@/lib/helpers";
+import { getNeighborhoodDescription } from "@/lib/helpers";
 import { Toaster } from "@/components/ui/sonner";
 import SavePropertyButton from "@/components/ui/saved-property-button";
 import Listing from "@/models/listing";
@@ -84,9 +84,8 @@ export const mapToIProperty = (
     bathrooms: doc.features?.bathrooms ?? 0,
     sizeSqm: doc.features?.sizeSqm ?? 0,
   },
-  terms: {
-    leaseTerm: doc.terms?.leaseTerm ?? null,
-  },
+  roomType: doc.roomType,
+  terms: { leaseTerm: null },
   smartLock: {
     hasSmartLock: doc.smartLock?.hasSmartLock ?? false,
     accessInstructions: doc.smartLock?.accessInstructions,
@@ -181,10 +180,10 @@ export default async function PropertyDetailsPage({
 
       <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 mt-12">
         <div className="lg:col-span-8 flex flex-col pb-12">
-          <div className="mb-8">
-            <h1 className="text-3xl md:text-5xl font-black uppercase tracking-tight leading-[1.1] mb-4">
-              {listing.title}
-            </h1>
+          <div className="flex flex-col mb-4 md:mb-0">
+            <span className="text-2xl md:text-3xl font-black uppercase tracking-tight">
+            GHS {listing.price.toLocaleString()}
+            </span>
             <div className="flex items-center justify-between">
               <div className="flex flex-wrap items-center gap-4 text-sm font-bold uppercase tracking-widest text-zinc-500">
                 <span className="flex items-center gap-1.5 text-black">
@@ -411,10 +410,9 @@ export default async function PropertyDetailsPage({
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-black p-4 flex items-center justify-between z-50 lg:hidden">
         <div>
           <div className="text-xl font-black">
-            ${listing.price.toLocaleString()}
+            GHS {listing.price.toLocaleString()}
             <span className="text-sm font-medium text-zinc-500">
-              {" "}
-              {formatLeaseTerm(listing.terms.leaseTerm)}
+              {listing.listingType === "For_Rent" ? (listing.roomType === "Furnished" ? " /day" : " /month") : ""}
             </span>
           </div>
           <div className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">

@@ -1,0 +1,137 @@
+# Tuya Smart Lock Integration Guide & Status
+
+This document serves as a handover for any developer or AI agent continuing the Tuya Smart Lock integration for the Wunkat Homes platform. 
+
+## 🏗️ Architecture Overview
+The application acts as a SaaS middleman between the end-users and the Tuya Cloud API. Users do not use the official Tuya App. Instead:
+1. **Admins/Installers** pair physical locks to a master Tuya account (App Account UID) via the Tuya app.
+2. **The Next.js Backend** authenticates with the Tuya Cloud API using HMAC-SHA256 signatures and syncs the fleet using the `TUYA_ADMIN_UID`.
+3. **MongoDB** tracks which `tuyaDeviceId` belongs to which `Property` / `Listing`.
+4. **Users/Tenants** click buttons on the web app, and the Next.js server relays those commands to Tuya.
+
+---
+
+## ✅ What Has Been Completed (Admin Phase Complete)
+
+### 1. API Wrapper & Authentication (`src/lib/tuya.ts`)
+- Custom Tuya OpenAPI request wrapper using native `crypto`.
+- Handles dynamic token generation, caching, and HMAC signature calculation.
+- Includes functions: `getAccessToken()`, `getDeviceDetails(deviceId)`, `getDevicesByUser(uid)` and `createTemporaryPin()`.
+
+### 2. Environment Variables
+The following variables are active in `.env`:
+- `TUYA_ACCESS_ID`
+- `TUYA_ACCESS_SECRET`
+- `TUYA_ENDPOINT`
+- `TUYA_ADMIN_UID` (The App Account UID from Tuya IoT platform used to sync the fleet).
+
+### 3. Database Schema (`src/models/smartlock.ts`)
+- A Mongoose model (`SmartLock`) bridges Tuya devices to properties.
+- Fields: `tuyaDeviceId`, `name`, `propertyId`, `listingId`, `status` ('unassigned', 'online', 'offline'), `batteryLevel`, `lockState` ('locked', 'unlocked', 'unknown'), `doorState` ('closed', 'open', 'unknown').
+
+### 4. Fleet Auto-Sync & Admin Actions (`src/actions/admin/smartlock.action.ts`)
+- `syncLocksFromCloud()`: Fetches the entire fleet of devices from Tuya's servers and saves new ones to MongoDB. 
+  - *Dev Note: There is currently a mock data loop inside this function that clones the first Tuya device 14 times. This is strictly for UI testing in `NODE_ENV === 'development'` and should be ignored/removed for production.*
+- `renameSmartLock()`: Updates the human-readable name of a lock directly in MongoDB.
+
+### 5. Hardware Fleet Dashboard (`src/app/admin/smartlocks/page.tsx`)
+- A full Admin UI is available at `/admin/smartlocks`.
+- Uses client component `src/components/admin/smartlock-manager.tsx`.
+- Features real-time search, status filtering, renaming, and an "Edit Property" link that jumps directly to the property a lock is assigned to.
+- **UI Architecture:** Completely redesigned to match the Wunkat monochrome/zinc aesthetic, heavily relying on Shadcn UI (`Badge`, `DropdownMenu`) and minimalist Lucide icons over flashy colored backgrounds.
+
+### 6. Property Assignment Integration
+- Locks are assigned to properties during the Property Creation or Edit flow.
+- `src/components/smart-lock-toggle.tsx` provides a dropdown of unassigned locks.
+- Server Actions (`createPropertyAction`, `editPropertyAction`, `deletePropertyAction`) handle the assignment atomically using **Mongoose Transactions**, guaranteeing data consistency. If a property is deleted, the hardware is safely unassigned and returned to the fleet pool.
+
+### 7. Security & Edge Cases (Important for Future Queries)
+- **Private Data:** In the `Listing` model, `smartLock.accessInstructions` is explicitly configured with `select: false`. This ensures sensitive entry codes are never accidentally leaked in public API queries.
+- **Querying Private Data:** If you ever need to retrieve the instructions (e.g., to display in the secure Tenant Dashboard or the Admin Edit Page), you **MUST** explicitly append `.select('+smartLock.accessInstructions')` to your Mongoose query.
+
+### 8. Seamless KYC Onboarding & Digital Signature Flow
+The provisioning flow from User Checkout to Admin Activation is designed as a "White-Glove" concierge experience, completely eliminating in-office paperwork.
+
+**A. User Checkout (The Digital Signature)**
+- During checkout (`src/components/checkout-client.tsx`), the user must read the Tenancy Agreement, check "I agree", type their legal name, and pay via Paystack.
+- The `verifyPaystackPayment` webhook (`src/actions/user/payment.action.ts`) extracts the typed signature, captures the user's IP Address and User-Agent, and computes a secure SHA-256 `documentHash`. 
+- This generates a robust `signatureAudit` object and marks the lease as `isSigned: true`. This serves as a legally binding "Clickwrap" electronic signature.
+
+**B. In-Office Verification (Admin Ratification)**
+- The tenant visits the office with their physical Ghana Card. The admin opens the Tenant Directory (`/admin/manage/tenants`) on a tablet.
+- The Tenant Profile Modal dynamically adapts. Because the lease is already signed digitally, the Admin simply clicks **"Verify Identity & Grant Access"**.
+- **Hardware-Optimized Uploads:** The UI prompts the admin to capture a Face Photo (using the tablet's front camera via `capture="user"`) and scan the Ghana Card (using the rear camera via `capture="environment"`).
+- **VIP Fast-Track:** If the user is already KYC verified in the system, a "VIP Fast-Track" badge appears, and document uploads are bypassed.
+
+**C. Activation & Provisioning**
+- Once the Admin submits the verification form, it triggers `verifyAndOnboardTenantAction`.
+- The Admin's physical ID verification officially ratifies the online signature. The lease status flips to Active, the Tuya smart lock is provisioned, and the access PIN is securely dispatched to the tenant via email/SMS. No secondary in-office signing is required.
+
+### 9. Admin Emergency Access Control
+- The unified Tenant Directory also features an **Emergency Unlock** button inside the "Occupied Asset" panel for active leases.
+- This queries `getTenantsData()` in `tenant.service.ts` to map the specific `SmartLock` to the active lease's `propertyId`.
+- The Tuya command uses `remote_no_dp_key` (with a value of `true`) to remotely trigger the lock via the `remoteUnlockAction`.
+
+### 10. Temporary PIN Encryption
+- Tuya's temporary password API requires a specific encryption flow which has been implemented.
+- First, a `password-ticket` is fetched. The `ticket_key` is decrypted using AES-256-ECB with the `TUYA_ACCESS_SECRET`.
+- The desired PIN is then encrypted using AES-128-ECB with the decrypted original key, and passed to the API with `password_type: 'ticket'`.
+- Wi-Fi locks require a 7-digit PIN, so the PIN generation logic in `src/actions/admin/smartlock.action.ts` has been updated to generate 7-digit PINs.
+
+### 11. Audit Logging, Identity Tracking & Temporary PINs
+- The system maintains a robust, non-repudiable security audit trail. A Mongoose model (`AccessLog`) tracks every critical smart lock event: `PIN_RESET`, `TEMP_PIN_CREATED`, `REMOTE_UNLOCK`, `PIN_REVOKED`, `PHYSICAL_UNLOCK`, and `ALARM_TRIGGERED`.
+- **User Accountability**: Server actions explicitly capture the active user's session ID and store it in `actorId` (referencing the `User` model) and `actorType`. This separates web-triggered human events from Tuya webhook-triggered hardware events (`actorType: 'Hardware'`).
+- **Audit History UI**: Inside the `/admin/smartlocks` dashboard, clicking "Manage" on any lock opens the `SmartLockManageDialog`. This modal contains an **Audit History** tab that dynamically queries `getLockAuditLogs(lockId)`. The UI displays a professional, industry-standard timeline complete with the exact user's Avatar, Name, Role Badge, Email, and Phone number, alongside the security event and formatted timestamp.
+- When an admin generates a temporary/vendor PIN, they can provide a custom name and duration. The hardware issues the PIN, and the backend securely stores it in the `SmartLock.activeTempPins` array (saving only the last 4 digits, e.g., `***1234`, for security) along with its expiration date.
+- Admins have the ability to explicitly revoke active temporary PINs before they expire using the `revokeTemporaryPinAction`, which hits Tuya's `DELETE /v1.0/devices/{device_id}/door-lock/temp-passwords/{password_id}` endpoint and prunes the database array.
+
+### 12. Security Operations Center (SOC) & Live Monitoring
+- The platform uses a **Zero-Polling Architecture** via Pusher to monitor fleet health and activity in real-time.
+- `src/lib/pusher-server.ts` handles API route triggers, and `src/lib/pusher-client.ts` connects the React UI using `pusher-js`.
+- Tuya's Webhooks post to `src/app/api/webhooks/tuya/route.ts` which is fully configured to parse advanced Tuya Data Points (DPs) including `residual_electricity` (exact 0-100% battery), hardware alarms (`tamper_alarm`, `door_unclosed_alarm`), and physical unlock records (`unlock_record`, `unlock_fingerprint`).
+- The webhook automatically updates the `SmartLock` document (managing an `activeAlarms` array and `batteryPercentage`), and securely saves hardware events (`PHYSICAL_UNLOCK`, `ALARM_TRIGGERED`) to the `AccessLog` audit timeline.
+- It streams this data to the frontend via two Pusher channels: `status_update` and `activity_log`.
+- The `/admin/smartlocks` "Live Monitoring" tab subscribes to these streams to instantly flash red ALARM badges on tampered locks, update dynamic battery progress bars, and scroll a real-time "Security & Access Event Feed" at the bottom of the dashboard.
+
+
+### 13. Hardware Specifics: Auto-Locking Clutch Constraints
+- The fleet primarily consists of the "Camera Lock with Display" model. This specific hardware is an **auto-locking clutch lever** lock.
+- **Missing Sensors:** Diagnostic analysis of the Tuya API responses for these devices confirmed they *do not expose* physical state sensors like `doorcontact_state` (open/closed) or `closed_opened_status` (latch engaged/disengaged).
+- **UI Constraints:** Because the cloud cannot track the physical state of the door, all "Unlock" buttons across the application (in both `SmartLockManageDialog` and `TenantDirectoryClient`) are implemented as **stateless triggers**, not toggle switches.
+- **The 5-Second Standard:** When an Admin or Tenant clicks "Unlock", the command is fired instantly and the UI transitions into a green "Unlocked (5s)" countdown timer, mimicking the physical clutch disengaging and re-engaging 5 seconds later. The UI specifically avoids saying "Status: Unlocked" because the data would instantly become stale.
+- The `Lock State` and `Door State` columns in the Live Monitoring dashboard gracefully render "Auto (Clutch)" and "No Sensor" badges for these devices instead of displaying confusing "Unknown" states.
+
+### 14. Additional UI & Platform Enhancements (August & September)
+While working on this branch, several critical platform improvements were made alongside the Tuya integration:
+- **Search Auto-Healing:** Added intelligent URL and state auto-healing to both the Home Page search bar and the `/properties` page filters. If a user selects a combination of filters that yields 0 results (e.g. restrictive property type + invalid location), the UI instantly self-heals by aggressively pruning the invalid parameter, preventing "no results" dead ends.
+- **Dynamic Tour Scheduling:** Created a global `Settings` collection for the platform. Admins can now explicitly select their `tourAvailableDays` (e.g., Mon, Wed, Fri) via the `/admin/manage/tours` dashboard.
+- **Booking Calendar Constraints:** Ripped out the native HTML date inputs from `BookingCard` and integrated the Shadcn `<Calendar />`. The component is piped directly to the admin settings, physically disabling and graying out past dates and any days of the week the admin is unavailable. The `BookingCard` responsive styling was also rebuilt to seamlessly fit the Calendar without horizontal clipping (`lg:w-[350px]`, `lg:p-6`, and mobile scaling).
+- **Cache Synchronization:** Implemented global `revalidatePath("/", "layout")` logic inside the settings update action to perfectly sync the database state with the heavily cached public routing tree.
+- **KYC & Identity Verification Architecture:** 
+  - The UI for Identity capture was completely split into two highly-specialized routes to prevent logical overlaps and bugs.
+  - `/admin/manage/tenants/[id]/onboarding` is now strictly an activation wizard for **pending** tenants to grant them lease access.
+  - `/admin/manage/tenants/[id]/edit` is a dedicated identity management page for correcting data (like typos in Legal Names) on **active** tenants, without exposing dangerous lease-activation triggers.
+  - The tenant directory dynamically routes the admin to the correct page based on the tenant's pipeline stage.
+- **Mongoose Security & Schema Patching:** Discovered and fixed a silent bug where Ghana Card image uploads successfully reached Cloudinary and the database, but failed to render on the UI because the MongoDB schema had `idDocumentUrl` flagged with `select: false`. The backend queries in `tenant.service.ts` were forcefully patched with `+idDocumentUrl` to expose this data cleanly to the admin.
+
+---
+
+## ?? Next Steps (For the Next Agent/Developer)
+
+The Admin Phase (Fleet Management, Tenant PIN Provisioning, and Emergency Access) is **100% complete**. 
+If you are picking up this project, you have two crucial workflows to finish:
+
+### Step 1: Fix Lifecycle Email Templates for Non-Smart Lock Properties
+While `lease-activation-mail.tsx` has already been adapted, the system still sends automated lifecycle emails assuming every property has a Tuya Smart Lock. You must update:
+1. `move-out-confirmation-mail.tsx`
+2. `subscription-reminder-mail.tsx`
+
+*Implementation Detail:* These React Email components currently hardcode warnings like "Smart Lock PIN expiration". They need to conditionally render physical key vs digital key messages. You must inject a `hasSmartLock` boolean prop into them, and then update their respective caller actions (`src/actions/user/lease.action.ts` and the cron job `src/app/api/cron/check-subscriptions/route.ts`) to determine the lock status and pass that boolean down.
+
+### Step 2: Build the Tenant Dashboard (User Phase)
+Create a reusable React component (e.g., `src/components/smartlock/tenant-controls.tsx`) meant for the tenant's digital portal. It should contain:
+1. A large "Unlock Door" button that calls the existing `remoteUnlockAction` (or a tenant-specific version).
+2. A form to call the existing `createTemporaryPin()` function so users can generate time-bound access for guests.
+
+### Step 3: Subscription & Lease Verification Middleware
+Before the server executes the Tuya "Unlock" command triggered by a user in Step 2, you must query the database to ensure that the `User` has an **Active Lease** or **Subscription** for the `Property` linked to that specific `SmartLock`. If their lease is expired, suspended, or unpaid, the backend must firmly reject the unlock request.

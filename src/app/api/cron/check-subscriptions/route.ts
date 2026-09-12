@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/config/DbConnect";
 import Lease from "@/models/lease";
+import SmartLock from "@/models/smartlock";
+import AccessLog from "@/models/accesslog";
 import { sendEmail } from "@/lib/resend";
 import React from "react";
 import SubscriptionReminderEmail from "@/components/email/subscription-reminder-mail";
+import { deleteTemporaryPin } from "@/lib/tuya";
 // Import your email template (adjust path as needed)
 
 export const dynamic = "force-dynamic"; // Ensure Next.js doesn't statically cache this route
@@ -37,7 +40,7 @@ export async function GET(request: Request) {
       // Only fetch exactly what we need to save memory
       const leases = await Lease.find(query)
         .populate("userId", "email name")
-        .populate("listingId", "title");
+        .populate("listingId", "title propertyId");
 
       for (const lease of leases) {
         if (!lease.userId?.email) continue;
@@ -49,7 +52,21 @@ export async function GET(request: Request) {
           : `${emailSubjectPrefix}: ${daysLeft} days left on your lease`;
 
         try {
-          // Fire the email
+          // 1. Data Enrichment: Check if this lease/property has a Smart Lock
+          let hasSmartLock = false;
+          let lock = null;
+          try {
+            lock = await SmartLock.findOne({
+              $or: [{ propertyId: lease.listingId.propertyId }, { listingId: lease.listingId._id }],
+            });
+            if (lock && lock.tuyaDeviceId) {
+              hasSmartLock = true;
+            }
+          } catch (lockError) {
+            console.error(`[CRON WARNING] Failed to query SmartLock for Lease ${lease._id}:`, lockError);
+          }
+
+          // 2. Fire the email conditionally customized by hasSmartLock
           await sendEmail({
             to: lease.userId.email,
             subject: subject,
@@ -57,16 +74,49 @@ export async function GET(request: Request) {
               userName: lease.userId.name,
               propertyTitle: lease.listingId.title,
               daysRemaining: daysLeft,
-              endDate: lease.endDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+              endDate: lease.endDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }),
+              hasSmartLock: hasSmartLock
             })
           });
 
-          // Mark as sent (Idempotency)
+          // 3. Mark as sent (Idempotency)
           lease.reminders[milestoneKey].sent = true;
           
-          // If expired, automatically update the lease status
+          // 4. Decoupled Hardware Action (Smart Locks Only) & Lease Status Update
           if (milestoneKey === "expired") {
             lease.status = "Expired";
+            
+            if (hasSmartLock && lock) {
+              try {
+                // Wipe any active temporary PINs from the physical Tuya lock
+                if (lock.activeTempPins && lock.activeTempPins.length > 0) {
+                  for (const pin of lock.activeTempPins) {
+                    try {
+                      await deleteTemporaryPin(lock.tuyaDeviceId, pin.pinId);
+                    } catch (tuyaError) {
+                      console.error(`[CRON WARNING] Failed to delete PIN ${pin.pinId} from Tuya:`, tuyaError);
+                    }
+                  }
+                }
+                
+                // Clear the PINs in the DB
+                lock.activeTempPins = [];
+                await lock.save();
+
+                // Non-repudiable audit log for system intervention
+                await AccessLog.create({
+                  lockId: lock._id,
+                  propertyId: lock.propertyId,
+                  action: 'SYSTEM_LOCKOUT',
+                  actorId: lease.userId._id,
+                  actorType: 'System',
+                  performedBy: 'System Cron',
+                  metadata: { reason: "Lease Expired", autoRevokedPins: true }
+                });
+              } catch (lockError) {
+                console.error(`[CRON ERROR] Smart Lock Revocation Failed for Lease ${lease._id}:`, lockError);
+              }
+            }
           }
 
           await lease.save();

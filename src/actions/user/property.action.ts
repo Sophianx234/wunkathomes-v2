@@ -8,6 +8,7 @@ import mongoose from "mongoose";
 import { connectToDatabase } from "@/config/DbConnect";
 import Property from "@/models/property";
 import Listing from "@/models/listing";
+import SmartLock from "@/models/smartlock";
 import { deleteFromCloudinary, uploadToCloudinary } from "@/lib/cloudinary"; 
 import { getSession } from "@/lib/session";
 import { COMMON_AMENITIES } from "@/lib/constants";
@@ -30,10 +31,11 @@ const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/web
 const createPropertySchema = z.object({
   title: z.string().trim().min(5, "Title is too short").max(100).regex(/^[^<>]+$/, "Invalid characters detected"),
   listingType: z.enum(["For_Rent", "For_Sale"]),
+  roomType: z.enum(["Furnished", "Empty"]).optional().default("Empty"),
   status: z.enum(["Available", "Pending", "Rented", "Sold"]).default("Available"),
   price: z.coerce.number().positive("Price must be greater than 0"),
   description: z.string().trim().min(20, "Description too short").max(5000),
-  leaseTerm: z.string().trim().max(50).optional().nullable(),
+
   
   bedrooms: z.coerce.number().min(0).max(50).default(0),
   bathrooms: z.coerce.number().min(0).max(50).default(0),
@@ -51,6 +53,7 @@ const createPropertySchema = z.object({
   landmarks: z.array(z.string().trim().max(100)).max(20).optional(),
   
   hasSmartLock: z.boolean().default(false),
+  smartLockId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid Lock ID").optional().nullable().or(z.literal('')),
   accessInstructions: z.string().trim().max(1000).optional().nullable(),
 
   mediaUrls: z.array(z.string().url("Invalid image URL"))
@@ -117,7 +120,7 @@ export async function createPropertyAction(prevState: ActionState, formData: For
       propertyType: formData.get("propertyType"),
       description: formData.get("description"),
       price: formData.get("price"),
-      leaseTerm: formData.get("leaseTerm"),
+      roomType: formData.get("roomType"),
       status: formData.get("status") || "Available",
       bedrooms: formData.get("bedrooms"),
       bathrooms: formData.get("bathrooms"),
@@ -130,6 +133,7 @@ export async function createPropertyAction(prevState: ActionState, formData: For
       amenities: formData.getAll("amenities"),
       landmarks: landmarksStr ? landmarksStr.split(",").map(item => item.trim()).filter(Boolean) : [],
       hasSmartLock: formData.get("hasSmartLock") === "on" || formData.get("hasSmartLock") === "true",
+      smartLockId: formData.get("smartLockId"),
       accessInstructions: formData.get("accessInstructions"),
       
       // 1. THIS IS THE KEY CHANGE: Grab the URLs instead of Files
@@ -151,20 +155,34 @@ export async function createPropertyAction(prevState: ActionState, formData: For
         generalAmenities: validData.amenities,
       }], { session: dbSession });
 
-      await Listing.create([{
+      const newListing = await Listing.create([{
         propertyId: newProperty[0]._id,
         listingType: validData.listingType,
+        roomType: validData.roomType,
         status: validData.status,
         price: validData.price,
         title: validData.title,
         description: validData.description,
         features: { bedrooms: validData.bedrooms, bathrooms: validData.bathrooms, sizeSqm: validData.sizeSqm },
-        terms: { leaseTerm: validData.leaseTerm || undefined },
+        terms: { },
         smartLock: { hasSmartLock: validData.hasSmartLock, accessInstructions: validData.accessInstructions },
         
         // 2. PASS THE URLS DIRECTLY TO MONGO
         images: validData.mediaUrls, 
       }], { session: dbSession });
+
+      // 3. IF SMART LOCK ID WAS PROVIDED, ASSIGN IT
+      if (validData.hasSmartLock && validData.smartLockId) {
+        await SmartLock.findByIdAndUpdate(
+          validData.smartLockId,
+          { 
+            propertyId: newProperty[0]._id,
+            listingId: newListing[0]._id,
+            status: 'online'
+          },
+          { session: dbSession }
+        );
+      }
     });
     await dbSession.endSession();
 
@@ -212,7 +230,7 @@ export async function editPropertyAction(prevState: ActionState, formData: FormD
       propertyType: formData.get("propertyType"),
       description: formData.get("description"),
       price: formData.get("price"),
-      leaseTerm: formData.get("leaseTerm"),
+      roomType: formData.get("roomType"),
       status: formData.get("status") || "Available",
       bedrooms: formData.get("bedrooms"),
       bathrooms: formData.get("bathrooms"),
@@ -225,6 +243,8 @@ export async function editPropertyAction(prevState: ActionState, formData: FormD
       amenities: formData.getAll("amenities"),
       landmarks: landmarksStr ? landmarksStr.split(",").map(item => item.trim()).filter(Boolean) : [],
       hasSmartLock: formData.get("hasSmartLock") === "on" || formData.get("hasSmartLock") === "true",
+      smartLockId: formData.get("smartLockId"),
+      accessInstructions: formData.get("accessInstructions"),
       
       // Look for the lightweight strings, not files
       newMediaUrls: formData.getAll("newMediaUrls"), 
@@ -257,15 +277,37 @@ export async function editPropertyAction(prevState: ActionState, formData: FormD
 
       await Listing.findByIdAndUpdate(validData.listingId, {
         listingType: validData.listingType,
+        roomType: validData.roomType,
         status: validData.status,
         price: validData.price,
         title: validData.title,
         description: validData.description,
         features: { bedrooms: validData.bedrooms, bathrooms: validData.bathrooms, sizeSqm: validData.sizeSqm },
-        terms: { leaseTerm: validData.leaseTerm || undefined },
+        terms: { },
         smartLock: { hasSmartLock: validData.hasSmartLock, accessInstructions: validData.accessInstructions },
         images: finalImageUrls, // <-- Directly save the text arrays
       }, { session: dbSession });
+      
+      // Handle Smart Lock reassignment securely
+      // 1. Unassign ANY lock currently pointing to this property to guarantee a clean slate
+      await SmartLock.updateMany(
+        { propertyId: targetPropertyId },
+        { propertyId: null, listingId: null, status: 'unassigned' },
+        { session: dbSession }
+      );
+      
+      // 2. If the user explicitly provided a new valid lock ID, assign it
+      if (validData.hasSmartLock && validData.smartLockId) {
+        await SmartLock.findByIdAndUpdate(
+          validData.smartLockId,
+          { 
+            propertyId: targetPropertyId,
+            listingId: validData.listingId,
+            status: 'online'
+          },
+          { session: dbSession }
+        );
+      }
     });
     await dbSession.endSession();
 
@@ -320,7 +362,16 @@ export async function deletePropertyAction(rawListingId: string) {
     const dbSession = await mongoose.startSession();
     await dbSession.withTransaction(async () => {
       await Listing.findByIdAndDelete(listingId, { session: dbSession });
-      if (propertyId) await Property.findByIdAndDelete(propertyId, { session: dbSession });
+      if (propertyId) {
+        await Property.findByIdAndDelete(propertyId, { session: dbSession });
+        
+        // Unassign any smart lock connected to this property so it returns to the pool
+        await SmartLock.updateMany(
+          { propertyId: propertyId },
+          { propertyId: null, listingId: null, status: 'unassigned' },
+          { session: dbSession }
+        );
+      }
     });
     await dbSession.endSession();
 

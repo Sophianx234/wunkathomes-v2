@@ -38,7 +38,7 @@ async function DataLoader({ page }: { page: number }) {
     .populate({ 
       path: "userId", 
       model: User,
-      select: "name email profilePicture phone"
+      select: "name email profilePicture phone accountStatus kycStatus"
     })
     .populate({
       path: "listingId",
@@ -67,11 +67,14 @@ async function DataLoader({ page }: { page: number }) {
       email: ticket.userId?.email || "",
       phone: ticket.userId?.phone || "N/A",
       profilePicture: ticket.userId?.profilePicture || "/default-avatar.png",
+      accountStatus: ticket.userId?.accountStatus || "Unknown",
+      kycStatus: ticket.userId?.kycStatus || "Pending",
     },
     listing: {
       title: ticket.listingId?.title || "Unknown Property",
       slug: ticket.listingId?.slug || "",
       image: ticket.listingId?.images?.[0] || "/placeholder.jpg",
+      propertyType: ticket.listingId?.propertyId?.propertyType || "Unknown",
       location: ticket.listingId?.propertyId?.location 
         ? `${ticket.listingId.propertyId.location.area}, ${ticket.listingId.propertyId.location.region}`
         : "Unknown Location",

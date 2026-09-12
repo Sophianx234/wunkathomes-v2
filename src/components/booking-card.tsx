@@ -11,8 +11,8 @@ import {
   Clock01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { formatLeaseTerm } from "@/lib/helpers";
-import { createTourAction, TourActionState } from "@/actions/user/tour.action";
+
+import { createTourAction, rescheduleTourAction, TourActionState } from "@/actions/user/tour.action";
 import { toast } from "sonner";
 import { PhoneInput } from "@/components/phone-input";
 
@@ -27,47 +27,50 @@ type SchedulingStep = "IDLE" | "DATE" | "PHONE" | "SUCCESS";
 
 const initialState: TourActionState = { success: false, message: "" };
 
-export default function BookingCard({ listing, isRent, hasBookedTour, bookedTourDate }: BookingCardProps) {
-  const [state, formAction, isPending] = useActionState(
-    createTourAction,
-    initialState,
-  );
+import { Calendar } from "@/components/ui/calendar";
+
+export default function BookingCard({ listing, isRent, hasBookedTour, bookedTourDate, availableDays = [1, 2, 3, 4, 5], tourPrice = 50 }: BookingCardProps & { availableDays?: number[], tourPrice?: number }) {
+  const [state, formAction, isPending] = useActionState(createTourAction, initialState);
+  const [rescheduleState, rescheduleFormAction, isReschedulePending] = useActionState(rescheduleTourAction, initialState);
 
   const [step, setStep] = useState<SchedulingStep>(hasBookedTour ? "SUCCESS" : "IDLE");
-  const [selectedDate, setSelectedDate] = useState("");
+  const [isRescheduling, setIsRescheduling] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedTime, setSelectedTime] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [countryCode, setCountryCode] = useState("+233");
 
   // Lock navigation if a tour is already booked
   const handleNext = (nextStep: SchedulingStep) => {
-    if (hasBookedTour) return;
+    if (hasBookedTour && !isRescheduling) return;
     setStep(nextStep);
   };
   
   const handleBack = (prevStep: SchedulingStep) => {
-    if (hasBookedTour) return;
+    if (hasBookedTour && !isRescheduling) return;
     setStep(prevStep);
   };
 
   const resetFlow = () => {
-    if (hasBookedTour) return;
+    if (hasBookedTour && !isRescheduling) return;
     setStep("IDLE");
-    setSelectedDate("");
+    setSelectedDate(undefined);
     setSelectedTime("");
     setPhoneNumber("");
   };
 
   useEffect(() => {
-    if (state.success) {
-      toast.success(state.message);
+    const activeState = isRescheduling ? rescheduleState : state;
+    if (activeState.success) {
+      toast.success(activeState.message);
       setStep("SUCCESS");
-    } else if (state.error) {
-      toast.error(state.error);
+      setIsRescheduling(false);
+    } else if (activeState.error) {
+      toast.error(activeState.error);
     }
-  }, [state]);
+  }, [state, rescheduleState]);
 
-  const displayDate = bookedTourDate || selectedDate;
+  const displayDate = bookedTourDate || (selectedDate ? selectedDate.toLocaleDateString() : "");
 
   const isSale = listing.listingType === "For_Sale";
   const isShortLet = listing.listingType === "Short_Let";
@@ -87,12 +90,12 @@ export default function BookingCard({ listing, isRent, hasBookedTour, bookedTour
   }
 
   return (
-    <div className="lg:col-span-4 lg:-translate-y-8 w-full lg:w-[300px] lg:ml-auto relative">
+    <div className="lg:col-span-4 lg:-translate-y-8 w-full lg:w-[350px] lg:ml-auto relative">
       
       {/* Unified Responsive Container */}
       <div className="
         fixed bottom-0 left-0 right-0 z-50 bg-white border-t-2 border-black p-4 rounded-t-2xl shadow-[0_-10px_40px_rgba(0,0,0,0.15)] transition-all duration-300 box-border w-full max-w-[100vw]
-        lg:sticky lg:top-32 lg:min-h-[460px] lg:p-8 lg:border-2 lg:border-black lg:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] lg:flex lg:flex-col lg:rounded-lg lg:bottom-auto lg:left-auto lg:right-auto lg:z-auto lg:max-w-none
+        lg:sticky lg:top-32 lg:min-h-[460px] lg:p-6 lg:border-2 lg:border-black lg:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] lg:flex lg:flex-col lg:rounded-lg lg:bottom-auto lg:left-auto lg:right-auto lg:z-auto lg:max-w-none
       ">
         
         {/* === Mobile Only: Header / Condensed View === */}
@@ -103,8 +106,7 @@ export default function BookingCard({ listing, isRent, hasBookedTour, bookedTour
                 <div className="text-xl font-black truncate">
                   ${listing.price?.toLocaleString()}
                   <span className="text-[10px] font-medium text-zinc-500">
-                    {" "}
-                    {formatLeaseTerm(listing.terms?.leaseTerm)}
+                    {listing.listingType === "For_Rent" ? (listing.roomType === "Furnished" ? " /day" : " /month") : ""}
                   </span>
                 </div>
                 <div className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 truncate">
@@ -114,7 +116,7 @@ export default function BookingCard({ listing, isRent, hasBookedTour, bookedTour
               <div className="flex gap-2 shrink-0">
                 <button
                   onClick={() => handleNext("DATE")}
-                  disabled={hasBookedTour}
+                  disabled={hasBookedTour && !isRescheduling}
                   className="p-3 border-2 border-black rounded-lg hover:bg-zinc-50/50 transition-colors shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <span className="scale-90 flex items-center">
@@ -153,11 +155,10 @@ export default function BookingCard({ listing, isRent, hasBookedTour, bookedTour
             {isRent ? "Lease for" : "Purchase Price"}
           </span>
           <div className="text-4xl font-black tracking-tight break-words">
-            ${listing.price?.toLocaleString()}
-            {listing.terms?.leaseTerm && (
+            GHS {listing.price?.toLocaleString()}
+            {listing.listingType === "For_Rent" && (
               <span className="text-lg text-zinc-500 font-medium tracking-normal">
-                {" "}
-                {formatLeaseTerm(listing.terms.leaseTerm)}
+                {listing.roomType === "Furnished" ? " /day" : " /month"}
               </span>
             )}
           </div>
@@ -181,7 +182,7 @@ export default function BookingCard({ listing, isRent, hasBookedTour, bookedTour
             <span className="text-sm font-medium text-zinc-600">
               Agent Fees
             </span>
-            <span className="text-sm font-bold text-green-600">$0</span>
+            <span className="text-sm font-bold text-green-600">GHS 0</span>
           </div>
         </div>
 
@@ -212,11 +213,11 @@ export default function BookingCard({ listing, isRent, hasBookedTour, bookedTour
                 <div className="flex-grow border-t border-zinc-200/60"></div>
               </div>
 
-              <button
-                onClick={() => handleNext("DATE")}
-                disabled={hasBookedTour}
-                className="w-full box-border py-4 bg-white text-black font-black uppercase tracking-widest text-xs border-2 border-black rounded-lg hover:bg-zinc-50/50 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
+                <button
+                  onClick={() => handleNext("DATE")}
+                  disabled={hasBookedTour && !isRescheduling}
+                  className="w-full box-border py-4 bg-white text-black font-black uppercase tracking-widest text-xs border-2 border-black rounded-lg hover:bg-zinc-50/50 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
                 <HugeiconsIcon icon={Calendar01Icon} size={16} /> Schedule a
                 Tour
               </button>
@@ -236,18 +237,19 @@ export default function BookingCard({ listing, isRent, hasBookedTour, bookedTour
                 <label className="text-[10px] lg:text-xs font-bold uppercase tracking-widest text-black">
                   Select a Date
                 </label>
-                <div className="relative w-full min-w-0 max-w-full box-border">
-                  <span className="absolute left-3 lg:left-4 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none scale-90 lg:scale-100 flex items-center">
-                    <HugeiconsIcon icon={Calendar01Icon} size={16} />
-                  </span>
-                  <input
-                    type="date"
-                    value={selectedDate}
-                    onChange={(e) => setSelectedDate(e.target.value)}
-                    className="block w-full min-w-0 max-w-full box-border py-2.5 lg:py-3.5 pl-9 lg:pl-10 pr-3 lg:pr-4 border-2 border-black rounded-lg text-xs lg:text-sm font-bold focus:outline-none focus:ring-2 focus:ring-black/20 text-black bg-white m-0 appearance-none"
-                    min={new Date().toISOString().split("T")[0]}
-                  />
-                </div>
+                <div className="w-full box-border border-2 border-black rounded-lg bg-white overflow-hidden flex justify-center items-center p-1 md:p-2 [&>div]:scale-[0.85] [&>div]:origin-top sm:[&>div]:scale-100">
+                    <Calendar
+                      mode="single"
+                      selected={selectedDate}
+                      onSelect={setSelectedDate}
+                      disabled={(date) => {
+                        const isPast = date < new Date(new Date().setHours(0, 0, 0, 0));
+                        const day = date.getDay();
+                        return isPast || !availableDays.includes(day);
+                      }}
+                      className="rounded-md border-0 pointer-events-auto"
+                    />
+                  </div>
               </div>
 
               <div className="flex flex-col gap-1 w-full min-w-0 max-w-full box-border">
@@ -278,17 +280,21 @@ export default function BookingCard({ listing, isRent, hasBookedTour, bookedTour
           )}
 
           {step === "PHONE" && (
-            <form
-              action={formAction}
-              className="flex flex-col w-full max-w-full box-border gap-2 animate-in fade-in slide-in-from-bottom-2 duration-300"
-            >
-              <button
-                type="button"
-                onClick={() => handleBack("DATE")}
-                className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold flex items-center gap-1 mb-2 hover:text-black w-fit"
-              >
-                <HugeiconsIcon icon={ArrowLeft01Icon} size={12} /> Back
-              </button>
+            <form action={isRescheduling ? rescheduleFormAction : formAction} className="flex flex-col w-full max-w-full box-border animate-in fade-in slide-in-from-bottom-2 duration-300">
+              <div className="flex items-center gap-2 mb-4 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => handleBack("DATE")}
+                  className="p-1 hover:bg-zinc-100 rounded transition-colors text-black"
+                >
+                  <HugeiconsIcon icon={ArrowLeft01Icon} size={16} />
+                </button>
+                <h3 className="font-black uppercase tracking-widest text-xs lg:text-sm text-black m-0">Contact Details</h3>
+              </div>
+
+              <p className="text-[10px] lg:text-xs text-zinc-500 mb-6 font-medium leading-relaxed">
+                We'll text you a reminder before the tour.
+              </p>
 
               <div className="flex flex-col gap-1 w-full max-w-full box-border">
                 <label className="text-[10px] lg:text-xs font-bold uppercase tracking-widest text-black mb-1">
@@ -296,7 +302,15 @@ export default function BookingCard({ listing, isRent, hasBookedTour, bookedTour
                 </label>
                 <div className="relative w-full max-w-full box-border">
                   <input type="hidden" name="listingId" value={listing.id} />
-                  <input type="hidden" name="scheduledDate" value={selectedDate} />
+                  <input 
+                    type="hidden" 
+                    name="scheduledDate" 
+                    value={
+                      selectedDate 
+                        ? `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}` 
+                        : ""
+                    } 
+                  />
                   <input type="hidden" name="scheduledTime" value={selectedTime} />
                   
                   {/* Combine the country code with raw digits for the backend */}
@@ -306,25 +320,23 @@ export default function BookingCard({ listing, isRent, hasBookedTour, bookedTour
                     id="phone"
                     name="rawPhoneNumber"
                     value={phoneNumber}
-                    onChange={setPhoneNumber}
-                    countryCode={countryCode}
-                    onCountryCodeChange={setCountryCode}
-                    className="block w-full max-w-full box-border py-3 lg:py-4 border-2 border-black rounded-lg text-xs lg:text-sm font-bold focus:outline-none focus:ring-2 focus:ring-black/20 text-black placeholder:text-zinc-300 m-0"
+                    onChange={(val) => setPhoneNumber(val)}
+                    onCountryCodeChange={(code) => setCountryCode(code)}
                   />
                 </div>
               </div>
 
               <button
                 type="submit"
-                disabled={isPending || phoneNumber.length < 9}
+                disabled={isPending || isReschedulePending || phoneNumber.length < 9}
                 className="block w-full max-w-full box-border py-3 lg:py-4 flex items-center justify-center bg-black text-white font-black uppercase tracking-widest text-[10px] lg:text-xs rounded-lg hover:bg-zinc-800 transition-colors mt-2 disabled:opacity-30 disabled:cursor-not-allowed m-0"
               >
-                {isPending && (
+                {(isPending || isReschedulePending) && (
                   <span className="scale-90 flex items-center mr-1.5 lg:mr-2">
                      <HugeiconsIcon icon={Loading03Icon} size={16} className="animate-spin" />
                   </span>
                 )}
-                {isPending ? "Confirming..." : "Confirm Tour"}
+                {isPending || isReschedulePending ? "Confirming..." : "Confirm Tour"}
               </button>
             </form>
           )}
@@ -356,13 +368,34 @@ export default function BookingCard({ listing, isRent, hasBookedTour, bookedTour
                 )}
                 .
               </p>
+
+              <div className="bg-zinc-50 border border-zinc-200 rounded-lg p-3 w-full mb-6">
+                <p className="text-[10px] lg:text-xs text-zinc-600 font-medium leading-relaxed">
+                  Please note: A viewing fee of <span className="font-bold text-black">{tourPrice || 50} GHS</span> is payable to the tour guide after the viewing.
+                </p>
+              </div>
+
+              <button
+                onClick={() => {
+                  setIsRescheduling(true);
+                  setStep("DATE");
+                }}
+                className="w-full box-border py-3 bg-white text-black font-bold uppercase tracking-widest text-[10px] lg:text-xs border-2 border-black rounded-lg hover:bg-zinc-50 transition-colors mb-2"
+              >
+                Reschedule Tour
+              </button>
+              <Link href={`/checkout/${listing.slug}?type=deposit`} className="w-full">
+                  <button className="px-5 py-3 bg-black text-white font-black uppercase tracking-widest text-[10px] rounded-lg hover:bg-black/90 transition-colors whitespace-nowrap w-full">
+                    {ctaText}
+                  </button>
+                </Link>
               
               {!hasBookedTour && (
                 <button
                   onClick={resetFlow}
-                  className="block w-full max-w-full box-border py-2.5 lg:py-3 bg-white text-black font-black uppercase tracking-widest text-[10px] lg:text-xs border-2 border-black rounded-lg hover:bg-zinc-50/50 transition-colors m-0"
+                  className="block w-full max-w-full box-border py-2.5 lg:py-3 bg-white text-zinc-500 font-black uppercase tracking-widest text-[10px] lg:text-xs hover:text-black transition-colors m-0"
                 >
-                  Done
+                  Close
                 </button>
               )}
             </div>
@@ -372,3 +405,7 @@ export default function BookingCard({ listing, isRent, hasBookedTour, bookedTour
     </div>
   );
 }
+
+
+
+

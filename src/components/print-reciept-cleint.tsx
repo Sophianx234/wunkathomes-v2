@@ -93,7 +93,7 @@ export default function PrintReceipt({
             </div>
             
             <div className="text-right">
-              <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border ${transaction.status === 'Success' ? 'bg-green-50 border-green-200 text-green-700' : 'bg-amber-50 border-amber-200 text-amber-700'}`}>
+              <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border ${transaction.status === 'Success' ? 'bg-green-50 border-green-200 text-green-700' : 'bg-zinc-50 border-zinc-200 text-zinc-700'}`}>
                 <HugeiconsIcon
                   icon={transaction.status === "Success" ? TickDouble02Icon : UniversityIcon}
                   size={14}

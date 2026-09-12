@@ -49,7 +49,7 @@ export default function SignLeaseClient({ data }: SignLeaseClientProps) {
 
       if (result.success) {
         toast.success("Tenancy Agreement successfully executed.");
-        router.push("/user/leases");
+        router.push("/user/dashboard");
       } else {
         toast.error(result.error || "Failed to execute document.");
         setIsSigning(false);

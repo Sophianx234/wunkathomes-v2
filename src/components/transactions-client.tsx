@@ -2,6 +2,8 @@
 
 import React, { useState, useMemo, useTransition } from "react";
 import Link from "next/link";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { MoreHorizontalIcon, BedSingle01Icon, Bathtub01Icon, Maximize01Icon } from "@hugeicons/core-free-icons";
 import {
   Search01Icon,
   FilterIcon,
@@ -15,14 +17,17 @@ import {
   Download01Icon,
   Alert01Icon,
   Loading03Icon,
+  ArrowLeft01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { reportTransactionIssueAction } from "@/actions/user/maintenance.action";
 import {
   Table,
   TableBody,
@@ -106,12 +111,12 @@ const getStatusBadge = (status: string) => {
     case "Success":
       return "text-emerald-700 ring-1 ring-emerald-200/50 bg-emerald-50/50";
     case "Pending":
-      return "text-amber-700 ring-1 ring-amber-300/50 bg-amber-50/50";
+      return "text-zinc-700 ring-1 ring-zinc-300/50 bg-zinc-50/50";
     case "Failed":
     case "Abandoned":
       return "text-zinc-500 ring-1 ring-zinc-200/60 bg-zinc-50/50 line-through decoration-zinc-300";
     case "Refunded":
-      return "text-rose-700 ring-1 ring-rose-200/50 bg-rose-50/50";
+      return "text-zinc-700 ring-1 ring-zinc-200/50 bg-zinc-50/50";
     default:
       return "text-zinc-600 ring-1 ring-zinc-200/60 bg-zinc-50/50";
   }
@@ -156,6 +161,7 @@ const getChannelIcon = (channel: string) => {
 
 // --- MAIN CLIENT COMPONENT ---
 export default function TransactionsClient({ data }: TransactionsClientProps) {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<"all" | "success" | "pending">(
     "all",
   );
@@ -194,12 +200,20 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
 
   const handleReportIssue = () => {
     if (!selectedTx) return;
+    setIsReportingIssue(true);
     startTransition(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      toast.success(
-        `Support ticket created for transaction #${selectedTx.reference.slice(-6)}.`,
-      );
-      setIsReportingIssue(false);
+      try {
+        const result = await reportTransactionIssueAction(selectedTx.reference);
+        if (result.success) {
+          toast.success(result.message);
+        } else {
+          toast.error(result.error || "Failed to create support ticket.");
+        }
+      } catch (err) {
+        toast.error("An unexpected error occurred.");
+      } finally {
+        setIsReportingIssue(false);
+      }
     });
   };
 
@@ -220,7 +234,14 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
       <div className="max-w-[1400px] mx-auto space-y-4 md:space-y-6 pt-6 md:pt-16 w-full box-border">
         {/* PAGE HEADER & TABS */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 md:gap-4 pb-2 border-b border-zinc-200/60 w-full box-border">
-          <div>
+          <div className="space-y-2">
+            <button
+              onClick={() => router.back()}
+              className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-zinc-500 hover:text-zinc-900 transition-colors w-fit"
+            >
+              <HugeiconsIcon icon={ArrowLeft01Icon} size={16} />
+              Back
+            </button>
             <h1 className="text-lg md:text-3xl font-semibold tracking-tight text-zinc-900 truncate">
               Payment History
             </h1>
@@ -231,7 +252,7 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
             onValueChange={(val) => setActiveTab(val as any)}
             className="w-full md:w-auto"
           >
-            <TabsList className="h-8 md:h-9 bg-zinc-100/50 border border-zinc-200/60 p-0.5 md:p-0.5 rounded-lg w-full flex overflow-x-auto scrollbar-hide">
+            <TabsList className="h-8 md:h-9 bg-zinc-100/50 border border-zinc-200/60 p-0.5 md:p-0.5 rounded-lg w-full flex overflow-x-auto hide-scrollbar">
               <TabsTrigger
                 value="all"
                 className="text-[10px] md:text-[13px] font-medium data-[state=active]:bg-white rounded-md px-2 md:px-4 shrink-0"
@@ -345,8 +366,8 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
         </section>
 
         {/* EDGE-TO-EDGE FINANCIAL TABLE */}
-        <div className="bg-white border border-zinc-200/60 rounded-lg md:rounded-lg shadow-[0_1px_4px_rgba(0,0,0,0.01)] w-full overflow-hidden box-border">
-          <div className="w-full overflow-x-auto box-border scrollbar-hide">
+        <div className="bg-white border border-zinc-200/60 rounded-lg overflow-hidden w-full box-border">
+          <div className="w-full overflow-x-auto box-border hide-scrollbar">
             <Table className="w-full min-w-full">
               <TableHeader className="bg-zinc-50/30">
                 <TableRow className="border-zinc-200/60 hover:bg-transparent">
@@ -368,14 +389,14 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
                   <TableHead className="font-medium text-zinc-500 text-[8px] md:text-xs h-8 md:h-10 w-[80px] md:w-[140px] text-right pr-3 md:pr-6 whitespace-nowrap">
                     Status
                   </TableHead>
+                  <TableHead className="w-[40px] md:w-[50px]"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredData.map((tx) => (
                   <TableRow
                     key={tx.id}
-                    className="group border-zinc-200/60 hover:bg-zinc-50/50 transition-colors cursor-pointer"
-                    onClick={() => setSelectedTx(tx)}
+                    className="group border-zinc-200/60 hover:bg-zinc-50/50 transition-colors"
                   >
                     <TableCell className="py-2 md:py-3 align-middle px-2 md:px-4">
                       <div className="flex flex-col min-w-0">
@@ -432,20 +453,35 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
 
                     <TableCell className="py-2 md:py-3 align-middle px-2 md:px-4">
                       <span className="text-[10px] md:text-[14px] font-semibold text-zinc-900 font-tabular-nums tracking-tight whitespace-nowrap">
-                        {formatCurrency(tx.amount, tx.currency).replace(
-                          "GH",
-                          "",
-                        )}
+                        {formatCurrency(tx.amount, tx.currency).replace("GH", "")}
                       </span>
                     </TableCell>
 
                     <TableCell className="py-2 md:py-3 align-middle text-right pr-3 md:pr-6">
                       <Badge
                         variant="outline"
-                        className={`px-1.5 md:px-2 py-0 border-0 rounded-full text-[7px] md:text-[10px] uppercase tracking-wider font-bold h-4 md:h-5 whitespace-nowrap ${getStatusBadge(tx.status)}`}
+                        className={`px-1.5 md:px-2 py-0 border-0 rounded text-[7px] md:text-[9px] uppercase tracking-wider font-bold h-4 md:h-5 ${getStatusBadge(tx.status)}`}
                       >
                         {tx.status}
                       </Badge>
+                    </TableCell>
+
+                    {/* Actions Column */}
+                    <TableCell className="py-2 md:py-3 align-middle text-right px-2 md:px-4">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-6 w-6 md:h-8 md:w-8 rounded-md text-zinc-500 hover:text-zinc-900 m-0 p-0">
+                            <span className="scale-75 md:scale-100 flex items-center">
+                              <HugeiconsIcon icon={MoreHorizontalIcon} size={16} />
+                            </span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => setSelectedTx(tx)}>
+                            View Details
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -453,10 +489,10 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
                 {filteredData.length === 0 && (
                   <TableRow>
                     <TableCell
-                      colSpan={6}
-                      className="h-20 md:h-32 text-center text-zinc-500 text-[10px] md:text-sm"
+                      colSpan={7}
+                      className="h-24 md:h-32 text-center text-zinc-500 text-[10px] md:text-sm"
                     >
-                      You don't have any transactions matching this criteria.
+                      No transactions match your current filters.
                     </TableCell>
                   </TableRow>
                 )}
@@ -471,99 +507,107 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
         open={!!selectedTx && !isViewingReceipt}
         onOpenChange={(open) => !open && setSelectedTx(null)}
       >
-        <DialogContent className="w-full sm:max-w-xl md:max-w-2xl p-0 bg-[#FAFAFA] border border-slate-200/80 flex flex-col font-sans shadow-sm rounded-lg max-h-[85vh] overflow-hidden">
+        <DialogContent className="w-full sm:max-w-xl md:max-w-4xl p-0 bg-white border border-slate-200/80 flex flex-col md:flex-row font-sans rounded-lg max-h-[85vh] overflow-hidden">
           {selectedTx && (
             <>
-              {/* Header Context Section */}
-              <div className="px-4 md:px-6 py-6 md:py-8 border-b border-zinc-200/60 bg-zinc-50/30 w-full box-border">
-                <div className="flex items-center justify-between mb-3 md:mb-5">
-                  <Badge
-                    variant="outline"
-                    className={`px-1.5 md:px-2 py-0 border-0 rounded text-[7px] md:text-[9px] uppercase tracking-wider font-bold h-4 md:h-5 ${getStatusBadge(selectedTx.status)}`}
-                  >
-                    {selectedTx.status}
-                  </Badge>
+              {/* Left Column: Financials & Context */}
+              <div className="w-full md:w-[340px] shrink-0 bg-zinc-50/50 flex flex-col border-b md:border-b-0 md:border-r border-zinc-200/60">
+                <div className="p-6 md:p-8 flex-1 flex flex-col">
+                  <div className="flex flex-wrap items-center gap-2 mb-8">
+                    <Badge
+                      variant="outline"
+                      className={`px-2 py-0 border-0 rounded text-[9px] uppercase tracking-wider font-bold h-5 ${getStatusBadge(selectedTx.status)}`}
+                    >
+                      {selectedTx.status}
+                    </Badge>
+                    <span
+                      className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${getPurposeBadge(selectedTx.paymentPurpose)}`}
+                    >
+                      {selectedTx.paymentPurpose.replace(/_/g, " ")}
+                    </span>
+                  </div>
+
+                  <div className="mb-10">
+                    <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-2">Total Amount</p>
+                    <h2 className="text-4xl font-semibold tracking-tighter text-zinc-900 font-tabular-nums leading-none">
+                      {formatCurrency(
+                        selectedTx.amount,
+                        selectedTx.currency,
+                      ).replace("GH", "")}
+                    </h2>
+                  </div>
+
+                  <div className="mt-auto pt-8 border-t border-zinc-200/60">
+                    <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-4">Paid By</p>
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-10 w-10 border border-zinc-200/60">
+                        <AvatarImage src={selectedTx.user.profilePicture} />
+                        <AvatarFallback className="bg-white text-zinc-600 font-medium text-xs">
+                          {selectedTx.user.name.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col min-w-0">
+                        <h3 className="text-sm font-semibold tracking-tight text-zinc-900 leading-none truncate">
+                          {selectedTx.user.name}
+                        </h3>
+                        <p className="text-[12px] text-zinc-500 mt-1 leading-none truncate">
+                          {selectedTx.user.email}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                <h2 className="text-2xl md:text-4xl font-semibold tracking-tighter text-zinc-900 font-tabular-nums leading-none truncate">
-                  {formatCurrency(
-                    selectedTx.amount,
-                    selectedTx.currency,
-                  ).replace("GH", "")}
-                </h2>
+                {/* Left Column Bottom Action */}
+                <div className="p-4 border-t border-zinc-200/60 bg-white md:bg-zinc-50/50 mt-auto flex flex-col gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsReportingIssue(true)}
+                    className="h-10 w-full text-[12px] font-medium border-zinc-200/60 hover:bg-white md:hover:bg-white rounded-lg flex items-center justify-center gap-2 text-zinc-700 bg-white md:bg-transparent"
+                  >
+                    <span className="flex items-center shrink-0">
+                      <HugeiconsIcon icon={Alert01Icon} size={14} />
+                    </span>
+                    Report Issue
+                  </Button>
+                  <Button
+                    disabled={selectedTx.status !== "Success"}
+                    onClick={() => setIsViewingReceipt(true)}
+                    className="h-10 w-full text-[12px] font-medium bg-zinc-900 text-white hover:bg-zinc-800 rounded-lg flex items-center justify-center gap-2 disabled:bg-zinc-200 disabled:text-zinc-400"
+                  >
+                    <span className="flex items-center shrink-0">
+                      <HugeiconsIcon icon={Download01Icon} size={14} />
+                    </span>
+                    {selectedTx.status === "Success"
+                      ? "View Official Receipt"
+                      : "Unavailable"}
+                  </Button>
+                </div>
               </div>
 
-              {/* Scrollable Data Body */}
-              <div className="flex-1 overflow-y-auto px-4 md:px-6 py-6 md:py-8 space-y-6 md:space-y-10 w-full box-border">
-                {/* 1. Transaction Audit Block (Definition List) */}
-                <section className="w-full box-border">
-                  <h3 className="text-[9px] md:text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-2 md:mb-4">
-                    Transaction Details
-                  </h3>
-                  <div className="bg-white border border-zinc-200/60 rounded-lg md:rounded-lg overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.01)] w-full box-border">
-                    <dl className="divide-y divide-zinc-100 text-[10px] md:text-[13px] w-full">
-                      <div className="flex justify-between py-2 md:py-3 px-3 md:px-4 w-full">
-                        <dt className="text-zinc-500 font-medium shrink-0">
-                          Reference ID
-                        </dt>
-                        <dd className="text-zinc-900 font-mono tracking-tight text-right font-medium truncate pl-2 max-w-[150px] md:max-w-[250px]">
-                          {selectedTx.reference}
-                        </dd>
-                      </div>
-                      <div className="flex justify-between py-2 md:py-3 px-3 md:px-4 w-full">
-                        <dt className="text-zinc-500 font-medium shrink-0">
-                          Date Initiated
-                        </dt>
-                        <dd className="text-zinc-900 font-tabular-nums text-right font-medium truncate pl-2">
-                          {formatDate(selectedTx.createdAt)}
-                        </dd>
-                      </div>
-                      {selectedTx.paidAt && (
-                        <div className="flex justify-between py-2 md:py-3 px-3 md:px-4 w-full">
-                          <dt className="text-zinc-500 font-medium shrink-0">
-                            Date Cleared
-                          </dt>
-                          <dd className="text-emerald-700 font-tabular-nums text-right font-medium truncate pl-2">
-                            {formatDate(selectedTx.paidAt)}
-                          </dd>
-                        </div>
-                      )}
-                      <div className="flex justify-between py-2 md:py-3 px-3 md:px-4 w-full">
-                        <dt className="text-zinc-500 font-medium shrink-0">
-                          Payment Channel
-                        </dt>
-                        <dd className="text-zinc-900 capitalize text-right flex items-center justify-end gap-1 md:gap-1.5 font-medium truncate pl-2">
-                          <span className="scale-75 md:scale-100 flex items-center">
-                            {getChannelIcon(selectedTx.channel)}
-                          </span>
-                          {selectedTx.channel.replace("_", " ")}
-                        </dd>
-                      </div>
-                    </dl>
-                  </div>
-                </section>
-
-                {/* 2. Associated Asset Context Card */}
-                <section className="w-full box-border">
-                  <div className="flex items-center justify-between mb-2 md:mb-4 w-full">
-                    <h3 className="text-[9px] md:text-[11px] font-bold text-zinc-400 uppercase tracking-widest truncate pr-2">
-                      Associated Asset
+              {/* Right Column: Scrollable Data Body */}
+              <div className="flex-1 overflow-y-auto bg-white p-6 md:p-8 space-y-8">
+                {/* 1. Property Context Card */}
+                <section>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
+                      Associated Property
                     </h3>
                     <Link
                       href={`/properties/${selectedTx.listing.slug}`}
                       target="_blank"
-                      className="inline-flex items-center gap-1 text-[9px] md:text-[11px] font-medium text-zinc-500 hover:text-zinc-900 tracking-wide transition-colors shrink-0"
+                      className="inline-flex items-center gap-1 text-[11px] font-medium text-zinc-500 hover:text-zinc-900 tracking-wide transition-colors"
                     >
                       View Asset{" "}
-                      <span className="scale-75 md:scale-100 flex items-center">
+                      <span className="flex items-center shrink-0">
                         <HugeiconsIcon icon={LinkSquare01Icon} size={12} />
                       </span>
                     </Link>
                   </div>
 
-                  <div className="rounded-lg md:rounded-lg border border-zinc-200/60 overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.01)] bg-white w-full box-border">
-                    <div className="p-3 md:p-4 flex gap-2 md:gap-4 w-full min-w-0">
-                      <div className="h-10 w-10 md:h-12 md:w-12 shrink-0 bg-zinc-100/50 rounded-md overflow-hidden border border-zinc-200/60 shadow-sm">
+                  <div className="rounded-lg border border-zinc-200/60 overflow-hidden">
+                    <div className="p-4 bg-zinc-50/50 flex gap-4 border-b border-zinc-200/60">
+                      <div className="h-12 w-12 shrink-0 bg-white rounded-md overflow-hidden border border-zinc-200/60">
                         {selectedTx.listing.image ? (
                           <img
                             src={selectedTx.listing.image}
@@ -572,7 +616,7 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
-                            <span className="scale-75 md:scale-100 flex items-center">
+                            <span className="flex items-center shrink-0">
                               <HugeiconsIcon
                                 icon={Building03Icon}
                                 size={16}
@@ -583,44 +627,123 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
                         )}
                       </div>
                       <div className="flex flex-col justify-center min-w-0">
-                        <h4 className="text-[11px] md:text-sm font-semibold tracking-tight text-zinc-900 truncate">
+                        <h4 className="text-sm font-semibold tracking-tight text-zinc-900 truncate">
                           {selectedTx.listing.title}
                         </h4>
-                        <p className="text-[9px] md:text-[12px] text-zinc-500 mt-0.5 truncate">
+                        <p className="text-[12px] text-zinc-500 mt-0.5 truncate">
                           {selectedTx.listing.property?.propertyName ||
-                            selectedTx.listing.property?.location ||
-                            "Location not provided"}
+                            selectedTx.listing.property?.location}
                         </p>
                       </div>
                     </div>
+                    <dl className="grid grid-cols-2 gap-x-4 gap-y-4 p-4 text-[13px] bg-white">
+                      <div>
+                        <dt className="text-zinc-500 mb-1">Pricing</dt>
+                        <dd className="font-medium text-zinc-900 font-tabular-nums">
+                          {formatCurrency(selectedTx.listing.price).replace(
+                            "GH",
+                            "",
+                          )}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-zinc-500 mb-1">Asset Type</dt>
+                        <dd className="font-medium text-zinc-900 capitalize">
+                          {selectedTx.listing.property?.propertyType?.replace(
+                            "_",
+                            " ",
+                          )}
+                        </dd>
+                      </div>
+                      <div className="col-span-2">
+                        <dt className="text-zinc-500 mb-1.5">Configurations</dt>
+                        <dd className="flex items-center gap-4 text-zinc-700 font-medium flex-wrap">
+                          <span className="flex items-center gap-1.5">
+                            <span className="flex items-center shrink-0 text-zinc-400">
+                              <HugeiconsIcon icon={BedSingle01Icon} size={14} />
+                            </span>
+                            {selectedTx.listing.features.bedrooms} Bed
+                          </span>
+                          <span className="flex items-center gap-1.5">
+                            <span className="flex items-center shrink-0 text-zinc-400">
+                              <HugeiconsIcon icon={Bathtub01Icon} size={14} />
+                            </span>
+                            {selectedTx.listing.features.bathrooms} Bath
+                          </span>
+                          {selectedTx.listing.features.sizeSqm > 0 && (
+                            <span className="flex items-center gap-1.5">
+                              <span className="flex items-center shrink-0 text-zinc-400">
+                                <HugeiconsIcon icon={Maximize01Icon} size={14} />
+                              </span>
+                              {selectedTx.listing.features.sizeSqm} sqm
+                            </span>
+                          )}
+                        </dd>
+                      </div>
+                    </dl>
                   </div>
                 </section>
-              </div>
 
-              {/* Fixed Bottom Action Bar */}
-              <div className="p-3 md:p-4 border-t border-zinc-200/60 bg-white grid grid-cols-2 gap-2 md:gap-3 w-full box-border shrink-0">
-                <Button
-                  variant="outline"
-                  onClick={() => setIsReportingIssue(true)}
-                  className="h-8 md:h-10 w-full text-[10px] md:text-[12px] font-medium border-zinc-200/60 hover:bg-zinc-50 text-zinc-700 rounded-md md:rounded-lg shadow-none truncate px-1"
-                >
-                  <span className="scale-75 md:scale-100 flex items-center md:mr-2 shrink-0">
-                    <HugeiconsIcon icon={Alert01Icon} size={14} />
-                  </span>
-                  Report Issue
-                </Button>
-                <Button
-                  disabled={selectedTx.status !== "Success"}
-                  onClick={() => setIsViewingReceipt(true)}
-                  className="h-8 md:h-10 w-full text-[10px] md:text-[12px] font-medium bg-zinc-900 text-white hover:bg-zinc-800 rounded-md md:rounded-lg shadow-none disabled:bg-zinc-200 disabled:text-zinc-400 truncate px-1"
-                >
-                  <span className="scale-75 md:scale-100 flex items-center md:mr-2 shrink-0">
-                    <HugeiconsIcon icon={Download01Icon} size={14} />
-                  </span>
-                  {selectedTx.status === "Success"
-                    ? "View Receipt"
-                    : "Unavailable"}
-                </Button>
+                {/* 2. Audit Details Block */}
+                <section>
+                  <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-4">
+                    Audit Log
+                  </h3>
+                  <div className="bg-white border border-zinc-200/60 rounded-lg overflow-hidden">
+                    <dl className="divide-y divide-zinc-100 text-[13px]">
+                      <div className="flex justify-between items-center py-3 px-4 hover:bg-zinc-50/50 transition-colors">
+                        <dt className="text-zinc-500 font-medium">
+                          Reference ID
+                        </dt>
+                        <dd className="text-zinc-900 font-mono tracking-tight text-right font-medium">
+                          {selectedTx.reference}
+                        </dd>
+                      </div>
+                      <div className="flex justify-between items-center py-3 px-4 hover:bg-zinc-50/50 transition-colors">
+                        <dt className="text-zinc-500 font-medium">
+                          Created At
+                        </dt>
+                        <dd className="text-zinc-900 font-tabular-nums text-right font-medium">
+                          {formatDate(selectedTx.createdAt)}
+                        </dd>
+                      </div>
+                      {selectedTx.paidAt && (
+                        <div className="flex justify-between items-center py-3 px-4 hover:bg-zinc-50/50 transition-colors">
+                          <dt className="text-zinc-500 font-medium">
+                            Cleared At
+                          </dt>
+                          <dd className="text-emerald-700 font-tabular-nums text-right font-medium">
+                            {formatDate(selectedTx.paidAt)}
+                          </dd>
+                        </div>
+                      )}
+                      <div className="flex justify-between items-center py-3 px-4 hover:bg-zinc-50/50 transition-colors">
+                        <dt className="text-zinc-500 font-medium">Channel</dt>
+                        <dd className="text-zinc-900 capitalize text-right flex items-center gap-1.5 font-medium">
+                          <span className="flex items-center shrink-0">
+                            {getChannelIcon(selectedTx.channel)}
+                          </span>
+                          {selectedTx.channel.replace("_", " ")}
+                        </dd>
+                      </div>
+                      {selectedTx.leaseId && (
+                        <div className="flex justify-between items-center py-3 px-4 bg-zinc-50/50 border-t-zinc-200/60">
+                          <dt className="text-zinc-500 font-medium">
+                            Lease Link
+                          </dt>
+                          <dd className="flex items-center gap-1 text-zinc-900 text-right font-medium">
+                            <span className="flex items-center shrink-0 text-zinc-400">
+                              <HugeiconsIcon icon={ArrowUpRight01Icon} size={14} />
+                            </span>
+                            <span className="font-mono tracking-tight text-[12px] uppercase">
+                              {selectedTx.leaseId.slice(-8)}
+                            </span>
+                          </dd>
+                        </div>
+                      )}
+                    </dl>
+                  </div>
+                </section>
               </div>
             </>
           )}
@@ -675,3 +798,4 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
     </div>
   );
 }
+

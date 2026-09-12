@@ -54,8 +54,9 @@ const acceptInviteSchema = z.object({
 
 // --- INVITE TEAM MEMBER ---
 export async function inviteTeamMemberAction(rawEmail: string, rawRole: string) {
+  let session;
   try {
-    const session = await getSession() as SessionPayload;
+    session = await getSession() as SessionPayload;
     // 1. RBAC Check
     if (!session?.userId || session.role !== "Admin") {
       throw new Error("Unauthorized access attempt.");
@@ -102,8 +103,9 @@ export async function inviteTeamMemberAction(rawEmail: string, rawRole: string) 
 
 // --- UPDATE TEAM MEMBER ROLE ---
 export async function updateTeamMemberRole(rawUserId: string, rawNewRole: string) {
+  let session;
   try {
-    const session = await getSession() as SessionPayload;
+    session = await getSession() as SessionPayload;
     if (!session?.userId || session.role !== "Admin") throw new Error("Unauthorized");
 
     const { userId, newRole } = updateRoleSchema.parse({ userId: rawUserId, newRole: rawNewRole });
@@ -142,8 +144,9 @@ export async function updateTeamMemberRole(rawUserId: string, rawNewRole: string
 
 // --- TOGGLE ACCOUNT STATUS ---
 export async function toggleTeamAccountStatus(rawUserId: string, rawCurrentStatus: string) {
+  let session;
   try {
-    const session = await getSession() as SessionPayload;
+    session = await getSession() as SessionPayload;
     if (!session?.userId || session.role !== "Admin") throw new Error("Unauthorized");
 
     const { userId, currentStatus } = toggleStatusSchema.parse({ userId: rawUserId, currentStatus: rawCurrentStatus });
@@ -185,8 +188,9 @@ export async function toggleTeamAccountStatus(rawUserId: string, rawCurrentStatu
 
 // --- CANCEL PENDING INVITATION ---
 export async function cancelInvitation(rawInvitationId: string) {
+  let session;
   try {
-    const session = await getSession() as SessionPayload;
+    session = await getSession() as SessionPayload;
     if (!session?.userId || session.role !== "Admin") throw new Error("Unauthorized");
 
     const { invitationId } = cancelInviteSchema.parse({ invitationId: rawInvitationId });

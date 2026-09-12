@@ -27,6 +27,7 @@ import { notFound } from "next/navigation";
 
 import { connectToDatabase } from "@/config/DbConnect";
 import Review from "@/models/review";
+import { getGlobalSettings } from "@/actions/admin/settings.action";
 
 import BookingCard from "@/components/booking-card";
 import ImageGallery from "@/components/image-gallery";
@@ -34,7 +35,7 @@ import { PropertyMap } from "@/components/property-map-dynamic";
 import SimilarCarousel from "@/components/similar-carousel";
 import ThingsToKnow from "@/components/things-to-know";
 import ReviewForm from "@/components/review-form";
-import { formatLeaseTerm, getNeighborhoodDescription } from "@/lib/helpers";
+import { getNeighborhoodDescription } from "@/lib/helpers";
 import { Toaster } from "@/components/ui/sonner";
 import SavePropertyButton from "@/components/ui/saved-property-button";
 import Listing from "@/models/listing";
@@ -86,9 +87,8 @@ export const mapToIProperty = (
     bathrooms: doc.features?.bathrooms ?? 0,
     sizeSqm: doc.features?.sizeSqm ?? 0,
   },
-  terms: {
-    leaseTerm: doc.terms?.leaseTerm ?? null,
-  },
+  roomType: doc.roomType,
+  terms: { leaseTerm: null },
   smartLock: {
     hasSmartLock: doc.smartLock?.hasSmartLock ?? false,
     accessInstructions: doc.smartLock?.accessInstructions,
@@ -161,6 +161,10 @@ export default async function PropertyDetailsPage({
   const tourCookie = cookieStore.get(`tour_booked_${listing.id}`);
 
   const hasBookedTour = !!tourCookie;
+  
+  const settings = await getGlobalSettings();
+  const availableTourDays = settings.tourAvailableDays;
+  const tourPrice = settings.tourPrice || 50;
   const bookedTourDate = tourCookie ? tourCookie.value : null;
   let isSaved = false;
   
@@ -444,6 +448,8 @@ export default async function PropertyDetailsPage({
           isRent={isRent}
           hasBookedTour={hasBookedTour}
           bookedTourDate={bookedTourDate}
+          availableDays={availableTourDays}
+          tourPrice={tourPrice}
         />
       </section>
 
@@ -463,3 +469,5 @@ export default async function PropertyDetailsPage({
     </main>
   );
 }
+
+

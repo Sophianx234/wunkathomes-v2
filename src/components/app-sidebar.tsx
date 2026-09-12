@@ -30,6 +30,7 @@ import {
   HelpCircleIcon,
   SearchIcon,
   MessageMultiple01Icon,
+  SparklesIcon,
 } from "@hugeicons/core-free-icons";
 
 // --- TYPES ---
@@ -65,17 +66,12 @@ const data = {
       title: "CRM & Leasing",
       items: [
         {
-          title: "Tenant Management",
+          title: "Tenants",
           url: "/admin/manage/tenants",
           icon: <HugeiconsIcon icon={UserGroupIcon} strokeWidth={2} />,
         },
         {
-          title: "Tenant Onboarding",
-          url: "/admin/manage/tenants/onboarding",
-          icon: <HugeiconsIcon icon={File01Icon} strokeWidth={2} />,
-        },
-        {
-          title: "Tour Management",
+          title: "Tours",
           url: "/admin/manage/tours",
           icon: <HugeiconsIcon icon={Calendar01Icon} strokeWidth={2} />,
         },
@@ -85,15 +81,19 @@ const data = {
       title: "Operations",
       items: [
         {
-          title: "Transaction Management",
+          title: "Transactions",
           url: "/admin/manage/transactions",
           icon: <HugeiconsIcon icon={Wallet01Icon} strokeWidth={2} />,
         },
-
         {
           title: "Smartlock & Access",
-          url: "/admin/manage/access-control",
+          url: "/admin/smartlocks",
           icon: <HugeiconsIcon icon={LockIcon} strokeWidth={2} />,
+        },
+        {
+          title: "Cleaning Services",
+          url: "/admin/manage/cleaning",
+          icon: <HugeiconsIcon icon={SparklesIcon} strokeWidth={2} />,
         },
         {
           title: "Maintenance",
@@ -120,7 +120,7 @@ const data = {
       icon: <HugeiconsIcon icon={Settings05Icon} strokeWidth={2} />,
     },
     {
-      title: "Team Management",
+      title: "Team",
       url: "/admin/manage/team",
       icon: <HugeiconsIcon icon={UserGroupIcon} strokeWidth={2} />,
     },

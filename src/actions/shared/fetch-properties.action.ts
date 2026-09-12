@@ -71,9 +71,8 @@ export async function getPublicProperties(
     description: listing.description,
     features: listing.features || {},
     images: listing.images || [],
-    terms: {
-      leaseTerm: listing.terms?.leaseTerm ?? null,
-    },
+    roomType: listing.roomType,
+    terms: { leaseTerm: null },
     property: {
       propertyType: listing.propertyId?.propertyType || "House",
       location: listing.propertyId?.location?.area || "Accra",
@@ -162,9 +161,8 @@ export async function getAdminProperties(
       bathrooms: doc.features?.bathrooms ?? 0,
       sizeSqm: doc.features?.sizeSqm ?? 0,
     },
-    terms: {
-      leaseTerm: doc.terms?.leaseTerm ?? null,
-    },
+    roomType: doc.roomType,
+    terms: { leaseTerm: null },
     smartLock: {
       hasSmartLock: doc.smartLock?.hasSmartLock ?? false,
     },

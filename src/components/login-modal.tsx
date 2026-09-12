@@ -26,8 +26,8 @@ export function LoginModal({ children }: LoginModalProps) {
       </DialogTrigger>
       
       <DialogContent 
-        className="sm:max-w-[425px] p-0 border-0 max-h-[90vh] overflow-y-auto flex flex-col [&::-webkit-scrollbar]:hidden"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        className="sm:max-w-[425px] p-0 border-0 max-h-[90vh] overflow-y-auto flex flex-col hide-scrollbar"
+
       >
         <div className="p-8 bg-background flex-1">
           <DialogHeader className="text-center flex flex-col items-center mb-6 shrink-0">
