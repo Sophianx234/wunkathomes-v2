@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 import { DocumentViewer } from "@/components/ui/document-viewer";
+import { TenancyDocument } from "./lease-document viewer";
 import { verifyAndOnboardTenantAction, updateTenantDetailsAction } from "@/actions/admin/tenant.action";
 import type { TenantRecord } from "@/components/tenant-directory-client";
 import Image from "next/image";
@@ -91,6 +92,15 @@ export default function TenantEditClient({ tenant }: { tenant: TenantRecord }) {
   const hasCardScan = (tenant.user.ghanaCardUrl && !removeExistingCard) || !!editCardScan;
   const hasGhanaCardNumber = editGhanaCard || tenant.user.ghanaCardNumber;
   const needsDocs = tenant.user.kycStatus !== "Verified" && (!hasFacePhoto || !hasCardScan || !hasGhanaCardNumber || hasGhanaCardNumber === "Not Provided" || hasGhanaCardNumber.length < 15);
+
+  if (isViewingDocument && tenant) {
+    return (
+      <TenancyDocument
+        selectedActivation={tenant as any}
+        onBack={() => setIsViewingDocument(false)}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] p-6 lg:pb-12 font-sans">

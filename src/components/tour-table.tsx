@@ -294,13 +294,13 @@ export default function TourTable({
       {/* PAGE HEADER & TABS */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-zinc-200/60 pb-4">
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
+          <h1 className="text-2xl font-black text-zinc-900 tracking-tight uppercase">
             Tour Management
           </h1>
           {activeCount > 0 && activeTab === "active" && (
             <Badge
               variant="secondary"
-              className="bg-black text-white hover:bg-zinc-800 text-[11px] px-2 h-5 flex items-center justify-center rounded-full"
+              className="bg-black text-white hover:bg-zinc-800 text-[11px] px-2 h-5 flex items-center justify-center rounded-sm"
             >
               {activeCount} Active
             </Badge>
@@ -598,7 +598,7 @@ export default function TourTable({
                     value={sheetStatus}
                     onValueChange={(val) => requestStatusChange(val as TourStatus)}
                   >
-                    <SelectTrigger className="w-full h-10 border-zinc-200/60 bg-zinc-50/50 focus:ring-zinc-500/20 text-[13px] font-medium">
+                    <SelectTrigger className="w-full h-10 rounded-sm border-zinc-200/60 bg-zinc-50/50 focus:ring-zinc-500/20 text-[13px] font-medium">
                       <SelectValue placeholder="Select status" />
                     </SelectTrigger>
                     <SelectContent>

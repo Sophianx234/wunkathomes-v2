@@ -20,8 +20,8 @@ export default async function AdminCleaningPage() {
     .populate({
       path: "listingId",
       model: Listing,
-      select: "title",
-      populate: { path: "propertyId", model: Property, select: "location" },
+      select: "title slug images",
+      populate: { path: "propertyId", model: Property, select: "location propertyType" },
     })
     .sort({ createdAt: -1 })
     .lean();
@@ -58,6 +58,9 @@ export default async function AdminCleaningPage() {
       tenantImage: schedule.userId?.profilePicture || "",
       propertyTitle: schedule.listingId?.title || "Unknown Property",
       propertyLocation: locationString,
+      propertyImage: schedule.listingId?.images?.[0] || "",
+      propertyType: schedule.listingId?.propertyId?.propertyType || "Unknown",
+      propertySlug: schedule.listingId?.slug || "",
       scheduleType: schedule.scheduleType,
       weeklyDays: schedule.weeklyDays || [],
       customDates: schedule.customDates ? schedule.customDates.map((d: Date) => d.toISOString()) : [],

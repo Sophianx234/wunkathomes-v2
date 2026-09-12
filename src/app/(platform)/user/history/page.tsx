@@ -15,7 +15,7 @@ export default function FinancialLedgerPage() {
     {
       id: "txn_8942301",
       date: "May 02, 2026",
-      amount: "$11,500.00",
+      amount: "GHS 11,500.00",
       type: "WIRE_TRANSFER",
       description: "Annual Balance Clearance",
       property: "The Glasshouse Villa",
@@ -24,7 +24,7 @@ export default function FinancialLedgerPage() {
     {
       id: "txn_8942250",
       date: "May 01, 2026",
-      amount: "$500.00",
+      amount: "GHS 500.00",
       type: "CARD_PAYMENT",
       description: "Refundable Hold",
       property: "The Glasshouse Villa",
@@ -33,7 +33,7 @@ export default function FinancialLedgerPage() {
     {
       id: "txn_8941002",
       date: "Apr 15, 2026",
-      amount: "$500.00",
+      amount: "GHS 500.00",
       type: "MOBILE_MONEY",
       description: "Refundable Hold",
       property: "Cantonments Penthouse",

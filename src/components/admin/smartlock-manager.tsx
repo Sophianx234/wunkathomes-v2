@@ -467,6 +467,48 @@ export default function SmartLockManager({
               )}
             </div>
           </div>
+           {/* Live Activity Stream */}
+        <div className="bg-white rounded-lg border border-zinc-200 overflow-hidden col-span-2 mt-8">
+          <div className="p-4 border-b border-zinc-200 bg-zinc-50">
+            <h3 className="font-semibold text-zinc-900 flex items-center gap-2">
+              
+              Security & Access Feed
+            </h3>
+          </div>
+          <div className="p-0">
+            {liveActivities.length === 0 ? (
+              <div className="p-8 text-center text-sm text-zinc-500">
+                Listening for hardware events from Tuya Cloud...
+              </div>
+            ) : (
+              <ul className="divide-y divide-zinc-100 max-h-[400px] overflow-y-auto">
+                {liveActivities.map((act, idx) => (
+                  <li key={idx} className="p-4 hover:bg-zinc-50 transition-colors text-sm flex items-start gap-4">
+                    <div className="shrink-0 mt-1">
+                      {act.action === 'ALARM_TRIGGERED' ? (
+                        <div className="h-2 w-2 rounded-full bg-zinc-500 shadow-[0_0_8px_rgba(244,63,94,0.8)]" />
+                      ) : act.action === 'ALARM_CLEARED' ? (
+                        <div className="h-2 w-2 rounded-full bg-emerald-500" />
+                      ) : (
+                        <div className="h-2 w-2 rounded-full bg-blue-500" />
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-zinc-900 font-medium">{act.lockName} <span className="text-zinc-400 font-normal">({act.tuyaDeviceId})</span></p>
+                      <p className="text-zinc-600 mt-0.5">
+                        <span className="font-semibold text-zinc-800">{act.action}</span> - {act.performedBy} 
+                        {act.metadata?.targetName && <code className="ml-2 text-[10px] bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-500">{act.metadata.targetName}</code>}
+                      </p>
+                      <p className="text-[10px] text-zinc-400 font-mono mt-1">
+                        {new Date(act.timestamp).toLocaleTimeString()}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
         </div>
 
         <div className="bg-white rounded-lg border border-zinc-200 overflow-hidden  mt-8">

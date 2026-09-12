@@ -20,7 +20,7 @@ export default function UserCommandCenter() {
     type: "SIGN_CONTRACT",
     propertyName: "The Glasshouse Villa",
     holdExpiry: "71h 45m",
-    depositPaid: "$500.00",
+    depositPaid: "GHS 500.00",
     image: "/images/properties/glasshouse.jpg", // Replace with your actual image path
   };
 

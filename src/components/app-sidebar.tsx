@@ -66,12 +66,12 @@ const data = {
       title: "CRM & Leasing",
       items: [
         {
-          title: "Tenant Directory",
+          title: "Tenants",
           url: "/admin/manage/tenants",
           icon: <HugeiconsIcon icon={UserGroupIcon} strokeWidth={2} />,
         },
         {
-          title: "Tour Management",
+          title: "Tours",
           url: "/admin/manage/tours",
           icon: <HugeiconsIcon icon={Calendar01Icon} strokeWidth={2} />,
         },
@@ -81,7 +81,7 @@ const data = {
       title: "Operations",
       items: [
         {
-          title: "Transaction Management",
+          title: "Transactions",
           url: "/admin/manage/transactions",
           icon: <HugeiconsIcon icon={Wallet01Icon} strokeWidth={2} />,
         },
@@ -120,7 +120,7 @@ const data = {
       icon: <HugeiconsIcon icon={Settings05Icon} strokeWidth={2} />,
     },
     {
-      title: "Team Management",
+      title: "Team",
       url: "/admin/manage/team",
       icon: <HugeiconsIcon icon={UserGroupIcon} strokeWidth={2} />,
     },

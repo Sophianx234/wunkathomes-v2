@@ -327,7 +327,7 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
                 Tenancy Agreement
                 <Dialog open={isAgreementOpen} onOpenChange={setIsAgreementOpen}>
                   <DialogTrigger asChild>
-                    <Button type="button" variant="outline" size="sm" className="text-[9px] md:text-xs">
+                    <Button type="button" variant="outline" size="sm" className="text-[9px] rounded-sm md:text-xs">
                       View Agreement
                     </Button>
                   </DialogTrigger>
@@ -379,7 +379,7 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
               <div className="w-full">
                 <Button 
                   type="submit"
-                  disabled={isProcessing}
+                  disabled={isProcessing || !agreedToTerms || !typedSignature.trim()}
                   className="w-full py-6 bg-black text-white hover:bg-black/90 font-bold tracking-tight text-sm md:text-base rounded-lg flex items-center justify-center gap-2 transition-colors"
                 >
                   {isProcessing && <HugeiconsIcon icon={Loading03Icon} size={18} className="animate-spin" />}
@@ -461,12 +461,12 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
             <div className="space-y-2 md:space-y-4 mb-3 md:mb-6 w-full box-border">
               <div className="flex justify-between items-center text-xs md:text-sm font-medium text-slate-900">
                 <span>{pricingLabel}</span>
-                <span>${(isRent ? rentSubtotal : basePrice).toLocaleString()}</span>
+                <span>GHS {(isRent ? rentSubtotal : basePrice).toLocaleString()}</span>
               </div>
               {isRent && securityDeposit > 0 && (
                 <div className="flex justify-between items-center text-xs md:text-sm font-medium text-slate-900">
                   <span>Security Deposit (Refundable)</span>
-                  <span>${securityDeposit.toLocaleString()}</span>
+                  <span>GHS {securityDeposit.toLocaleString()}</span>
                 </div>
               )}
               <div className="flex justify-between items-center text-xs md:text-sm font-medium text-zinc-600">
@@ -476,12 +476,10 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
             </div>
 
             <div className="p-2 md:p-4 bg-zinc-50/50 border border-zinc-200/60 rounded-lg mb-3 md:mb-6 w-full box-border">
-              <div className="flex justify-between items-center mb-1">
-                <span className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-zinc-500">
-                  Total Due
-                </span>
-                <span className="text-lg md:text-xl font-black text-black">
-                  ${finalTotal.toLocaleString()}
+              <div className="flex justify-between items-center pt-3 border-t border-black/10">
+                <span className="text-sm font-black uppercase tracking-widest text-black">Total Due</span>
+                <span className="text-xl font-black text-black">
+                  GHS {finalTotal.toLocaleString()}
                 </span>
               </div>
               <p className="text-[8px] md:text-[10px] text-zinc-500 font-medium leading-relaxed mt-1 md:mt-2 break-words">

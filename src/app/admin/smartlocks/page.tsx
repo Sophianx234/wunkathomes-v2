@@ -35,7 +35,7 @@ export default async function SmartLocksAdminPage({
     <div className="flex flex-col flex-1 w-full min-h-screen bg-zinc-50/50">
       <div className="max-w-7xl w-full mx-auto p-6 md:p-8 space-y-8">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-900">Smart Locks Management</h1>
+          <h1 className="text-2xl font-black text-zinc-900 tracking-tight uppercase">Smart Locks Management</h1>
           <p className="text-zinc-500 mt-1">Sync hardware from the Tuya Cloud, manage device names, and view assignments.</p>
         </div>
 

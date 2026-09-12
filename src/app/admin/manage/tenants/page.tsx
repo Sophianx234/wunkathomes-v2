@@ -6,7 +6,7 @@ import TenantDirectoryClient, { TenantRecord } from "@/components/tenant-directo
 import { DataTableSkeleton } from "@/components/ui/data-table-skeleton";
 
 export const metadata = {
-  title: "Tenant Directory | Admin Dashboard",
+  title: "Manage Tenants | Admin Dashboard",
 };
 
 export const dynamic = "force-dynamic";

@@ -155,7 +155,7 @@ export default function BookingCard({ listing, isRent, hasBookedTour, bookedTour
             {isRent ? "Lease for" : "Purchase Price"}
           </span>
           <div className="text-4xl font-black tracking-tight break-words">
-            ${listing.price?.toLocaleString()}
+            GHS {listing.price?.toLocaleString()}
             {listing.listingType === "For_Rent" && (
               <span className="text-lg text-zinc-500 font-medium tracking-normal">
                 {listing.roomType === "Furnished" ? " /day" : " /month"}
@@ -182,7 +182,7 @@ export default function BookingCard({ listing, isRent, hasBookedTour, bookedTour
             <span className="text-sm font-medium text-zinc-600">
               Agent Fees
             </span>
-            <span className="text-sm font-bold text-green-600">$0</span>
+            <span className="text-sm font-bold text-green-600">GHS 0</span>
           </div>
         </div>
 

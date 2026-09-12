@@ -110,9 +110,9 @@ export function SmartLockManageDialog({
 
         <Tabs defaultValue="controls" className="w-full">
           <div className="px-6 pt-4 bg-zinc-50">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="controls">Access Controls</TabsTrigger>
-              <TabsTrigger value="audit">Audit History</TabsTrigger>
+            <TabsList className="grid w-full rounded-sm grid-cols-2">
+              <TabsTrigger value="controls" className='rounded-sm'>Access Controls</TabsTrigger>
+              <TabsTrigger value="audit" className='rounded-sm'>Audit History</TabsTrigger>
             </TabsList>
           </div>
 
@@ -159,13 +159,13 @@ export function SmartLockManageDialog({
                           value={vendorName}
                           onChange={(e) => setVendorName(e.target.value)}
                           placeholder="e.g. Cleaner"
-                          className="h-8 text-[13px]"
+                          className="h-8 text-[13px] rounded-sm"
                         />
                       </div>
                       <div>
                         <label className="text-[11px] font-semibold text-zinc-600 mb-1.5 block">Duration (Hours)</label>
                         <Select value={vendorHours.toString()} onValueChange={(v) => setVendorHours(Number(v))}>
-                          <SelectTrigger className="h-8 text-[13px]">
+                          <SelectTrigger className="h-8 text-[13px] rounded-sm">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>

@@ -507,11 +507,6 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
         open={!!selectedTx && !isViewingReceipt}
         onOpenChange={(open) => !open && setSelectedTx(null)}
       >
-      {/* INDUSTRY STANDARD TRANSACTION DESK (Sheet) */}
-      <Dialog
-        open={!!selectedTx && !isViewingReceipt}
-        onOpenChange={(open) => !open && setSelectedTx(null)}
-      >
         <DialogContent className="w-full sm:max-w-xl md:max-w-4xl p-0 bg-white border border-slate-200/80 flex flex-col md:flex-row font-sans rounded-lg max-h-[85vh] overflow-hidden">
           {selectedTx && (
             <>
@@ -596,7 +591,7 @@ export default function TransactionsClient({ data }: TransactionsClientProps) {
                 <section>
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
-                      Associated Asset
+                      Associated Property
                     </h3>
                     <Link
                       href={`/properties/${selectedTx.listing.slug}`}

@@ -1,0 +1,133 @@
+        {/* EDGE-TO-EDGE FINANCIAL TABLE */}
+        <div className="bg-white border border-zinc-200/60 rounded-lg overflow-hidden w-full box-border">
+          <div className="w-full overflow-x-auto box-border hide-scrollbar">
+            <Table className="w-full min-w-full">
+              <TableHeader className="bg-zinc-50/30">
+                <TableRow className="border-zinc-200/60 hover:bg-transparent">
+                  <TableHead className="font-medium text-zinc-500 text-[8px] md:text-xs h-8 md:h-10 w-[140px] md:w-[200px] whitespace-nowrap px-2 md:px-4">
+                    Reference & Date
+                  </TableHead>
+                  <TableHead className="font-medium text-zinc-500 text-[8px] md:text-xs h-8 md:h-10 whitespace-nowrap px-2 md:px-4">
+                    Property
+                  </TableHead>
+                  <TableHead className="font-medium text-zinc-500 text-[8px] md:text-xs h-8 md:h-10 hidden sm:table-cell whitespace-nowrap px-2 md:px-4">
+                    Payment Type
+                  </TableHead>
+                  <TableHead className="font-medium text-zinc-500 text-[8px] md:text-xs h-8 md:h-10 hidden sm:table-cell whitespace-nowrap px-2 md:px-4">
+                    Method
+                  </TableHead>
+                  <TableHead className="font-medium text-zinc-500 text-[8px] md:text-xs h-8 md:h-10 whitespace-nowrap px-2 md:px-4">
+                    Amount
+                  </TableHead>
+                  <TableHead className="font-medium text-zinc-500 text-[8px] md:text-xs h-8 md:h-10 w-[80px] md:w-[140px] text-right pr-3 md:pr-6 whitespace-nowrap">
+                    Status
+                  </TableHead>
+                  <TableHead className="w-[40px] md:w-[50px]"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredData.map((tx) => (
+                  <TableRow
+                    key={tx.id}
+                    className="group border-zinc-200/60 hover:bg-zinc-50/50 transition-colors"
+                  >
+                    <TableCell className="py-2 md:py-3 align-middle px-2 md:px-4">
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-[10px] md:text-[13px] font-mono font-medium text-zinc-900 truncate">
+                          {tx.reference}
+                        </span>
+                        <span className="text-[8px] md:text-[11px] text-zinc-500 mt-0.5 truncate">
+                          {formatDate(tx.createdAt)}
+                        </span>
+                      </div>
+                    </TableCell>
+
+                    <TableCell className="py-2 md:py-3 align-middle px-2 md:px-4">
+                      <div className="flex items-center gap-1.5 md:gap-3 min-w-0">
+                        <div className="w-5 h-5 md:w-8 md:h-8 rounded md:rounded-md overflow-hidden bg-zinc-100/50 shrink-0 border border-zinc-200/60 flex items-center justify-center">
+                          {tx.listing.image ? (
+                            <img
+                              src={tx.listing.image}
+                              alt={tx.listing.title}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <span className="scale-75 md:scale-100 flex items-center">
+                              <HugeiconsIcon
+                                icon={Building03Icon}
+                                size={14}
+                                className="text-zinc-400"
+                              />
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-[9px] md:text-[13px] font-medium text-zinc-900 truncate max-w-[120px] md:max-w-[180px]">
+                          {tx.listing.title}
+                        </span>
+                      </div>
+                    </TableCell>
+
+                    <TableCell className="py-2 md:py-3 align-middle px-2 md:px-4 hidden sm:table-cell">
+                      <span
+                        className={`px-1.5 md:px-2 py-0.5 rounded md:rounded-md text-[7px] md:text-[10px] uppercase font-bold tracking-widest whitespace-nowrap ${getPurposeBadge(tx.paymentPurpose)}`}
+                      >
+                        {tx.paymentPurpose.replace("_", " ")}
+                      </span>
+                    </TableCell>
+
+                    <TableCell className="py-2 md:py-3 align-middle px-2 md:px-4 hidden sm:table-cell">
+                      <div className="flex items-center text-[9px] md:text-[12px] font-medium text-zinc-600 gap-1 md:gap-1.5 capitalize whitespace-nowrap">
+                        <span className="scale-75 md:scale-100 flex items-center">
+                          {getChannelIcon(tx.channel)}
+                        </span>
+                        {tx.channel.replace("_", " ")}
+                      </div>
+                    </TableCell>
+
+                    <TableCell className="py-2 md:py-3 align-middle px-2 md:px-4">
+                      <span className="text-[10px] md:text-[14px] font-semibold text-zinc-900 font-tabular-nums tracking-tight whitespace-nowrap">
+                        {formatCurrency(tx.amount, tx.currency).replace("GH", "")}
+                      </span>
+                    </TableCell>
+
+                    <TableCell className="py-2 md:py-3 align-middle text-right pr-3 md:pr-6">
+                      <Badge
+                        variant="outline"
+                        className={`px-1.5 md:px-2 py-0 border-0 rounded text-[7px] md:text-[9px] uppercase tracking-wider font-bold h-4 md:h-5 ${getStatusBadge(tx.status)}`}
+                      >
+                        {tx.status}
+                      </Badge>
+                    </TableCell>
+
+                    {/* Actions Column */}
+                    <TableCell className="py-2 md:py-3 align-middle text-right px-2 md:px-4">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-6 w-6 md:h-8 md:w-8 rounded-md text-zinc-500 hover:text-zinc-900 m-0 p-0">
+                            <span className="scale-75 md:scale-100 flex items-center">
+                              <HugeiconsIcon icon={MoreHorizontalIcon} size={16} />
+                            </span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => setSelectedTx(tx)}>
+                            View Details
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+
+                {filteredData.length === 0 && (
+                  <TableRow>
+                    <TableCell
+                      colSpan={7}
+                      className="h-24 md:h-32 text-center text-zinc-500 text-[10px] md:text-sm"
+                    >
+                      No transactions match your current filters.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>

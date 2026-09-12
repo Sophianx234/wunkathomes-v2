@@ -50,6 +50,9 @@ export interface CleaningRecord {
   tenantImage?: string;
   propertyTitle: string;
   propertyLocation: string;
+  propertyImage?: string;
+  propertyType?: string;
+  propertySlug?: string;
   scheduleType: "daily" | "weekly" | "custom";
   weeklyDays?: number[];
   customDates?: string[]; // ISO strings
@@ -112,22 +115,12 @@ export default function CleaningDirectoryClient({
   const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] p-6 lg:pb-10 font-sans">
-      <div className="max-w-[1400px] mx-auto space-y-6">
-        {/* PAGE HEADER */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-zinc-200/60 pb-4">
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
-              Cleaning Schedules
-            </h1>
-            <Badge className="bg-black text-white hover:bg-zinc-800 text-[11px] px-2 h-5 rounded-full">
-              {data.filter(d => d.isDispatchToday).length} Active Today
-            </Badge>
-          </div>
-        </div>
+    <div className="min-h-screen  py-6 lg:pb-10 font-sans">
+      <div className=" mx-auto space-y-6">
+        
 
         {/* SEARCH & FILTER BAR */}
-        <section className="flex flex-col xl:flex-row items-center gap-4 bg-white p-1.5 border border-zinc-200/60 rounded-lg shadow-sm w-full">
+        <section className="flex flex-col xl:flex-row items-center gap-4 bg-white p-1.5 border border-zinc-200/60 rounded-lg  w-full">
           <div className="relative flex-1 w-full">
             <HugeiconsIcon icon={Search01Icon} size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
             <Input
@@ -180,7 +173,7 @@ export default function CleaningDirectoryClient({
         </section>
 
         {/* DATA TABLE */}
-        <div className="bg-white border border-zinc-200/60 rounded-lg overflow-hidden shadow-sm">
+        <div className="bg-white border border-zinc-200/60 rounded-lg overflow-hidden ">
           <Table className="min-w-[800px]">
             <TableHeader className="bg-zinc-50/30">
               <TableRow className="border-zinc-200/60 hover:bg-transparent">
@@ -200,7 +193,7 @@ export default function CleaningDirectoryClient({
                   {/* TENANT PROFILE */}
                   <TableCell className="py-3 align-middle">
                     <div className="flex items-center gap-3">
-                      <Avatar className="h-9 w-9 border border-zinc-200/60 shadow-sm">
+                      <Avatar className="h-9 w-9 border border-zinc-200/60 ">
                         <AvatarImage src={record.tenantImage} />
                         <AvatarFallback className="bg-zinc-100/50 text-zinc-600 text-xs font-medium">
                           {record.tenantName.charAt(0)}
@@ -312,7 +305,7 @@ export default function CleaningDirectoryClient({
                     Tenant Information
                   </h4>
                   <div className="flex items-center gap-3 p-3 bg-zinc-50/50 border border-zinc-200/60 rounded-lg">
-                    <Avatar className="h-10 w-10 border border-zinc-200/60 shadow-sm">
+                    <Avatar className="h-10 w-10 border border-zinc-200/60 ">
                       <AvatarImage src={selectedRecord.tenantImage} />
                       <AvatarFallback className="bg-white text-zinc-900 font-bold text-sm">
                         {selectedRecord.tenantName.charAt(0)}
@@ -329,20 +322,47 @@ export default function CleaningDirectoryClient({
                   </div>
                 </div>
 
-                {/* Property Details */}
-                <div>
+                {/* Associated Property */}
+                <section>
                   <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-3">
-                    Property Location
+                    Associated Property
                   </h4>
-                  <div className="flex flex-col p-3 bg-zinc-50/50 border border-zinc-200/60 rounded-lg">
-                    <span className="text-sm font-bold text-zinc-900 flex items-center gap-1.5">
-                      {selectedRecord.propertyTitle}
-                    </span>
-                    <span className="text-xs font-medium text-zinc-500 mt-0.5">
-                      {selectedRecord.propertyLocation}
-                    </span>
+                  <div className="rounded-lg border border-zinc-200/60 overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.01)] bg-white">
+                    <div className="p-4 bg-zinc-50/50 flex gap-4 border-b border-zinc-200/60">
+                      <div className="h-12 w-12 shrink-0 bg-white rounded-md overflow-hidden border border-zinc-200/60 ">
+                        {selectedRecord.propertyImage ? (
+                          <img src={selectedRecord.propertyImage} alt="Property" className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <HugeiconsIcon icon={Building01Icon} size={16} className="text-zinc-300"/>
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex flex-col justify-center min-w-0">
+                        <h4 className="text-sm font-semibold tracking-tight text-zinc-900 truncate">
+                          {selectedRecord.propertyTitle}
+                        </h4>
+                        <p className="text-[12px] text-zinc-500 mt-0.5 truncate">
+                          {selectedRecord.propertyLocation}
+                        </p>
+                      </div>
+                    </div>
+                    <dl className="grid grid-cols-2 gap-x-4 gap-y-4 p-4 text-[13px]">
+                      <div>
+                        <dt className="text-zinc-500 mb-1">Asset Type</dt>
+                        <dd className="font-medium text-zinc-900 capitalize">
+                          {selectedRecord.propertyType?.replace("_", " ") || "Unknown"}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-zinc-500 mb-1">Area / Region</dt>
+                        <dd className="font-medium text-zinc-900 truncate">
+                          {selectedRecord.propertyLocation}
+                        </dd>
+                      </div>
+                    </dl>
                   </div>
-                </div>
+                </section>
 
                 {/* Schedule Rules */}
                 <div>

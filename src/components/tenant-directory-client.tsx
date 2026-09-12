@@ -402,11 +402,11 @@ export default function TenantDirectoryClient({
         {/* PAGE HEADER */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-zinc-200/60 pb-4">
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
-              Tenant Directory
+            <h1 className="text-2xl font-black text-zinc-900 tracking-tight uppercase">
+              Manage Tenants
             </h1>
             {awaitingCount > 0 && (
-              <Badge className="bg-black text-white hover:bg-zinc-800 text-[11px] px-2 h-5 rounded-full">
+              <Badge className="bg-black text-white hover:bg-zinc-800 text-[11px] px-2 h-5 rounded-md">
                 {awaitingCount} Pending
               </Badge>
             )}
@@ -555,7 +555,7 @@ export default function TenantDirectoryClient({
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-48 rounded-lg shadow-sm border-zinc-200/80 font-sans p-1">
-                        <DropdownMenuItem onClick={() => tenant.pipelineStage === "pending" ? router.push(`/admin/manage/tenants/${tenant.id}/onboard`) : setSelectedTenantId(tenant.id)} className="text-[12px] font-medium cursor-pointer h-8">
+                        <DropdownMenuItem onClick={() => tenant.pipelineStage === "pending" ? router.push(`/admin/manage/tenants/${tenant.id}/onboarding`) : setSelectedTenantId(tenant.id)} className="text-[12px] font-medium cursor-pointer h-8">
                           {tenant.pipelineStage === "pending" ? "Review & Onboard" : "View Full Profile"}
                         </DropdownMenuItem>
                         {tenant.pipelineStage === "active" && (
@@ -793,7 +793,7 @@ export default function TenantDirectoryClient({
 
                 {/* Property & Lease Details */}
                 <section>
-                  <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-4">Occupied Asset</h3>
+                  <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-4">Occupied Property</h3>
                   <div className="rounded-lg border border-zinc-200/60 overflow-hidden bg-white">
                     <div className="p-4 bg-zinc-50/50 flex gap-4 border-b border-zinc-200/60">
                       <div className="h-12 w-12 shrink-0 bg-white rounded-md overflow-hidden border border-zinc-200/60 shadow-sm">
@@ -909,9 +909,7 @@ export default function TenantDirectoryClient({
                         selectedTenant.transactions.map((tx) => (
                           <div key={tx.id} className="flex items-center justify-between py-2.5 px-3 -mx-3 rounded-lg hover:bg-zinc-50 transition-colors">
                             <div className="flex items-center gap-3">
-                              <div className="h-8 w-8 rounded-full bg-zinc-100/50 flex items-center justify-center border border-zinc-200/60">
-                                <HugeiconsIcon icon={File01Icon} size={14} className="text-zinc-500" />
-                              </div>
+                              
                               <div>
                                 <p className="text-[13px] font-medium text-zinc-900 capitalize">{tx.purpose.replace(/_/g, " ")}</p>
                                 <p className="text-[11px] text-zinc-500">{tx.date}</p>

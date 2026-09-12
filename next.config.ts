@@ -42,7 +42,9 @@ const nextConfig: NextConfig = {
         '*.ngrok-free.app', 
         '*.ngrok.io', 
         '*.ngrok.dev', 
-        '*.ngrok.app'
+        '*.ngrok.app',
+        'wunkathomes.com',
+        'www.wunkathomes.com'
       ], 
     },
   },

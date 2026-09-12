@@ -319,7 +319,7 @@ export function UserDashboard({ user, activeLeases, initialSchedule }: Dashboard
                   />
                 </span>
               </div>
-              <div className="min-w-0">
+              <div className="min-w-0 bg-white">
                 <h4 className="text-[11px] md:text-sm font-bold text-zinc-900 mb-0.5 md:mb-1 tracking-tight">
                   Payment Successful! Your property is reserved.
                 </h4>
@@ -333,7 +333,7 @@ export function UserDashboard({ user, activeLeases, initialSchedule }: Dashboard
 
         {/* 1B. VIP BANNER (VERIFIED / REPEAT TENANT) */}
         {!needsKyc && isPendingAdmin && (
-          <div className="bg-emerald-50/50 border border-emerald-200/60 p-4 md:p-6 rounded-lg md:rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3 md:gap-6 relative overflow-hidden w-full box-border shadow-sm">
+          <div className="bg-white border border-emerald-200/60 p-4 md:p-6 rounded-lg md:rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3 md:gap-6 relative overflow-hidden w-full box-border shadow-sm">
             <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500" />
             <div className="flex items-start sm:items-center gap-3 md:gap-4 pl-1 md:pl-2 min-w-0">
               <div className="w-8 h-8 md:w-10 md:h-10 bg-white border border-emerald-200/60 rounded-full flex items-center justify-center shrink-0">
@@ -345,7 +345,7 @@ export function UserDashboard({ user, activeLeases, initialSchedule }: Dashboard
                   />
                 </span>
               </div>
-              <div className="min-w-0">
+              <div className="min-w-0 ">
                 <h4 className="text-[11px] md:text-sm font-bold text-emerald-900 mb-0.5 md:mb-1 tracking-tight">
                   Payment Successful!
                 </h4>

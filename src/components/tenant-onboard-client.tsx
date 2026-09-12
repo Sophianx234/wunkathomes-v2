@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 import { DocumentViewer } from "@/components/ui/document-viewer";
+import { TenancyDocument } from "./lease-document viewer";
 import { verifyAndOnboardTenantAction, updateTenantDetailsAction } from "@/actions/admin/tenant.action";
 import type { TenantRecord } from "@/components/tenant-directory-client";
 
@@ -126,6 +127,15 @@ export default function TenantOnboardClient({ tenant }: { tenant: TenantRecord }
   const hasGhanaCardNumber = editGhanaCard || tenant.user.ghanaCardNumber;
   const needsDocs = tenant.user.kycStatus !== "Verified" && (!hasFacePhoto || !hasCardScan || !hasGhanaCardNumber || hasGhanaCardNumber === "Not Provided" || hasGhanaCardNumber.length < 15);
 
+  if (isViewingDocument && tenant) {
+    return (
+      <TenancyDocument
+        selectedActivation={tenant as any}
+        onBack={() => setIsViewingDocument(false)}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#FAFAFA] p-6 lg:pb-12 font-sans">
       <div className="max-w-[800px] mx-auto space-y-6">
@@ -193,7 +203,7 @@ export default function TenantOnboardClient({ tenant }: { tenant: TenantRecord }
                   <Input 
                     value={editName} 
                     onChange={(e) => setEditName(e.target.value)} 
-                    className="h-10 text-[14px] bg-white font-medium"
+                    className="h-10 text-[14px] rounded-md bg-white font-medium"
                     placeholder="Enter full legal name"
                   />
                 </div>
@@ -203,7 +213,7 @@ export default function TenantOnboardClient({ tenant }: { tenant: TenantRecord }
                   <Input 
                     value={editPhone} 
                     onChange={(e) => setEditPhone(e.target.value)} 
-                    className="h-10 text-[14px] bg-white"
+                    className="h-10 rounded-md text-[14px] bg-white"
                   />
                 </div>
 
@@ -341,8 +351,7 @@ export default function TenantOnboardClient({ tenant }: { tenant: TenantRecord }
                     disabled={tenant.checklist.leaseSigned !== "Signed"}
                     className="flex items-center gap-1.5 text-[14px] font-medium text-zinc-900 hover:underline underline-offset-4 disabled:no-underline disabled:text-zinc-400"
                   >
-                    <HugeiconsIcon icon={ViewIcon} size={16} />
-                    {tenant.checklist.leaseSigned === "Signed" ? "View Signed Document" : "Awaiting Tenant Signature"}
+                    {tenant.checklist.leaseSigned === "Signed" ? "View  Document" : "Awaiting Tenant Signature"}
                   </button>
                 </div>
               </div>

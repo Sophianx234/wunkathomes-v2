@@ -224,7 +224,7 @@ export default function TransactionsClient({
         {/* PAGE HEADER & TABS */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-zinc-200/60 pb-4">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
+            <h1 className="text-2xl font-black text-zinc-900 tracking-tight uppercase">
               Transactions
             </h1>
           </div>
@@ -400,7 +400,7 @@ export default function TransactionsClient({
                   {/* Col 3: Allocation */}
                   <TableCell className="py-3 align-middle">
                     <span
-                      className={`px-2 py-0.5 rounded-md text-[11px] font-medium tracking-wide whitespace-nowrap ${getPurposeBadge(tx.paymentPurpose)}`}
+                      className={`px-2 py-0.5 rounded-sm shadow-none text-[11px] font-medium tracking-wide whitespace-nowrap ${getPurposeBadge(tx.paymentPurpose)}`}
                     >
                       {tx.paymentPurpose.replace("_", " ")}
                     </span>
@@ -425,7 +425,7 @@ export default function TransactionsClient({
                   <TableCell className="py-3 align-middle ">
                     <Badge
                       variant="outline"
-                      className={`px-2 py-0 border-0 rounded-full text-[10px] uppercase tracking-wider font-bold h-5 ${getStatusBadge(tx.status)}`}
+                      className={`px-2 py-0 border-0 rounded-sm text-[10px] uppercase tracking-wider font-bold h-5 ${getStatusBadge(tx.status)}`}
                     >
                       {tx.status}
                     </Badge>
@@ -543,7 +543,7 @@ export default function TransactionsClient({
                 <section>
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
-                      Associated Asset
+                      Associated Property
                     </h3>
                     <Link
                       href={`/admin/properties/${selectedTx.listing.slug}`}

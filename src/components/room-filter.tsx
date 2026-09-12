@@ -123,7 +123,7 @@ export function RoomFilters({ onFilter }: RoomFiltersProps) {
           {/* Price Range */}
           <div>
             <label className="block text-sm font-semibold mb-3">
-              Max Price: ${filters.maxPrice}
+              Max Price: GHS {filters.maxPrice}
             </label>
             <input
               type="range"
@@ -141,8 +141,8 @@ export function RoomFilters({ onFilter }: RoomFiltersProps) {
             />
 
             <div className="flex justify-between text-xs text-muted-foreground mt-2">
-              <span>$0</span>
-              <span>$5000+</span>
+              <span>GHS 0</span>
+              <span>GHS 5000+</span>
             </div>
           </div>
 

@@ -605,29 +605,25 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
             <div className="p-6 space-y-6">
               {/* Email Input */}
               <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-widest text-zinc-500">
+                <label className="text-xs  font-bold  tracking-widest text-zinc-500">
                   Email Address
                 </label>
-                <div className="relative">
-                  <HugeiconsIcon
-                    icon={Mail01Icon}
-                    size={16}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"
-                  />
+                <div className="relative pt-2">
+                  
                   <Input
                     type="email"
                     required
-                    placeholder="colleague@wunkathomes.com"
+                    placeholder="example@gmail.com"
                     value={inviteEmail}
                     onChange={(e) => setInviteEmail(e.target.value)}
-                    className="pl-9 h-11 border-zinc-200/60 bg-zinc-50 focus-visible:ring-1 focus-visible:ring-zinc-900 focus-visible:bg-white transition-all shadow-none"
+                    className="pl-3 py-2 border-zinc-200/60 bg-zinc-50 rounded-sm focus-visible:ring-1 focus-visible:ring-zinc-900 focus-visible:bg-white transition-all shadow-none"
                   />
                 </div>
               </div>
 
               {/* Role Selection */}
               <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2 block">
+                <label className="text-xs font-bold  tracking-widest text-zinc-500 mb-2 block">
                   System Role
                 </label>
                 <div className="grid gap-3">
@@ -709,14 +705,14 @@ export default function ManageTeamClient({ data }: ManageTeamClientProps) {
                 type="button"
                 variant="ghost"
                 onClick={() => setIsInviteOpen(false)}
-                className="text-zinc-500 hover:text-zinc-900"
+                className="text-zinc-500 rounded-sm hover:text-zinc-900"
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
                 disabled={isPending}
-                className="bg-zinc-900 hover:bg-zinc-800 text-white min-w-[120px]"
+                className="bg-zinc-900 hover:bg-zinc-800 rounded-sm text-white min-w-[120px]"
               >
                 {isPending ? (
                   <HugeiconsIcon
