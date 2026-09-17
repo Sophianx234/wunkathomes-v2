@@ -71,43 +71,14 @@ export default function CreatePropertyForm({ unassignedLocks = [] }: { unassigne
       return;
     }
 
-    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
-
-    if (!cloudName || !uploadPreset) {
-      toast.error("Cloudinary configuration is missing from environment.");
-      return;
-    }
-
-    setIsUploadingToCloud(true);
-    const toastId = toast.loading("Uploading high-res images to cloud...");
+    const toastId = toast.loading("Saving property and securing images...");
 
     try {
-      // Upload all selected files directly from the browser to Cloudinary
-      const uploadPromises = uploadedFiles.map(async (file) => {
-        const cloudData = new FormData();
-        cloudData.append("file", file);
-        cloudData.append("upload_preset", uploadPreset);
-
-        const response = await fetch(
-          `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-          { method: "POST", body: cloudData }
-        );
-
-        const data = await response.json();
-        if (!data.secure_url) throw new Error("Upload failed for a file");
-        
-        return data.secure_url as string;
+      // ✅ SECURITY: Pass raw files to the Server Action instead of uploading client-side.
+      // This allows the server to enforce upload-time transformations and deterministic naming.
+      uploadedFiles.forEach((file) => {
+        formData.append("mediaFiles", file);
       });
-
-      const uploadedUrls = await Promise.all(uploadPromises);
-
-      // Append only the resulting text URLs to the formData
-      uploadedUrls.forEach((url) => {
-        formData.append("mediaUrls", url);
-      });
-      toast.dismiss(toastId);
-      toast.success("Images secured. Saving property data...", { id: toastId });
 
       // Fire the Server Action via transition
       startTransition(() => {
@@ -115,8 +86,8 @@ export default function CreatePropertyForm({ unassignedLocks = [] }: { unassigne
       });
 
     } catch (error) {
-      console.error("Cloudinary Error:", error);
-      toast.error("Image upload failed. Please check your network connection.", { id: toastId });
+      console.error("Submission Error:", error);
+      toast.error("Form submission failed. Please try again.", { id: toastId });
     } finally {
       setIsUploadingToCloud(false);
     }
