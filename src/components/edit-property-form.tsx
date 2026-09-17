@@ -117,31 +117,11 @@ export default function EditPropertyForm({
     const toastId = toast.loading("Processing changes...");
 
     try {
-      // Step A: If there are NEW files, upload them directly to Cloudinary
+      // ✅ SECURITY: Pass raw files to the Server Action instead of uploading client-side.
+      // This allows the server to enforce upload-time transformations and deterministic naming.
       if (uploadedFiles.length > 0) {
-        toast.loading("Uploading new high-res images...", { id: toastId });
-        
-        const uploadPromises = uploadedFiles.map(async (file) => {
-          const cloudData = new FormData();
-          cloudData.append("file", file);
-          cloudData.append("upload_preset", uploadPreset!);
-
-          const response = await fetch(
-            `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-            { method: "POST", body: cloudData }
-          );
-
-          const data = await response.json();
-          if (!data.secure_url) throw new Error("Upload failed for a file");
-          
-          return data.secure_url as string;
-        });
-
-        const newUploadedUrls = await Promise.all(uploadPromises);
-
-        // Step B: Append the lightweight URLs to the formData as "newMediaUrls"
-        newUploadedUrls.forEach((url) => {
-          pendingFormData.append("newMediaUrls", url);
+        uploadedFiles.forEach((file) => {
+          pendingFormData.append("newMediaFiles", file);
         });
       }
 
