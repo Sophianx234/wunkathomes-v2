@@ -7,13 +7,32 @@ cloudinary.config({
 });
 
 // --- Internal single-file processor ---
-async function uploadSingleFile(file: File | string, folder: string): Promise<string> {
+async function uploadSingleFile(file: File | string, folder: string, publicId?: string): Promise<string> {
+  const isBase64Image = typeof file === "string" && file.startsWith("data:image/");
+  const isFileImage = typeof file !== "string" && file.type.startsWith("image/");
+  const isImage = isBase64Image || isFileImage;
+
+  const options: any = {
+    folder: folder,
+    resource_type: "auto",
+  };
+
+  if (publicId) {
+    options.public_id = publicId;
+    options.overwrite = true;
+  }
+
+  if (isImage) {
+    options.width = 1200;
+    options.height = 1200;
+    options.crop = "limit";
+    options.format = "webp";
+    options.quality = "auto";
+  }
+
   // ✅ FIX: If the file is a Base64 string, upload it directly
   if (typeof file === "string") {
-    const result = await cloudinary.uploader.upload(file, {
-      folder: folder,
-      resource_type: "auto",
-    });
+    const result = await cloudinary.uploader.upload(file, options);
     return result.secure_url;
   }
 
@@ -23,10 +42,7 @@ async function uploadSingleFile(file: File | string, folder: string): Promise<st
 
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
-      { 
-        folder: folder, 
-        resource_type: "auto" 
-      },
+      options,
       (error, result) => {
         if (error || !result) return reject(error);
         resolve(result.secure_url);
@@ -37,22 +53,25 @@ async function uploadSingleFile(file: File | string, folder: string): Promise<st
 }
 
 // --- TypeScript Overloads (For perfect IDE intellisense) ---
-export async function uploadToCloudinary(file: File | string, folder?: string): Promise<string>;
-export async function uploadToCloudinary(files: (File | string)[], folder?: string): Promise<string[]>;
+export async function uploadToCloudinary(file: File | string, folder?: string, publicId?: string): Promise<string>;
+export async function uploadToCloudinary(files: (File | string)[], folder?: string, publicIds?: string[]): Promise<string[]>;
 
 // --- Main Dynamic Function ---
 export async function uploadToCloudinary(
   fileOrFiles: File | string | (File | string)[], 
-  folder: string = "wunkathomes/general"
+  folder: string = "wunkathomes/general",
+  publicIdOrIds?: string | string[]
 ): Promise<string | string[]> {
   
   if (Array.isArray(fileOrFiles)) {
     // If it's an array, upload all files concurrently for maximum speed
-    const uploadPromises = fileOrFiles.map((file) => uploadSingleFile(file, folder));
+    const ids = Array.isArray(publicIdOrIds) ? publicIdOrIds : [];
+    const uploadPromises = fileOrFiles.map((file, index) => uploadSingleFile(file, folder, ids[index]));
     return await Promise.all(uploadPromises);
   } else {
     // If it's a single file, just process that one
-    return await uploadSingleFile(fileOrFiles, folder);
+    const id = typeof publicIdOrIds === "string" ? publicIdOrIds : undefined;
+    return await uploadSingleFile(fileOrFiles, folder, id);
   }
 }
 
