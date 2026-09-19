@@ -56,16 +56,16 @@ const createPropertySchema = z.object({
   smartLockId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid Lock ID").optional().nullable().or(z.literal('')),
   accessInstructions: z.string().trim().max(1000).optional().nullable(),
 
-  mediaUrls: z.array(z.string().url("Invalid image URL"))
+  mediaFiles: z.array(z.any())
     .min(1, "At least one image is required")
     .max(10, "Maximum of 10 images allowed"),
     
 });
 
 // Edit Schema drops media requirement and adds secure JSON parsing for retained images
-// Add .omit({ mediaUrls: true }) before .extend()
+// Add .omit({ mediaFiles: true }) before .extend()
 const editPropertySchema = createPropertySchema
-  .omit({ mediaUrls: true }) 
+  .omit({ mediaFiles: true }) 
   .extend({
     listingId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid Listing ID"),
     
@@ -77,8 +77,8 @@ const editPropertySchema = createPropertySchema
       return [];
     }, z.array(z.string().url("Invalid image URL")).max(10)),
     
-    // Accept the new images (optional, because they might just be editing text)
-    newMediaUrls: z.array(z.string().url()).optional().default([]),
+    // Accept the new images
+    newMediaFiles: z.array(z.any()).optional().default([]),
   });
 
 const deleteSchema = z.object({
@@ -136,18 +136,28 @@ export async function createPropertyAction(prevState: ActionState, formData: For
       smartLockId: formData.get("smartLockId"),
       accessInstructions: formData.get("accessInstructions"),
       
-      // 1. THIS IS THE KEY CHANGE: Grab the URLs instead of Files
-      mediaUrls: formData.getAll("mediaUrls"), 
+      // ✅ SECURITY: Accept raw files, not URLs
+      mediaFiles: formData.getAll("mediaFiles"), 
     };
 
     const validData = createPropertySchema.parse(rawData);
 
     await connectToDatabase();
     
+    const propertyId = new mongoose.Types.ObjectId();
+    const listingId = new mongoose.Types.ObjectId();
+
+    // ✅ SECURITY: Enforce deterministic naming and upload optimizations directly from the server
+    const folder = `wunkathomes/properties/${listingId}`;
+    const files = validData.mediaFiles as File[];
+    const publicIds = files.map((_, i) => `${folder}/img_${i + 1}`);
+    const uploadedUrls = await uploadToCloudinary(files, folder, publicIds) as string[];
+    
     // Mongoose recommended transaction pattern
     const dbSession = await mongoose.startSession();
     await dbSession.withTransaction(async () => {
       const newProperty = await Property.create([{
+        _id: propertyId,
         propertyType: validData.propertyType,
         location: { region: validData.region, area: validData.area, city: validData.city || undefined },
         coordinates: { lat: validData.lat, lng: validData.lng },
@@ -156,7 +166,8 @@ export async function createPropertyAction(prevState: ActionState, formData: For
       }], { session: dbSession });
 
       const newListing = await Listing.create([{
-        propertyId: newProperty[0]._id,
+        _id: listingId,
+        propertyId: propertyId,
         listingType: validData.listingType,
         roomType: validData.roomType,
         status: validData.status,
@@ -166,9 +177,7 @@ export async function createPropertyAction(prevState: ActionState, formData: For
         features: { bedrooms: validData.bedrooms, bathrooms: validData.bathrooms, sizeSqm: validData.sizeSqm },
         terms: { },
         smartLock: { hasSmartLock: validData.hasSmartLock, accessInstructions: validData.accessInstructions },
-        
-        // 2. PASS THE URLS DIRECTLY TO MONGO
-        images: validData.mediaUrls, 
+        images: uploadedUrls, 
       }], { session: dbSession });
 
       // 3. IF SMART LOCK ID WAS PROVIDED, ASSIGN IT
@@ -246,8 +255,8 @@ export async function editPropertyAction(prevState: ActionState, formData: FormD
       smartLockId: formData.get("smartLockId"),
       accessInstructions: formData.get("accessInstructions"),
       
-      // Look for the lightweight strings, not files
-      newMediaUrls: formData.getAll("newMediaUrls"), 
+      // ✅ SECURITY: Accept raw files
+      newMediaFiles: formData.getAll("newMediaFiles"), 
     };
 
     const validData = editPropertySchema.parse(rawData);
@@ -262,8 +271,16 @@ export async function editPropertyAction(prevState: ActionState, formData: FormD
     // Diff to find images that were completely removed by the user
     const imagesToDeleteFromCloudinary = oldListing.images.filter((img: string) => !validData.retainedImages.includes(img));
 
-    // Combine old images kept + new images uploaded directly from browser
-    const finalImageUrls = [...validData.retainedImages, ...validData.newMediaUrls];
+    // ✅ SECURITY: Enforce deterministic naming and upload optimizations directly from the server
+    const folder = `wunkathomes/properties/${validData.listingId}`;
+    const files = validData.newMediaFiles as File[];
+    // Generate deterministic public IDs that don't collide with retained images
+    const startIdx = validData.retainedImages.length + 1;
+    const publicIds = files.map((_, i) => `${folder}/img_${startIdx + i}`);
+    const uploadedUrls = await uploadToCloudinary(files, folder, publicIds) as string[];
+
+    // Combine old images kept + new images securely uploaded
+    const finalImageUrls = [...validData.retainedImages, ...uploadedUrls];
 
     const dbSession = await mongoose.startSession();
     await dbSession.withTransaction(async () => {
@@ -285,7 +302,7 @@ export async function editPropertyAction(prevState: ActionState, formData: FormD
         features: { bedrooms: validData.bedrooms, bathrooms: validData.bathrooms, sizeSqm: validData.sizeSqm },
         terms: { },
         smartLock: { hasSmartLock: validData.hasSmartLock, accessInstructions: validData.accessInstructions },
-        images: finalImageUrls, // <-- Directly save the text arrays
+        images: finalImageUrls, 
       }, { session: dbSession });
       
       // Handle Smart Lock reassignment securely
