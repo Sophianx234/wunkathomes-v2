@@ -91,6 +91,11 @@ const data = {
           icon: <HugeiconsIcon icon={LockIcon} strokeWidth={2} />,
         },
         {
+          title: "Access Logs",
+          url: "/admin/manage/access-logs",
+          icon: <HugeiconsIcon icon={File01Icon} strokeWidth={2} />,
+        },
+        {
           title: "Cleaning Services",
           url: "/admin/manage/cleaning",
           icon: <HugeiconsIcon icon={SparklesIcon} strokeWidth={2} />,
