@@ -13,7 +13,7 @@ import Maintenance from "@/models/maintenance";
 import SmartLock from "@/models/smartlock";
 import AccessLog from "@/models/accesslog";
 
-export async function getDashboardData() {
+export async function getDashboardData(targetYear?: number) {
   // 1. STRICT ZERO-TRUST AUTHORIZATION (CRITICAL FIX)
   const session = await getSession();
   if (!session?.userId || !['Admin', 'Manager'].includes(session.role)) {
@@ -208,14 +208,14 @@ export async function getDashboardData() {
     ]);
 
     const assetChartData = [
-      { status: "Rented", count: assetAggregations.find(a => a._id === "Rented")?.count || 0, fill: "var(--foreground)" },
-      { status: "Pending", count: assetAggregations.find(a => a._id === "Pending")?.count || 0, fill: "var(--muted-foreground)" },
-      { status: "Available", count: assetAggregations.find(a => a._id === "Available")?.count || 0, fill: "#FDE047" },
+      { status: "Rented", count: assetAggregations.find(a => a._id === "Rented")?.count || 0, fill: "#10b981" },
+      { status: "Pending", count: assetAggregations.find(a => a._id === "Pending")?.count || 0, fill: "#f59e0b" },
+      { status: "Available", count: assetAggregations.find(a => a._id === "Available")?.count || 0, fill: "#3b82f6" },
     ];
 
-    const currentYear = new Date().getFullYear();
-    const startOfYear = new Date(currentYear, 0, 1);
-    const endOfYear = new Date(currentYear, 11, 31, 23, 59, 59);
+    const chartYear = targetYear || new Date().getFullYear();
+    const startOfYear = new Date(chartYear, 0, 1);
+    const endOfYear = new Date(chartYear, 11, 31, 23, 59, 59, 999);
 
     const revenueStats = await Transaction.aggregate([
       { $match: { status: "Success", paidAt: { $gte: startOfYear, $lte: endOfYear } } },
