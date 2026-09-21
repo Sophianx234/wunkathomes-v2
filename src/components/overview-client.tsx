@@ -26,6 +26,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react"
 import Link from "next/link"
 import * as React from "react"
+import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import {
   Bar,
   BarChart,
@@ -79,9 +80,9 @@ const revenueChartConfig = {
 }
 
 const assetChartConfig = {
-  Rented: { label: "Rented", color: "var(--foreground)" },
-  Pending: { label: "Pending", color: "var(--muted-foreground)" },
-  Available: { label: "Available", color: "#FDE047" },
+  Rented: { label: "Rented", color: "#10b981" },
+  Pending: { label: "Pending", color: "#f59e0b" },
+  Available: { label: "Available", color: "#3b82f6" },
 }
 
 // --- UTILS ---
@@ -119,6 +120,7 @@ const renderStars = (rating: number) => {
 
 // --- COMPONENT TYPES ---
 type DashboardProps = {
+  selectedYear?: number;
   data: {
     metrics: {
       monthlyRevenue: number;
@@ -154,8 +156,19 @@ type DashboardProps = {
   }
 }
 
-export default function PortfolioDashboardClient({ data }: DashboardProps) {
+export default function PortfolioDashboardClient({ data, selectedYear }: DashboardProps) {
   const [isMounted, setIsMounted] = React.useState(false)
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+
+  const currentYearStr = (selectedYear || new Date().getFullYear()).toString();
+
+  const handleYearChange = (year: string) => {
+    const params = new URLSearchParams(searchParams.toString())
+    params.set("year", year)
+    router.push(`${pathname}?${params.toString()}`)
+  }
 
   React.useEffect(() => {
     setIsMounted(true)
@@ -191,7 +204,7 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
       link: "/admin/manage/maintenance",
       containerClass: "bg-zinc-50 border-zinc-200 text-zinc-900",
       iconClass: "bg-zinc-100 text-zinc-600",
-      btnClass: "bg-zinc-950 hover:bg-zinc-800 text-white border-transparent shadow-sm",
+      btnClass: "bg-zinc-950 hover:bg-zinc-800 text-white border-transparent shadow-none",
     });
   }
 
@@ -215,7 +228,7 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
       link: "/admin/manage/tenants",
       containerClass: "bg-zinc-50 border-zinc-200 text-zinc-900",
       iconClass: "bg-zinc-100 text-zinc-600",
-      btnClass: "bg-zinc-950 hover:bg-zinc-800 text-white border-transparent shadow-sm",
+      btnClass: "bg-zinc-950 hover:bg-zinc-800 text-white border-transparent shadow-none",
     });
   }
 
@@ -229,7 +242,7 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
       link: "/admin/manage/transactions",
       containerClass: "bg-blue-50 border-blue-200 text-blue-900",
       iconClass: "bg-blue-100 text-blue-600",
-      btnClass: "bg-zinc-950 hover:bg-zinc-800 text-white border-transparent shadow-sm",
+      btnClass: "bg-zinc-950 hover:bg-zinc-800 text-white border-transparent shadow-none",
     });
   }
 
@@ -243,7 +256,7 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
       link: "/admin/manage/tours",
       containerClass: "bg-zinc-100/50 border-zinc-200/60 text-zinc-900",
       iconClass: "bg-white text-zinc-600",
-      btnClass: "bg-zinc-950 hover:bg-zinc-800 text-white border-transparent shadow-sm",
+      btnClass: "bg-zinc-950 hover:bg-zinc-800 text-white border-transparent shadow-none",
     });
   }
 
@@ -258,7 +271,7 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
       link: "/admin/manage/locks",
       containerClass: "bg-rose-50 border-rose-200 text-rose-900",
       iconClass: "bg-rose-100 text-rose-600",
-      btnClass: "bg-zinc-950 hover:bg-zinc-800 text-white border-transparent shadow-sm",
+      btnClass: "bg-zinc-950 hover:bg-zinc-800 text-white border-transparent shadow-none",
     });
   }
 
@@ -350,9 +363,8 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
               <Card className="rounded-lg shadow-none bg-white border border-zinc-200/50">
                 <div className="flex flex-col p-6 h-full justify-center">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-foreground">Occupied Units</span>
-                    {/* quick info */}
-                    <div className="flex  items-center justify-center rounded-lg  ">
+                    <span className="text-sm font-medium text-foreground">Occupied Properties</span>
+                    <div className="flex items-center justify-center rounded-lg">
                       <HugeiconsIcon icon={House03Icon} strokeWidth={1} className="size-10 text-zinc-400" />
                     </div>
                   </div>
@@ -360,21 +372,36 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
                     <span className="text-2xl font-bold tracking-tight text-foreground font-tabular-nums">
                       {metrics.rentedListings} <span className="text-xl font-semibold text-muted-foreground">/ {metrics.totalListings}</span>
                     </span>
-                    <div className="mt-2 flex items-center text-xs text-muted-foreground">
-                      <span className="mr-1.5 font-medium text-emerald-600">
-                        {metrics.totalListings > 0 ? Math.round((metrics.rentedListings / metrics.totalListings) * 100) : 0}%
-                      </span>
-                      portfolio capacity
+                    <div className="mt-2 flex flex-col  text-xs text-muted-foreground">
+                      {(() => {
+                        const capacity = metrics.totalListings > 0 ? Math.round((metrics.rentedListings / metrics.totalListings) * 100) : 0;
+                        const availableUnits = metrics.totalListings - metrics.rentedListings;
+                        
+                        let colorClass = "text-rose-600";
+                        if (capacity >= 80) colorClass = "text-emerald-600";
+                        else if (capacity >= 50) colorClass = "text-amber-500";
+
+                        return (
+                          <>
+                            <span className={`mr-1.5 font-medium ${colorClass}`}>
+                              {capacity}%
+                            </span>
+                            <span className="">
+                              Units Remaining <span className="opacity-70 ml-1">({availableUnits} {availableUnits === 1 ? 'unit' : 'units'} vacant)</span>
+                            </span>
+                          </>
+                        );
+                      })()}
                     </div>
                   </div>
                 </div>
               </Card>
 
-              {/* Card 3: Active Tenancies */}
+              {/* Card 3: Current Residents */}
               <Card className="rounded-lg shadow-none bg-white border border-zinc-200/50">
                 <div className="flex flex-col p-6 h-full justify-center">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-foreground">Active Tenancies</span>
+                    <span className="text-sm font-medium text-foreground">Current Tenants</span>
                     {/* quick info */}
                     <div className="flex  items-center justify-center rounded-lg  ">
                       <HugeiconsIcon icon={Door01Icon} strokeWidth={1} className="size-10 text-zinc-400" />
@@ -385,7 +412,7 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
                       {metrics.activeTenancies}
                     </span>
                     <div className="mt-2 flex items-center text-xs text-muted-foreground">
-                      <span className="mx-1 font-medium text-foreground">{metrics.pendingLeases}</span> new application{metrics.pendingLeases === 1 ? '' : 's'} pending
+                      <span className="mr-1 font-medium text-foreground">{metrics.pendingLeases}</span> onboarding in progress
                     </div>
                   </div>
                 </div>
@@ -395,9 +422,8 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
               <Card className="rounded-lg shadow-none bg-white border border-zinc-200/50">
                 <div className="flex flex-col p-6 h-full justify-center">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-foreground">Open Work Orders</span>
-                    {/* quick info */}
-                    <div className="flex  items-center justify-center rounded-lg  ">
+                    <span className="text-sm font-medium text-foreground">Maintenance Requests</span>
+                    <div className="flex items-center justify-center rounded-lg">
                       <HugeiconsIcon icon={Wrench01Icon} strokeWidth={1} className="size-10 text-zinc-400" />
                     </div>
                   </div>
@@ -406,7 +432,18 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
                       {metrics.openWorkOrders}
                     </span>
                     <div className="mt-2 flex items-center text-xs text-muted-foreground">
-                      <span className="mx-1 font-medium text-zinc-600">{metrics.urgentMaintenance}</span> require{metrics.urgentMaintenance === 1 ? 's' : ''} urgent attention
+                      {metrics.urgentMaintenance > 0 ? (
+                        <>
+                          <span className="mr-1 font-medium text-rose-600">
+                            {metrics.urgentMaintenance}
+                          </span> 
+                          <span className="text-rose-600/90">
+                            require{metrics.urgentMaintenance === 1 ? 's' : ''} urgent attention
+                          </span>
+                        </>
+                      ) : (
+                        <span className="text-zinc-500">No urgent issues</span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -417,7 +454,7 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
             <div className="lg:col-span-4 h-full">
               <Card className="flex flex-col h-full rounded-lg shadow-none bg-white border border-zinc-200/50">
                 <div className="p-6 pb-0">
-                  <span className="text-sm font-medium text-foreground">Subscriptions & Assets</span>
+                  <span className="text-sm font-medium text-foreground">Properties Status</span>
                 </div>
                 <CardContent className="flex flex-1 flex-col justify-center px-6 pb-6 pt-4">
                   <div className="relative h-[200px] w-full">
@@ -445,7 +482,7 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
                                       {totalAssets}
                                     </tspan>
                                     <tspan x={viewBox.cx} y={(viewBox.cy || 0) + 20} className="fill-muted-foreground text-[10px] font-medium tracking-wide">
-                                      Total Assets
+                                      Total Units
                                     </tspan>
                                   </text>
                                 )
@@ -457,15 +494,21 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
                     </ChartContainer>
                   </div>
                   <div className="mt-4 flex flex-col gap-2">
-                    {assetChartData.map((item) => (
-                      <div key={item.status} className="flex items-center justify-between text-xs">
-                        <div className="flex items-center gap-2">
-                          <div className="size-2.5 rounded-full" style={{ backgroundColor: item.fill }} />
-                          <span className="font-medium text-muted-foreground">{item.status}</span>
+                    {assetChartData.map((item) => {
+                      const percentage = totalAssets > 0 ? Math.round((item.count / totalAssets) * 100) : 0;
+                      return (
+                        <div key={item.status} className="flex items-center justify-between text-xs">
+                          <div className="flex items-center gap-2">
+                            <div className="size-2.5 rounded-full" style={{ backgroundColor: item.fill }} />
+                            <span className="font-medium text-muted-foreground">{item.status}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-semibold text-foreground">{item.count}</span>
+                            <span className="text-[10px] font-medium text-muted-foreground/60 w-8 text-right">({percentage}%)</span>
+                          </div>
                         </div>
-                        <span className="font-semibold text-foreground">{item.count}</span>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </CardContent>
               </Card>
@@ -479,14 +522,15 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
             <div className="lg:col-span-8 h-full">
               <Card className="flex flex-col h-full rounded-lg shadow-none bg-white border border-zinc-200/50">
                 <div className="flex items-center justify-between p-6 pb-2">
-                  <span className="text-sm font-medium text-foreground">Sales dynamics</span>
-                  <Select defaultValue="2026">
+                  <span className="text-sm font-medium text-foreground">Revenue Overview</span>
+                  <Select value={currentYearStr} onValueChange={handleYearChange}>
                     <SelectTrigger className="h-7 w-[80px] border-none shadow-none text-xs font-medium focus:ring-0">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="2026">2026</SelectItem>
                       <SelectItem value="2025">2025</SelectItem>
+                      <SelectItem value="2024">2024</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -562,7 +606,11 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
                         {metrics.activeTours}
                       </span>
                       <div className="mt-1 flex items-center text-[11px] font-medium text-muted-foreground">
-                        <span className="mr-1 font-bold text-foreground">{metrics.toursToday}</span> today
+                        {metrics.toursToday > 0 ? (
+                          <><span className="mr-1 font-bold text-foreground">{metrics.toursToday}</span> today</>
+                        ) : (
+                          "No tours today"
+                        )}
                       </div>
                     </div>
                   </div>
@@ -601,7 +649,7 @@ export default function PortfolioDashboardClient({ data }: DashboardProps) {
                         </TableCell>
                         <TableCell className="py-3 px-5 text-right">
                           <Badge variant="secondary" className={`rounded-md px-2 py-0.5 text-[10px] font-medium hover:bg-transparent border-none ${
-                            payment.status === "Pending_Verification" ? "bg-zinc-50 text-zinc-700" : "bg-emerald-50 text-emerald-700"
+                            payment.status === "Pending_Verification" ? "bg-amber-50 text-amber-700" : "bg-emerald-50 text-emerald-700"
                           }`}>
                             {payment.status === "Pending_Verification" ? "Pending" : "Processed"}
                           </Badge>
