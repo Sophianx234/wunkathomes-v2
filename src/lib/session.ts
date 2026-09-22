@@ -1,14 +1,12 @@
 // src/lib/session.ts
-import jwt from "jsonwebtoken"
 import { cookies } from "next/headers"
-import { jwtVerify } from "jose";
+import { jwtVerify, SignJWT } from "jose";
 
 export interface SessionPayload {
   userId: string | object;
   email: string;
   role: string;
 }
-
 
 export async function getSession() {
   const cookieStore = await cookies();
@@ -26,16 +24,25 @@ export async function getSession() {
     return null;
   }
 }
+
 export async function createSession(payload: SessionPayload) {
-  // 1. Create JWT token
-  const token = jwt.sign(
-    payload,
-    process.env.JWT_SECRET || "your-secret-key",
-    { expiresIn: "7d" }
-  )
+  const isAdminOrManager = ["Admin", "Manager"].includes(payload.role);
+  
+  // 10 minutes for Admin/Manager, 30 days for standard Users
+  const expirationStr = isAdminOrManager ? "10m" : "30d";
+  const maxAgeInSeconds = isAdminOrManager ? 10 * 60 : 30 * 24 * 60 * 60; 
+
+  const secret = new TextEncoder().encode(process.env.JWT_SECRET || "your-secret-key");
+  
+  // 1. Create JWT token using jose (Edge compatible)
+  const token = await new SignJWT({ ...payload as any })
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime(expirationStr)
+    .sign(secret);
 
   // 2. Set cookie
-  const cookieStore = await cookies()
+  const cookieStore = await cookies();
   
   cookieStore.set({
     name: "auth-token",
@@ -43,14 +50,12 @@ export async function createSession(payload: SessionPayload) {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
-    maxAge: 60 * 60 * 24 * 7, // 7 days
+    maxAge: maxAgeInSeconds,
     path: "/",
-  })
+  });
 }
 
-
 export async function deleteSession() {
-  const cookieStore = await cookies()
-  
-  cookieStore.delete("auth-token")
+  const cookieStore = await cookies();
+  cookieStore.delete("auth-token");
 }
