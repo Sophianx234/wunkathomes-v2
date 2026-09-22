@@ -9,6 +9,7 @@ import User from "@/models/user";
 import { Figtree, Geist, Geist_Mono } from "next/font/google";
 import '../globals.css';
 import { Toaster } from "@/components/ui/sonner";
+import { SessionTimeoutModal } from "@/components/admin/SessionTimeoutModal";
 const figtree = Figtree({subsets:['latin'],variable:'--font-sans'});
 
 export const dynamic = "force-dynamic";
@@ -70,6 +71,7 @@ export default async function RootLayout({
             </div>
           </div>
         </SidebarInset>
+        <SessionTimeoutModal />
       </SidebarProvider>
     </TooltipProvider>
       </body>
