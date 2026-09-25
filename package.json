@@ -9,7 +9,12 @@
     "lint": "eslint",
     "seed": "tsx scripts/seed.ts",
     "seed:destroy": "tsx scripts/seed.ts -d",
-    "email": "email dev --dir src/components/email"
+    "email": "email dev --dir src/components/email",
+    "demo:50": "tsx scripts/trigger-demo.ts 50",
+    "demo:75": "tsx scripts/trigger-demo.ts 75",
+    "demo:90": "tsx scripts/trigger-demo.ts 90",
+    "demo:expire": "tsx scripts/trigger-demo.ts expired",
+    "admin": "tsx scripts/admin.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
