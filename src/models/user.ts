@@ -68,6 +68,14 @@ const userSchema = new mongoose.Schema({
   enum: ['Active', 'Suspended'],
   default: 'Active',
 },
+  twoFactorToken: {
+    type: String,
+    select: false,
+  },
+  twoFactorExpires: {
+    type: Date,
+    select: false,
+  },
 }, { timestamps: true });
 
 const User = mongoose.models.User || mongoose.model('User', userSchema);
