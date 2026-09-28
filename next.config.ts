@@ -54,10 +54,6 @@ const nextConfig: NextConfig = {
     // !! WARN !! Dangerously allow production builds to complete with type errors.
     ignoreBuildErrors: true,
   },
-  eslint: {
-    // Dangerously allow production builds to complete with ESLint errors.
-    ignoreDuringBuilds: true,
-  },
 
   // 4. SECURITY HEADERS
   // Prevents attackers from fingerprinting your tech stack

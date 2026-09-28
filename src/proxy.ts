@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
-import { jwtVerify } from "jose"; // <-- Required for Edge JWT decoding
+import { jwtVerify, SignJWT } from "jose"; // <-- Required for Edge JWT decoding
 import { getSession } from "./lib/session";
 
 // ============================================================================
@@ -76,76 +76,70 @@ export async function proxy(request: NextRequest) {
 }
 
   // ============================================================================
-  // 4. STRICT ROUTE PROTECTION (RBAC)
+  // 4. STRICT ROUTE PROTECTION (RBAC) & SLIDING SESSION
   // ============================================================================
 
-  // FIX: Decode the JWT to establish absolute truth of identity and role
-  const session = await getSession();
-  const isAuthenticated = !!session;
-  const userRole = session?.role ;
-
-  // A. Protect Auth Routes
-  const isAuthRoute = authRoutes.some((route) => path.startsWith(route));
-  if (isAuthRoute && isAuthenticated) {
-    return NextResponse.redirect(
-      new URL(
-        userRole === "Admin" ? "/admin/overview" : "/user/dashboard",
-        request.url,
-      ),
-    );
-  }
-
-  // B. Protect Standard User Routes
-  const isProtectedRoute = protectedRoutes.some((route) =>
-    path.startsWith(route),
-  );
-  if (isProtectedRoute && !isAuthenticated) {
-    const redirectUrl = new URL("/login", request.url);
-    redirectUrl.searchParams.set("callbackUrl", path);
-    return NextResponse.redirect(redirectUrl);
-  }
-
-  // C. FIX: Protect Admin Routes via True RBAC
-  const isAdminRoute = adminRoutes.some((route) => path.startsWith(route));
-  if (isAdminRoute) {
-    if (!isAuthenticated) {
-      return NextResponse.redirect(new URL("/login", request.url));
-    }
-    // Block standard users from accessing /admin paths
-    if (userRole !== "Admin" && userRole !== "Manager") {
-      console.warn(
-        `[SECURITY] User attempted unauthorized admin access. IP: ${trueIp}`,
-      );
-      return NextResponse.redirect(new URL("/user/dashboard", request.url));
-    }
-  }
-
-  // ============================================================================
-  // 5. CSRF & ORIGIN PROTECTION (Mutation Firewall)
-  // ============================================================================
-  if (["POST", "PUT", "PATCH", "DELETE"].includes(request.method)) {
-    const origin = request.headers.get("origin");
-    if (process.env.NODE_ENV === "production") {
-      // Define all permitted domains here
-      const allowedDomains = [
-        process.env.NEXT_PUBLIC_APP_URL, // From Vercel Env Vars
-        "https://wunkathomes.com",       // Future production domain
-        "https://www.wunkathomes.com",   // WWW production domain
-        "https://wunkathomes-v2-t5wg.vercel.app" // Fallback temp domain
-      ].filter(Boolean) as string[];
-      const isOriginAllowed = origin && allowedDomains.some(domain => origin.startsWith(domain));
-      if (!isOriginAllowed) {
-        console.error(
-          `[EDGE FIREWALL] Blocked CSRF attempt from ${origin} (IP: ${trueIp})`,
-        );
-        return new NextResponse("Forbidden: Invalid Origin", { status: 403 });
+  const token = request.cookies.get("auth-token")?.value;
+  let session = await getSession();
+  let newToken: string | null = null;
+  let needsCookieClear = false;
+  
+  if (token) {
+    try {
+      const secret = new TextEncoder().encode(process.env.JWT_SECRET || "your-secret-key");
+      const { payload } = await jwtVerify(token, secret);
+      const role = payload.role as string;
+      
+      // Sliding Session Logic for Admin/Manager
+      if (['Admin', 'Manager'].includes(role)) {
+        newToken = await new SignJWT({ 
+            userId: payload.userId, 
+            email: payload.email, 
+            role: payload.role 
+          })
+          .setProtectedHeader({ alg: 'HS256' })
+          .setIssuedAt()
+          .setExpirationTime('10m')
+          .sign(secret);
       }
+    } catch (error) {
+      // Token is invalid/expired
+      session = null;
+      needsCookieClear = true;
     }
   }
 
-  // ============================================================================
-  // 6. CONTENT SECURITY POLICY (CSP) & SECURE HEADERS
-  // ============================================================================
+  const isAuthenticated = !!session;
+  const userRole = session?.role;
+
+  // Helper to apply common headers and sliding cookies to ANY response
+  const applySecurity = (res: NextResponse) => {
+    res.headers.set("Content-Security-Policy", cspHeader);
+    res.headers.set("X-Frame-Options", "DENY");
+    res.headers.set("X-Content-Type-Options", "nosniff");
+    res.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+    res.headers.set(
+      "Strict-Transport-Security",
+      "max-age=63072000; includeSubDomains; preload",
+    );
+    
+    if (needsCookieClear) {
+      res.cookies.delete("auth-token");
+    } else if (newToken) {
+      res.cookies.set({
+        name: 'auth-token',
+        value: newToken,
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: 'lax',
+        maxAge: 10 * 60, // 10 minutes
+        path: '/',
+      });
+    }
+    return res;
+  };
+
+  // Content Security Policy (CSP) Definition
   const cspHeader = `
     default-src 'self';
     script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.paystack.co;
@@ -160,9 +154,65 @@ export async function proxy(request: NextRequest) {
     frame-src 'self' https://js.paystack.co https://checkout.paystack.com;
     frame-ancestors 'none';
     upgrade-insecure-requests;
-  `
-    .replace(/\s{2,}/g, " ")
-    .trim();
+  `.replace(/\s{2,}/g, " ").trim();
+
+  // A. Protect Auth Routes
+  const isAuthRoute = authRoutes.some((route) => path.startsWith(route));
+  if (isAuthRoute && isAuthenticated) {
+    return applySecurity(NextResponse.redirect(
+      new URL(
+        userRole === "Admin" ? "/admin/overview" : "/user/dashboard",
+        request.url,
+      ),
+    ));
+  }
+
+  // B. Protect Standard User Routes
+  const isProtectedRoute = protectedRoutes.some((route) =>
+    path.startsWith(route),
+  );
+  if (isProtectedRoute && !isAuthenticated) {
+    const redirectUrl = new URL("/login", request.url);
+    redirectUrl.searchParams.set("callbackUrl", path);
+    return applySecurity(NextResponse.redirect(redirectUrl));
+  }
+
+  // C. Protect Admin Routes via True RBAC
+  const isAdminRoute = adminRoutes.some((route) => path.startsWith(route));
+  if (isAdminRoute) {
+    if (!isAuthenticated) {
+      return applySecurity(NextResponse.redirect(new URL("/login", request.url)));
+    }
+    // Block standard users from accessing /admin paths
+    if (userRole !== "Admin" && userRole !== "Manager") {
+      console.warn(
+        `[SECURITY] User attempted unauthorized admin access. IP: ${trueIp}`,
+      );
+      return applySecurity(NextResponse.redirect(new URL("/user/dashboard", request.url)));
+    }
+  }
+
+  // ============================================================================
+  // 5. CSRF & ORIGIN PROTECTION (Mutation Firewall)
+  // ============================================================================
+  if (["POST", "PUT", "PATCH", "DELETE"].includes(request.method)) {
+    const origin = request.headers.get("origin");
+    if (process.env.NODE_ENV === "production") {
+      const allowedDomains = [
+        process.env.NEXT_PUBLIC_APP_URL, 
+        "https://wunkathomes.com",       
+        "https://www.wunkathomes.com",   
+        "https://wunkathomes-v2-t5wg.vercel.app" 
+      ].filter(Boolean) as string[];
+      const isOriginAllowed = origin && allowedDomains.some(domain => origin.startsWith(domain));
+      if (!isOriginAllowed) {
+        console.error(
+          `[EDGE FIREWALL] Blocked CSRF attempt from ${origin} (IP: ${trueIp})`,
+        );
+        return applySecurity(new NextResponse("Forbidden: Invalid Origin", { status: 403 }));
+      }
+    }
+  }
 
   const response = NextResponse.next({
     request: {
@@ -170,16 +220,7 @@ export async function proxy(request: NextRequest) {
     },
   });
 
-  response.headers.set("Content-Security-Policy", cspHeader);
-  response.headers.set("X-Frame-Options", "DENY");
-  response.headers.set("X-Content-Type-Options", "nosniff");
-  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
-  response.headers.set(
-    "Strict-Transport-Security",
-    "max-age=63072000; includeSubDomains; preload",
-  );
-
-  return response;
+  return applySecurity(response);
 }
 
 export const config = {
