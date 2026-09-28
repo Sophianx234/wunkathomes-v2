@@ -11,6 +11,11 @@ import {
   FieldSeparator,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
 import Link from "next/link";
 import { useFormState, useFormStatus } from "react-dom";
 import { loginAction, verifyTwoFactorAction } from "@/actions/user/auth.action";
@@ -102,17 +107,18 @@ export function LoginForm({
             </p>
           </div>
 
-          <Field>
+          <Field className="items-center">
             <FieldLabel htmlFor="otp">Verification Code</FieldLabel>
-            <Input
-              id="otp"
-              name="otp"
-              type="text"
-              placeholder="123456"
-              maxLength={6}
-              required
-              className="bg-background rounded-md text-center tracking-widest text-lg"
-            />
+            <InputOTP maxLength={6} id="otp" name="otp" autoFocus>
+              <InputOTPGroup>
+                <InputOTPSlot index={0} />
+                <InputOTPSlot index={1} />
+                <InputOTPSlot index={2} />
+                <InputOTPSlot index={3} />
+                <InputOTPSlot index={4} />
+                <InputOTPSlot index={5} />
+              </InputOTPGroup>
+            </InputOTP>
           </Field>
 
           <Field>
