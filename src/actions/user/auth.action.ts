@@ -154,6 +154,31 @@ export async function loginAction(prevState: any, formData: FormData) {
       return { success: false, error: "Invalid email or password." };
     }
 
+    if (['Admin', 'Manager'].includes(user.role)) {
+      // 1. Generate OTP
+      const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+      const hashedOtp = await bcrypt.hash(otpCode, 10);
+      
+      user.twoFactorToken = hashedOtp;
+      user.twoFactorExpires = Date.now() + 5 * 60 * 1000; // 5 minutes
+      await user.save();
+
+      // 2. Send Email
+      const TwoFactorEmail = (await import('@/components/email/two-factor-mail')).default;
+      await sendEmail({
+        to: user.email,
+        subject: "WunkatHomes Admin Verification Code",
+        react: React.createElement(TwoFactorEmail, { userName: user.name, otpCode })
+      }).catch(err => console.error("[NON-FATAL] Failed to send 2FA email:", err));
+
+      return { 
+        success: true, 
+        requiresTwoFactor: true, 
+        email: user.email, 
+        message: "Please check your email for the verification code." 
+      };
+    }
+
     await createSession({
       userId: user._id.toString(),
       email: user.email,
@@ -161,9 +186,7 @@ export async function loginAction(prevState: any, formData: FormData) {
     });
 
     let targetRoute = "/";
-    if (user.role === "Admin") targetRoute = "/admin/overview";
-    else if (user.role === "Manager") targetRoute = "/admin/overview";
-    else if (formData.get("isModal") === "true") targetRoute = "REFRESH";
+    if (formData.get("isModal") === "true") targetRoute = "REFRESH";
 
     return { success: true, message: "Welcome back!", redirectUrl: targetRoute };
 
@@ -171,6 +194,55 @@ export async function loginAction(prevState: any, formData: FormData) {
     if (error.message === "RATE_LIMIT_EXCEEDED") return { success: false, error: "Too many login attempts. Please try again later." };
     console.error(`[SECURITY LOG] Login Error (IP: ${ip}):`, error.message);
     return { success: false, error: "An unexpected error occurred. Please try again." };
+  }
+}
+
+const verifyOtpSchema = z.object({
+  email: z.string().email(),
+  otp: z.string().length(6, "OTP must be 6 digits").regex(/^\d+$/, "OTP must contain only numbers"),
+});
+
+export async function verifyTwoFactorAction(prevState: any, formData: FormData) {
+  try {
+    const validatedFields = verifyOtpSchema.safeParse(Object.fromEntries(formData));
+    if (!validatedFields.success) return { success: false, error: "Invalid code format." };
+    
+    const { email, otp } = validatedFields.data;
+    await connectToDatabase();
+    
+    const user = await User.findOne({ 
+      email,
+      twoFactorExpires: { $gt: Date.now() }
+    }).select("+twoFactorToken");
+
+    if (!user || !user.twoFactorToken) {
+      return { success: false, error: "Code is invalid or has expired." };
+    }
+
+    const isValid = await bcrypt.compare(otp, user.twoFactorToken);
+    if (!isValid) {
+      return { success: false, error: "Incorrect verification code." };
+    }
+
+    // Clear the tokens to prevent reuse
+    user.twoFactorToken = undefined;
+    user.twoFactorExpires = undefined;
+    await user.save();
+
+    await createSession({
+      userId: user._id.toString(),
+      email: user.email,
+      role: user.role,
+    });
+
+    let targetRoute = "/admin/overview";
+    if (formData.get("isModal") === "true") targetRoute = "REFRESH";
+
+    return { success: true, message: "Verification successful!", redirectUrl: targetRoute };
+
+  } catch (error: any) {
+    console.error("2FA Verify Error:", error);
+    return { success: false, error: "An unexpected error occurred." };
   }
 }
 
