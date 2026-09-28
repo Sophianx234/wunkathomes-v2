@@ -89,7 +89,7 @@ export function SignupForm({
             id="email"
             name="email"
             type="email"
-            placeholder="m@example.com"
+            placeholder="Please enter your email"
             required
             className="bg-background rounded-md"
           />
