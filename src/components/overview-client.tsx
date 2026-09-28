@@ -150,6 +150,8 @@ type DashboardProps = {
     dueRents: any[];
     recentListings: any[];
     recentReviews: any[];
+    recentSecurityEvents?: any[];
+    recentTours?: any[];
     propertyTypeStats: any[];
     assetChartData: any[];
     revenueChartData: any[];
@@ -182,6 +184,8 @@ export default function PortfolioDashboardClient({ data, selectedYear }: Dashboa
     dueRents,
     recentListings,
     recentReviews,
+    recentSecurityEvents = [],
+    recentTours = [],
     propertyTypeStats,
     assetChartData,
     revenueChartData
@@ -782,6 +786,78 @@ export default function PortfolioDashboardClient({ data, selectedYear }: Dashboa
               </div>
             </div>
             
+            {/* NEW SECTION: Recently Booked Tours */}
+            <div className="lg:col-span-12 h-full">
+              <div className="h-full flex flex-col overflow-hidden rounded-lg border border-border/60 bg-white shadow-sm">
+                <div className="flex items-center justify-between p-5 border-b border-border/40">
+                  <span className="text-sm font-medium text-foreground">Recently Booked Tours</span>
+                  <Button variant="ghost" size="sm" className="text-xs text-muted-foreground hover:text-foreground" asChild>
+                    <Link href="/admin/manage/tours">View All <HugeiconsIcon icon={ArrowRight01Icon} className="ml-1 size-3" /></Link>
+                  </Button>
+                </div>
+                <div className="flex-1 overflow-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="border-b border-border/40 hover:bg-transparent">
+                        <TableHead className="h-10 px-5 text-xs font-medium text-muted-foreground">Client</TableHead>
+                        <TableHead className="h-10 text-xs font-medium text-muted-foreground">Property</TableHead>
+                        <TableHead className="h-10 text-xs font-medium text-muted-foreground">Date & Time</TableHead>
+                        <TableHead className="h-10 text-xs font-medium text-muted-foreground">Type</TableHead>
+                        <TableHead className="h-10 px-5 text-right text-xs font-medium text-muted-foreground">Status</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {recentTours.length > 0 ? recentTours.map((tour: any) => (
+                        <TableRow key={tour.id} className="group border-b border-border/40 transition-colors hover:bg-muted/30">
+                          <TableCell className="py-3 px-5">
+                            <div className="flex items-center gap-3">
+                              <Avatar className="h-8 w-8 border border-border/50">
+                                <AvatarImage src={tour.clientAvatar || ""} />
+                                <AvatarFallback className="text-[10px] bg-muted">{tour.clientName.charAt(0)}</AvatarFallback>
+                              </Avatar>
+                              <div className="flex flex-col">
+                                <span className="text-[13px] font-medium text-foreground">{tour.clientName}</span>
+                                <span className="text-[11px] text-muted-foreground">{tour.clientEmail}</span>
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell className="py-3">
+                            <div className="flex flex-col">
+                              <span className="text-[13px] font-medium text-foreground">{tour.propertyTitle}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="py-3">
+                            <div className="flex flex-col">
+                              <span className="text-[13px] font-medium text-foreground">{tour.tourDate}</span>
+                              <span className="text-[11px] text-muted-foreground flex items-center gap-1"><HugeiconsIcon icon={Clock01Icon} className="size-3" /> {tour.tourTime}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="py-3">
+                            <Badge variant="outline" className="rounded-md px-2 py-0.5 text-[10px] font-medium bg-zinc-50">
+                              {tour.type === "Virtual" ? "Virtual" : "In-Person"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="py-3 px-5 text-right">
+                            <Badge variant="secondary" className={`rounded-md px-2 py-0.5 text-[10px] font-medium hover:bg-transparent border-none ${
+                              tour.status === "Confirmed" ? "bg-emerald-50 text-emerald-600" :
+                              tour.status === "Pending_Time" ? "bg-amber-50 text-amber-600" :
+                              "bg-zinc-100/50 text-zinc-600"
+                            }`}>
+                              {tour.status.replace("_", " ")}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      )) : (
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-center py-6 text-xs text-muted-foreground">No recent tours booked.</TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+            </div>
+
             {/* Right Col: Table 4 - Occupancy by Property Type */}
             <div className="lg:col-span-12 h-full">
               <div className="h-full flex flex-col overflow-hidden rounded-lg border border-border/60 bg-white shadow-sm">

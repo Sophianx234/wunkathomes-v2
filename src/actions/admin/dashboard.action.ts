@@ -122,7 +122,7 @@ export async function getDashboardData(targetYear?: number) {
     };
 
     // 3. Recent Data Lists
-    const [recentTransactions, dueRentsData, recentListingsData, recentReviewsData, propertyData, recentSecurityEventsData] = await Promise.all([
+    const [recentTransactions, dueRentsData, recentListingsData, recentReviewsData, propertyData, recentSecurityEventsData, recentToursData] = await Promise.all([
       Transaction.find().sort({ createdAt: -1 }).limit(4).populate('userId', 'name').populate('listingId', 'title'),
       Lease.find({ status: { $in: ["Awaiting_Payment", "Pending_Verification"] } })
         .sort({ createdAt: -1 })
@@ -134,10 +134,23 @@ export async function getDashboardData(targetYear?: number) {
       Property.aggregate([
         { $group: { _id: "$propertyType", total: { $sum: 1 } } }
       ]),
-      AccessLog.find().sort({ createdAt: -1 }).limit(5).populate('actorId', 'name email profilePicture role').populate('lockId', 'name').lean()
+      AccessLog.find().sort({ createdAt: -1 }).limit(5).populate('actorId', 'name email profilePicture role').populate('lockId', 'name').lean(),
+      Tour.find().sort({ createdAt: -1 }).limit(5).populate('userId', 'name email profilePicture').populate('listingId', 'title')
     ]);
 
     // Transform Data
+    const recentTours = recentToursData.map(t => ({
+      id: t._id.toString(),
+      clientName: t.userId?.name || "Unknown Client",
+      clientEmail: t.userId?.email || "",
+      clientAvatar: t.userId?.profilePicture || "",
+      propertyTitle: t.listingId?.title || "Property",
+      tourDate: new Date(t.date).toLocaleDateString(),
+      tourTime: t.time,
+      status: t.status,
+      type: t.tourType
+    }));
+
     const recentPayments = recentTransactions.map(t => ({
       id: t._id.toString(),
       tenant: t.userId?.name || "Unknown User",
@@ -244,6 +257,7 @@ export async function getDashboardData(targetYear?: number) {
       recentListings,
       recentReviews,
       recentSecurityEvents,
+      recentTours,
       propertyTypeStats,
       assetChartData,
       revenueChartData
