@@ -135,20 +135,20 @@ export async function getDashboardData(targetYear?: number) {
         { $group: { _id: "$propertyType", total: { $sum: 1 } } }
       ]),
       AccessLog.find().sort({ createdAt: -1 }).limit(5).populate('actorId', 'name email profilePicture role').populate('lockId', 'name').lean(),
-      Tour.find().sort({ createdAt: -1 }).limit(5).populate('userId', 'name email profilePicture').populate('listingId', 'title')
+      Tour.find().sort({ createdAt: -1 }).limit(5).populate('listingId', 'title')
     ]);
 
     // Transform Data
     const recentTours = recentToursData.map(t => ({
       id: t._id.toString(),
-      clientName: t.userId?.name || "Unknown Client",
-      clientEmail: t.userId?.email || "",
-      clientAvatar: t.userId?.profilePicture || "",
+      clientName: "Guest Lead",
+      clientEmail: t.phoneNumber || "No Phone Provided",
+      clientAvatar: "",
       propertyTitle: t.listingId?.title || "Property",
-      tourDate: new Date(t.date).toLocaleDateString(),
-      tourTime: t.time,
+      tourDate: t.scheduledDate ? new Date(t.scheduledDate).toLocaleDateString() : "Pending",
+      tourTime: t.scheduledDate ? new Date(t.scheduledDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "TBD",
       status: t.status,
-      type: t.tourType
+      type: "In-Person"
     }));
 
     const recentPayments = recentTransactions.map(t => ({
