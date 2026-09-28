@@ -131,9 +131,11 @@ export function LoginForm({
             </p>
           </div>
 
-          <Field className="items-center">
-            <FieldLabel htmlFor="otp">Verification Code</FieldLabel>
-            <InputOTP maxLength={6} id="otp" name="otp" autoFocus>
+          <Field className="items-center text-center  w-full">
+            <FieldLabel htmlFor="otp" className="flex justify-center ">Verification Code</FieldLabel>
+            <div className="flex justify-center">
+
+            <InputOTP maxLength={6}  id="otp" name="otp" autoFocus>
               <InputOTPGroup>
                 <InputOTPSlot index={0} />
                 <InputOTPSlot index={1} />
@@ -143,14 +145,9 @@ export function LoginForm({
                 <InputOTPSlot index={5} />
               </InputOTPGroup>
             </InputOTP>
+          </div>
           </Field>
-
-          <Field>
-            <SubmitButton label="Verify Code" loadingLabel="Verifying..." />
-          </Field>
-          
-          <div className="flex flex-col items-center gap-2 mt-2">
-            <button
+ <button
               type="button"
               onClick={handleResend}
               disabled={countdown > 0 || isResending}
@@ -160,15 +157,21 @@ export function LoginForm({
                 ? "Sending..." 
                 : countdown > 0 
                   ? `Didn't receive a code? Resend in ${countdown}s` 
-                  : "Didn't receive a code? Resend Code"}
+                  : "Resend Code"}
             </button>
+          <Field>
+            <SubmitButton label="Verify Code" loadingLabel="Verifying..." />
+          </Field>
+          
+          <div className="flex flex-col items-center gap-2 ">
+           
             <Button 
               variant="ghost" 
               type="button" 
-              className="w-full text-sm mt-1" 
+              className="w-full rounded-md text-sm mt-1" 
               onClick={() => setIs2FA(false)}
             >
-              Cancel & go back
+              go back
             </Button>
           </div>
         </FieldGroup>
@@ -213,6 +216,7 @@ export function LoginForm({
             id="password"
             name="password"
             type="password"
+            placeholder="Please enter your password"
             required
             className="bg-background rounded-md"
           />

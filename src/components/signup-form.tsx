@@ -115,6 +115,7 @@ export function SignupForm({
             id="password"
             name="password"
             type="password"
+            placeholder="Please enter your password"
             required
             minLength={8}
             className="bg-background rounded-md"
