@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,14 +13,14 @@ import {
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { useFormState, useFormStatus } from "react-dom";
-import { loginAction } from "@/actions/user/auth.action";
+import { loginAction, verifyTwoFactorAction } from "@/actions/user/auth.action";
 import { toast } from "sonner";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Loading03Icon } from "@hugeicons/core-free-icons";
 import { useRouter, useSearchParams } from "next/navigation";
 
 // --- Submit Button Component ---
-function SubmitButton() {
+function SubmitButton({ label, loadingLabel }: { label: string, loadingLabel: string }) {
   const { pending } = useFormStatus();
 
   return (
@@ -28,7 +28,7 @@ function SubmitButton() {
       {pending && (
         <HugeiconsIcon icon={Loading03Icon} className="animate-spin mr-2" />
       )}
-      {pending ? "Authenticating..." : "Login"}
+      {pending ? loadingLabel : label}
     </Button>
   );
 }
@@ -47,31 +47,93 @@ export function LoginForm({
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl');
 
-  // Initialize server action state hook
-  const [state, formAction] = useFormState(loginAction, null);
+  const [loginState, loginFormAction] = useFormState(loginAction, null);
+  const [verifyState, verifyFormAction] = useFormState(verifyTwoFactorAction, null);
 
-  // Trigger toasts on state change
+  const [is2FA, setIs2FA] = useState(false);
+  const [savedEmail, setSavedEmail] = useState("");
+
+  // Handle Login State
   useEffect(() => {
-    if (state?.error) {
-      toast.error(state.error);
-    } else if (state?.success) {
-      toast.success(state.message);
-      if (state.redirectUrl === "REFRESH") {
-        window.location.reload(); // Hard reload guarantees checkout page gets the updated session
+    if (loginState?.error) {
+      toast.error(loginState.error);
+    } else if (loginState?.success) {
+      if (loginState.requiresTwoFactor) {
+        toast.success(loginState.message);
+        setIs2FA(true);
+        setSavedEmail(loginState.email);
       } else {
-        const userRole = state?.userRole;
-        const targetDestination = callbackUrl || (userRole === "Admin" ? "/admin/overview" : (state?.redirectUrl || "/"));
-        router.push(targetDestination);
+        toast.success(loginState.message);
+        handleRedirect(loginState.redirectUrl);
       }
     }
-  }, [state, router, callbackUrl]);
+  }, [loginState]);
+
+  // Handle Verify State
+  useEffect(() => {
+    if (verifyState?.error) {
+      toast.error(verifyState.error);
+    } else if (verifyState?.success) {
+      toast.success(verifyState.message);
+      handleRedirect(verifyState.redirectUrl);
+    }
+  }, [verifyState]);
+
+  const handleRedirect = (target: string) => {
+    if (target === "REFRESH") {
+      window.location.reload(); 
+    } else {
+      const destination = callbackUrl || target || "/";
+      router.push(destination);
+    }
+  };
+
+  if (is2FA) {
+    return (
+      <form className={cn("flex flex-col gap-6", className)} action={verifyFormAction} {...props}>
+        {isModal && <input type="hidden" name="isModal" value="true" />}
+        <input type="hidden" name="email" value={savedEmail} />
+        
+        <FieldGroup>
+          <div className="flex flex-col items-center gap-1 text-center">
+            <h1 className="text-2xl font-bold">Two-Factor Authentication</h1>
+            <p className="text-sm text-balance text-muted-foreground">
+              We&apos;ve sent a 6-digit verification code to your email.
+            </p>
+          </div>
+
+          <Field>
+            <FieldLabel htmlFor="otp">Verification Code</FieldLabel>
+            <Input
+              id="otp"
+              name="otp"
+              type="text"
+              placeholder="123456"
+              maxLength={6}
+              required
+              className="bg-background rounded-md text-center tracking-widest text-lg"
+            />
+          </Field>
+
+          <Field>
+            <SubmitButton label="Verify Code" loadingLabel="Verifying..." />
+          </Field>
+          
+          <Button 
+            variant="ghost" 
+            type="button" 
+            className="w-full text-sm" 
+            onClick={() => setIs2FA(false)}
+          >
+            Cancel & go back
+          </Button>
+        </FieldGroup>
+      </form>
+    );
+  }
 
   return (
-    <form
-      className={cn("flex flex-col gap-6", className)}
-      action={formAction}
-      {...props}
-    >
+    <form className={cn("flex flex-col gap-6", className)} action={loginFormAction} {...props}>
       {isModal && <input type="hidden" name="isModal" value="true" />}
       <FieldGroup>
         <div className="flex flex-col items-center gap-1 text-center">
@@ -85,7 +147,7 @@ export function LoginForm({
           <FieldLabel htmlFor="email">Email</FieldLabel>
           <Input
             id="email"
-            name="email" // <-- Required for FormData
+            name="email"
             type="email"
             placeholder="m@example.com"
             required
@@ -105,7 +167,7 @@ export function LoginForm({
           </div>
           <Input
             id="password"
-            name="password" // <-- Required for FormData
+            name="password"
             type="password"
             required
             className="bg-background rounded-md"
@@ -113,13 +175,12 @@ export function LoginForm({
         </Field>
 
         <Field>
-          <SubmitButton />
+          <SubmitButton label="Login" loadingLabel="Authenticating..." />
         </Field>
 
         <FieldSeparator>Or</FieldSeparator>
 
         <Field>
-         
           <FieldDescription className="text-center mt-4">
             Don&apos;t have an account?{" "}
             <Link href={`/signup${callbackUrl ? `?callbackUrl=${encodeURIComponent(callbackUrl)}` : ''}`} className="underline underline-offset-4">
