@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/input-otp";
 import Link from "next/link";
 import { useFormState, useFormStatus } from "react-dom";
-import { loginAction, verifyTwoFactorAction } from "@/actions/user/auth.action";
+import { loginAction, verifyTwoFactorAction, resendTwoFactorAction } from "@/actions/user/auth.action";
 import { toast } from "sonner";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Loading03Icon } from "@hugeicons/core-free-icons";
@@ -57,6 +57,16 @@ export function LoginForm({
 
   const [is2FA, setIs2FA] = useState(false);
   const [savedEmail, setSavedEmail] = useState("");
+  const [countdown, setCountdown] = useState(60);
+  const [isResending, setIsResending] = useState(false);
+
+  // Handle Countdown Timer
+  useEffect(() => {
+    if (is2FA && countdown > 0) {
+      const timer = setInterval(() => setCountdown((c) => c - 1), 1000);
+      return () => clearInterval(timer);
+    }
+  }, [is2FA, countdown]);
 
   // Handle Login State
   useEffect(() => {
@@ -67,6 +77,7 @@ export function LoginForm({
         toast.success(loginState.message);
         setIs2FA(true);
         setSavedEmail(loginState.email);
+        setCountdown(60);
       } else {
         toast.success(loginState.message);
         handleRedirect(loginState.redirectUrl);
@@ -83,6 +94,19 @@ export function LoginForm({
       handleRedirect(verifyState.redirectUrl);
     }
   }, [verifyState]);
+
+  const handleResend = async () => {
+    if (countdown > 0 || isResending) return;
+    setIsResending(true);
+    const result = await resendTwoFactorAction(savedEmail);
+    if (result.success) {
+      toast.success(result.message);
+      setCountdown(60);
+    } else {
+      toast.error(result.error);
+    }
+    setIsResending(false);
+  };
 
   const handleRedirect = (target: string) => {
     if (target === "REFRESH") {
@@ -125,14 +149,28 @@ export function LoginForm({
             <SubmitButton label="Verify Code" loadingLabel="Verifying..." />
           </Field>
           
-          <Button 
-            variant="ghost" 
-            type="button" 
-            className="w-full text-sm" 
-            onClick={() => setIs2FA(false)}
-          >
-            Cancel & go back
-          </Button>
+          <div className="flex flex-col items-center gap-2 mt-2">
+            <button
+              type="button"
+              onClick={handleResend}
+              disabled={countdown > 0 || isResending}
+              className="text-sm font-medium text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:hover:text-muted-foreground transition-colors"
+            >
+              {isResending 
+                ? "Sending..." 
+                : countdown > 0 
+                  ? `Didn't receive a code? Resend in ${countdown}s` 
+                  : "Didn't receive a code? Resend Code"}
+            </button>
+            <Button 
+              variant="ghost" 
+              type="button" 
+              className="w-full text-sm mt-1" 
+              onClick={() => setIs2FA(false)}
+            >
+              Cancel & go back
+            </Button>
+          </div>
         </FieldGroup>
       </form>
     );

@@ -387,3 +387,45 @@ export async function resetPasswordAction(prevState: any, formData: FormData) {
     return { success: false, error: "An unexpected error occurred." };
   }
 }
+
+// ============================================================================
+// 6. RESEND 2FA OTP
+// ============================================================================
+export async function resendTwoFactorAction(email: string) {
+  try {
+    if (!email) return { success: false, error: "Missing email address." };
+
+    await connectToDatabase();
+    const user = await User.findOne({ email });
+
+    if (!user || !['Admin', 'Manager'].includes(user.role)) {
+      // Fail silently for security (don't confirm if user exists to unauthorized callers)
+      return { success: false, error: "Unable to process request." };
+    }
+
+    if (user.accountStatus === "Suspended") {
+      return { success: false, error: "This account is suspended." };
+    }
+
+    // 1. Generate new OTP
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const hashedOtp = await bcrypt.hash(otpCode, 10);
+    
+    user.twoFactorToken = hashedOtp;
+    user.twoFactorExpires = Date.now() + 5 * 60 * 1000; // 5 minutes
+    await user.save();
+
+    // 2. Send Email
+    const TwoFactorEmail = (await import('@/components/email/two-factor-mail')).default;
+    await sendEmail({
+      to: user.email,
+      subject: "WunkatHomes Admin Verification Code",
+      react: React.createElement(TwoFactorEmail, { userName: user.name, otpCode })
+    }).catch(err => console.error("[NON-FATAL] Failed to resend 2FA email:", err));
+
+    return { success: true, message: "A new verification code has been sent to your email." };
+  } catch (error) {
+    console.error("[AUTH LOG] 2FA Resend Error:", error);
+    return { success: false, error: "An unexpected error occurred." };
+  }
+}
