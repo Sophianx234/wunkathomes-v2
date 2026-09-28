@@ -12,27 +12,43 @@ const WARNING_BEFORE_MS = 2 * 60 * 1000;
 export function SessionTimeoutModal() {
   const [showModal, setShowModal] = useState(false);
   const [timeLeft, setTimeLeft] = useState(WARNING_BEFORE_MS / 1000); // Countdown in seconds
-  const lastActive = useRef<number>(Date.now());
   const timerInterval = useRef<NodeJS.Timeout | null>(null);
+
+  // Initialize localStorage if missing
+  useEffect(() => {
+    if (!localStorage.getItem("adminLastActive")) {
+      localStorage.setItem("adminLastActive", Date.now().toString());
+    }
+  }, []);
 
   // Handle User Activity to Reset Timer
   const updateActivity = useCallback(() => {
-    // Only update if the modal is NOT showing 
-    // (If it's showing, they MUST click "Stay Logged In" to ping the server and slide the middleware cookie)
-    if (!showModal) {
-      lastActive.current = Date.now();
+    if (showModal) return;
+    
+    const now = Date.now();
+    const stored = parseInt(localStorage.getItem("adminLastActive") || "0", 10);
+    
+    // CRITICAL FIX: Prevent a sudden mouse movement from rescuing a dead/suspended session.
+    // If the browser tab was asleep and the user comes back, their first mouse movement 
+    // will NOT reset the clock if they are already past the warning threshold.
+    if (now - stored < (SESSION_TIMEOUT_MS - WARNING_BEFORE_MS)) {
+      // Throttle localStorage writes to save performance
+      if (now - stored > 1000) {
+        localStorage.setItem("adminLastActive", now.toString());
+      }
     }
   }, [showModal]);
 
   useEffect(() => {
     // Listen for basic browser interaction
     const events = ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart'];
-    events.forEach((event) => window.addEventListener(event, updateActivity));
+    events.forEach((event) => window.addEventListener(event, updateActivity, { passive: true }));
 
     // Check timer every second
     timerInterval.current = setInterval(() => {
       const now = Date.now();
-      const idleTime = now - lastActive.current;
+      const lastActive = parseInt(localStorage.getItem("adminLastActive") || now.toString(), 10);
+      const idleTime = now - lastActive;
 
       if (idleTime >= (SESSION_TIMEOUT_MS - WARNING_BEFORE_MS)) {
         setShowModal(true);
@@ -63,7 +79,7 @@ export function SessionTimeoutModal() {
     }
     // Hide modal and reset local timers
     setShowModal(false);
-    lastActive.current = Date.now();
+    localStorage.setItem("adminLastActive", Date.now().toString());
     setTimeLeft(WARNING_BEFORE_MS / 1000);
   };
 
