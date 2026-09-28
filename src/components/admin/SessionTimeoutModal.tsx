@@ -40,8 +40,8 @@ export function SessionTimeoutModal() {
   }, [showModal]);
 
   useEffect(() => {
-    // Listen for basic browser interaction
-    const events = ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart'];
+    // Listen for strictly intentional interaction (ignoring mousemove/scroll to prevent phantom resets from sensitive mice)
+    const events = ['mousedown', 'keydown', 'touchstart', 'click'];
     events.forEach((event) => window.addEventListener(event, updateActivity, { passive: true }));
 
     // Check timer every second

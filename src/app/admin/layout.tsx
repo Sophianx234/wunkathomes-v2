@@ -71,8 +71,8 @@ export default async function RootLayout({
             </div>
           </div>
         </SidebarInset>
-        <SessionTimeoutModal />
       </SidebarProvider>
+      <SessionTimeoutModal />
     </TooltipProvider>
       </body>
     </html>
