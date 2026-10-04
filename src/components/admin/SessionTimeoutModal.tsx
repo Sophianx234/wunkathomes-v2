@@ -14,11 +14,9 @@ export function SessionTimeoutModal() {
   const [timeLeft, setTimeLeft] = useState(WARNING_BEFORE_MS / 1000); // Countdown in seconds
   const timerInterval = useRef<NodeJS.Timeout | null>(null);
 
-  // Initialize localStorage if missing
+  // Initialize localStorage
   useEffect(() => {
-    if (!localStorage.getItem("adminLastActive")) {
-      localStorage.setItem("adminLastActive", Date.now().toString());
-    }
+    localStorage.setItem("adminLastActive", Date.now().toString());
   }, []);
 
   // Handle User Activity to Reset Timer
@@ -100,6 +98,20 @@ export function SessionTimeoutModal() {
   const maxTime = WARNING_BEFORE_MS / 1000;
   const strokeDashoffset = circumference - (timeLeft / maxTime) * circumference;
 
+  // Dynamic colors based on time remaining
+  let ringColorClass = "stroke-zinc-900 dark:stroke-zinc-100";
+  let textColorClass = "text-zinc-900 dark:text-zinc-100";
+
+  if (timeLeft <= 30) {
+    // Red when critically low (<= 30s)
+    ringColorClass = "stroke-rose-500";
+    textColorClass = "text-rose-500";
+  } else if (timeLeft <= 60) {
+    // Grey when getting lower (<= 60s)
+    ringColorClass = "stroke-zinc-500 dark:stroke-zinc-400";
+    textColorClass = "text-zinc-500 dark:text-zinc-400";
+  }
+
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div className="bg-white dark:bg-zinc-950 border dark:border-zinc-800 rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center flex flex-col items-center animate-in fade-in zoom-in duration-300">
@@ -129,7 +141,7 @@ export function SessionTimeoutModal() {
               cy="60"
               r={radius}
               fill="transparent"
-              className="stroke-rose-500 transition-all duration-1000 ease-linear"
+              className={`${ringColorClass} transition-all duration-1000 ease-linear`}
               strokeWidth="8"
               strokeLinecap="round"
               strokeDasharray={circumference}
@@ -139,7 +151,7 @@ export function SessionTimeoutModal() {
           
           {/* Centered Time */}
           <div className="absolute flex flex-col items-center justify-center">
-            <span className="text-3xl font-bold text-rose-500 tabular-nums tracking-tight">
+            <span className={`text-3xl font-bold ${textColorClass} transition-colors duration-1000 tabular-nums tracking-tight`}>
               {minutes}:{seconds}
             </span>
           </div>
