@@ -125,7 +125,7 @@ export function SessionTimeoutModal() {
 
         {/* Circular Progress Bar */}
         <div className="relative flex items-center justify-center w-36 h-36 mb-8">
-          <svg className="w-full h-full transform -rotate-90 drop-shadow-md" viewBox="0 0 120 120">
+          <svg className="w-full h-full transform -rotate-90 " viewBox="0 0 120 120">
             {/* Background Track */}
             <circle
               cx="60"
@@ -170,7 +170,6 @@ export function SessionTimeoutModal() {
             onClick={handleLogout}
             className="flex items-center justify-center gap-2 w-full bg-transparent hover:bg-rose-50 dark:hover:bg-rose-500/10 text-rose-600 font-medium py-2.5 rounded-lg transition-colors"
           >
-            <LogOut className="w-5 h-5" />
             Log Out Now
           </button>
         </div>

@@ -33,14 +33,18 @@ import {
 
 import { DocumentViewer } from "@/components/ui/document-viewer";
 import { TenancyDocument } from "./lease-document viewer";
-import { verifyAndOnboardTenantAction, updateTenantDetailsAction } from "@/actions/admin/tenant.action";
+import { verifyAndOnboardTenantAction, updateTenantDetailsAction, rejectTenantOnboardingAction } from "@/actions/admin/tenant.action";
 import type { TenantRecord } from "@/components/tenant-directory-client";
 
 export default function TenantOnboardClient({ tenant }: { tenant: TenantRecord }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [confirmAction, setConfirmAction] = useState<"verifyAndOnboard" | null>(null);
+  const [confirmAction, setConfirmAction] = useState<"verifyAndOnboard" | "rejectOnboarding" | null>(null);
   
+  // Rejection state
+  const [rejectReason, setRejectReason] = useState("Fraudulent Documents");
+  const [suspendUser, setSuspendUser] = useState(false);
+
   // Media Viewer
   const [expandedImage, setExpandedImage] = useState<string | null>(null);
   const [isViewingDocument, setIsViewingDocument] = useState(false);
@@ -80,6 +84,29 @@ export default function TenantOnboardClient({ tenant }: { tenant: TenantRecord }
             router.refresh();
           } else {
             toast.error(res.error || "Failed to complete onboarding.");
+          }
+        } catch (error) {
+          toast.error("An unexpected error occurred.");
+        } finally {
+          setConfirmAction(null);
+        }
+      });
+    } else if (confirmAction === "rejectOnboarding") {
+      startTransition(async () => {
+        try {
+          const formData = new FormData();
+          formData.append("leaseId", tenant.lease.id);
+          formData.append("userId", tenant.user.id);
+          formData.append("reason", rejectReason);
+          formData.append("suspendUser", String(suspendUser));
+
+          const res = await rejectTenantOnboardingAction(formData);
+          if (res.success) {
+            toast.success(res.message);
+            router.push("/admin/manage/tenants");
+            router.refresh();
+          } else {
+            toast.error(res.error || "Failed to reject onboarding.");
           }
         } catch (error) {
           toast.error("An unexpected error occurred.");
@@ -368,13 +395,20 @@ export default function TenantOnboardClient({ tenant }: { tenant: TenantRecord }
               <p className="text-[14px] text-zinc-500 leading-relaxed">Ensure the tenant is physically present in the office with their original Ghana Card. Verify their identity to activate the lease and provision property access (digital or physical keys) for <strong className="text-zinc-900 font-semibold">{tenant.lease.propertyName} ({tenant.lease.unitNumber})</strong>.</p>
             </div>
             
-            <div className="pt-2">
+            <div className="pt-2 flex flex-col sm:flex-row gap-3">
               <Button 
                 disabled={needsDocs}
-                className="w-full h-14 bg-zinc-900 text-white hover:bg-zinc-800 text-[15px] font-semibold rounded-xl  transition-all disabled:opacity-50" 
+                className="w-full sm:flex-1 h-14 bg-zinc-900 text-white hover:bg-zinc-800 text-[15px] font-semibold rounded-xl  transition-all disabled:opacity-50" 
                 onClick={() => setConfirmAction("verifyAndOnboard")}
               >
                 {needsDocs ? "Complete Identity Capture to Continue" : (tenant.smartLock?.tuyaDeviceId || tenant.lease.smartLockCode ? "Verify & Grant Smart Lock Access" : "Verify & Complete Onboarding")}
+              </Button>
+              <Button 
+                variant="outline"
+                className="w-full sm:w-auto h-14 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 text-[15px] font-semibold rounded-xl transition-all" 
+                onClick={() => setConfirmAction("rejectOnboarding")}
+              >
+                Reject Application
               </Button>
             </div>
           </section>
@@ -387,13 +421,17 @@ export default function TenantOnboardClient({ tenant }: { tenant: TenantRecord }
       <AlertDialog open={!!confirmAction} onOpenChange={(open) => !open && setConfirmAction(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-lg font-bold text-zinc-900">Verify Identity & Dispatch Keys</AlertDialogTitle>
+            <AlertDialogTitle className="text-lg font-bold text-zinc-900">
+              {confirmAction === "verifyAndOnboard" ? "Verify Identity & Dispatch Keys" : "Reject Application"}
+            </AlertDialogTitle>
             <AlertDialogDescription className="text-[13px] text-zinc-500 leading-relaxed">
-              By confirming, you verify that the tenant's physical Ghana Card matches the person present in the office. This action will activate their lease and dispatch property access credentials (via Smart Lock PIN or Physical Keys).
+              {confirmAction === "verifyAndOnboard" 
+                ? "By confirming, you verify that the tenant's physical Ghana Card matches the person present in the office. This action will activate their lease and dispatch property access credentials (via Smart Lock PIN or Physical Keys)."
+                : "This action will cancel the lease, free up the property listing, and notify the user."}
             </AlertDialogDescription>
           </AlertDialogHeader>
           
-          {tenant.user.kycStatus === "Verified" && (
+          {confirmAction === "verifyAndOnboard" && tenant.user.kycStatus === "Verified" && (
             <div className="mt-4 p-4 bg-emerald-50 border border-emerald-200/60 rounded-lg">
               <div className="flex items-start gap-3">
                 <HugeiconsIcon icon={CheckmarkBadge01Icon} className="text-emerald-600 shrink-0" size={20} />
@@ -407,10 +445,45 @@ export default function TenantOnboardClient({ tenant }: { tenant: TenantRecord }
             </div>
           )}
 
+          {confirmAction === "rejectOnboarding" && (
+            <div className="mt-4 space-y-4">
+              <div>
+                <label className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest mb-2 block">Reason for Rejection</label>
+                <select 
+                  className="w-full h-10 px-3 text-[14px] rounded-md border border-zinc-200/60 bg-white text-zinc-900 outline-none focus:border-zinc-400"
+                  value={rejectReason}
+                  onChange={(e) => setRejectReason(e.target.value)}
+                >
+                  <option value="Fraudulent Documents">Fraudulent Documents</option>
+                  <option value="Suspicious Activity">Suspicious Activity</option>
+                  <option value="Tenant Withdrew">Tenant Withdrew</option>
+                  <option value="Payment Failed">Payment Failed</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <input 
+                  type="checkbox" 
+                  id="suspend-user" 
+                  checked={suspendUser} 
+                  onChange={(e) => setSuspendUser(e.target.checked)} 
+                  className="rounded border-zinc-300"
+                />
+                <label htmlFor="suspend-user" className="text-[13px] text-zinc-700 font-medium">Suspend User Account</label>
+              </div>
+            </div>
+          )}
+
           <AlertDialogFooter className="mt-6 gap-2 sm:gap-0">
             <AlertDialogCancel disabled={isPending} className="h-10 text-[13px] font-semibold border-zinc-200/60 hover:bg-zinc-50 rounded-lg">Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={executeConfirmedAction} disabled={isPending} className="h-10 text-[13px] font-semibold rounded-lg bg-zinc-900 text-white hover:bg-zinc-800">
+            <AlertDialogAction 
+              onClick={executeConfirmedAction} 
+              disabled={isPending} 
+              className={`h-10 text-[13px] font-semibold rounded-lg ${confirmAction === "rejectOnboarding" ? "bg-red-600 hover:bg-red-700 text-white" : "bg-zinc-900 hover:bg-zinc-800 text-white"}`}
+            >
               {isPending ? <><HugeiconsIcon icon={Loading03Icon} className="animate-spin mr-2" size={14} /> Processing...</> : 
+               confirmAction === "rejectOnboarding" ? "Confirm Rejection" :
                (tenant.user.kycStatus === "Verified") ? "Approve & Dispatch Keys" : (tenant.smartLock?.tuyaDeviceId || tenant.lease.smartLockCode ? "Verify & Grant Smart Lock Access" : "Verify & Complete Onboarding")}
             </AlertDialogAction>
           </AlertDialogFooter>
