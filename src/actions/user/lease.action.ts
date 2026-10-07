@@ -30,6 +30,8 @@ const signLeaseSchema = z.object({
 
 const vacateSchema = z.object({
   leaseId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid Lease ID format"),
+  moveOutDate: z.string().datetime().optional(),
+  vacateReason: z.string().optional(),
 });
 
 // ============================================================================
@@ -53,9 +55,6 @@ export async function signLeaseAgreement(
       throw new Error("UNAUTHORIZED");
     }
     userId = session.userId;
-
-    // const { success } = await ratelimit.limit(`sign_lease_${userId}`);
-    // if (!success) throw new Error("RATE_LIMIT_EXCEEDED");
 
     const { leaseId, typedSignature } = signLeaseSchema.parse({
       leaseId: rawLeaseId,
@@ -105,11 +104,6 @@ export async function signLeaseAgreement(
   } catch (error: any) {
     if (error.message === "UNAUTHORIZED")
       return { success: false, error: "Unauthorized access." };
-    if (error.message === "RATE_LIMIT_EXCEEDED")
-      return {
-        success: false,
-        error: "Too many requests. Please try again later.",
-      };
 
     console.error(
       `[SECURITY LOG] Signature Error (User: ${userId}, IP: ${ip}):`,
@@ -123,28 +117,28 @@ export async function signLeaseAgreement(
   }
 }
 
-export async function submitNoticeToVacate(rawLeaseId: string) {
+export async function submitNoticeToVacate(rawLeaseId: string, rawMoveOutDate?: string, rawVacateReason?: string) {
   let ip = "unknown";
   let userId = "unknown";
 
   try {
-    // 1. Capture Identity Footprint
     const headersList = await headers();
     ip = headersList.get("x-forwarded-for")?.split(",")[0] || "Unknown IP";
 
-    // 2. Zero-Trust Authorization
     const session = await getSession();
     if (!session || !session.userId) {
       throw new Error("UNAUTHORIZED");
     }
     userId = session.userId;
 
-    // 3. Strict Payload Scrubbing
-    const { leaseId } = vacateSchema.parse({ leaseId: rawLeaseId });
+    const { leaseId, moveOutDate, vacateReason } = vacateSchema.parse({ 
+      leaseId: rawLeaseId,
+      moveOutDate: rawMoveOutDate,
+      vacateReason: rawVacateReason
+    });
 
     await connectToDatabase();
 
-    // 4. Fetch Lease & Verify Ownership (IDOR Protection)
     const lease = await Lease.findOne({
       _id: leaseId,
       userId: userId,
@@ -163,15 +157,13 @@ export async function submitNoticeToVacate(rawLeaseId: string) {
       };
     }
 
-    // 5. ATOMIC TRANSACTION: Mongoose Recommended Pattern
     const dbSession = await mongoose.startSession();
     await dbSession.withTransaction(async () => {
-      // Update Lease
       lease.intentToVacate = true;
-      lease.moveOutDate = lease.endDate;
+      lease.moveOutDate = moveOutDate ? new Date(moveOutDate) : lease.endDate;
+      lease.vacateReason = vacateReason || "Not provided";
       await lease.save({ session: dbSession });
 
-      // Instantly relist the property as Available
       await Listing.findByIdAndUpdate(
         lease.listingId._id,
         { status: "Available" },
@@ -180,15 +172,14 @@ export async function submitNoticeToVacate(rawLeaseId: string) {
     });
     await dbSession.endSession();
 
-    // 6. Fire and Forget Email (Outside transaction block)
     if (lease.userId?.email && lease.listingId?.title) {
       sendEmail({
         to: lease.userId.email,
-        subject: `Move-Out Confirmed: ${lease.listingId.title}`,
+        subject: `Move-Out Request Received: ${lease.listingId.title}`,
         react: React.createElement(MoveOutConfirmationEmail, {
           userName: lease.userId.name,
           propertyTitle: lease.listingId.title,
-          moveOutDate: lease.endDate.toLocaleDateString("en-GB", {
+          moveOutDate: lease.moveOutDate.toLocaleDateString("en-GB", {
             day: "numeric",
             month: "long",
             year: "numeric",
@@ -199,24 +190,18 @@ export async function submitNoticeToVacate(rawLeaseId: string) {
       });
     }
 
-    // 7. Revalidate UI
     revalidatePath("/user/dashboard");
-    revalidatePath("/admin/activations");
+    revalidatePath("/admin/manage/tenants");
 
     return {
       success: true,
-      message:
-        "Notice to vacate submitted. Check your email for move-out instructions.",
+      message: "Notice to vacate submitted. Check your email for move-out instructions.",
     };
   } catch (error: any) {
-    // 8. Secure Failure & Logging
     if (error.message === "UNAUTHORIZED")
       return { success: false, message: "Unauthorized access." };
 
-    console.error(
-      `[SECURITY LOG] Notice to Vacate Error (User: ${userId}, IP: ${ip}):`,
-      error.message,
-    );
+    console.error(`[SECURITY LOG] Notice to Vacate Error:`, error.message);
     return { success: false, message: "An unexpected system error occurred." };
   }
 }

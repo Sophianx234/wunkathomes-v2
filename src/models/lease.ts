@@ -62,12 +62,15 @@ const leaseSchema = new mongoose.Schema({
     }  // Triggers when now >= endDate
   },
   intentToVacate: { 
-  type: Boolean, 
-  default: false 
-},
-moveOutDate: { 
-  type: Date 
-},
+    type: Boolean, 
+    default: false 
+  },
+  moveOutDate: { 
+    type: Date 
+  },
+  vacateReason: {
+    type: String
+  },
 
   signatureAudit: {
     isSigned: { type: Boolean, default: false },
