@@ -241,9 +241,16 @@ export function UserDashboard({ user, activeLeases, initialSchedule }: Dashboard
     router.push(`/checkout/renew?leaseId=${lease.id}`);
   };
 
+  const [vacateDate, setVacateDate] = useState<string>("");
+  const [vacateReason, setVacateReason] = useState<string>("");
+
   const handleVacate = async () => {
+    if (!vacateDate) {
+      toast.error("Please select a move-out date.");
+      return;
+    }
     setIsVacating(true);
-    const result = await submitNoticeToVacate(lease.id);
+    const result = await submitNoticeToVacate(lease.id, new Date(vacateDate).toISOString(), vacateReason);
 
     if (result.success) {
       toast.success(result.message);
@@ -462,25 +469,49 @@ export function UserDashboard({ user, activeLeases, initialSchedule }: Dashboard
                   <AlertDialogContent>
                     <AlertDialogHeader>
                       <AlertDialogTitle className="text-sm md:text-lg">
-                        Are you absolutely sure?
+                        Submit Notice to Vacate
                       </AlertDialogTitle>
                       <AlertDialogDescription className="text-[11px] md:text-sm">
-                        This action will inform property management that you are
-                        vacating on{" "}
-                        <strong>{endDate.toLocaleDateString()}</strong>. Your
-                        smart lock access will expire, and the property will be
-                        immediately listed for new tenants.
+                        This action will inform property management that you intend to move out.
+                        Please provide your intended move-out date.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
+                    
+                    <div className="flex flex-col gap-3 py-4">
+                      <div>
+                        <Label htmlFor="vacate-date" className="text-xs">Move-Out Date</Label>
+                        <Input 
+                          id="vacate-date" 
+                          type="date" 
+                          min={today.toISOString().split('T')[0]} 
+                          value={vacateDate}
+                          onChange={(e) => setVacateDate(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="vacate-reason" className="text-xs">Reason (Optional)</Label>
+                        <Input 
+                          id="vacate-reason" 
+                          placeholder="e.g. Relocating for work"
+                          value={vacateReason}
+                          onChange={(e) => setVacateReason(e.target.value)}
+                        />
+                      </div>
+                    </div>
+
                     <AlertDialogFooter className="gap-2">
                       <AlertDialogCancel className="text-[11px] md:text-sm h-8 md:h-10">
                         Cancel
                       </AlertDialogCancel>
                       <AlertDialogAction
-                        onClick={handleVacate}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleVacate();
+                        }}
+                        disabled={!vacateDate || isVacating}
                         className="bg-zinc-900 text-white hover:bg-zinc-800 text-[11px] md:text-sm h-8 md:h-10"
                       >
-                        Confirm Move-Out
+                        {isVacating ? "Submitting..." : "Confirm Move-Out"}
                       </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>

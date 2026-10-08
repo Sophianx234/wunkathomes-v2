@@ -259,3 +259,147 @@ export async function updateTenantDetailsAction(formData: FormData) {
     return { success: false, error: error.message || "An unexpected error occurred." };
   }
 }
+
+export async function rejectTenantOnboardingAction(formData: FormData) {
+  try {
+    const { getSession } = await import("@/lib/session");
+    const session = await getSession();
+    if (!session?.userId || !['Admin', 'Manager'].includes(session.role)) {
+      return { success: false, error: "Unauthorized access attempt." };
+    }
+
+    const leaseId = formData.get("leaseId") as string;
+    const userId = formData.get("userId") as string;
+    const reason = formData.get("reason") as string;
+    const suspendUser = formData.get("suspendUser") === "true";
+
+    if (!leaseId || !userId || !reason) {
+      return { success: false, error: "Missing required fields." };
+    }
+
+    const { connectToDatabase } = await import("@/config/DbConnect");
+    await connectToDatabase();
+    
+    const Lease = (await import("@/models/lease")).default;
+    const Listing = (await import("@/models/listing")).default;
+    const User = (await import("@/models/user")).default;
+
+    const lease = await Lease.findById(leaseId).populate("listingId");
+    if (!lease) return { success: false, error: "Lease not found." };
+    
+    const user = await User.findById(userId);
+    if (!user) return { success: false, error: "User not found." };
+
+    // Cancel Lease
+    lease.status = "Cancelled";
+    await lease.save();
+
+    // Free up listing
+    if (lease.listingId) {
+      await Listing.findByIdAndUpdate(lease.listingId._id, { status: "Available" });
+    }
+
+    // Update User if fraud
+    if (reason === "Fraudulent Documents" || reason === "Suspicious Activity") {
+      user.kycStatus = "Rejected";
+    }
+    
+    if (suspendUser) {
+      user.accountStatus = "Suspended";
+    }
+    await user.save();
+
+    // Send Rejection Email
+    if (user.email) {
+      const { sendEmail } = await import("@/lib/resend");
+      const TeamUpdateEmail = (await import("@/components/email/team-update-mail")).default;
+      
+      let message = "Your tenancy application has been cancelled.";
+      if (reason === "Fraudulent Documents" || reason === "Suspicious Activity") {
+         message = "Your tenancy application has been rejected due to irregularities with your verification documents.";
+      } else if (reason === "Tenant Withdrew") {
+         message = "Your tenancy application has been cancelled as per your withdrawal request.";
+      }
+      
+      const React = await import("react");
+      await sendEmail({
+        to: user.email,
+        subject: `Application Update: ${lease.listingId?.title || "Property"}`,
+        react: React.createElement(TeamUpdateEmail, {
+          userName: user.name,
+          title: "Application Cancelled",
+          message: message
+        })
+      }).catch(err => console.error("Failed to send rejection email", err));
+    }
+
+    const { revalidatePath } = await import("next/cache");
+    revalidatePath("/admin/manage/tenants");
+    return { success: true, message: "Onboarding successfully rejected and cancelled." };
+
+  } catch (error: any) {
+    console.error("[REJECT_ONBOARDING]", error);
+    return { success: false, error: error.message || "An unexpected error occurred." };
+  }
+}
+
+export async function processMoveOutAction(leaseId: string) {
+  try {
+    const { getSession } = await import("@/lib/session");
+    const session = await getSession();
+    if (!session?.userId || !['Admin', 'Manager'].includes(session.role)) {
+      return { success: false, error: "Unauthorized access attempt." };
+    }
+
+    if (!leaseId) {
+      return { success: false, error: "Lease ID is required." };
+    }
+
+    const { connectToDatabase } = await import("@/config/DbConnect");
+    await connectToDatabase();
+    
+    const Lease = (await import("@/models/lease")).default;
+    const Listing = (await import("@/models/listing")).default;
+    const SmartLock = (await import("@/models/smartlock")).default;
+
+    const lease = await Lease.findById(leaseId).populate("listingId");
+    if (!lease) return { success: false, error: "Lease not found." };
+    
+    // Process Smart Lock if exists
+    let lockProcessed = false;
+    if (lease.listingId) {
+      const lock = await SmartLock.findOne({
+        $or: [{ propertyId: lease.listingId.propertyId }, { listingId: lease.listingId._id }],
+      });
+      if (lock && lock.tuyaDeviceId) {
+        const { resetTenantPinAction } = await import("./smartlock.action");
+        // We will call the reset action, but for a true move-out, we ideally want to delete the pin.
+        // For now, reset it so the old PIN is invalidated.
+        await resetTenantPinAction(lock.tuyaDeviceId, leaseId);
+        lockProcessed = true;
+      }
+    }
+
+    // Terminate Lease
+    lease.status = "Expired";
+    await lease.save();
+
+    // Ensure listing is available
+    if (lease.listingId) {
+      await Listing.findByIdAndUpdate(lease.listingId._id, { status: "Available" });
+    }
+
+    const { revalidatePath } = await import("next/cache");
+    revalidatePath("/admin/manage/tenants");
+    revalidatePath(`/admin/manage/tenants/${lease.userId}`);
+
+    return { 
+      success: true, 
+      message: `Move-out processed successfully. ${lockProcessed ? "Smart lock PIN has been revoked." : "Please collect physical keys."}` 
+    };
+
+  } catch (error: any) {
+    console.error("[PROCESS_MOVE_OUT]", error);
+    return { success: false, error: error.message || "An unexpected error occurred." };
+  }
+}
