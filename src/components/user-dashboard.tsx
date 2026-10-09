@@ -401,8 +401,8 @@ export function UserDashboard({ user, activeLeases, initialSchedule }: Dashboard
 
 
 
-        {/* 4. RENEWAL & VACATE ACTION CARD */}
-        {isExpiringSoon && !isRestricted && (
+        {/* 4. MANAGE LEASE & VACATE ACTION CARD */}
+        {!isRestricted && (
           <div className="bg-white border border-zinc-200/60 p-4 md:p-6 rounded-lg md:rounded-lg flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6 relative overflow-hidden w-full box-border">
             <div className="absolute left-0 top-0 bottom-0 w-1 bg-zinc-900" />
 
@@ -428,14 +428,18 @@ export function UserDashboard({ user, activeLeases, initialSchedule }: Dashboard
                     ? "Move-Out Scheduled"
                     : isExpired
                       ? "Payment Overdue: Lease Expired"
-                      : "Lease Renewal Due"}
+                      : isExpiringSoon
+                        ? "Lease Renewal Due"
+                        : "Manage Lease"}
                 </h4>
                 <p className="text-[9px] md:text-sm text-zinc-500 font-medium mt-0.5 md:mt-1 max-w-xl break-words leading-tight">
                   {lease.intentToVacate
                     ? `Your notice to vacate is confirmed for ${endDate.toLocaleDateString()}. Please prepare for the final property inspection.`
                     : isExpired
                       ? "Your lease has officially expired. Please renew your subscription immediately to prevent the automatic revocation of your smart lock access."
-                      : `Your current lease concludes in ${daysLeft} days. Please secure your renewal or officially submit a notice to vacate.`}
+                      : isExpiringSoon
+                        ? `Your current lease concludes in ${daysLeft} days. Please secure your renewal or officially submit a notice to vacate.`
+                        : `Your lease is active. You have ${daysLeft} days remaining. You can submit a notice to vacate early if you intend to move out.`}
                 </p>
               </div>
             </div>
@@ -517,26 +521,28 @@ export function UserDashboard({ user, activeLeases, initialSchedule }: Dashboard
                   </AlertDialogContent>
                 </AlertDialog>
 
-                <button
-                  onClick={handleRenewal}
-                  disabled={isRenewing || isVacating}
-                  className="w-full sm:w-auto px-4 py-2 md:px-6 md:py-2.5 bg-zinc-900 hover:bg-black text-white font-semibold text-[10px] md:text-sm rounded-md md:rounded-lg transition-colors flex items-center justify-center gap-1.5 md:gap-2 disabled:opacity-70 shadow-sm shrink-0"
-                >
-                  {isRenewing ? (
-                    <>
-                      <span className="scale-75 md:scale-100 flex items-center">
-                        <HugeiconsIcon
-                          icon={Loading03Icon}
-                          size={16}
-                          className="animate-spin"
-                        />
-                      </span>{" "}
-                      Processing...
-                    </>
-                  ) : (
-                    "Renew Lease"
-                  )}
-                </button>
+                {isExpiringSoon && (
+                  <button
+                    onClick={handleRenewal}
+                    disabled={isRenewing || isVacating}
+                    className="w-full sm:w-auto px-4 py-2 md:px-6 md:py-2.5 bg-zinc-900 hover:bg-black text-white font-semibold text-[10px] md:text-sm rounded-md md:rounded-lg transition-colors flex items-center justify-center gap-1.5 md:gap-2 disabled:opacity-70 shadow-sm shrink-0"
+                  >
+                    {isRenewing ? (
+                      <>
+                        <span className="scale-75 md:scale-100 flex items-center">
+                          <HugeiconsIcon
+                            icon={Loading03Icon}
+                            size={16}
+                            className="animate-spin"
+                          />
+                        </span>{" "}
+                        Processing...
+                      </>
+                    ) : (
+                      "Renew Lease"
+                    )}
+                  </button>
+                )}
               </div>
             )}
           </div>
