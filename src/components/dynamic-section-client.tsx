@@ -6,11 +6,14 @@ import { ArrowDown01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import PropertyCard from "./property-card";
 
-interface FeaturedSalesClientProps {
+interface DynamicSectionClientProps {
+  title: string;
+  subtitle: string;
   properties: any[];
+  bgClass?: string;
 }
 
-export default function FeaturedSalesClient({ properties }: FeaturedSalesClientProps) {
+export default function DynamicSectionClient({ title, subtitle, properties, bgClass = "bg-white" }: DynamicSectionClientProps) {
   const [visibleCount, setVisibleCount] = useState(8);
 
   const handleLoadMore = () => {
@@ -23,7 +26,7 @@ export default function FeaturedSalesClient({ properties }: FeaturedSalesClientP
   if (properties.length === 0) return null;
 
   return (
-    <section className="bg-white py-20 md:py-28 overflow-hidden">
+    <section className={`${bgClass} py-20 md:py-24 overflow-hidden border-t border-zinc-100`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* === Section Header === */}
@@ -38,17 +41,11 @@ export default function FeaturedSalesClient({ properties }: FeaturedSalesClientP
             <div className="flex items-center gap-3 mb-3">
               <div className="h-[2px] w-8 bg-black" />
               <span className="uppercase tracking-[0.2em] text-[10px] md:text-xs font-bold text-zinc-500">
-                Latest Listings
+                Explore Categories
               </span>
             </div>
             <h2 className="text-4xl md:text-5xl font-black text-primary leading-tight tracking-tight uppercase">
-              Find your <br />
-              <span
-                className="text-transparent"
-                style={{ WebkitTextStroke: "1.5px black" }}
-              >
-                next home.
-              </span>
+              {title}
             </h2>
           </motion.div>
 
@@ -59,8 +56,7 @@ export default function FeaturedSalesClient({ properties }: FeaturedSalesClientP
             transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
             className="text-sm md:text-base text-zinc-500 font-medium max-w-sm "
           >
-            Explore a handpicked selection of our finest properties. 
-            Each one is 100% verified and ready for you to move in.
+            {subtitle}
           </motion.p>
         </div>
 
@@ -90,7 +86,7 @@ export default function FeaturedSalesClient({ properties }: FeaturedSalesClientP
                 onClick={handleLoadMore}
                 className="px-10 py-4 bg-white text-primary font-bold uppercase tracking-widest text-xs border-2 border-black hover:bg-black hover:text-white transition-all duration-300 flex items-center justify-center gap-3 group"
               >
-                Show More Homes
+                Show More
                 <HugeiconsIcon
                   icon={ArrowDown01Icon}
                   size={16}

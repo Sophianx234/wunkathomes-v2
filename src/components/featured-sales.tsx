@@ -39,6 +39,7 @@ export default async function FeaturedSales() {
   }));
 
     // Pass the real data to the client component
+    if (formattedProperties.length === 0) return null;
   
     return <FeaturedSalesClient properties={formattedProperties} />;
   }

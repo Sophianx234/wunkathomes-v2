@@ -1,5 +1,8 @@
 import FeaturedRentals from "@/components/featured-rentals";
 import FeaturedSales from "@/components/featured-sales";
+import PropertyTypeSections from "@/components/property-type-sections";
+import RoomTypeSections from "@/components/room-type-sections";
+import AffordableRoomsSection from "@/components/affordable-rooms-section";
 import Hero from "@/components/hero";
 import HowItWorks from "@/components/how-it-works";
 import SearchBar from "@/components/search-bar";
@@ -18,7 +21,12 @@ export default function Home() {
         <FeaturedSales />
         <FeaturedRentals />
         
-        {/* 4. The D2C Process: Explaining the digital/smart-lock advantage */}
+        {/* 4. Dynamic Data-Driven Categories (Separated) */}
+        <PropertyTypeSections />
+        <RoomTypeSections />
+        <AffordableRoomsSection />
+
+        {/* 5. The D2C Process: Explaining the digital/smart-lock advantage */}
         <HowItWorks />
       </main>
     </div>

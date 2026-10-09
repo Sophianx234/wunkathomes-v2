@@ -11,7 +11,7 @@ interface FeaturedRentalsClientProps {
 }
 
 export default function FeaturedRentalsClient({ properties }: FeaturedRentalsClientProps) {
-  const [visibleCount, setVisibleCount] = useState(4);
+  const [visibleCount, setVisibleCount] = useState(8);
 
   const handleLoadMore = () => {
     setVisibleCount((prev) => prev + 4);

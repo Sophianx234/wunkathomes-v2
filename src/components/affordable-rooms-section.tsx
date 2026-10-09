@@ -1,27 +1,29 @@
 import { connectToDatabase } from "@/config/DbConnect";
 import Listing from "@/models/listing";
 import Property from "@/models/property";
-import FeaturedRentalsClient from "./featured-rentals-client";
+import DynamicSectionClient from "./dynamic-section-client";
 
-export default async function FeaturedRentals() {
+export default async function AffordableRoomsSection() {
   await connectToDatabase();
 
-  // Fetch only "For_Rent" listings that are currently available
-  const rawRentals = await Listing.find({ 
-    listingType: "For_Rent",
-    status: { $in: ["Available", "Pending"] }
+  // Calculation/Filtering handled directly on the backend query!
+  const rawListings = await Listing.find({
+    status: { $in: ["Available", "Pending"] },
+    price: { $lt: 3000 }
   })
     .populate({ path: "propertyId", model: Property })
     .sort({ createdAt: -1 })
     .lean();
 
-  // Format the data to match the structure your PropertyCard expects
-  const formattedRentals = rawRentals.map((listing: any) => ({
+  if (!rawListings || rawListings.length === 0) return null;
+
+  const formattedProperties = rawListings.map((listing: any) => ({
     id: listing._id.toString(),
     slug: listing.slug,
     title: listing.title,
     price: listing.price,
     listingType: listing.listingType,
+    roomType: listing.roomType || "Empty",
     status: listing.status,
     description: listing.description,
     features: listing.features || {},
@@ -38,7 +40,12 @@ export default async function FeaturedRentals() {
     },
   }));
 
-  if (formattedRentals.length === 0) return null;
-
-  return <FeaturedRentalsClient properties={formattedRentals} />;
+  return (
+    <DynamicSectionClient
+      title="Affordable Rooms"
+      subtitle="Great spaces that won't break the bank."
+      properties={formattedProperties}
+      bgClass="bg-white"
+    />
+  );
 }
