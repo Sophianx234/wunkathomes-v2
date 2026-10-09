@@ -182,7 +182,7 @@ export default function PropertiesClient({
                     !isAvailable
                       ? "bg-zinc-100/30 hidden text-zinc-300 cursor-not-allowed"
                       : typeFilter.toLowerCase() === type.value.toLowerCase()
-                      ? "bg-black text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)] md:shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)] -translate-y-[1px]"
+                      ? "bg-black text-white  -translate-y-[1px]"
                       : "bg-zinc-100/50 text-zinc-500 hover:bg-zinc-200 hover:text-black"
                   }`}
                 >
