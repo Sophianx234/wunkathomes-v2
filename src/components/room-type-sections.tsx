@@ -49,7 +49,7 @@ export default async function RoomTypeSections() {
           <DynamicSectionClient
             key={`room-${type}`}
             title={`${type} Rooms`}
-            subtitle={`Find the perfect ${type.toLowerCase()} room tailored to your needs.`}
+            subtitle={`Discover comfortable ${type.toLowerCase()} rooms that feel just like home.`}
             properties={matchingProperties}
             bgClass="bg-zinc-50"
           />

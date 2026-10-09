@@ -43,7 +43,7 @@ export default async function AffordableRoomsSection() {
   return (
     <DynamicSectionClient
       title="Affordable Rooms"
-      subtitle="Great spaces that won't break the bank."
+      subtitle="Explore comfortable homes that fit perfectly within your budget."
       properties={formattedProperties}
       bgClass="bg-white"
     />

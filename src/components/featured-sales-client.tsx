@@ -11,7 +11,7 @@ interface FeaturedSalesClientProps {
 }
 
 export default function FeaturedSalesClient({ properties }: FeaturedSalesClientProps) {
-  const [visibleCount, setVisibleCount] = useState(8);
+  const [visibleCount, setVisibleCount] = useState(4);
 
   const handleLoadMore = () => {
     setVisibleCount((prev) => prev + 4);

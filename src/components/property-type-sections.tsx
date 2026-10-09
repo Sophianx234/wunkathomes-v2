@@ -49,7 +49,7 @@ export default async function PropertyTypeSections() {
           <DynamicSectionClient
             key={`prop-${type}`}
             title={`${type.replace(/_/g, " ")}s`}
-            subtitle={`Explore our curated selection of ${type.replace(/_/g, " ").toLowerCase()}s.`}
+            subtitle={`Browse our collection of beautiful ${type.replace(/_/g, " ").toLowerCase()}s ready for move-in.`}
             properties={matchingProperties}
             bgClass="bg-white"
           />
