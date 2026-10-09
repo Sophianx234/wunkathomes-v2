@@ -3,44 +3,44 @@
 import { motion, useScroll, useSpring } from "framer-motion";
 import { useRef } from "react";
 import {
-  UserAdd02Icon,
+  Search01Icon,
   Calendar02Icon,
-  Wallet02Icon,
-  SignatureIcon,
-  SmartAcIcon,
+  UserGroupIcon,
+  DashboardSquare01Icon,
+  Key02Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 
 const steps = [
   {
     number: "01",
-    title: "Join the Community",
-    desc: "Start by creating your account. A quick sign-up gives you full, unrestricted access to browse our exclusive, company-managed properties.",
-    icon: UserAdd02Icon,
+    title: "Browse Properties",
+    desc: "Explore our collection of exclusive, company-managed homes to find your perfect fit.",
+    icon: Search01Icon,
   },
   {
     number: "02",
-    title: "Schedule a Viewing",
-    desc: "Found a place that feels like home? Request a site visit directly through the platform. We want you to experience the space before making any commitments.",
+    title: "Tour or Secure",
+    desc: "Found your dream property? You can either schedule a site visit to see it in person or instantly secure it by paying the deposit online.",
     icon: Calendar02Icon,
   },
   {
     number: "03",
-    title: "Secure Your Space",
-    desc: "Once you are certain, lock it in. Pay your initial deposit seamlessly online to reserve the property and immediately take it off the market.",
-    icon: Wallet02Icon,
+    title: "Admin Onboarding",
+    desc: "Sit back while our team handles the rest. We manage the onboarding process, paperwork, and verifications for you.",
+    icon: UserGroupIcon,
   },
   {
     number: "04",
-    title: "Sign & Settle",
-    desc: "Say goodbye to stacks of paperwork. Review and digitally sign your legally binding tenancy agreement right from your smartphone.",
-    icon: SignatureIcon,
+    title: "Dashboard Access",
+    desc: "Once your property is officially secured, you gain full access to your personalized Resident Dashboard to manage your stay.",
+    icon: DashboardSquare01Icon,
   },
   {
     number: "05",
-    title: "Unlock & Move In",
-    desc: "Voila! Receive your unique smart-lock PIN immediately. Move in on your exact start date, with zero hassle and total peace of mind.",
-    icon: SmartAcIcon,
+    title: "Move In",
+    desc: "Receive your keys or smart-lock access and step into your new home seamlessly.",
+    icon: Key02Icon,
   },
 ];
 

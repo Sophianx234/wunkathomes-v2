@@ -35,6 +35,7 @@ import { PropertyMap } from "@/components/property-map-dynamic";
 import SimilarCarousel from "@/components/similar-carousel";
 import ThingsToKnow from "@/components/things-to-know";
 import ReviewForm from "@/components/review-form";
+import BackButton from "@/components/back-button";
 import { getNeighborhoodDescription } from "@/lib/helpers";
 import { Toaster } from "@/components/ui/sonner";
 import SavePropertyButton from "@/components/ui/saved-property-button";
@@ -205,6 +206,9 @@ export default async function PropertyDetailsPage({
 
   return (
     <main className="min-h-screen bg-white text-black pt-12 md:pt-24 pb-20 md:pb-32">
+      <div className="max-w-6xl mx-auto px-4 md:px-0 mb-4 md:mb-6">
+        <BackButton />
+      </div>
       <div className="max-w-6xl mx-auto px-2 md:px-0">
         <ImageGallery images={listing.images} title={listing.title} />
       </div>

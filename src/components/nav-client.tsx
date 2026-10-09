@@ -338,9 +338,14 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 10, scale: 0.95 }}
                       transition={{ duration: 0.2 }}
-                      className="absolute right-0 top-14 w-64 bg-white border border-zinc-200/60 shadow-sm rounded-lg overflow-hidden flex flex-col py-2"
+                      className="absolute right-0 top-[60px] w-64 z-50"
                     >
-                      <div className="px-4 py-3 border-b border-zinc-200/60 flex items-center gap-3">
+                      <div className="relative bg-white border border-zinc-200/60 shadow-lg rounded-xl flex flex-col py-2">
+                        {/* Arrow Pointer */}
+                        <div className="absolute -top-[7px] right-8 w-[14px] h-[14px] bg-white border-l border-t border-zinc-200/60 transform rotate-45 rounded-tl-[2px] pointer-events-none" />
+                        
+                        <div className="relative z-10 flex flex-col">
+                          <div className="px-4 py-3 border-b border-zinc-200/60 flex items-center gap-3">
                         <div className="relative size-10 rounded-full overflow-hidden border border-zinc-200/60 shrink-0">
                           {user.profilePicture ? (
                             <Image
@@ -452,18 +457,85 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                           <LogoutButton />
                         </form>
                       </div>
+                        </div>
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
               </>
             ) : (
-              <LoginModal>
-                <Button className="bg-black rounded-sm hover:bg-zinc-800 text-white py-3 px-4 font-medium">
-                  <Link href="/login" className="flex items-center gap-2">
-                    Sign In <HugeiconsIcon icon={ArrowRight01Icon} />
-                  </Link>
-                </Button>
-              </LoginModal>
+              <>
+                <button
+                  onClick={toggleProfile}
+                  className="flex items-center gap-2 border pr-6 border-zinc-200/60 rounded-full p-1.5 transition-all bg-white focus:outline-none  relative"
+                >
+                  <div className="bg-zinc-100/50 p-1 rounded-full text-zinc-600">
+                    <HugeiconsIcon icon={UserCircleIcon} size={24} />
+                  </div>
+                  <div className="text-left text-[14px] font-medium text-zinc-900">
+                    Account
+                  </div>
+                </button>
+
+                <AnimatePresence>
+                  {profileOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      transition={{ duration: 0.2 }}
+                      className="absolute right-0 top-[60px] w-64 z-50"
+                    >
+                      <div className="relative bg-white border border-zinc-200/60 shadow-lg rounded-xl flex flex-col p-2">
+                        {/* Arrow Pointer */}
+                        <div className="absolute -top-[7px] right-8 w-[14px] h-[14px] bg-white border-l border-t border-zinc-200/60 transform rotate-45 rounded-tl-[2px] pointer-events-none" />
+                        
+                        <div className="relative z-10 flex flex-col overflow-hidden rounded-[8px]">
+                          <div className="pb-2 mb-2 border-b border-zinc-200/60 flex flex-col">
+                            <LoginModal>
+                              <button
+                                onClick={() => setProfileOpen(false)}
+                                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50/50 transition"
+                              >
+                                <HugeiconsIcon icon={DashboardSquare01Icon} size={18} className="text-zinc-400" />
+                                My Dashboard
+                              </button>
+                            </LoginModal>
+
+                            <LoginModal>
+                              <button
+                                onClick={() => setProfileOpen(false)}
+                                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50/50 transition"
+                              >
+                                <HugeiconsIcon icon={FavouriteIcon} size={18} className="text-zinc-400" />
+                                My Saved Homes
+                              </button>
+                            </LoginModal>
+
+                            <LoginModal>
+                              <button
+                                onClick={() => setProfileOpen(false)}
+                                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50/50 transition"
+                              >
+                                <HugeiconsIcon icon={CreditCardPosIcon} size={18} className="text-zinc-400" />
+                                Payment History
+                              </button>
+                            </LoginModal>
+                          </div>
+                          
+                          <LoginModal>
+                            <Button asChild className="w-full bg-black rounded-sm hover:bg-zinc-800 text-white py-2 px-4 font-medium">
+                              <Link href="/login" className="flex items-center gap-2 justify-center w-full" onClick={() => setProfileOpen(false)}>
+                                Sign In <HugeiconsIcon icon={ArrowRight01Icon} size={18} />
+                              </Link>
+                            </Button>
+                          </LoginModal>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </>
             )}
           </div>
 
