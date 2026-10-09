@@ -122,6 +122,9 @@ export async function getTenantsData() {
         documentUrl: lease.documentUrl || undefined,
         totalRentAmount: lease.totalRentAmount || 0,
         smartLockCode: lease.smartLockPin || "",
+        intentToVacate: lease.intentToVacate || false,
+        moveOutDate: lease.moveOutDate ? new Date(lease.moveOutDate).toISOString() : null,
+        vacateReason: lease.vacateReason || "",
         signatureAudit: {
           isSigned: lease.signatureAudit?.isSigned || false,
           signedAt: signedAtFormatted,

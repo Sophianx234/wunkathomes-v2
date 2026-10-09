@@ -63,7 +63,7 @@ import { formatCurrency } from "./transactions-client";
 import { DocumentViewer } from "./ui/document-viewer";
 import { TenancyDocument } from "./lease-document viewer";
 
-import { toggleAccountStatus, verifyAndOnboardTenantAction, updateTenantDetailsAction } from "@/actions/admin/tenant.action";
+import { toggleAccountStatus, verifyAndOnboardTenantAction, updateTenantDetailsAction, processMoveOutAction } from "@/actions/admin/tenant.action";
 import {
   activateLeaseAndGeneratePin,
   approveTenantPaperwork,
@@ -78,7 +78,7 @@ import {
 
 // --- TYPES ---
 type TabStage = "all" | "pending";
-type ActionType = "approve" | "reject" | "pin" | "suspend" | "restore" | "remoteUnlock" | "vendorPin" | "resetPin" | "revokePin" | "verifyAndOnboard";
+type ActionType = "approve" | "reject" | "pin" | "suspend" | "restore" | "remoteUnlock" | "vendorPin" | "resetPin" | "revokePin" | "verifyAndOnboard" | "processMoveOut";
 
 export interface TenantRecord {
   id: string;
@@ -109,6 +109,9 @@ export interface TenantRecord {
     documentUrl?: string;
     totalRentAmount: number;
     smartLockCode: string;
+    intentToVacate?: boolean;
+    moveOutDate?: string;
+    vacateReason?: string;
     signatureAudit?: {
       isSigned: boolean;
       signedAt: string;
@@ -306,6 +309,8 @@ export default function TenantDirectoryClient({
       } else if (confirmAction === "resetPin") {
         if (!selectedTenant.smartLock?.tuyaDeviceId) return;
         result = await resetTenantPinAction(selectedTenant.smartLock.tuyaDeviceId, selectedTenant.lease.id);
+      } else if (confirmAction === "processMoveOut") {
+        result = await processMoveOutAction(selectedTenant.lease.id);
       }
 
       if (result?.success) {
@@ -384,6 +389,12 @@ export default function TenantDirectoryClient({
       title: "Revoke Temporary PIN",
       description: `Are you sure you want to revoke the temporary PIN for "${pinToRevoke?.name}"? They will lose access immediately.`,
       confirmText: "Revoke Access",
+      confirmClass: "bg-rose-600 text-white hover:bg-rose-700",
+    },
+    processMoveOut: {
+      title: "Process Move-Out",
+      description: "This will finalize the tenant's move-out, expire their lease, revoke smart lock access (if applicable), and set the property listing back to Available.",
+      confirmText: "Complete Move-Out",
       confirmClass: "bg-rose-600 text-white hover:bg-rose-700",
     },
   };
@@ -535,9 +546,16 @@ export default function TenantDirectoryClient({
                   {/* STATUS */}
                   <TableCell className="py-3 align-middle">
                     <div className="flex flex-col gap-1 items-start">
-                      <Badge variant="outline" className={`px-2 py-0 border-0 rounded text-[10px] uppercase tracking-wider font-bold h-5 ${getLeaseBadgeStyle(tenant.status)}`}>
-                        {tenant.status.replace(/_/g, " ")}
-                      </Badge>
+                      <div className="flex items-center gap-1.5">
+                        <Badge variant="outline" className={`px-2 py-0 border-0 rounded text-[10px] uppercase tracking-wider font-bold h-5 ${getLeaseBadgeStyle(tenant.status)}`}>
+                          {tenant.status.replace(/_/g, " ")}
+                        </Badge>
+                        {tenant.lease.intentToVacate && (
+                          <Badge variant="outline" className="px-2 py-0 border-0 rounded text-[10px] uppercase tracking-wider font-bold h-5 bg-amber-100/50 text-amber-700 ring-1 ring-amber-200/60">
+                            Moving Out
+                          </Badge>
+                        )}
+                      </div>
                       {tenant.pipelineStage === "active" && (
                         <span className="text-[11px] text-zinc-500">Exp: {formatDate(tenant.lease.endDate)}</span>
                       )}
@@ -887,6 +905,33 @@ export default function TenantDirectoryClient({
 
                 {selectedTenant.pipelineStage === "active" && (
                   <>
+                    {selectedTenant.lease.intentToVacate && (
+                      <section>
+                        <div className="p-4 rounded-lg border border-amber-200 bg-amber-50/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                          <div>
+                            <h3 className="text-[13px] font-bold text-amber-900 flex items-center gap-2">
+                              <HugeiconsIcon icon={Alert01Icon} size={16} /> Move-Out Requested
+                            </h3>
+                            <p className="text-[12px] text-amber-700 mt-1">
+                              Tenant requested to vacate on <strong className="font-semibold">{selectedTenant.lease.moveOutDate ? formatDate(selectedTenant.lease.moveOutDate) : "N/A"}</strong>.
+                            </p>
+                            {selectedTenant.lease.vacateReason && (
+                              <p className="text-[12px] text-amber-700/80 mt-0.5">
+                                Reason: <span className="italic">{selectedTenant.lease.vacateReason}</span>
+                              </p>
+                            )}
+                          </div>
+                          <Button
+                            variant="default"
+                            className="h-9 px-4 text-[12px] font-semibold bg-rose-600 hover:bg-rose-700 text-white rounded-md whitespace-nowrap shadow-sm border-0"
+                            onClick={() => requestAction("processMoveOut")}
+                          >
+                            Process Move-Out
+                          </Button>
+                        </div>
+                      </section>
+                    )}
+
                     {selectedTenant.smartLock?.activeTempPins && selectedTenant.smartLock.activeTempPins.length > 0 && (
                       <section>
                         <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-4">Active Temporary Access</h3>
