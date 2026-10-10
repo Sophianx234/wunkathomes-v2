@@ -46,7 +46,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { TransactionReceipt } from "./transaction-reciept";
+import TransactionReceipt from "./transaction-reciept";
 import { formatCurrency } from "./transactions-client";
 
 // IMPORT YOUR RECEIPT COMPONENT HERE

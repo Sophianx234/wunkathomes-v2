@@ -55,7 +55,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { TransactionReceipt } from "./transaction-reciept";
+import TransactionReceipt from "./transaction-reciept";
 
 // --- TYPES ---
 export interface UserTransaction {

@@ -13,7 +13,7 @@ import {
   Location01Icon
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { TransactionReceipt } from "./transaction-reciept";
+import TransactionReceipt from "./transaction-reciept";
 
 interface SuccessReceiptProps {
   transaction: any;
