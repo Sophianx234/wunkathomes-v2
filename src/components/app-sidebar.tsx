@@ -114,11 +114,11 @@ const data = {
     },
   ],
   navSecondary: [
-    {
+    /* {
       title: "Search",
       url: "/admin/search",
       icon: <HugeiconsIcon icon={SearchIcon} strokeWidth={2} />,
-    },
+    }, */
     {
       title: "Settings",
       url: "/admin/settings",

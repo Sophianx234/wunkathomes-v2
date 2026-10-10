@@ -19,9 +19,8 @@ import {
 import Link from "next/link";
 import { useFormState, useFormStatus } from "react-dom";
 import { loginAction, verifyTwoFactorAction, resendTwoFactorAction } from "@/actions/user/auth.action";
-import { toast } from "sonner";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Loading03Icon } from "@hugeicons/core-free-icons";
+import { Loading03Icon, Alert01Icon } from "@hugeicons/core-free-icons";
 import { useRouter, useSearchParams } from "next/navigation";
 
 // --- Submit Button Component ---
@@ -59,6 +58,7 @@ export function LoginForm({
   const [savedEmail, setSavedEmail] = useState("");
   const [countdown, setCountdown] = useState(60);
   const [isResending, setIsResending] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   // Handle Countdown Timer
   useEffect(() => {
@@ -71,15 +71,14 @@ export function LoginForm({
   // Handle Login State
   useEffect(() => {
     if (loginState?.error) {
-      toast.error(loginState.error);
+      setErrorMessage(loginState.error);
     } else if (loginState?.success) {
+      setErrorMessage("");
       if (loginState.requiresTwoFactor) {
-        toast.success(loginState.message);
         setIs2FA(true);
         setSavedEmail(loginState.email);
         setCountdown(60);
       } else {
-        toast.success(loginState.message);
         handleRedirect(loginState.redirectUrl);
       }
     }
@@ -88,9 +87,9 @@ export function LoginForm({
   // Handle Verify State
   useEffect(() => {
     if (verifyState?.error) {
-      toast.error(verifyState.error);
+      setErrorMessage(verifyState.error);
     } else if (verifyState?.success) {
-      toast.success(verifyState.message);
+      setErrorMessage("");
       handleRedirect(verifyState.redirectUrl);
     }
   }, [verifyState]);
@@ -98,12 +97,12 @@ export function LoginForm({
   const handleResend = async () => {
     if (countdown > 0 || isResending) return;
     setIsResending(true);
+    setErrorMessage("");
     const result = await resendTwoFactorAction(savedEmail);
     if (result.success) {
-      toast.success(result.message);
       setCountdown(60);
     } else {
-      toast.error(result.error);
+      setErrorMessage(result.error);
     }
     setIsResending(false);
   };
@@ -123,11 +122,18 @@ export function LoginForm({
         {isModal && <input type="hidden" name="isModal" value="true" />}
         <input type="hidden" name="email" value={savedEmail} />
         
+        {errorMessage && (
+          <div className="bg-destructive/15 text-destructive p-3 rounded-md flex items-center gap-2 text-sm font-medium">
+            <HugeiconsIcon icon={Alert01Icon} size={18} />
+            {errorMessage}
+          </div>
+        )}
+
         <FieldGroup>
           <div className="flex flex-col items-center gap-1 text-center">
             <h1 className="text-2xl font-bold">Two-Factor Authentication</h1>
             <p className="text-sm text-balance text-muted-foreground">
-              We&apos;ve sent a 6-digit verification code to your email.
+              We&apos;ve sent a 6-digit verification code to <span className="font-medium text-foreground">{savedEmail}</span>.
             </p>
           </div>
 
@@ -182,6 +188,14 @@ export function LoginForm({
   return (
     <form className={cn("flex flex-col gap-6", className)} action={loginFormAction} {...props}>
       {isModal && <input type="hidden" name="isModal" value="true" />}
+      
+      {errorMessage && !is2FA && (
+        <div className="bg-destructive/15 text-destructive p-3 rounded-md flex items-center gap-2 text-sm font-medium">
+          <HugeiconsIcon icon={Alert01Icon} size={18} />
+          {errorMessage}
+        </div>
+      )}
+
       <FieldGroup>
         <div className="flex flex-col items-center gap-1 text-center">
           <h1 className="text-2xl font-bold">Login to your account</h1>

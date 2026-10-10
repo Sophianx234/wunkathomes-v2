@@ -140,13 +140,20 @@ export async function POST(req: Request) {
 
       const startDate = new Date(metadata.selectedMoveInDate || Date.now());
       const endDate = new Date(startDate);
-      const term = listing.terms?.leaseTerm?.toLowerCase() || "";
-      if (term.includes("month")) endDate.setMonth(endDate.getMonth() + 1);
-      else if (term.includes("year")) {
-        const yearMatch = term.match(/(\d+)_year/);
-        const yearsToAdd = yearMatch ? parseInt(yearMatch[1], 10) : 1;
-        endDate.setFullYear(endDate.getFullYear() + yearsToAdd);
-      } else endDate.setFullYear(endDate.getFullYear() + 1);
+      
+      const roomType = listing.roomType || "Empty";
+      const rentDuration = metadata?.rentDuration || (roomType === "Furnished" ? 1 : 3);
+      const isRent = listing.listingType !== "For_Sale";
+
+      if (isRent) {
+        if (roomType === "Furnished") {
+          endDate.setDate(endDate.getDate() + rentDuration);
+        } else {
+          endDate.setMonth(endDate.getMonth() + rentDuration);
+        }
+      } else {
+        endDate.setFullYear(endDate.getFullYear() + 1);
+      }
 
       const dynamicReminders = calculateMilestones(startDate, endDate);
       const userId = metadata.userId;
@@ -154,6 +161,11 @@ export async function POST(req: Request) {
       const dbSession = await mongoose.startSession();
       let newLeaseId = null;
       await dbSession.withTransaction(async () => {
+        const typedSignature = metadata?.signature || "Pre-Signed";
+        const timestamp = new Date();
+        const signaturePayload = `${metadata.listingId}:${userId}:${typedSignature}:Webhook-IP:Webhook-UserAgent:${timestamp.toISOString()}`;
+        const documentHash = crypto.createHash("sha256").update(signaturePayload).digest("hex");
+
         const newLease = await Lease.create([{
           listingId: metadata.listingId,
           userId: userId,
@@ -161,7 +173,15 @@ export async function POST(req: Request) {
           startDate,
           endDate,
           reminders: dynamicReminders,
-          status: "Pending_Verification",
+          status: "Awaiting_Admin_Approval",
+          signatureAudit: {
+            isSigned: true,
+            signedAt: timestamp,
+            ipAddress: "Webhook-IP",
+            userAgent: "Webhook-UserAgent",
+            typedName: typedSignature,
+            documentHash: documentHash,
+          },
         }], { session: dbSession });
         
         newLeaseId = newLease[0]._id;

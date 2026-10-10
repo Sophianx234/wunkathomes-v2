@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,9 +11,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { useFormState, useFormStatus } from "react-dom";
 import { resetPasswordAction } from "@/actions/user/auth.action";
-import { toast } from "sonner";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Loading03Icon } from "@hugeicons/core-free-icons";
+import { Loading03Icon, Alert01Icon } from "@hugeicons/core-free-icons";
 import { useRouter, useSearchParams } from "next/navigation";
 
 function SubmitButton() {
@@ -38,12 +37,13 @@ export function ResetPasswordForm({
   const token = searchParams.get("token");
 
   const [state, formAction] = useFormState(resetPasswordAction, null);
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     if (state?.error) {
-      toast.error(state.error);
+      setErrorMessage(state.error);
     } else if (state?.success) {
-      toast.success(state.message);
+      setErrorMessage("");
       if (state.redirectUrl) {
         router.push(state.redirectUrl);
       }
@@ -68,6 +68,12 @@ export function ResetPasswordForm({
       action={formAction}
       {...props}
     >
+      {errorMessage && (
+        <div className="bg-destructive/15 text-destructive p-3 rounded-md flex items-center gap-2 text-sm font-medium">
+          <HugeiconsIcon icon={Alert01Icon} size={18} />
+          {errorMessage}
+        </div>
+      )}
       <FieldGroup>
         <div className="flex flex-col items-center gap-1 text-center">
           <h1 className="text-2xl font-bold">Set New Password</h1>

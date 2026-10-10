@@ -300,7 +300,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
               <>
                 <button
                   onClick={toggleProfile}
-                  className="flex items-center gap-2 border pr-6 border-zinc-200/60 rounded-full p-1.5 transition-all bg-white focus:outline-none hover:shadow-xs relative"
+                  className="flex items-center gap-2 border pr-6 border-zinc-200/60 rounded-full p-1.5 transition-all bg-white focus:outline-none  relative"
                 >
                   <div className="relative">
                     {user.profilePicture ? (

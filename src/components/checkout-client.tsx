@@ -22,7 +22,6 @@ import { HugeiconsIcon } from "@hugeicons/react"
 import { IProperty } from "@/components/property-card"
 import { verifyPaystackPayment } from "@/actions/user/payment.action"
 import { LoginModal } from "@/components/login-modal"
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
 import { Checkbox } from "@/components/ui/checkbox"
 import { TenancyDocument } from "@/components/lease-document viewer"
 
@@ -64,9 +63,10 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
   })
   const [moveInDate, setMoveInDate] = useState(defaultDate)
   const [isProcessing, setIsProcessing] = useState(false)
+  const [isVerifyingPayment, setIsVerifyingPayment] = useState(false)
   const [agreedToTerms, setAgreedToTerms] = useState(false)
+  const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false)
   const [typedSignature, setTypedSignature] = useState("")
-  const [isAgreementOpen, setIsAgreementOpen] = useState(false)
 
   const isRent = propType !== "Sale" && propType !== "For_Sale";
   const roomType = listing?.roomType || "Empty"; // 'Furnished' or 'Empty'
@@ -98,6 +98,8 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
     metadata: {
       userId: currentUser?.id, 
       listingId: listing.id,
+      isInitialLease: true,
+      selectedMoveInDate: moveInDate,
       moveInDate: moveInDate,
       signature: typedSignature,
       rentDuration,
@@ -146,7 +148,7 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
 
   // Handle Paystack Success & Close events
   const onSuccess = async (paystackResponse: any) => {
-    toast.loading("Verifying your payment securely...", { id: "payment-toast" });
+    setIsVerifyingPayment(true);
 
     const result = await verifyPaystackPayment(
       paystackResponse.reference, 
@@ -157,13 +159,15 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
     if (result.success) {
       toast.success(result.message, { id: "payment-toast" });
       
+      // Navigate to success, let the verifying UI stay up until redirect completes
       setTimeout(() => {
         router.push(`/checkout/success?reference=${paystackResponse.reference}`); 
-      }, 1000); 
+      }, 500); 
       
     } else {
       toast.error(result.message, { id: "payment-toast" });
       setIsProcessing(false);
+      setIsVerifyingPayment(false);
     }
   }
 
@@ -192,6 +196,27 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
       onClose
     })
   }
+
+  if (isVerifyingPayment) {
+    return (
+      <main className="min-h-screen bg-zinc-50/50 flex flex-col items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white p-8 rounded-xl border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center flex flex-col items-center">
+          <div className="w-16 h-16 border-4 border-slate-200 border-t-black rounded-full animate-spin mb-6"></div>
+          <h1 className="text-2xl font-black uppercase tracking-tight text-slate-900 mb-2">Processing Payment...</h1>
+          <p className="text-sm font-medium text-slate-500 leading-relaxed">
+            Please wait while we securely verify your transaction and finalize your Tenancy Agreement. This usually takes just a moment.
+          </p>
+        </div>
+      </main>
+    )
+  }
+
+  const handleAgreementScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+    if (scrollHeight - scrollTop - clientHeight < 20) {
+      setHasScrolledToBottom(true);
+    }
+  };
 
   return (
     <main className="min-h-screen bg-zinc-50/50 text-black py-6 md:py-24 px-2 md:px-4 sm:px-6 lg:px-8 overflow-x-hidden">
@@ -325,23 +350,23 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
             <div className="bg-white p-3 md:p-8 rounded-lg border border-zinc-200/60 w-full max-w-full box-border">
               <h2 className="text-xs md:text-sm font-bold uppercase tracking-widest mb-3 md:mb-6 border-b border-zinc-200/60 pb-2 md:pb-4 flex items-center justify-between">
                 Tenancy Agreement
-                <Dialog open={isAgreementOpen} onOpenChange={setIsAgreementOpen}>
-                  <DialogTrigger asChild>
-                    <Button type="button" variant="outline" size="sm" className="text-[9px] rounded-sm md:text-xs">
-                      View Agreement
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-3xl max-h-[85vh] overflow-hidden p-0 border-0 bg-white shadow-xl sm:rounded-xl flex flex-col relative">
-                    <div className="flex-1 overflow-y-auto hide-scrollbar">
-                      <TenancyDocument selectedActivation={draftActivation as any} onBack={() => setIsAgreementOpen(false)} showNav={false} isModal={true} />
-                    </div>
-                    {/* Fixed Caret Indicator */}
-                    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 pointer-events-none text-zinc-400 bg-white/90 p-1.5 rounded-full shadow-sm border border-zinc-100">
-                      <HugeiconsIcon icon={ArrowDown01Icon} size={18} />
-                    </div>
-                  </DialogContent>
-                </Dialog>
               </h2>
+              
+              <div 
+                className="w-full h-[400px] md:h-[500px] overflow-y-auto border border-zinc-200 rounded-md mb-6 bg-zinc-50/30 p-2 md:p-4 relative"
+                onScroll={handleAgreementScroll}
+              >
+                <div className="max-w-none text-xs md:text-sm text-slate-800">
+                  <TenancyDocument selectedActivation={draftActivation as any} showNav={false} isModal={true} />
+                </div>
+                {!hasScrolledToBottom && (
+                  <div className="sticky bottom-0 left-0 right-0 bg-gradient-to-t from-white via-white/80 to-transparent pt-12 pb-4 flex justify-center pointer-events-none">
+                    <span className="bg-black text-white text-[10px] md:text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-2 shadow-sm animate-pulse">
+                      Scroll to bottom to agree <HugeiconsIcon icon={ArrowDown01Icon} size={14} />
+                    </span>
+                  </div>
+                )}
+              </div>
               
               <div className="space-y-4">
                 <div className="flex items-start space-x-3">
@@ -349,9 +374,13 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
                     id="terms" 
                     checked={agreedToTerms}
                     onCheckedChange={(checked) => setAgreedToTerms(checked as boolean)}
-                    className="mt-1"
+                    disabled={!hasScrolledToBottom}
+                    className="mt-1 disabled:opacity-50"
                   />
-                  <label htmlFor="terms" className="text-xs md:text-sm text-zinc-600 leading-relaxed cursor-pointer">
+                  <label 
+                    htmlFor="terms" 
+                    className={`text-xs md:text-sm leading-relaxed ${!hasScrolledToBottom ? 'text-zinc-400 cursor-not-allowed' : 'text-zinc-600 cursor-pointer'}`}
+                  >
                     I acknowledge that I have reviewed the Standard Tenancy Agreement. I agree to be legally bound by its terms, which will take effect upon successful payment.
                   </label>
                 </div>

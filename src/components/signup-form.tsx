@@ -15,10 +15,9 @@ import Link from "next/link";
 import { useFormState, useFormStatus } from "react-dom";
 import { PhoneInput } from "./phone-input";
 import { signupAction } from "@/actions/user/auth.action";
-import { toast } from "sonner";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Loading03Icon } from "@hugeicons/core-free-icons";
-import { useRouter, useSearchParams } from "next/navigation"; // <-- 1. Import useRouter
+import { Loading03Icon, Alert01Icon } from "@hugeicons/core-free-icons";
+import { useRouter, useSearchParams } from "next/navigation"; 
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -37,20 +36,20 @@ export function SignupForm({
   className,
   ...props
 }: React.ComponentProps<"form">) {
-  const router = useRouter(); // <-- 2. Initialize router
+  const router = useRouter(); 
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl');
   const [phone, setPhone] = useState("");
   const [countryCode, setCountryCode] = useState("+233");
   const [state, formAction] = useFormState(signupAction, null);
+  const [errorMessage, setErrorMessage] = useState("");
 
-  // Trigger toasts whenever the server state updates
+  // Trigger redirects whenever the server state updates
   useEffect(() => {
     if (state?.error) {
-      toast.error(state.error);
+      setErrorMessage(state.error);
     } else if (state?.success) {
-      toast.success(state.message);
-      // <-- 3. Redirect on the client AFTER the toast triggers
+      setErrorMessage("");
       const userRole = state?.userRole;
       const targetDestination = callbackUrl || (userRole === "Admin" ? "/admin/overview" : "/");
       router.push(targetDestination);
@@ -63,6 +62,12 @@ export function SignupForm({
       action={formAction}
       {...props}
     >
+      {errorMessage && (
+        <div className="bg-destructive/15 text-destructive p-3 rounded-md flex items-center gap-2 text-sm font-medium">
+          <HugeiconsIcon icon={Alert01Icon} size={18} />
+          {errorMessage}
+        </div>
+      )}
       <FieldGroup>
         <div className="flex flex-col items-center gap-1 text-center mb-2">
           <h1 className="text-2xl font-bold">Create an account</h1>
