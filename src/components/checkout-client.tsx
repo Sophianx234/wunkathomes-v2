@@ -384,9 +384,10 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
                   </label>
                 </div>
               </div>
+            </div>
 
-              {/* Submit Button */}
-            {currentUser ? (
+            {/* Submit Button */}
+          {currentUser ? (
               <div className="w-full">
                 <Button 
                   type="submit"

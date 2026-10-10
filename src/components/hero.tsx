@@ -76,7 +76,7 @@ export default function Hero() {
           >
             <Link href="/properties">
               <button className="w-full sm:w-auto px-6 md:px-8 py-3 md:py-4 bg-white text-primary font-bold uppercase rounded-md tracking-widest text-[10px] md:text-xs hover:bg-black hover:text-white border-2 border-white transition-all duration-300 flex items-center justify-center gap-3 group">
-                View Portfolio
+                Browse Properties
                 <HugeiconsIcon
                   icon={ArrowRight01Icon}
                   className="w-4 h-4 group-hover:translate-x-1 transition-transform"
