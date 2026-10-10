@@ -64,6 +64,7 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
   const [moveInDate, setMoveInDate] = useState(defaultDate)
   const [isProcessing, setIsProcessing] = useState(false)
   const [isVerifyingPayment, setIsVerifyingPayment] = useState(false)
+  const [isPaymentSuccessful, setIsPaymentSuccessful] = useState(false)
   const [agreedToTerms, setAgreedToTerms] = useState(false)
   const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false)
 
@@ -156,17 +157,18 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
     );
 
     if (result.success) {
-      toast.success(result.message, { id: "payment-toast" });
+      setIsPaymentSuccessful(true);
       
-      // Navigate to success, let the verifying UI stay up until redirect completes
+      // Wait for the animation to play before redirecting
       setTimeout(() => {
         router.push(`/checkout/success?reference=${paystackResponse.reference}`); 
-      }, 500); 
+      }, 2500); 
       
     } else {
       toast.error(result.message, { id: "payment-toast" });
       setIsProcessing(false);
       setIsVerifyingPayment(false);
+      setIsPaymentSuccessful(false);
     }
   }
 
@@ -198,13 +200,27 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
 
   if (isVerifyingPayment) {
     return (
-      <main className="min-h-screen bg-zinc-50/50 flex flex-col items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white p-8 rounded-xl border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center flex flex-col items-center">
-          <div className="w-16 h-16 border-4 border-slate-200 border-t-black rounded-full animate-spin mb-6"></div>
-          <h1 className="text-2xl font-black uppercase tracking-tight text-slate-900 mb-2">Processing Payment...</h1>
-          <p className="text-sm font-medium text-slate-500 leading-relaxed">
-            Please wait while we securely verify your transaction and finalize your Tenancy Agreement. This usually takes just a moment.
-          </p>
+      <main className="fixed inset-0 z-[100] bg-zinc-50/95 backdrop-blur-md flex flex-col items-center justify-center p-4 w-full h-full">
+        <div className="max-w-md w-full text-center flex flex-col items-center">
+          {isPaymentSuccessful ? (
+            <>
+              <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mb-6 animate-in zoom-in duration-500 shadow-lg shadow-green-500/20">
+                <HugeiconsIcon icon={CheckmarkBadge01Icon} size={40} className="text-white" />
+              </div>
+              <h1 className="text-2xl font-black uppercase tracking-tight text-slate-900 mb-2 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-150">Payment Successful!</h1>
+              <p className="text-sm font-medium text-slate-500 leading-relaxed animate-in fade-in slide-in-from-bottom-4 duration-500 delay-300">
+                Your transaction has been securely verified. Redirecting you to your digital receipt...
+              </p>
+            </>
+          ) : (
+            <>
+              <div className="w-16 h-16 border-4 border-slate-200 border-t-black rounded-full animate-spin mb-6"></div>
+              <h1 className="text-2xl font-black uppercase tracking-tight text-slate-900 mb-2">Processing Payment...</h1>
+              <p className="text-sm font-medium text-slate-500 leading-relaxed">
+                Please wait while we securely verify your transaction and finalize your Tenancy Agreement. This usually takes just a moment.
+              </p>
+            </>
+          )}
         </div>
       </main>
     )
