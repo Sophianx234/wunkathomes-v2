@@ -121,7 +121,7 @@ export default function PrintReceipt({
             
             <div className="space-y-6">
               <ReceiptRow label="Date Paid" value={`${formattedDate} at ${formattedTime}`} />
-              <ReceiptRow label="Payment Method" value={`Paystack (${transaction.channel || "Gateway"})`} />
+              <ReceiptRow label="Payment Method" value={transaction.channel ? transaction.channel.replace(/_/g, " ") : "Gateway"} className="capitalize" />
               
               <div className="flex items-start justify-between gap-4 border-b border-zinc-200/60 pb-3">
                 <span className="text-[12px] font-semibold text-zinc-500 mt-0.5 uppercase tracking-wider">Channel</span>
@@ -132,7 +132,7 @@ export default function PrintReceipt({
                     <HugeiconsIcon icon={CreditCardIcon} size={16} className="text-zinc-400" />
                   )}
                   <span className="block text-[13px] font-medium text-zinc-900 capitalize">
-                    {transaction.channel?.replace("_", " ") || "Secure Web"}
+                    {transaction.channel?.replace(/_/g, " ") || "Secure Web"}
                   </span>
                 </div>
               </div>
@@ -179,11 +179,11 @@ export default function PrintReceipt({
 }
 
 // Internal Helper Component for clean, aligned rows
-function ReceiptRow({ label, value, isMono = false }: { label: string; value: string; isMono?: boolean }) {
+function ReceiptRow({ label, value, isMono = false, className }: { label: string; value: string; isMono?: boolean; className?: string }) {
   return (
     <div className="flex items-start justify-between gap-4 border-b border-zinc-200/60 pb-3">
       <span className="text-[12px] font-semibold text-zinc-500 mt-0.5 uppercase tracking-wider">{label}</span>
-      <span className={`text-[13px] font-medium text-zinc-900 text-right ${isMono ? 'font-mono tracking-tight text-[12px]' : ''}`}>
+      <span className={`text-[13px] font-medium text-zinc-900 text-right ${isMono ? 'font-mono tracking-tight text-[12px]' : ''} ${className || ""}`}>
         {value}
       </span>
     </div>

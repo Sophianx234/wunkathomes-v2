@@ -205,7 +205,7 @@ export default function PrintReceipt({ transaction }: PrintReceiptProps) {
                 </div>
                 <div>
                   <p className="text-sm font-bold text-zinc-900 capitalize">
-                    {transaction.channel?.replace("_", " ") || "Secure Gateway"}
+                    {transaction.channel?.replace(/_/g, " ") || "Secure Gateway"}
                   </p>
                   <p className="text-[10px] font-medium text-zinc-500 uppercase tracking-widest">
                     Paid via Paystack

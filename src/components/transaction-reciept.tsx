@@ -89,13 +89,13 @@ export function TransactionReceipt({ transaction, onBack }: TransactionReceiptPr
       <div className="max-w-[800px] mx-auto mt-6 md:mt-12 print:mt-0 p-4 md:p-0 w-full box-border">
         
         {/* The Digital Certificate Card */}
-        <div className="bg-white border border-zinc-100 rounded-[32px] shadow overflow-hidden print:border-none print:shadow-none print:rounded-none w-full">
+        <div className="bg-white border border-zinc-200 w-full print:border-none">
           
           {/* Header */}
-          <div className="p-8 md:p-12 flex flex-col md:flex-row md:items-start justify-between gap-6 border-b border-zinc-100 print:border-zinc-200">
+          <div className="p-8 md:p-12 flex flex-col md:flex-row md:items-start justify-between gap-6 border-b border-zinc-200">
             <div>
-              <div className="h-14 w-14 relative  overflow-hidden mb-5  flex items-center justify-center ">
-                <Image src={'/images/home.png'} alt="WunkatHomes" fill className="object-cover" />
+              <div className="h-14 w-14 relative overflow-hidden mb-5 flex items-center justify-center">
+                <Image src={'/images/home.png'} alt="WunkatHomes" fill className="object-contain" />
               </div>
               <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-zinc-900 mb-1">
                 WunkatHomes Ltd.
@@ -105,61 +105,61 @@ export function TransactionReceipt({ transaction, onBack }: TransactionReceiptPr
               </p>
             </div>
             
-            <div className="text-left md:text-right flex flex-col md:items-start print:items-start">
+            <div className="text-left md:text-right flex flex-col md:items-end">
                <p className="text-[9px] md:text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5">Date Issued</p>
                <p className="text-[13px] md:text-[14px] font-semibold text-zinc-900 mb-3">{dateStr}</p>
                
                <p className="text-[9px] md:text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5">Transaction Ref</p>
-               <p className="font-mono text-[11px] md:text-[12px] font-bold text-zinc-600 bg-zinc-50 px-2.5 py-1.5 rounded-lg border border-zinc-100 inline-block print:border-none print:px-0">
+               <p className="font-mono text-[11px] md:text-[12px] font-bold text-zinc-600">
                  {transaction.reference}
                </p>
             </div>
           </div>
 
           {/* Amount Showcase */}
-          <div className="p-8 md:p-16 bg-zinc-50/50 print:bg-white flex flex-col items-center justify-center text-center">
+          <div className="p-8 md:p-16 bg-white flex flex-col items-center justify-center text-center">
             <p className="text-[10px] md:text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-3">Total Amount Paid</p>
             <h2 className={`text-4xl md:text-6xl font-black tracking-tighter ${isSuccess ? "text-zinc-900" : "text-zinc-400 line-through"}`}>
               {formatCurrency(transaction.amount, transaction.currency)}
             </h2>
-            <div className={`mt-5 px-4 py-1.5 text-[11px] md:text-[12px] font-bold uppercase tracking-widest rounded-full  flex items-center gap-1.5 ${
-              isSuccess ? "" 
-              : transaction.status === "Pending" ? ""
-              : ""
+            <div className={`mt-5 px-4 py-1.5 text-[11px] md:text-[12px] font-bold uppercase tracking-widest flex items-center gap-1.5 ${
+              isSuccess ? "text-green-700 bg-green-50" 
+              : transaction.status === "Pending" ? "text-amber-700 bg-amber-50"
+              : "text-red-700 bg-red-50"
             }`}>
               {transaction.status}
             </div>
           </div>
 
           {/* Entities Grid */}
-          <div className="p-8 md:p-12 border-t border-zinc-100 print:border-zinc-200">
+          <div className="p-8 md:p-12 border-t border-zinc-200">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10 md:mb-14">
                {/* Billed To Box */}
-               <div className="bg-white md:bg-zinc-50 rounded-[24px] md:p-6 md:border border-zinc-100 print:border-none print:p-0 print:bg-white">
+               <div className="bg-white">
                  <h3 className="text-[10px] md:text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-4">Billed To</h3>
                  <p className="text-[15px] md:text-[17px] font-bold text-zinc-900 mb-1.5 truncate">{transaction.user.name}</p>
                  <p className="text-[13px] md:text-[14px] text-zinc-500 font-medium truncate">{transaction.user.email}</p>
                </div>
                
                {/* Property Box */}
-               <div className="bg-white md:bg-zinc-50 rounded-[24px] md:p-6 md:border border-zinc-100 print:border-none print:p-0 print:bg-white">
+               <div className="bg-white">
                  <h3 className="text-[10px] md:text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-4">Property / Asset</h3>
                  <p className="text-[15px] md:text-[17px] font-bold text-zinc-900 mb-1.5 truncate">{transaction.listing.title}</p>
                  <p className="text-[13px] md:text-[14px] text-zinc-500 font-medium truncate">{transaction.listing.property.location}</p>
-                 <p className="text-[11px] md:text-[12px] text-zinc-400 font-bold mt-3 capitalize bg-white md:bg-zinc-100/80 px-2 py-1 rounded-md inline-block print:px-0 print:bg-white">
-                   Asset Type: {transaction.listing.property.propertyType.replace("_", " ")}
+                 <p className="text-[11px] md:text-[12px] text-zinc-400 font-bold mt-3 capitalize inline-block">
+                   Asset Type: {transaction.listing.property.propertyType.replace(/_/g, " ")}
                  </p>
                </div>
             </div>
 
             {/* Line Items / Details */}
             <div className="space-y-4 max-w-2xl mx-auto">
-              <h3 className="text-[10px] md:text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-4 border-b border-zinc-100 pb-3 print:border-zinc-200">Payment Breakdown</h3>
-              <div className="flex justify-between items-center py-2.5 border-b border-zinc-50 print:border-zinc-100">
+              <h3 className="text-[10px] md:text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-4 border-b border-zinc-200 pb-3">Payment Breakdown</h3>
+              <div className="flex justify-between items-center py-2.5 border-b border-zinc-200 border-dashed">
                  <span className="text-[13px] md:text-[14px] font-semibold text-zinc-500">Payment Method</span>
-                 <span className="text-[13px] md:text-[14px] font-bold text-zinc-900 capitalize">{transaction.channel.replace("_", " ")}</span>
+                 <span className="text-[13px] md:text-[14px] font-bold text-zinc-900 capitalize">{transaction.channel.replace(/_/g, " ")}</span>
               </div>
-              <div className="flex justify-between items-center py-2.5 border-b border-zinc-50 print:border-zinc-100">
+              <div className="flex justify-between items-center py-2.5 border-b border-zinc-200 border-dashed">
                  <span className="text-[13px] md:text-[14px] font-semibold text-zinc-500">Payment Purpose</span>
                  <span className="text-[13px] md:text-[14px] font-bold text-zinc-900 capitalize">{transaction.paymentPurpose.replace(/_/g, " ")}</span>
               </div>
@@ -171,11 +171,11 @@ export function TransactionReceipt({ transaction, onBack }: TransactionReceiptPr
           </div>
 
           {/* Footer */}
-          <div className="p-8 md:p-12 border-t border-zinc-100 bg-zinc-50/50 print:bg-white print:border-zinc-200 text-center">
+          <div className="p-8 md:p-12 border-t border-zinc-200 bg-white text-center">
              <p className="text-[11px] md:text-[13px] font-medium text-zinc-500 leading-relaxed max-w-md mx-auto">
                If you have any questions regarding this official receipt, please contact support at <span className="font-bold text-zinc-900">support@wunkathomes.com</span>.
              </p>
-             <div className="mt-8 pt-6 border-t border-zinc-200/60 print:border-zinc-200">
+             <div className="mt-8 pt-6 border-t border-zinc-200">
                <p className="text-[9px] md:text-[10px] font-bold text-zinc-400 tracking-widest uppercase flex items-center justify-center gap-1.5">
                   Generated Securely by WunkatHomes
                </p>

@@ -121,7 +121,7 @@ export default function SuccessReceipt({ transaction }: SuccessReceiptProps) {
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/10" />
         
         {/* Floating Success Pill */}
-        <div className="absolute top-6 left-6 md:top-10 md:left-10 bg-white/95 backdrop-blur-md px-4 py-2 rounded-full flex items-center gap-2 shadow-lg">
+        <div className=" bg-white/95 backdrop-blur-md px-4 py-2 rounded-full flex items-center gap-2 shadow-lg">
           <HugeiconsIcon icon={CheckmarkBadge01Icon} size={16} className="text-green-600" />
           <span className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-zinc-900">Payment Confirmed</span>
         </div>
@@ -168,7 +168,7 @@ export default function SuccessReceipt({ transaction }: SuccessReceiptProps) {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-y-10 gap-x-8 mb-16">
             <DetailItem label="Date & Time" value={formattedDateTimeFull} />
-            <DetailItem label="Payment Method" value={`Paystack (${transaction.channel || "Card"})`} />
+            <DetailItem label="Payment Method" value={transaction.channel ? transaction.channel.replace(/_/g, " ") : "Card"} className="capitalize" />
             <DetailItem label="Transaction Type" value={isRenewal ? "Lease Extension" : "Upfront Rent"} />
             <DetailItem label="Tenant Name" value={transaction.userId?.name || "Verified User"} />
           </div>
@@ -197,13 +197,13 @@ export default function SuccessReceipt({ transaction }: SuccessReceiptProps) {
   );
 }
 
-function DetailItem({ label, value }: { label: string; value: string }) {
+function DetailItem({ label, value, className }: { label: string; value: string; className?: string }) {
   return (
     <div>
       <p className="text-[10px] md:text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1.5">
         {label}
       </p>
-      <p className="text-sm md:text-base font-bold text-zinc-900 leading-snug break-words">
+      <p className={`text-sm md:text-base font-bold text-zinc-900 leading-snug break-words ${className || ""}`}>
         {value}
       </p>
     </div>
