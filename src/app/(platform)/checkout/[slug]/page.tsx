@@ -58,7 +58,6 @@ export default async function CheckoutPage({ params }: CheckoutPageProps) {
       };
     }
   }
-  console.log("Current User:", listing);
 
   // Pass both the listing and the user data down
   return <CheckoutWrapper listing={listing} currentUser={currentUser} />;

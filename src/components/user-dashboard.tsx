@@ -604,7 +604,15 @@ export function UserDashboard({ user, activeLeases, initialSchedule }: Dashboard
 
           <div className="w-full bg-zinc-100/50 rounded-full h-1.5 md:h-2.5 overflow-hidden box-border">
             <div
-              className={`h-full rounded-full transition-all duration-1000 ${isRestricted ? "bg-zinc-300" : "bg-zinc-900"}`}
+              className={`h-full rounded-full transition-all duration-1000 ${
+                isRestricted
+                  ? "bg-zinc-300"
+                  : isExpired || progressPercentage >= 90
+                    ? "bg-red-500"
+                    : progressPercentage >= 75
+                      ? "bg-amber-500"
+                      : "bg-zinc-900"
+              }`}
               style={{ width: `${progressPercentage}%` }}
             />
           </div>

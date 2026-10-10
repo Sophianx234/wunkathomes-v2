@@ -102,66 +102,71 @@ export default function SuccessReceipt({ transaction }: SuccessReceiptProps) {
   }
 
   return (
-    <div className="w-full py-12 md:py-20 px-4 sm:px-6 flex-1">
-      <div className="max-w-[500px] mx-auto w-full font-sans px-4 md:px-0 mt-4 md:mt-10">
-        <motion.div
-        initial={{ y: 30, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.1, type: "spring", stiffness: 200, damping: 25 }}
-        className="bg-white rounded-[32px] overflow-hidden  border border-zinc-100/80"
+    <div className="w-full min-h-screen flex flex-col bg-zinc-50/50 font-sans">
+      {/* --- FULL BLEED PINTEREST STYLE HERO IMAGE --- */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6 }}
+        className="relative w-full h-[40vh] min-h-[350px] md:h-[50vh] bg-zinc-200"
       >
-        {/* --- PINTEREST STYLE HERO IMAGE --- */}
-        <div className="relative w-full h-[280px] md:h-[340px] bg-zinc-100">
-          <Image 
-            src={propertyImage} 
-            alt="Property" 
-            fill 
-            className="object-cover" 
-            priority
-          />
-          {/* Gradient Overlay for text readability */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/70" />
-          
-          {/* Floating Success Pill */}
-          <div className="absolute top-5 left-5 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm">
-            <HugeiconsIcon icon={CheckmarkBadge01Icon} size={14} className="text-green-600" />
-            <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-900">Payment Confirmed</span>
-          </div>
+        <Image 
+          src={propertyImage} 
+          alt="Property" 
+          fill 
+          className="object-cover" 
+          priority
+        />
+        {/* Gradient Overlay for text readability */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/10" />
+        
+        {/* Floating Success Pill */}
+        <div className="absolute top-6 left-6 md:top-10 md:left-10 bg-white/95 backdrop-blur-md px-4 py-2 rounded-full flex items-center gap-2 shadow-lg">
+          <HugeiconsIcon icon={CheckmarkBadge01Icon} size={16} className="text-green-600" />
+          <span className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-zinc-900">Payment Confirmed</span>
+        </div>
 
-          {/* Property Info at Bottom of Image */}
-          <div className="absolute bottom-5 left-5 right-5 text-white">
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight mb-1.5 drop-shadow-sm line-clamp-2 leading-tight">
+        {/* Property Info at Bottom of Image */}
+        <div className="absolute inset-x-0 bottom-0 pb-6 md:pb-12">
+          <div className="max-w-5xl mx-auto px-6 md:px-10 w-full text-white">
+            <h1 className="text-3xl md:text-5xl lg:text-6xl font-black tracking-tight mb-2 md:mb-4 drop-shadow-sm line-clamp-2 leading-tight">
               {transaction.listingId?.title || "WunkatHomes Property"}
             </h1>
-            <div className="flex items-center gap-1.5 text-white/90 text-[12px] font-medium drop-shadow-sm">
-              <HugeiconsIcon icon={Location01Icon} size={14} />
+            <div className="flex items-center gap-2 text-white/90 text-sm md:text-lg font-medium drop-shadow-sm">
+              <HugeiconsIcon icon={Location01Icon} size={18} />
               <span className="truncate">{locationString}</span>
             </div>
           </div>
         </div>
+      </motion.div>
 
-        {/* --- CLEAN RECEIPT DETAILS --- */}
-        <div className="p-6 md:p-8">
-          <div className="flex items-end justify-between mb-8 pb-6 border-b border-zinc-100">
+      {/* --- DIRECT PAGE CONTENT (NO CARD) --- */}
+      <div className="max-w-5xl mx-auto w-full px-6 md:px-10 py-10 md:py-16">
+        <motion.div
+          initial={{ y: 30, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.2, type: "spring", stiffness: 200, damping: 25 }}
+        >
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 pb-10 border-b border-zinc-200/80 gap-6">
             <div>
-              <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5">
+              <p className="text-xs md:text-sm font-bold text-zinc-500 uppercase tracking-widest mb-2">
                 Amount Paid
               </p>
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tighter text-zinc-900">
+              <h2 className="text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter text-zinc-900">
                 GHS {transaction.amount?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
               </h2>
             </div>
-            <div className="text-right">
-              <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5">
+            <div className="md:text-right">
+              <p className="text-xs md:text-sm font-bold text-zinc-500 uppercase tracking-widest mb-2">
                 Ref ID
               </p>
-              <p className="font-mono text-[11px] font-semibold text-zinc-800 bg-zinc-100/80 px-2 py-1 rounded-md">
+              <p className="font-mono text-sm font-bold text-zinc-800 bg-zinc-200/50 px-3 py-1.5 rounded-lg inline-block">
                 {transaction.reference}
               </p>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-y-6 gap-x-4 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-y-10 gap-x-8 mb-16">
             <DetailItem label="Date & Time" value={formattedDateTimeFull} />
             <DetailItem label="Payment Method" value={`Paystack (${transaction.channel || "Card"})`} />
             <DetailItem label="Transaction Type" value={isRenewal ? "Lease Extension" : "Upfront Rent"} />
@@ -169,26 +174,25 @@ export default function SuccessReceipt({ transaction }: SuccessReceiptProps) {
           </div>
 
           {/* --- ACTIONS --- */}
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col sm:flex-row items-center gap-4 max-w-2xl">
             <Link
               href={continueUrl}
-              className="w-full h-[52px] bg-zinc-900 text-white text-[13px] font-bold rounded-[20px] hover:bg-zinc-800 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-md"
+              className="w-full h-14 bg-zinc-900 text-white text-sm font-bold rounded-2xl hover:bg-black transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:scale-95"
             >
               <span>{buttonText}</span>
-              <HugeiconsIcon icon={ButtonIcon} size={16} />
+              <HugeiconsIcon icon={ButtonIcon} size={18} />
             </Link>
 
             <button
               onClick={() => setIsViewingReceipt(true)}
-              className="w-full h-[52px] bg-white border border-zinc-200/80 text-zinc-700 text-[13px] font-bold rounded-[20px] hover:bg-zinc-50 transition-colors flex items-center justify-center gap-2"
+              className="w-full h-14 bg-transparent border-2 border-zinc-200 text-zinc-700 text-sm font-bold rounded-2xl hover:border-zinc-300 hover:bg-white transition-all flex items-center justify-center gap-2"
             >
-              <HugeiconsIcon icon={PrinterIcon} size={16} />
+              <HugeiconsIcon icon={PrinterIcon} size={18} />
               <span>View Official Receipt</span>
             </button>
           </div>
-        </div>
-      </motion.div>
-    </div>
+        </motion.div>
+      </div>
     </div>
   );
 }
@@ -196,10 +200,10 @@ export default function SuccessReceipt({ transaction }: SuccessReceiptProps) {
 function DetailItem({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest mb-1">
+      <p className="text-[10px] md:text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1.5">
         {label}
       </p>
-      <p className="text-[12px] md:text-[13px] font-semibold text-zinc-900 leading-snug break-words">
+      <p className="text-sm md:text-base font-bold text-zinc-900 leading-snug break-words">
         {value}
       </p>
     </div>
