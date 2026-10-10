@@ -489,6 +489,7 @@ export function UserDashboard({ user, activeLeases, initialSchedule }: Dashboard
                           type="date" 
                           min={today.toISOString().split('T')[0]} 
                           value={vacateDate}
+                          className="rounded-md mt-1"
                           onChange={(e) => setVacateDate(e.target.value)}
                         />
                       </div>
@@ -498,6 +499,7 @@ export function UserDashboard({ user, activeLeases, initialSchedule }: Dashboard
                           id="vacate-reason" 
                           placeholder="e.g. Relocating for work"
                           value={vacateReason}
+                          className="rounded-md mt-1"
                           onChange={(e) => setVacateReason(e.target.value)}
                         />
                       </div>
