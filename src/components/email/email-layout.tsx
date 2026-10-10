@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Body, Container, Head, Html, Tailwind, Hr, Img, Section, Text } from "react-email";
+import { Body, Container, Head, Html, Tailwind, Hr, Img, Section, Text, Row, Column } from "react-email";
 
 const LOGO_URL = "https://res.cloudinary.com/dtytb8qrc/image/upload/v1761591015/home_yevjdg.png";
 
@@ -10,18 +10,24 @@ export function EmailLayout({ children }: { children: React.ReactNode }) {
       <Tailwind>
         <Body className="bg-white font-sans m-0 p-0">
           <Container className="mx-auto my-0 px-6 pt-12 pb-24 max-w-[580px]">
-            {/* GLOBAL HEADER */}
+            {/* GLOBAL Email HEADER */}
             <Section className="mb-10">
-              <Img
-                src={LOGO_URL}
-                width="80"
-                height="auto"
-                alt="WunkatHomes"
-                className="block outline-none border-none"
-              />
-               <span className="pt-2 text-primary text-2xl  font-bold tracking-tight text-zinc-800">
-              Wunkat<span className="text-zinc-500">Homes</span>
-            </span>
+              <Row>
+                <Column style={{ width: "45px" }}>
+                  <Img
+                    src={LOGO_URL}
+                    width="45"
+                    height="auto"
+                    alt="WunkatHomes"
+                    className="outline-none border-none"
+                  />
+                </Column>
+                <Column style={{ paddingLeft: "12px", paddingTop: "8px" }}>
+                  <Text className="m-0 text-2xl font-bold tracking-tight text-zinc-800">
+                    Wunkat<span className="text-zinc-500">Homes</span>
+                  </Text>
+                </Column>
+              </Row>
             </Section>
 
             {/* CONTENT INJECTION */}
