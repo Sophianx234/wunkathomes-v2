@@ -121,9 +121,13 @@ export default function SuccessReceipt({ transaction }: SuccessReceiptProps) {
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/10" />
         
         {/* Floating Success Pill */}
-        <div className=" bg-white/95 backdrop-blur-md px-4 py-2 rounded-full flex items-center gap-2 shadow-lg">
-          <HugeiconsIcon icon={CheckmarkBadge01Icon} size={16} className="text-green-600" />
-          <span className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-zinc-900">Payment Confirmed</span>
+        <div className="absolute top-6 md:top-10 inset-x-0">
+          <div className="max-w-5xl mx-auto px-6 md:px-10 w-full flex">
+            <div className="bg-white/95 backdrop-blur-md px-4 py-2 rounded-full flex items-center gap-2 shadow-lg">
+              <HugeiconsIcon icon={CheckmarkBadge01Icon} size={16} className="text-green-600" />
+              <span className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-zinc-900">Payment Confirmed</span>
+            </div>
+          </div>
         </div>
 
         {/* Property Info at Bottom of Image */}
