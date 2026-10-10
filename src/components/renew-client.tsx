@@ -14,6 +14,7 @@ import {
   Loading03Icon,
   Shield01Icon,
   Calendar01Icon,
+  CheckmarkBadge01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 // Note: You will need to create this action to process the renewal!
@@ -39,6 +40,8 @@ interface RenewClientProps {
 export default function RenewClient({ data }: RenewClientProps) {
   const router = useRouter();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isVerifyingPayment, setIsVerifyingPayment] = useState(false);
+  const [isPaymentSuccessful, setIsPaymentSuccessful] = useState(false);
 
   const isRent = data.listing.listingType !== "Sale" && data.listing.listingType !== "For_Sale";
   const roomType = data.listing.roomType || "Empty"; 
@@ -78,7 +81,7 @@ export default function RenewClient({ data }: RenewClientProps) {
   const initializePayment = usePaystackPayment(paystackConfig);
 
   const onSuccess = async (paystackResponse: any) => {
-    toast.loading("Processing your renewal...", { id: "renew-toast" });
+    setIsVerifyingPayment(true);
 
     // Server action to update the Lease endDate
     const result = await processLeaseRenewal(
@@ -87,15 +90,17 @@ export default function RenewClient({ data }: RenewClientProps) {
     );
 
     if (result.success) {
-      toast.success("Lease successfully renewed!", { id: "renew-toast" });
+      setIsPaymentSuccessful(true);
       setTimeout(() => {
         router.push(
           `/checkout/success?reference=${paystackResponse.reference}`,
         );
-      }, 1000);
+      }, 2500);
     } else {
       toast.error(result.message, { id: "renew-toast" });
       setIsProcessing(false);
+      setIsVerifyingPayment(false);
+      setIsPaymentSuccessful(false);
     }
   };
 
@@ -108,6 +113,34 @@ export default function RenewClient({ data }: RenewClientProps) {
     setIsProcessing(true);
     initializePayment({ onSuccess, onClose });
   };
+
+  if (isVerifyingPayment) {
+    return (
+      <main className="fixed inset-0 z-[100] bg-zinc-50/95 backdrop-blur-md flex flex-col items-center justify-center p-4 w-full h-full">
+        <div className="max-w-md w-full text-center flex flex-col items-center">
+          {isPaymentSuccessful ? (
+            <>
+              <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mb-6 animate-in zoom-in duration-500 shadow-lg shadow-green-500/20">
+                <HugeiconsIcon icon={CheckmarkBadge01Icon} size={40} className="text-white" />
+              </div>
+              <h1 className="text-2xl font-black uppercase tracking-tight text-slate-900 mb-2 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-150">Payment Successful!</h1>
+              <p className="text-sm font-medium text-slate-500 leading-relaxed animate-in fade-in slide-in-from-bottom-4 duration-500 delay-300">
+                Your lease extension has been securely verified. Redirecting you to your digital receipt...
+              </p>
+            </>
+          ) : (
+            <>
+              <div className="w-16 h-16 border-4 border-slate-200 border-t-black rounded-full animate-spin mb-6"></div>
+              <h1 className="text-2xl font-black uppercase tracking-tight text-slate-900 mb-2">Processing Renewal...</h1>
+              <p className="text-sm font-medium text-slate-500 leading-relaxed">
+                Please wait while we securely verify your transaction and finalize your lease extension. This usually takes just a moment.
+              </p>
+            </>
+          )}
+        </div>
+      </main>
+    )
+  }
 
   return (
     <main className="min-h-screen bg-zinc-50/50 text-black py-12 md:py-24 px-4 sm:px-6 lg:px-8">

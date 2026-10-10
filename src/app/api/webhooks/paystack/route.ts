@@ -69,7 +69,14 @@ export async function POST(req: Request) {
         return new NextResponse("Lease not found", { status: 404 });
       }
 
-      const serverExpectedPrice = existingLease.listingId.price;
+      const rentDuration = metadata?.rentDuration || 1;
+      const roomType = existingLease.listingId.roomType || "Empty";
+      const listingType = existingLease.listingId.listingType || existingLease.listingId.propertyId?.type || "Rent";
+      const isRent = listingType !== "Sale" && listingType !== "For_Sale";
+
+      const basePrice = existingLease.listingId.price || 0;
+      const serverExpectedPrice = isRent ? basePrice * rentDuration : basePrice;
+
       if (amountPaidInGhs < serverExpectedPrice - 1) {
         console.error(`[WEBHOOK SECURITY] Underpayment! Paid: ${amountPaidInGhs}, Owed: ${serverExpectedPrice}`);
         return new NextResponse("Partial payment", { status: 400 });
@@ -79,14 +86,16 @@ export async function POST(req: Request) {
       const currentEndDate = existingLease.endDate ? new Date(existingLease.endDate) : now;
       const baseDateForExtension = currentEndDate > now ? currentEndDate : now;
       const newEndDate = new Date(baseDateForExtension);
-      const term = existingLease.listingId?.terms?.leaseTerm?.toLowerCase() || "";
 
-      if (term.includes("month")) newEndDate.setMonth(newEndDate.getMonth() + 1);
-      else if (term.includes("year")) {
-        const yearMatch = term.match(/(\d+)_year/);
-        const yearsToAdd = yearMatch ? parseInt(yearMatch[1], 10) : 1;
-        newEndDate.setFullYear(newEndDate.getFullYear() + yearsToAdd);
-      } else newEndDate.setFullYear(newEndDate.getFullYear() + 1);
+      if (isRent) {
+        if (roomType === "Furnished") {
+          newEndDate.setDate(newEndDate.getDate() + rentDuration);
+        } else {
+          newEndDate.setMonth(newEndDate.getMonth() + rentDuration);
+        }
+      } else {
+        newEndDate.setFullYear(newEndDate.getFullYear() + 1);
+      }
 
       const newDynamicReminders = calculateMilestones(baseDateForExtension, newEndDate);
 
