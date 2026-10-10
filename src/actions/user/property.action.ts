@@ -58,7 +58,7 @@ const createPropertySchema = z.object({
 
   mediaFiles: z.array(z.any())
     .min(1, "At least one image is required")
-    .max(10, "Maximum of 10 images allowed"),
+    .max(5, "Maximum of 5 images allowed"),
     
 });
 
@@ -75,7 +75,7 @@ const editPropertySchema = createPropertySchema
         try { return JSON.parse(val); } catch { return []; }
       }
       return [];
-    }, z.array(z.string().url("Invalid image URL")).max(10)),
+    }, z.array(z.string().url("Invalid image URL")).max(5)),
     
     // Accept the new images
     newMediaFiles: z.array(z.any()).optional().default([]),
@@ -87,10 +87,26 @@ const deleteSchema = z.object({
 
 // Helper
 function extractPublicId(url: string) {
+  // URLs look like: https://res.cloudinary.com/cloudname/image/upload/v1234/wunkathomes/properties/listingId/img_1.jpg
+  // We want to extract: wunkathomes/properties/listingId/img_1
+  try {
+    const urlObj = new URL(url);
+    const pathname = urlObj.pathname;
+    // pathname: /cloudname/image/upload/v1234/wunkathomes/properties/listingId/img_1.jpg
+    const parts = pathname.split('/');
+    const startIndex = parts.findIndex(p => p === 'wunkathomes');
+    if (startIndex !== -1) {
+      const publicIdWithExt = parts.slice(startIndex).join('/');
+      return publicIdWithExt.substring(0, publicIdWithExt.lastIndexOf('.'));
+    }
+  } catch (e) {
+    // fallback
+  }
+  
   const parts = url.split('/');
   const filename = parts[parts.length - 1];
   const folder = parts[parts.length - 2];
-  return `${folder}/${filename.split('.')[0]}`; 
+  return `wunkathomes/properties/${folder}/${filename.split('.')[0]}`; 
 }
 
 // ============================================================================
@@ -150,7 +166,7 @@ export async function createPropertyAction(prevState: ActionState, formData: For
     // ✅ SECURITY: Enforce deterministic naming and upload optimizations directly from the server
     const folder = `wunkathomes/properties/${listingId}`;
     const files = validData.mediaFiles as File[];
-    const publicIds = files.map((_, i) => `${folder}/img_${i + 1}`);
+    const publicIds = files.map((_, i) => `img_${i + 1}`);
     const uploadedUrls = await uploadToCloudinary(files, folder, publicIds) as string[];
     
     // Mongoose recommended transaction pattern
@@ -276,7 +292,7 @@ export async function editPropertyAction(prevState: ActionState, formData: FormD
     const files = validData.newMediaFiles as File[];
     // Generate deterministic public IDs that don't collide with retained images
     const startIdx = validData.retainedImages.length + 1;
-    const publicIds = files.map((_, i) => `${folder}/img_${startIdx + i}`);
+    const publicIds = files.map((_, i) => `img_${startIdx + i}`);
     const uploadedUrls = await uploadToCloudinary(files, folder, publicIds) as string[];
 
     // Combine old images kept + new images securely uploaded
