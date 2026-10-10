@@ -26,7 +26,7 @@ export default function PDFViewerWrapper({ children }: { children: React.ReactNo
 
   return (
     <div className="w-full h-[800px] md:h-screen max-h-[1000px] bg-white border border-zinc-200 overflow-hidden">
-      <PDFViewer width="100%" height="100%" className="border-none" showToolbar={true}>
+      <PDFViewer style={{ width: "100%", height: "100%", border: "none" }} showToolbar={true}>
         {children as any}
       </PDFViewer>
     </div>

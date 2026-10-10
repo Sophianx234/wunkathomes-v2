@@ -1,21 +1,12 @@
 import React from 'react';
-import { Page, Text, View, Document, StyleSheet, Font } from '@react-pdf/renderer';
-
-Font.register({
-  family: 'Inter',
-  fonts: [
-    { src: 'https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyeMZhrib2Bg-4.ttf', fontWeight: 400 },
-    { src: 'https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuIqeMZhrib2Bg-4.ttf', fontWeight: 700 },
-    { src: 'https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuGKYMZhrib2Bg-4.ttf', fontWeight: 900 }
-  ]
-});
+import { Page, Text, View, Document, StyleSheet } from '@react-pdf/renderer';
 
 const styles = StyleSheet.create({
   page: {
     flexDirection: 'column',
     backgroundColor: '#FFFFFF',
     padding: 60,
-    fontFamily: 'Inter',
+    fontFamily: 'Helvetica',
   },
   header: {
     alignItems: 'center',
@@ -98,19 +89,19 @@ export default function TenancyDocumentPDF({ selectedActivation }: any) {
 
         <View style={styles.body}>
           <Text style={styles.paragraph}>
-            This Tenancy Agreement is formally established between <Text style={styles.bold}>WunkatHomes Ltd.</Text> (referred to as the "Landlord") and <Text style={styles.bold}>{selectedActivation.user.name}</Text> (referred to as the "Tenant").
+            This Tenancy Agreement is formally established between <Text style={styles.bold}>WunkatHomes Ltd.</Text> (referred to as the "Landlord") and <Text style={styles.bold}>{selectedActivation?.user?.name || "Tenant"}</Text> (referred to as the "Tenant").
           </Text>
 
           <Text style={styles.paragraph}>
-            <Text style={styles.bold}>1. The Property:</Text> The Landlord agrees to rent, and the Tenant agrees to occupy the property known as <Text style={styles.bold}>{selectedActivation.lease.propertyName}</Text> located at <Text style={styles.bold}>{selectedActivation.lease.propertyLocation || `Unit ${selectedActivation.lease.unitNumber}`}</Text>.
+            <Text style={styles.bold}>1. The Property:</Text> The Landlord agrees to rent, and the Tenant agrees to occupy the property known as <Text style={styles.bold}>{selectedActivation?.lease?.propertyName || "Property"}</Text> located at <Text style={styles.bold}>{selectedActivation?.lease?.propertyLocation || `Unit ${selectedActivation?.lease?.unitNumber || "N/A"}`}</Text>.
           </Text>
 
           <Text style={styles.paragraph}>
-            <Text style={styles.bold}>2. Lease Duration:</Text> This agreement begins on <Text style={styles.bold}>{formatDate(selectedActivation.lease.startDate)}</Text> and will remain active until <Text style={styles.bold}>{selectedActivation.lease.endDate ? formatDate(selectedActivation.lease.endDate) : "the end of the agreed term"}</Text>, unless ended earlier under the terms of this agreement.
+            <Text style={styles.bold}>2. Lease Duration:</Text> This agreement begins on <Text style={styles.bold}>{formatDate(selectedActivation?.lease?.startDate)}</Text> and will remain active until <Text style={styles.bold}>{selectedActivation?.lease?.endDate ? formatDate(selectedActivation?.lease?.endDate) : "the end of the agreed term"}</Text>, unless ended earlier under the terms of this agreement.
           </Text>
 
           <Text style={styles.paragraph}>
-            <Text style={styles.bold}>3. Rent & Payment:</Text> The total rent payment of <Text style={styles.bold}>GHS {selectedActivation.lease.totalRentAmount?.toLocaleString(undefined, { minimumFractionDigits: 2 })}</Text> has been successfully processed and verified.
+            <Text style={styles.bold}>3. Rent & Payment:</Text> The total rent payment of <Text style={styles.bold}>GHS {selectedActivation?.lease?.totalRentAmount ? selectedActivation.lease.totalRentAmount.toLocaleString(undefined, { minimumFractionDigits: 2 }) : "0.00"}</Text> has been successfully processed and verified.
           </Text>
 
           <Text style={styles.paragraph}>
@@ -134,10 +125,10 @@ export default function TenancyDocumentPDF({ selectedActivation }: any) {
           <View style={styles.sigCol}>
             <Text style={styles.sigTitle}>Tenant E-Signature</Text>
             <View style={styles.sigLine}>
-              <Text style={styles.sigName}>{selectedActivation.lease.signatureAudit?.typedName || selectedActivation.user.name}</Text>
+              <Text style={styles.sigName}>{selectedActivation?.lease?.signatureAudit?.typedName || selectedActivation?.user?.name || "Tenant"}</Text>
             </View>
-            <Text style={styles.sigMeta}>Date: {selectedActivation.lease.signatureAudit?.signedAt || "Pending"}</Text>
-            <Text style={styles.sigMeta}>IP Addr: {selectedActivation.lease.signatureAudit?.ipAddress || "N/A"}</Text>
+            <Text style={styles.sigMeta}>Date: {selectedActivation?.lease?.signatureAudit?.signedAt || "Pending"}</Text>
+            <Text style={styles.sigMeta}>IP Addr: {selectedActivation?.lease?.signatureAudit?.ipAddress || "N/A"}</Text>
           </View>
         </View>
 

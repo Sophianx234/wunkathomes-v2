@@ -1,21 +1,12 @@
 import React from 'react';
-import { Page, Text, View, Document, StyleSheet, Image, Font } from '@react-pdf/renderer';
-
-Font.register({
-  family: 'Inter',
-  fonts: [
-    { src: 'https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyeMZhrib2Bg-4.ttf', fontWeight: 400 },
-    { src: 'https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuIqeMZhrib2Bg-4.ttf', fontWeight: 700 },
-    { src: 'https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuGKYMZhrib2Bg-4.ttf', fontWeight: 900 }
-  ]
-});
+import { Page, Text, View, Document, StyleSheet, Image } from '@react-pdf/renderer';
 
 const styles = StyleSheet.create({
   page: {
     flexDirection: 'column',
     backgroundColor: '#FFFFFF',
     padding: 40,
-    fontFamily: 'Inter',
+    fontFamily: 'Helvetica',
   },
   header: {
     flexDirection: 'row',
@@ -217,14 +208,14 @@ export default function TransactionReceiptPDF({ transaction, dateStr, formattedA
         <View style={styles.entitiesGrid}>
           <View style={styles.entityBox}>
             <Text style={styles.entityLabel}>Billed To</Text>
-            <Text style={styles.entityTitle}>{transaction.user.name}</Text>
-            <Text style={styles.entitySub}>{transaction.user.email}</Text>
+            <Text style={styles.entityTitle}>{transaction?.user?.name || "N/A"}</Text>
+            <Text style={styles.entitySub}>{transaction?.user?.email || "N/A"}</Text>
           </View>
           <View style={styles.entityBox}>
             <Text style={styles.entityLabel}>Property / Asset</Text>
-            <Text style={styles.entityTitle}>{transaction.listing.title}</Text>
-            <Text style={styles.entitySub}>{transaction.listing.property.location}</Text>
-            <Text style={styles.entityAsset}>Asset Type: {transaction.listing.property.propertyType.replace(/_/g, " ")}</Text>
+            <Text style={styles.entityTitle}>{transaction?.listing?.title || "N/A"}</Text>
+            <Text style={styles.entitySub}>{transaction?.listing?.property?.location || "N/A"}</Text>
+            <Text style={styles.entityAsset}>Asset Type: {transaction?.listing?.property?.propertyType?.replace(/_/g, " ") || "N/A"}</Text>
           </View>
         </View>
 
@@ -233,11 +224,11 @@ export default function TransactionReceiptPDF({ transaction, dateStr, formattedA
           <Text style={styles.breakdownTitle}>Payment Breakdown</Text>
           <View style={styles.row}>
             <Text style={styles.rowLabel}>Payment Method</Text>
-            <Text style={styles.rowValue}>{transaction.channel?.replace(/_/g, " ") || 'Secure Gateway'}</Text>
+            <Text style={styles.rowValue}>{transaction?.channel?.replace(/_/g, " ") || 'Secure Gateway'}</Text>
           </View>
           <View style={styles.row}>
             <Text style={styles.rowLabel}>Payment Purpose</Text>
-            <Text style={styles.rowValue}>{transaction.paymentPurpose?.replace(/_/g, " ") || 'Rent'}</Text>
+            <Text style={styles.rowValue}>{transaction?.paymentPurpose?.replace(/_/g, " ") || 'Rent'}</Text>
           </View>
           <View style={styles.totalRow}>
             <Text style={styles.totalLabel}>Total</Text>

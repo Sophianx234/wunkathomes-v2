@@ -115,7 +115,7 @@ export async function proxy(request: NextRequest) {
   // Helper to apply common headers and sliding cookies to ANY response
   const applySecurity = (res: NextResponse) => {
     res.headers.set("Content-Security-Policy", cspHeader);
-    res.headers.set("X-Frame-Options", "DENY");
+    res.headers.set("X-Frame-Options", "SAMEORIGIN");
     res.headers.set("X-Content-Type-Options", "nosniff");
     res.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
     res.headers.set(
@@ -148,10 +148,10 @@ export async function proxy(request: NextRequest) {
     font-src 'self' data:;
     connect-src 'self' https://api.paystack.co https://api.cloudinary.com https://api.maptiler.com; 
     worker-src 'self' blob:;
-    object-src 'none';
+    object-src 'self' blob: data:;
     base-uri 'self';
     form-action 'self';
-    frame-src 'self' https://js.paystack.co https://checkout.paystack.com;
+    frame-src 'self' blob: https://js.paystack.co https://checkout.paystack.com;
     frame-ancestors 'none';
     upgrade-insecure-requests;
   `.replace(/\s{2,}/g, " ").trim();
