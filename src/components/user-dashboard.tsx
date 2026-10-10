@@ -155,10 +155,11 @@ export function UserDashboard({ user, activeLeases, initialSchedule }: Dashboard
     }
   };
 
-  const needsKyc = false;
+  const isRejected = user.kycStatus === "Rejected";
+  const needsKyc = user.kycStatus === "Unverified" || user.kycStatus === "Pending";
   const needsSignature = !lease.signatureAudit.isSigned;
   const isPendingAdmin = lease.status === "Awaiting_Admin_Approval";
-  const isRestricted = needsKyc || needsSignature || isPendingAdmin;
+  const isRestricted = needsKyc || needsSignature || isPendingAdmin || isRejected;
 
   useEffect(() => {
     setShowPin(false);
@@ -312,6 +313,32 @@ export function UserDashboard({ user, activeLeases, initialSchedule }: Dashboard
         {/* ACTION CARDS & ALERTS (PREMIUM MINIMALIST STYLING)        */}
         {/* ========================================================= */}
 
+        {/* 1. REJECTED BANNER */}
+        {isRejected && (
+          <div className="bg-white border border-red-200/60 p-4 md:p-6 rounded-lg md:rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3 md:gap-6 relative overflow-hidden w-full box-border shadow-sm">
+            <div className="absolute left-0 top-0 bottom-0 w-1 " />
+            <div className="flex items-start sm:items-center gap-3 md:gap-4 pl-1 md:pl-2 min-w-0">
+              <div className="w-8 h-8 md:w-10 md:h-10 bg-white border  rounded-full flex items-center justify-center shrink-0">
+                <span className="scale-75 md:scale-100 flex items-center">
+                  <HugeiconsIcon
+                    icon={Alert01Icon}
+                    
+                    size={20}
+                  />
+                </span>
+              </div>
+              <div className="min-w-0 bg-white">
+                <h4 className="text-[11px] md:text-sm font-bold text-red-900 mb-0.5 md:mb-1 tracking-tight">
+                  Application Rejected
+                </h4>
+                <p className="text-[9px] md:text-sm  font-medium break-words leading-tight">
+                  Your onboarding application was rejected by the administration. Please contact support or visit our office to resolve the issue with your physical Ghana Card.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* 1A. KYC BANNER (UNVERIFIED / NEW TENANT) */}
         {needsKyc && isPendingAdmin && (
           <div className="bg-white border p-4 md:p-6 rounded-lg md:rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3 md:gap-6 relative overflow-hidden w-full box-border shadow-sm">
@@ -339,7 +366,7 @@ export function UserDashboard({ user, activeLeases, initialSchedule }: Dashboard
         )}
 
         {/* 1B. VIP BANNER (VERIFIED / REPEAT TENANT) */}
-        {!needsKyc && isPendingAdmin && (
+        {!needsKyc && isPendingAdmin && !isRejected && (
           <div className="bg-white border border-emerald-200/60 p-4 md:p-6 rounded-lg md:rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3 md:gap-6 relative overflow-hidden w-full box-border shadow-sm">
             <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500" />
             <div className="flex items-start sm:items-center gap-3 md:gap-4 pl-1 md:pl-2 min-w-0">
@@ -356,7 +383,7 @@ export function UserDashboard({ user, activeLeases, initialSchedule }: Dashboard
                 <h4 className="text-[11px] md:text-sm font-bold text-emerald-900 mb-0.5 md:mb-1 tracking-tight">
                   Payment Successful!
                 </h4>
-                <p className="text-[9px] md:text-sm text-emerald-700/80 font-medium break-words leading-tight">
+                <p className="text-[9px] md:text-sm  font-medium break-words leading-tight">
                   Our team is finalizing your new property.
                   Please visit our main office at <strong className="text-zinc-900">Wunkat Homes HQ, Hatso Accra</strong> with your physical Ghana Card to complete onboarding and receive your access credentials.
                 </p>
@@ -366,7 +393,7 @@ export function UserDashboard({ user, activeLeases, initialSchedule }: Dashboard
         )}
 
         {/* 2. SIGNATURE BANNER */}
-        {needsSignature && (
+        {needsSignature && !isRejected && (
           <div className="bg-white border border-zinc-200/60 p-4 md:p-6 rounded-lg md:rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3 md:gap-6 relative overflow-hidden w-full box-border">
             <div className="absolute left-0 top-0 bottom-0 w-1 bg-zinc-900" />
             <div className="flex items-start sm:items-center gap-3 md:gap-4 pl-1 md:pl-2 min-w-0">
