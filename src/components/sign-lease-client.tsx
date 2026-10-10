@@ -29,23 +29,15 @@ interface SignLeaseClientProps {
 export default function SignLeaseClient({ data }: SignLeaseClientProps) {
   const router = useRouter();
   const [agreed, setAgreed] = useState(false);
-  const [typedName, setTypedName] = useState("");
   const [isSigning, setIsSigning] = useState(false);
 
   const handleSign = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (typedName.trim().toLowerCase() !== data.tenantName.toLowerCase()) {
-      toast.error(
-        `Signature must exactly match your verified legal name: ${data.tenantName}`
-      );
-      return;
-    }
-
     setIsSigning(true);
 
     try {
-      const result = await signLeaseAgreement(data.leaseId, typedName);
+      const result = await signLeaseAgreement(data.leaseId, data.tenantName);
 
       if (result.success) {
         toast.success("Tenancy Agreement successfully executed.");
@@ -179,31 +171,14 @@ export default function SignLeaseClient({ data }: SignLeaseClientProps) {
                 />
               </div>
               <label htmlFor="consent" className="text-[9px] md:text-[12px] text-zinc-600 leading-relaxed cursor-pointer select-none break-words min-w-0 pt-0.5">
-                I acknowledge that I have read the Tenancy Agreement and agree to be legally bound by its terms.
+                I, <strong>{data.tenantName}</strong>, acknowledge that I have read the Tenancy Agreement and agree to be legally bound by its terms.
               </label>
-            </div>
-
-            {/* Clean Input Field */}
-            <div className="space-y-1.5 md:space-y-2 w-full box-border">
-              <label className="block text-[9px] md:text-[12px] font-medium text-zinc-700">
-                Digital Signature <span className="text-zinc-400 font-normal ml-0.5">(Type your legal name)</span>
-              </label>
-              <div className="relative w-full min-w-0 max-w-full box-border">
-                <input
-                  type="text"
-                  required
-                  placeholder={data.tenantName}
-                  value={typedName}
-                  onChange={(e) => setTypedName(e.target.value)}
-                  className="block w-full min-w-0 max-w-full box-border pl-2.5 pr-2.5 md:pl-3 md:pr-3 py-2 md:py-2.5 bg-white border border-zinc-300 rounded-md md:rounded-lg text-[11px] md:text-[14px] text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent transition-shadow appearance-none m-0"
-                />
-              </div>
             </div>
 
             <div className="pt-3 md:pt-4 space-y-3 md:space-y-4 border-t border-zinc-200/60 w-full box-border">
               <button
                 type="submit"
-                disabled={!agreed || !typedName || isSigning}
+                disabled={!agreed || isSigning}
                 className="block w-full min-w-0 max-w-full box-border h-9 md:h-11 bg-zinc-900 text-white text-[10px] md:text-[13px] font-medium rounded-lg hover:bg-zinc-800 transition-colors flex items-center justify-center gap-1.5 md:gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm m-0"
               >
                 {isSigning ? (
