@@ -66,7 +66,6 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
   const [isVerifyingPayment, setIsVerifyingPayment] = useState(false)
   const [agreedToTerms, setAgreedToTerms] = useState(false)
   const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false)
-  const [typedSignature, setTypedSignature] = useState("")
 
   const isRent = propType !== "Sale" && propType !== "For_Sale";
   const roomType = listing?.roomType || "Empty"; // 'Furnished' or 'Empty'
@@ -101,7 +100,7 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
       isInitialLease: true,
       selectedMoveInDate: moveInDate,
       moveInDate: moveInDate,
-      signature: typedSignature,
+      signature: formData.legalName || "Tenant Name",
       rentDuration,
       securityDeposit,
       rentSubtotal,
@@ -185,8 +184,8 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
       return
     }
 
-    if (!agreedToTerms || !typedSignature.trim()) {
-      toast.error("Please review and agree to the Tenancy Agreement with your signature.")
+    if (!agreedToTerms) {
+      toast.error("Please review and agree to the Tenancy Agreement.")
       return
     }
 
@@ -381,34 +380,17 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
                     htmlFor="terms" 
                     className={`text-xs md:text-sm leading-relaxed ${!hasScrolledToBottom ? 'text-zinc-400 cursor-not-allowed' : 'text-zinc-600 cursor-pointer'}`}
                   >
-                    I acknowledge that I have reviewed the Standard Tenancy Agreement. I agree to be legally bound by its terms, which will take effect upon successful payment.
+                    I, <strong>{formData.legalName || "[Full Legal Name]"}</strong>, acknowledge that I have reviewed the Standard Tenancy Agreement. I agree to be legally bound by its terms, which will take effect upon successful payment.
                   </label>
                 </div>
-
-                {agreedToTerms && (
-                  <div className="animate-in fade-in slide-in-from-top-2 pt-2">
-                    <label className="block text-[9px] md:text-[11px] font-bold uppercase tracking-widest text-zinc-500 mb-1 md:mb-2">
-                      Type Full Legal Name
-                    </label>
-                    <input 
-                      required
-                      type="text" 
-                      placeholder="e.g. John Doe"
-                      value={typedSignature}
-                      onChange={e => setTypedSignature(e.target.value)}
-                      className="block w-full min-w-0 max-w-full box-border m-0 p-2 md:p-4 border border-slate-300 rounded-lg text-xs md:text-sm font-bold focus:outline-none focus:border-black focus:ring-1 focus:ring-black bg-zinc-50/50 focus:bg-white transition-all appearance-none"
-                    />
-                  </div>
-                )}
               </div>
-            </div>
 
-            {/* Submit Button */}
+              {/* Submit Button */}
             {currentUser ? (
               <div className="w-full">
                 <Button 
                   type="submit"
-                  disabled={isProcessing || !agreedToTerms || !typedSignature.trim()}
+                  disabled={isProcessing || !agreedToTerms}
                   className="w-full py-6 bg-black text-white hover:bg-black/90 font-bold tracking-tight text-sm md:text-base rounded-lg flex items-center justify-center gap-2 transition-colors"
                 >
                   {isProcessing && <HugeiconsIcon icon={Loading03Icon} size={18} className="animate-spin" />}
