@@ -57,6 +57,8 @@ export default async function RenewPage({ searchParams }: RenewPageProps) {
       image: existingLease.listingId.images?.[0] || "/placeholder.jpg",
       propertyType:
         existingLease.listingId.propertyId?.propertyType || "Property",
+      roomType: existingLease.listingId.roomType || "Empty",
+      listingType: existingLease.listingId.listingType || existingLease.listingId.propertyId?.type || "Rent",
     },
   };
 

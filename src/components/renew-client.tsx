@@ -30,6 +30,8 @@ interface RenewClientProps {
       price: number;
       image: string;
       propertyType: string;
+      roomType?: string;
+      listingType?: string;
     };
   };
 }
@@ -38,17 +40,26 @@ export default function RenewClient({ data }: RenewClientProps) {
   const router = useRouter();
   const [isProcessing, setIsProcessing] = useState(false);
 
+  const isRent = data.listing.listingType !== "Sale" && data.listing.listingType !== "For_Sale";
+  const roomType = data.listing.roomType || "Empty"; 
+  const [rentDuration, setRentDuration] = useState<number>(roomType === 'Furnished' ? 1 : 3);
+  
+  const basePrice = data.listing.price || 0;
+  const finalTotal = isRent ? basePrice * rentDuration : basePrice;
+
   // Paystack Configuration for Renewal
   const paystackConfig = {
     reference: `RENEW_${new Date().getTime().toString()}`,
     email: data.user.email,
-    amount: Math.round(data.rentAmount * 100),
+    amount: Math.round(finalTotal * 100),
     publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY as string,
     currency: "GHS",
     metadata: {
       isRenewal: true, // Flag this for your webhook!
       userId: data.user.id,
       leaseId: data.leaseId,
+      rentDuration,
+      rentSubtotal: finalTotal,
       custom_fields: [
         {
           display_name: "Tenant Name",
@@ -72,8 +83,7 @@ export default function RenewClient({ data }: RenewClientProps) {
     // Server action to update the Lease endDate
     const result = await processLeaseRenewal(
       paystackResponse.reference,
-      data.leaseId,
-      data.rentAmount,
+      data.leaseId
     );
 
     if (result.success) {
@@ -160,12 +170,40 @@ export default function RenewClient({ data }: RenewClientProps) {
             </div>
           </div>
 
+          {isRent && (
+            <div className="mb-6">
+              <label className="block text-sm font-bold uppercase tracking-widest text-zinc-500 mb-2">
+                Renewal Duration ({roomType === 'Furnished' ? 'Days' : 'Months'})
+              </label>
+              {roomType === 'Furnished' ? (
+                <input 
+                  type="number" 
+                  min={1}
+                  value={rentDuration}
+                  onChange={e => setRentDuration(Math.max(1, parseInt(e.target.value) || 1))}
+                  className="w-full p-4 border border-zinc-200 rounded-lg focus:outline-none focus:border-black font-bold"
+                />
+              ) : (
+                <select
+                  value={rentDuration}
+                  onChange={e => setRentDuration(parseInt(e.target.value))}
+                  className="w-full p-4 border border-zinc-200 rounded-lg focus:outline-none focus:border-black font-bold cursor-pointer appearance-none"
+                >
+                  <option value={1}>1 Month</option>
+                  <option value={3}>3 Months</option>
+                  <option value={6}>6 Months</option>
+                  <option value={12}>1 Year (12 Months)</option>
+                </select>
+              )}
+            </div>
+          )}
+
           <div className="flex justify-between items-center mb-6">
             <span className="text-sm font-bold uppercase tracking-widest text-zinc-500">
               Renewal Amount
             </span>
             <span className="text-3xl font-black text-black">
-              GHS {data.rentAmount.toLocaleString()}
+              GHS {finalTotal.toLocaleString()}
             </span>
           </div>
 
@@ -183,7 +221,7 @@ export default function RenewClient({ data }: RenewClientProps) {
             )}
             {isProcessing
               ? "Processing..."
-              : `Pay GHS ${data.rentAmount.toLocaleString()} to Renew`}
+              : `Pay GHS ${finalTotal.toLocaleString()} to Renew`}
           </button>
 
           <div className="flex flex-col items-center gap-4 mt-6">

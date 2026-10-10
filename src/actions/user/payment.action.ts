@@ -280,8 +280,6 @@ export async function processLeaseRenewal(
       return { success: false, message: "Lease not found or unauthorized." };
     }
 
-    const serverExpectedPrice = existingLease.listingId.price;
-
     const response = await fetch(
       `https://api.paystack.co/transaction/verify/${reference}`,
       {
@@ -300,6 +298,14 @@ export async function processLeaseRenewal(
       };
     }
 
+    const rentDuration = data.data.metadata?.rentDuration || 1;
+    const roomType = existingLease.listingId?.roomType || "Empty";
+    const listingType = existingLease.listingId?.listingType || existingLease.listingId?.propertyId?.type || "Rent";
+    const isRent = listingType !== "Sale" && listingType !== "For_Sale";
+
+    const basePrice = existingLease.listingId.price || 0;
+    const serverExpectedPrice = isRent ? basePrice * rentDuration : basePrice;
+
     const amountPaidInGhs = data.data.amount / 100;
     if (amountPaidInGhs < serverExpectedPrice - 1) {
       console.error(
@@ -317,14 +323,16 @@ export async function processLeaseRenewal(
       : now;
     const baseDateForExtension = currentEndDate > now ? currentEndDate : now;
     const newEndDate = new Date(baseDateForExtension);
-    const term = existingLease.listingId?.terms?.leaseTerm?.toLowerCase() || "";
 
-    if (term.includes("month")) newEndDate.setMonth(newEndDate.getMonth() + 1);
-    else if (term.includes("year")) {
-      const yearMatch = term.match(/(\d+)_year/);
-      const yearsToAdd = yearMatch ? parseInt(yearMatch[1], 10) : 1;
-      newEndDate.setFullYear(newEndDate.getFullYear() + yearsToAdd);
-    } else newEndDate.setFullYear(newEndDate.getFullYear() + 1);
+    if (isRent) {
+      if (roomType === "Furnished") {
+        newEndDate.setDate(newEndDate.getDate() + rentDuration);
+      } else {
+        newEndDate.setMonth(newEndDate.getMonth() + rentDuration);
+      }
+    } else {
+      newEndDate.setFullYear(newEndDate.getFullYear() + 1);
+    }
 
     // NEW: Re-calculate the reminder milestones based on the newly extended period
     const newDynamicReminders = calculateMilestones(
