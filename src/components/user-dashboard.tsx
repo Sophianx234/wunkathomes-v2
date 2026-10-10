@@ -925,7 +925,7 @@ export function UserDashboard({ user, activeLeases, initialSchedule }: Dashboard
         {!isRestricted && (
           <div className="mb-4 md:mb-6 w-full ">
             {!showCleaning ? (
-              <div className="bg-white border border-zinc-200/60 p-6 md:p-8 rounded-[20px]  flex flex-col sm:flex-row items-center justify-between gap-6 w-full max-w-4xl mx-auto overflow-hidden relative">
+              <div className="bg-white border border-zinc-200/60 p-6 md:p-8 rounded-[20px]  flex flex-col sm:flex-row items-center justify-between gap-6 w-full  mx-auto overflow-hidden relative">
                 <div className="flex items-start sm:items-center gap-4 min-w-0">
                   
                   <div className="min-w-0">

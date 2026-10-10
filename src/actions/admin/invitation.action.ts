@@ -86,7 +86,7 @@ export async function inviteTeamMemberAction(rawEmail: string, rawRole: string) 
       { upsert: true, new: true }
     );
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (process.env.NODE_ENV === "production" ? "https://wunkathomes.com" : "http://localhost:3000");
     await sendEmail({
       to: email,
       subject: "Join the WunkatHomes Team",

@@ -18,6 +18,7 @@ async function triggerDemo() {
     const mongoose = (await import('mongoose')).default;
     const Lease = (await import('../src/models/lease')).default;
     const User = (await import('../src/models/user')).default;
+    await import('../src/models/listing'); // Ensure Listing is registered for populate
 
     await connectToDatabase();
 
@@ -48,12 +49,12 @@ async function triggerDemo() {
       process.exit(1);
     }
 
-    // 2. Artificially advance dates to simulate the passing of time
+    const now = new Date();
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     
-    const nextWeek = new Date();
-    nextWeek.setDate(nextWeek.getDate() + 7);
+    // Calculate total lease duration to realistically shift the dates
+    const durationMs = lease.endDate.getTime() - lease.startDate.getTime();
 
     // Initialize reminders object if it doesn't exist
     if (!lease.reminders) lease.reminders = {};
@@ -63,24 +64,34 @@ async function triggerDemo() {
         if (!lease.reminders.milestone1) lease.reminders.milestone1 = {};
         lease.reminders.milestone1.triggerDate = yesterday;
         lease.reminders.milestone1.sent = false;
-        // Make sure it doesn't accidentally trigger 'expired' if it was already expired
-        if (lease.endDate <= new Date()) lease.endDate = nextWeek;
+        
+        // Shift dates so we are exactly at 50%
+        lease.startDate = new Date(now.getTime() - (durationMs * 0.5));
+        lease.endDate = new Date(now.getTime() + (durationMs * 0.5));
         break;
       case '75':
         if (!lease.reminders.milestone2) lease.reminders.milestone2 = {};
         lease.reminders.milestone2.triggerDate = yesterday;
         lease.reminders.milestone2.sent = false;
-        if (lease.endDate <= new Date()) lease.endDate = nextWeek;
+        
+        // Shift dates so we are exactly at 75%
+        lease.startDate = new Date(now.getTime() - (durationMs * 0.75));
+        lease.endDate = new Date(now.getTime() + (durationMs * 0.25));
         break;
       case '90':
         if (!lease.reminders.milestone3) lease.reminders.milestone3 = {};
         lease.reminders.milestone3.triggerDate = yesterday;
         lease.reminders.milestone3.sent = false;
-        if (lease.endDate <= new Date()) lease.endDate = nextWeek;
+        
+        // Shift dates so we are exactly at 90%
+        lease.startDate = new Date(now.getTime() - (durationMs * 0.90));
+        lease.endDate = new Date(now.getTime() + (durationMs * 0.10));
         break;
       case 'expired':
       default:
         lease.endDate = yesterday;
+        lease.startDate = new Date(yesterday.getTime() - durationMs); // Keep total duration same
+        
         if (!lease.reminders.expired) lease.reminders.expired = {};
         lease.reminders.expired.triggerDate = yesterday;
         lease.reminders.expired.sent = false;
@@ -94,7 +105,7 @@ async function triggerDemo() {
     console.log("🚀 Triggering the check-subscriptions cron job...");
     
     const API_URL = "http://localhost:3000/api/cron/check-subscriptions";
-    const CRON_SECRET = process.env.CRON_SECRET || "";
+    const CRON_SECRET = process.env.CRON_SECRET_KEY || "";
 
     try {
       const response = await fetch(API_URL, {

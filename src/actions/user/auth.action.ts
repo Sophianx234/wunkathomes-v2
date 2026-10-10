@@ -106,10 +106,11 @@ export async function signupAction(prevState: any, formData: FormData) {
       role: newUser.role,
     });
 
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://wunkathomes.com";
     sendEmail({
       to: email,
       subject: "Welcome to WunkatHomes",
-      react: React.createElement(WelcomeEmail, { userName: name, exploreUrl: `${process.env.NEXT_PUBLIC_APP_URL}/explore` }),
+      react: React.createElement(WelcomeEmail, { userName: name, exploreUrl: `${baseUrl}/explore` }),
     }).catch(err => console.error("[NON-FATAL] Failed to send welcome email:", err));
 
     return { success: true, message: "Account created successfully!" };
@@ -322,7 +323,8 @@ export async function forgotPasswordAction(prevState: any, formData: FormData) {
     user.passwordResetExpires = Date.now() + 3600000; // 1 hour
     await user.save();
 
-    const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${resetToken}`;
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://wunkathomes.com";
+    const resetUrl = `${baseUrl}/reset-password?token=${resetToken}`;
 
     await sendEmail({
       to: user.email,
