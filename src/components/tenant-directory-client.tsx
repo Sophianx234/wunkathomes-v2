@@ -62,7 +62,7 @@ import {
 
 import { formatCurrency } from "./transactions-client";
 import { DocumentViewer } from "./ui/document-viewer";
-import { TenancyDocument } from "./lease-document viewer";
+import { TenancyDocumentPDFViewer } from "./tenancy-document-pdf-viewer";
 
 import { toggleAccountStatus, verifyAndOnboardTenantAction, updateTenantDetailsAction, processMoveOutAction } from "@/actions/admin/tenant.action";
 import {
@@ -405,10 +405,9 @@ export default function TenantDirectoryClient({
   };
 
   if (isViewingDocument && selectedTenant) {
-    // Note: Since TenancyDocument expects `selectedActivation`, we pass selectedTenant as `any` since they share shape
     return (
-      <TenancyDocument
-        selectedActivation={selectedTenant as any}
+      <TenancyDocumentPDFViewer
+        selectedActivation={selectedTenant}
         onBack={() => setIsViewingDocument(false)}
       />
     );
@@ -756,12 +755,12 @@ export default function TenantDirectoryClient({
                         </div>
                       </div>
                       <button
-                            onClick={() => setIsViewingDocument(true)}
-                            disabled={selectedTenant.checklist.leaseSigned !== "Signed"}
-                            className="text-[13px] font-medium text-zinc-900 hover:underline underline-offset-4 disabled:no-underline disabled:text-zinc-400"
-                          >
-                            {selectedTenant.checklist.leaseSigned === "Signed" ? "View " : "Awaiting Tenant Signature"}
-                          </button>
+                        onClick={() => setIsViewingDocument(true)}
+                        disabled={selectedTenant.checklist.leaseSigned !== "Signed"}
+                        className="text-xs font-medium text-zinc-900 hover:text-zinc-700 bg-zinc-100 hover:bg-zinc-200/80 px-3 py-1.5 rounded-lg active:scale-95 transition-all disabled:opacity-50 disabled:pointer-events-none shadow-2xs"
+                      >
+                        {selectedTenant.checklist.leaseSigned === "Signed" ? "View Agreement" : "Awaiting Tenant Signature"}
+                      </button>
                     </div>
                         </>
                       )}
@@ -787,13 +786,13 @@ export default function TenantDirectoryClient({
                           <HugeiconsIcon icon={FileDownloadIcon} size={18} className="text-zinc-400" />
                         </div>
                         <div>
-                          <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest mb-0.5">Tenancy Agreement</p>
+                          <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest mb-1">Tenancy Agreement</p>
                           <button
                             onClick={() => setIsViewingDocument(true)}
                             disabled={selectedTenant.checklist.leaseSigned !== "Signed"}
-                            className="text-[13px] font-medium text-zinc-900 hover:underline underline-offset-4 disabled:no-underline disabled:text-zinc-400"
+                            className="text-xs font-medium text-zinc-900 hover:text-zinc-700 bg-zinc-100 hover:bg-zinc-200/80 px-3 py-1.5 rounded-lg active:scale-95 transition-all disabled:opacity-50 disabled:pointer-events-none shadow-2xs"
                           >
-                            {selectedTenant.checklist.leaseSigned === "Signed" ? "View Signed Document" : "Awaiting Tenant Signature"}
+                            {selectedTenant.checklist.leaseSigned === "Signed" ? "View Signed Agreement" : "Awaiting Tenant Signature"}
                           </button>
                         </div>
                       </div>

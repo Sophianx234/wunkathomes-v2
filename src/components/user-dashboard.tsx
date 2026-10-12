@@ -908,9 +908,7 @@ export function UserDashboard({ user, activeLeases, initialSchedule }: Dashboard
             {!showCleaning ? (
               <div className="bg-white border border-zinc-200/80 p-5 md:p-6 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4 w-full overflow-hidden relative shadow-xs">
                 <div className="flex items-start sm:items-center gap-3.5 min-w-0">
-                  <div className="w-9 h-9 rounded-lg bg-zinc-100 flex items-center justify-center text-zinc-800 border border-zinc-200/60 shrink-0">
-                    <HugeiconsIcon icon={SparklesIcon} size={18} />
-                  </div>
+                 
                   <div className="min-w-0">
                     <h4 className="text-sm md:text-base font-semibold text-zinc-900 tracking-tight mb-0.5 truncate">
                       Professional Cleaning Services
@@ -930,7 +928,7 @@ export function UserDashboard({ user, activeLeases, initialSchedule }: Dashboard
                 </div>
               </div>
             ) : (
-              <div className="flex flex-col gap-3 w-full max-w-4xl mx-auto">
+              <div className="flex flex-col gap-3 w-full  mx-auto">
                 <div className="flex justify-end px-1">
                   <button
                     onClick={() => setShowCleaning(false)}

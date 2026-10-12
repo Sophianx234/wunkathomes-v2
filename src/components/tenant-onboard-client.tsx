@@ -32,7 +32,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 import { DocumentViewer } from "@/components/ui/document-viewer";
-import { TenancyDocument } from "./lease-document viewer";
+import { TenancyDocumentPDFViewer } from "./tenancy-document-pdf-viewer";
 import { verifyAndOnboardTenantAction, updateTenantDetailsAction, rejectTenantOnboardingAction } from "@/actions/admin/tenant.action";
 import type { TenantRecord } from "@/components/tenant-directory-client";
 
@@ -156,8 +156,8 @@ export default function TenantOnboardClient({ tenant }: { tenant: TenantRecord }
 
   if (isViewingDocument && tenant) {
     return (
-      <TenancyDocument
-        selectedActivation={tenant as any}
+      <TenancyDocumentPDFViewer
+        selectedActivation={tenant}
         onBack={() => setIsViewingDocument(false)}
       />
     );
