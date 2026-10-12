@@ -206,9 +206,7 @@ export default function PortfolioDashboardClient({ data, selectedYear }: Dashboa
       title: "Urgent Maintenance",
       message: `There are ${metrics.urgentMaintenance} urgent maintenance request${metrics.urgentMaintenance > 1 ? 's' : ''} waiting to be resolved.`,
       link: "/admin/manage/maintenance",
-      containerClass: "bg-zinc-50 border-zinc-200 text-zinc-900",
-      iconClass: "bg-zinc-100 text-zinc-600",
-      btnClass: "bg-zinc-950 hover:bg-zinc-800 text-white border-transparent shadow-none",
+      iconClass: "bg-amber-50 text-amber-700 border border-amber-200/60",
     });
   }
 
@@ -230,9 +228,7 @@ export default function PortfolioDashboardClient({ data, selectedYear }: Dashboa
       title: "New Tenant Approvals",
       message: onboardingMessage,
       link: "/admin/manage/tenants",
-      containerClass: "bg-zinc-50 border-zinc-200 text-zinc-900",
-      iconClass: "bg-zinc-100 text-zinc-600",
-      btnClass: "bg-zinc-950 hover:bg-zinc-800 text-white border-transparent shadow-none",
+      iconClass: "bg-zinc-100 text-zinc-900 border border-zinc-200/60",
     });
   }
 
@@ -244,9 +240,7 @@ export default function PortfolioDashboardClient({ data, selectedYear }: Dashboa
       title: "Pending Bank Transfers",
       message: `${metrics.pendingBankTransfers} bank transfer${metrics.pendingBankTransfers > 1 ? 's' : ''} need to be reviewed and confirmed.`,
       link: "/admin/manage/transactions",
-      containerClass: "bg-blue-50 border-blue-200 text-blue-900",
-      iconClass: "bg-blue-100 text-blue-600",
-      btnClass: "bg-zinc-950 hover:bg-zinc-800 text-white border-transparent shadow-none",
+      iconClass: "bg-blue-50 text-blue-700 border border-blue-200/60",
     });
   }
 
@@ -258,9 +252,7 @@ export default function PortfolioDashboardClient({ data, selectedYear }: Dashboa
       title: "Today's Tours",
       message: `You have ${metrics.pendingToursToday} property tour${metrics.pendingToursToday > 1 ? 's' : ''} happening today.`,
       link: "/admin/manage/tours",
-      containerClass: "bg-zinc-100/50 border-zinc-200/60 text-zinc-900",
-      iconClass: "bg-white text-zinc-600",
-      btnClass: "bg-zinc-950 hover:bg-zinc-800 text-white border-transparent shadow-none",
+      iconClass: "bg-zinc-100 text-zinc-800 border border-zinc-200/60",
     });
   }
 
@@ -273,14 +265,12 @@ export default function PortfolioDashboardClient({ data, selectedYear }: Dashboa
       title: "Offline Smart Locks",
       message: `There ${offlineLocksCount > 1 ? 'are' : 'is'} ${offlineLocksCount} smart lock${offlineLocksCount > 1 ? 's' : ''} currently offline that require${offlineLocksCount === 1 ? 's' : ''} attention.`,
       link: "/admin/manage/locks",
-      containerClass: "bg-rose-50 border-rose-200 text-rose-900",
-      iconClass: "bg-rose-100 text-rose-600",
-      btnClass: "bg-zinc-950 hover:bg-zinc-800 text-white border-transparent shadow-none",
+      iconClass: "bg-rose-50 text-rose-700 border border-rose-200/60",
     });
   }
 
   return (
-    <div className="min-h-screen bg-[#FDFDFD] p-4 lg:p-8 lg:pt-0 font-sans selection:bg-zinc-200">
+    <div className="min-h-screen bg-[#FAFAFA] p-4 lg:p-8 lg:pt-0 font-sans selection:bg-zinc-200">
       <div className="mx-auto max-w-[1500px] space-y-6">
         
         {/* ========================================================= */}
@@ -291,22 +281,23 @@ export default function PortfolioDashboardClient({ data, selectedYear }: Dashboa
             {activeAlerts.map((alert) => (
               <div 
                 key={alert.id} 
-                className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-lg border transition-all ${alert.containerClass}`}
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 md:p-5 rounded-xl border border-zinc-200/80 bg-white shadow-xs transition-colors"
               >
-                <div className="flex items-center gap-4">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${alert.iconClass}`}>
-                    <HugeiconsIcon icon={alert.icon} size={20} />
+                <div className="flex items-start sm:items-center gap-3.5 min-w-0">
+                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${alert.iconClass}`}>
+                    <HugeiconsIcon icon={alert.icon} size={18} />
                   </div>
-                  <div>
-                    <h4 className="text-[13px] font-bold tracking-tight mb-0.5">{alert.title}</h4>
-                    <p className="text-[12px] font-medium opacity-90 leading-relaxed">{alert.message}</p>
+                  <div className="min-w-0">
+                    <h4 className="text-sm font-semibold tracking-tight text-zinc-900 mb-0.5">{alert.title}</h4>
+                    <p className="text-xs md:text-sm font-normal text-zinc-600 leading-relaxed">{alert.message}</p>
                   </div>
                 </div>
                 <Link 
                   href={alert.link} 
-                  className={`shrink-0 px-5 py-2.5 border text-[11px] font-bold uppercase tracking-widest rounded-lg transition-colors flex items-center justify-center ${alert.btnClass}`}
+                  className="shrink-0 px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-medium rounded-lg transition-colors duration-150 active:scale-[0.98] flex items-center justify-center gap-1.5 shadow-xs"
                 >
-                  Review Action <HugeiconsIcon icon={ArrowRight01Icon} size={14} className="ml-1.5" />
+                  <span>Review Action</span>
+                  <HugeiconsIcon icon={ArrowRight01Icon} size={14} className="text-white" />
                 </Link>
               </div>
             ))}
@@ -322,145 +313,136 @@ export default function PortfolioDashboardClient({ data, selectedYear }: Dashboa
             {/* Left Col (4 Cards - 2x2 Grid) */}
             <div className="grid grid-cols-2 gap-5 lg:col-span-8">
               {/* Card 1: Revenue */}
-              <Card className="rounded-lg border-transparent border shadow-none bg-white border-zinc-200/50">
-                <div className="flex flex-col p-6 h-full justify-center">
+              <div className="rounded-xl border border-zinc-200/80 bg-white shadow-xs p-5 flex flex-col justify-between">
+                <div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-foreground">Total Revenue</span>
-                    <div className="flex  items-center justify-center   ">
-                      <HugeiconsIcon icon={Wallet02Icon} strokeWidth={1} className="size-10 text-zinc-400" />
+                    <span className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Total Revenue</span>
+                    <div className="w-8 h-8 rounded-lg bg-zinc-100 flex items-center justify-center text-zinc-700">
+                      <HugeiconsIcon icon={Wallet02Icon} size={16} />
                     </div>
                   </div>
-                  <div className="mt-4 flex flex-col">
-                    <span className="text-2xl font-bold tracking-tight text-foreground font-tabular-nums">
+                  <div className="mt-3">
+                    <span className="text-2xl font-bold tracking-tight text-zinc-900 font-tabular-nums">
                       {formatCurrency(metrics.monthlyRevenue).replace("GH", "")}
                     </span>
-                    {/* quik info */}
-                    <div className="mt-2 flex flex-col  text-xs text-muted-foreground">
-                      {metrics.revenueTrend > 0 ? (
-                        <span className="mr-1.5 flex items-center font-medium text-emerald-600">
-                          <HugeiconsIcon icon={ArrowUpRight01Icon} strokeWidth={2.5} className="mr-0.5 size-3" />
-                          {metrics.revenueTrend}%
-                          <span className="opacity-80 ml-1 font-normal tracking-tight">
-                            (+{formatCurrency(Math.abs(metrics.revenueDifference)).replace("GH", "")})
-                          </span>
-                        </span>
-                      ) : metrics.revenueTrend < 0 ? (
-                        <span className="mr-1.5 flex items-center font-medium text-rose-600">
-                          <HugeiconsIcon icon={ArrowDownRight01Icon} strokeWidth={2.5} className="mr-0.5 size-3" />
-                          {Math.abs(metrics.revenueTrend)}%
-                          <span className="opacity-80 ml-1 font-normal tracking-tight">
-                            (-{formatCurrency(Math.abs(metrics.revenueDifference)).replace("GH", "")})
-                          </span>
-                        </span>
-                      ) : (
-                        <span className="mr-1.5 flex items-center font-medium text-zinc-500">
-                          No change
-                        </span>
-                      )}
-                      <div className="ml-1 block">{metrics.timeframeLabel || "vs previous 30 days"}</div>
-                    </div>
                   </div>
                 </div>
-              </Card>
+                <div className="mt-2 text-xs text-zinc-500 flex flex-wrap items-center gap-1">
+                  {metrics.revenueTrend > 0 ? (
+                    <span className="inline-flex items-center font-medium text-emerald-600">
+                      <HugeiconsIcon icon={ArrowUpRight01Icon} size={14} className="mr-0.5" />
+                      {metrics.revenueTrend}%
+                      <span className="opacity-80 ml-1 font-normal">
+                        (+{formatCurrency(Math.abs(metrics.revenueDifference)).replace("GH", "")})
+                      </span>
+                    </span>
+                  ) : metrics.revenueTrend < 0 ? (
+                    <span className="inline-flex items-center font-medium text-rose-600">
+                      <HugeiconsIcon icon={ArrowDownRight01Icon} size={14} className="mr-0.5" />
+                      {Math.abs(metrics.revenueTrend)}%
+                      <span className="opacity-80 ml-1 font-normal">
+                        (-{formatCurrency(Math.abs(metrics.revenueDifference)).replace("GH", "")})
+                      </span>
+                    </span>
+                  ) : (
+                    <span className="font-medium text-zinc-500">No change</span>
+                  )}
+                  <span className="text-zinc-400">• {metrics.timeframeLabel || "vs previous 30 days"}</span>
+                </div>
+              </div>
 
               {/* Card 2: Occupancy */}
-              <Card className="rounded-lg shadow-none bg-white border border-zinc-200/50">
-                <div className="flex flex-col p-6 h-full justify-center">
+              <div className="rounded-xl border border-zinc-200/80 bg-white shadow-xs p-5 flex flex-col justify-between">
+                <div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-foreground">Occupied Properties</span>
-                    <div className="flex items-center justify-center rounded-lg">
-                      <HugeiconsIcon icon={House03Icon} strokeWidth={1} className="size-10 text-zinc-400" />
+                    <span className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Occupied Properties</span>
+                    <div className="w-8 h-8 rounded-lg bg-zinc-100 flex items-center justify-center text-zinc-700">
+                      <HugeiconsIcon icon={House03Icon} size={16} />
                     </div>
                   </div>
-                  <div className="mt-4 flex flex-col">
-                    <span className="text-2xl font-bold tracking-tight text-foreground font-tabular-nums">
-                      {metrics.rentedListings} <span className="text-xl font-semibold text-muted-foreground">/ {metrics.totalListings}</span>
+                  <div className="mt-3">
+                    <span className="text-2xl font-bold tracking-tight text-zinc-900 font-tabular-nums">
+                      {metrics.rentedListings} <span className="text-lg font-medium text-zinc-400">/ {metrics.totalListings}</span>
                     </span>
-                    <div className="mt-2 flex flex-col  text-xs text-muted-foreground">
-                      {(() => {
-                        const capacity = metrics.totalListings > 0 ? Math.round((metrics.rentedListings / metrics.totalListings) * 100) : 0;
-                        const availableUnits = metrics.totalListings - metrics.rentedListings;
-                        
-                        let colorClass = "text-rose-600";
-                        if (capacity >= 80) colorClass = "text-emerald-600";
-                        else if (capacity >= 50) colorClass = "text-amber-500";
-
-                        return (
-                          <>
-                            <span className={`mr-1.5 font-medium ${colorClass}`}>
-                              {capacity}%
-                            </span>
-                            <span className="">
-                              Units Remaining <span className="opacity-70 ml-1">({availableUnits} {availableUnits === 1 ? 'unit' : 'units'} vacant)</span>
-                            </span>
-                          </>
-                        );
-                      })()}
-                    </div>
                   </div>
                 </div>
-              </Card>
+                <div className="mt-2 text-xs text-zinc-500 flex items-center gap-1.5">
+                  {(() => {
+                    const capacity = metrics.totalListings > 0 ? Math.round((metrics.rentedListings / metrics.totalListings) * 100) : 0;
+                    const availableUnits = metrics.totalListings - metrics.rentedListings;
+                    
+                    let colorClass = "text-rose-600";
+                    if (capacity >= 80) colorClass = "text-emerald-600";
+                    else if (capacity >= 50) colorClass = "text-amber-600";
+
+                    return (
+                      <>
+                        <span className={`font-semibold ${colorClass}`}>
+                          {capacity}% capacity
+                        </span>
+                        <span className="text-zinc-400">
+                          • {availableUnits} {availableUnits === 1 ? 'unit' : 'units'} vacant
+                        </span>
+                      </>
+                    );
+                  })()}
+                </div>
+              </div>
 
               {/* Card 3: Current Residents */}
-              <Card className="rounded-lg shadow-none bg-white border border-zinc-200/50">
-                <div className="flex flex-col p-6 h-full justify-center">
+              <div className="rounded-xl border border-zinc-200/80 bg-white shadow-xs p-5 flex flex-col justify-between">
+                <div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-foreground">Current Tenants</span>
-                    {/* quick info */}
-                    <div className="flex  items-center justify-center rounded-lg  ">
-                      <HugeiconsIcon icon={Door01Icon} strokeWidth={1} className="size-10 text-zinc-400" />
+                    <span className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Current Tenants</span>
+                    <div className="w-8 h-8 rounded-lg bg-zinc-100 flex items-center justify-center text-zinc-700">
+                      <HugeiconsIcon icon={Door01Icon} size={16} />
                     </div>
                   </div>
-                  <div className="mt-4 flex flex-col">
-                    <span className="text-2xl font-bold tracking-tight text-foreground font-tabular-nums">
+                  <div className="mt-3">
+                    <span className="text-2xl font-bold tracking-tight text-zinc-900 font-tabular-nums">
                       {metrics.activeTenancies}
                     </span>
-                    <div className="mt-2 flex items-center text-xs text-muted-foreground">
-                      <span className="mr-1 font-medium text-foreground">{metrics.pendingLeases}</span> onboarding in progress
-                    </div>
                   </div>
                 </div>
-              </Card>
+                <div className="mt-2 text-xs text-zinc-500">
+                  <span className="font-semibold text-zinc-900">{metrics.pendingLeases}</span> onboarding pending
+                </div>
+              </div>
 
               {/* Card 4: Open Work Orders */}
-              <Card className="rounded-lg shadow-none bg-white border border-zinc-200/50">
-                <div className="flex flex-col p-6 h-full justify-center">
+              <div className="rounded-xl border border-zinc-200/80 bg-white shadow-xs p-5 flex flex-col justify-between">
+                <div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-foreground">Maintenance Requests</span>
-                    <div className="flex items-center justify-center rounded-lg">
-                      <HugeiconsIcon icon={Wrench01Icon} strokeWidth={1} className="size-10 text-zinc-400" />
+                    <span className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Maintenance Requests</span>
+                    <div className="w-8 h-8 rounded-lg bg-zinc-100 flex items-center justify-center text-zinc-700">
+                      <HugeiconsIcon icon={Wrench01Icon} size={16} />
                     </div>
                   </div>
-                  <div className="mt-4 flex flex-col">
-                    <span className="text-2xl font-bold tracking-tight text-foreground font-tabular-nums">
+                  <div className="mt-3">
+                    <span className="text-2xl font-bold tracking-tight text-zinc-900 font-tabular-nums">
                       {metrics.openWorkOrders}
                     </span>
-                    <div className="mt-2 flex items-center text-xs text-muted-foreground">
-                      {metrics.urgentMaintenance > 0 ? (
-                        <>
-                          <span className="mr-1 font-medium text-rose-600">
-                            {metrics.urgentMaintenance}
-                          </span> 
-                          <span className="text-rose-600/90">
-                            require{metrics.urgentMaintenance === 1 ? 's' : ''} urgent attention
-                          </span>
-                        </>
-                      ) : (
-                        <span className="text-zinc-500">No urgent issues</span>
-                      )}
-                    </div>
                   </div>
                 </div>
-              </Card>
+                <div className="mt-2 text-xs text-zinc-500">
+                  {metrics.urgentMaintenance > 0 ? (
+                    <span className="font-medium text-rose-600">
+                      {metrics.urgentMaintenance} {metrics.urgentMaintenance === 1 ? 'requires' : 'require'} urgent attention
+                    </span>
+                  ) : (
+                    <span className="text-zinc-500">No urgent requests</span>
+                  )}
+                </div>
+              </div>
             </div>
 
             {/* Middle Col: Asset Status Donut */}
             <div className="lg:col-span-4 h-full">
-              <Card className="flex flex-col h-full rounded-lg shadow-none bg-white border border-zinc-200/50">
-                <div className="p-6 pb-0">
-                  <span className="text-sm font-medium text-foreground">Properties Status</span>
+              <div className="flex flex-col h-full rounded-xl border border-zinc-200/80 bg-white shadow-xs p-5">
+                <div className="pb-1">
+                  <span className="text-sm font-semibold tracking-tight text-zinc-900">Properties Status</span>
                 </div>
-                <CardContent className="flex flex-1 flex-col justify-center px-6 pb-6 pt-4">
+                <div className="flex flex-1 flex-col justify-center pt-2">
                   <div className="relative h-[200px] w-full">
                     <ChartContainer config={assetChartConfig} className="mx-auto h-full w-full">
                       <PieChart>
@@ -482,10 +464,10 @@ export default function PortfolioDashboardClient({ data, selectedYear }: Dashboa
                               if (viewBox && "cx" in viewBox && "cy" in viewBox) {
                                 return (
                                   <text x={viewBox.cx} y={viewBox.cy} textAnchor="middle" dominantBaseline="middle">
-                                    <tspan x={viewBox.cx} y={viewBox.cy} className="fill-foreground text-3xl font-bold font-tabular-nums">
+                                    <tspan x={viewBox.cx} y={viewBox.cy} className="fill-zinc-900 text-3xl font-bold font-tabular-nums">
                                       {totalAssets}
                                     </tspan>
-                                    <tspan x={viewBox.cx} y={(viewBox.cy || 0) + 20} className="fill-muted-foreground text-[10px] font-medium tracking-wide">
+                                    <tspan x={viewBox.cx} y={(viewBox.cy || 0) + 20} className="fill-zinc-400 text-xs font-medium tracking-wide">
                                       Total Units
                                     </tspan>
                                   </text>
@@ -503,19 +485,19 @@ export default function PortfolioDashboardClient({ data, selectedYear }: Dashboa
                       return (
                         <div key={item.status} className="flex items-center justify-between text-xs">
                           <div className="flex items-center gap-2">
-                            <div className="size-2.5 rounded-full" style={{ backgroundColor: item.fill }} />
-                            <span className="font-medium text-muted-foreground">{item.status}</span>
+                            <div className="size-2 rounded-full" style={{ backgroundColor: item.fill }} />
+                            <span className="font-medium text-zinc-600">{item.status}</span>
                           </div>
-                          <div className="flex items-center gap-1.5">
-                            <span className="font-semibold text-foreground">{item.count}</span>
-                            <span className="text-[10px] font-medium text-muted-foreground/60 w-8 text-right">({percentage}%)</span>
+                          <div className="flex items-center gap-1.5 font-tabular-nums">
+                            <span className="font-semibold text-zinc-900">{item.count}</span>
+                            <span className="text-[11px] text-zinc-400 w-8 text-right">({percentage}%)</span>
                           </div>
                         </div>
                       );
                     })}
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -524,21 +506,21 @@ export default function PortfolioDashboardClient({ data, selectedYear }: Dashboa
             
             {/* Left 2/3: Revenue Chart */}
             <div className="lg:col-span-8 h-full">
-              <Card className="flex flex-col h-full rounded-lg shadow-none bg-white border border-zinc-200/50">
-                <div className="flex items-center justify-between p-6 pb-2">
-                  <span className="text-sm font-medium text-foreground">Revenue Overview</span>
+              <div className="flex flex-col h-full rounded-xl border border-zinc-200/80 bg-white shadow-xs p-5">
+                <div className="flex items-center justify-between pb-3">
+                  <span className="text-sm font-semibold tracking-tight text-zinc-900">Revenue Overview</span>
                   <Select value={currentYearStr} onValueChange={handleYearChange}>
-                    <SelectTrigger className="h-7 w-[80px] border-none shadow-none text-xs font-medium focus:ring-0">
+                    <SelectTrigger className="h-8 px-2.5 rounded-lg border border-zinc-200 text-xs font-medium text-zinc-700 bg-zinc-50 hover:bg-zinc-100 transition-colors focus:ring-0">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="rounded-lg">
                       <SelectItem value="2026">2026</SelectItem>
                       <SelectItem value="2025">2025</SelectItem>
                       <SelectItem value="2024">2024</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-                <CardContent className="flex-1 px-6 pb-6 pt-2">
+                <div className="flex-1 pt-2">
                   <div className="h-[260px] w-full">
                     <ChartContainer config={revenueChartConfig} className="h-full w-full">
                       <BarChart data={revenueChartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
@@ -547,13 +529,13 @@ export default function PortfolioDashboardClient({ data, selectedYear }: Dashboa
                           dataKey="month" 
                           axisLine={false} 
                           tickLine={false} 
-                          tick={{ fontSize: 10, fill: 'var(--muted-foreground)', fontWeight: 500 }} 
+                          tick={{ fontSize: 11, fill: 'var(--muted-foreground)', fontWeight: 500 }} 
                           dy={10} 
                         />
                         <YAxis 
                           axisLine={false} 
                           tickLine={false} 
-                          tick={{ fontSize: 10, fill: 'var(--muted-foreground)', fontWeight: 500 }} 
+                          tick={{ fontSize: 11, fill: 'var(--muted-foreground)', fontWeight: 500 }} 
                           tickFormatter={(value) => `${value / 1000}k`}
                         />
                         <ChartTooltip cursor={{ fill: 'var(--muted)' }} content={<ChartTooltipContent />} />
@@ -562,97 +544,93 @@ export default function PortfolioDashboardClient({ data, selectedYear }: Dashboa
                       </BarChart>
                     </ChartContainer>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </div>
 
             {/* Right 1/3: 2 Mini Cards + Transactions Table */}
             <div className="lg:col-span-4 flex flex-col gap-5">
               <div className="grid grid-cols-2 gap-5">
                 {/* Card 5: Smart Locks */}
-                <Card className="rounded-lg shadow-none bg-white border border-zinc-200/50">
-                  <div className="flex flex-col p-5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-foreground">Smart Locks</span>
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-border/60 text-muted-foreground">
-                        <HugeiconsIcon icon={Shield02Icon} strokeWidth={2} className="size-4" />
-                      </div>
-                    </div>
-                    <div className="mt-3 flex flex-col">
-                      <span className="text-2xl font-bold tracking-tight text-foreground font-tabular-nums">
-                        {metrics.totalLocks}
-                      </span>
-                      <div className="mt-1 flex items-center gap-2 text-[11px] font-medium">
-                        <span className="flex items-center text-emerald-600">
-                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 mr-1"></span>
-                          {metrics.onlineLocks} Online
-                        </span>
-                        <span className="flex items-center text-zinc-600">
-                          <span className="h-1.5 w-1.5 rounded-full bg-zinc-500 mr-1"></span>
-                          {metrics.offlineLocks} Offline
-                        </span>
-                      </div>
+                <div className="rounded-xl border border-zinc-200/80 bg-white shadow-xs p-4 flex flex-col justify-between">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Smart Locks</span>
+                    <div className="w-7 h-7 rounded-lg bg-zinc-100 flex items-center justify-center text-zinc-600">
+                      <HugeiconsIcon icon={Shield02Icon} size={15} />
                     </div>
                   </div>
-                </Card>
+                  <div className="mt-3">
+                    <span className="text-2xl font-bold tracking-tight text-zinc-900 font-tabular-nums">
+                      {metrics.totalLocks}
+                    </span>
+                    <div className="mt-1 flex items-center gap-2 text-xs font-medium">
+                      <span className="flex items-center text-emerald-600">
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 mr-1"></span>
+                        {metrics.onlineLocks} Online
+                      </span>
+                      <span className="flex items-center text-zinc-500">
+                        <span className="h-1.5 w-1.5 rounded-full bg-zinc-400 mr-1"></span>
+                        {metrics.offlineLocks} Offline
+                      </span>
+                    </div>
+                  </div>
+                </div>
 
                 {/* Card 6: Site Schedules */}
-                <Card className="rounded-lg shadow-none bg-white border border-zinc-200/50">
-                  <div className="flex flex-col p-5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-foreground">Tours</span>
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-border/60 text-muted-foreground">
-                        <HugeiconsIcon icon={Calendar01Icon} strokeWidth={2} className="size-4" />
-                      </div>
-                    </div>
-                    <div className="mt-3 flex flex-col">
-                      <span className="text-2xl font-bold tracking-tight text-foreground font-tabular-nums">
-                        {metrics.activeTours}
-                      </span>
-                      <div className="mt-1 flex items-center text-[11px] font-medium text-muted-foreground">
-                        {metrics.toursToday > 0 ? (
-                          <><span className="mr-1 font-bold text-foreground">{metrics.toursToday}</span> today</>
-                        ) : (
-                          "No tours today"
-                        )}
-                      </div>
+                <div className="rounded-xl border border-zinc-200/80 bg-white shadow-xs p-4 flex flex-col justify-between">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Tours</span>
+                    <div className="w-7 h-7 rounded-lg bg-zinc-100 flex items-center justify-center text-zinc-600">
+                      <HugeiconsIcon icon={Calendar01Icon} size={15} />
                     </div>
                   </div>
-                </Card>
+                  <div className="mt-3">
+                    <span className="text-2xl font-bold tracking-tight text-zinc-900 font-tabular-nums">
+                      {metrics.activeTours}
+                    </span>
+                    <div className="mt-1 text-xs font-medium text-zinc-500">
+                      {metrics.toursToday > 0 ? (
+                        <><span className="font-semibold text-zinc-900">{metrics.toursToday}</span> today</>
+                      ) : (
+                        "No tours today"
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {/* Table 1: Recent Transactions */}
-              <div className="overflow-hidden rounded-lg border border-border/60 bg-white flex-1 shadow-sm">
-                <div className="flex items-center justify-between p-5 border-b border-border/40">
-                  <span className="text-sm font-medium text-foreground">Recent Transactions</span>
+              <div className="overflow-hidden rounded-xl border border-zinc-200/80 bg-white flex-1 shadow-xs">
+                <div className="flex items-center justify-between p-4 md:p-5 border-b border-zinc-100">
+                  <span className="text-sm font-semibold tracking-tight text-zinc-900">Recent Transactions</span>
                   <Link href="/admin/transactions">
-                    <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground">
-                      <HugeiconsIcon icon={ArrowUpRight01Icon} strokeWidth={2} className="size-3.5" />
+                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 active:scale-95 transition-colors">
+                      <HugeiconsIcon icon={ArrowUpRight01Icon} size={15} />
                     </Button>
                   </Link>
                 </div>
                 <Table>
                   <TableHeader>
-                    <TableRow className="border-b border-border/40 hover:bg-transparent">
-                      <TableHead className="h-10 px-5 text-xs font-medium text-muted-foreground">Target</TableHead>
-                      <TableHead className="h-10 text-right text-xs font-medium text-muted-foreground">Amount</TableHead>
-                      <TableHead className="h-10 px-5 text-right text-xs font-medium text-muted-foreground">Status</TableHead>
+                    <TableRow className="border-b border-zinc-100 hover:bg-transparent">
+                      <TableHead className="h-9 px-5 text-xs font-medium text-zinc-500">Target</TableHead>
+                      <TableHead className="h-9 text-right text-xs font-medium text-zinc-500">Amount</TableHead>
+                      <TableHead className="h-9 px-5 text-right text-xs font-medium text-zinc-500">Status</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {recentPayments.length > 0 ? recentPayments.map((payment) => (
-                      <TableRow key={payment.id} className="group border-b border-border/40 transition-colors hover:bg-muted/30">
+                      <TableRow key={payment.id} className="group border-b border-zinc-100/80 transition-colors hover:bg-zinc-50/50">
                         <TableCell className="py-3 px-5">
                           <div className="flex flex-col">
-                            <span className="text-[13px] font-medium text-foreground">{payment.tenant}</span>
-                            <span className="text-[10px] text-muted-foreground mt-0.5">{payment.target}</span>
+                            <span className="text-xs font-medium text-zinc-900">{payment.tenant}</span>
+                            <span className="text-[11px] text-zinc-400 mt-0.5">{payment.target}</span>
                           </div>
                         </TableCell>
                         <TableCell className="py-3 text-right">
-                          <span className="text-[13px] font-semibold text-foreground font-tabular-nums">{formatCurrency(payment.amount).replace("GH", "")}</span>
+                          <span className="text-xs font-semibold text-zinc-900 font-tabular-nums">{formatCurrency(payment.amount).replace("GH", "")}</span>
                         </TableCell>
                         <TableCell className="py-3 px-5 text-right">
-                          <Badge variant="secondary" className={`rounded-md px-2 py-0.5 text-[10px] font-medium hover:bg-transparent border-none ${
+                          <Badge variant="secondary" className={`rounded-md px-2 py-0.5 text-[11px] font-medium hover:bg-transparent border-none ${
                             payment.status === "Pending_Verification" ? "bg-amber-50 text-amber-700" : "bg-emerald-50 text-emerald-700"
                           }`}>
                             {payment.status === "Pending_Verification" ? "Pending" : "Processed"}
@@ -661,7 +639,7 @@ export default function PortfolioDashboardClient({ data, selectedYear }: Dashboa
                       </TableRow>
                     )) : (
                       <TableRow>
-                        <TableCell colSpan={3} className="text-center py-6 text-xs text-muted-foreground">No recent transactions.</TableCell>
+                        <TableCell colSpan={3} className="text-center py-6 text-xs text-zinc-400">No recent transactions.</TableCell>
                       </TableRow>
                     )}
                   </TableBody>
@@ -674,52 +652,52 @@ export default function PortfolioDashboardClient({ data, selectedYear }: Dashboa
           {/* ROW 3: Published Listings (Left 2/3), Outstanding Rent (Right 1/3) */}
           <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
             
-            {/* Left 2/3: Table 3 - Recent Listings */}
+            {/* Left 2/3: Table 2 - Recent Listings */}
             <div className="lg:col-span-8">
-              <div className="h-full overflow-hidden rounded-lg border border-border/60 bg-white shadow-sm">
-                <div className="flex items-center justify-between p-5 border-b border-border/40">
-                  <span className="text-sm font-medium text-foreground">Recently Published</span>
+              <div className="h-full overflow-hidden rounded-xl border border-zinc-200/80 bg-white shadow-xs">
+                <div className="flex items-center justify-between p-4 md:p-5 border-b border-zinc-100">
+                  <span className="text-sm font-semibold tracking-tight text-zinc-900">Recently Published</span>
                 </div>
                 <Table>
                   <TableHeader>
-                    <TableRow className="border-b border-border/40 hover:bg-transparent">
-                      <TableHead className="h-10 px-5 text-xs font-medium text-muted-foreground">Listing</TableHead>
-                      <TableHead className="h-10 px-5 text-xs font-medium text-muted-foreground">Price</TableHead>
-                      <TableHead className="h-10  text-xs font-medium text-muted-foreground">Status</TableHead>
-                      <TableHead className="h-10  text-right text-xs font-medium text-muted-foreground ">Action</TableHead>
+                    <TableRow className="border-b border-zinc-100 hover:bg-transparent">
+                      <TableHead className="h-9 px-5 text-xs font-medium text-zinc-500">Listing</TableHead>
+                      <TableHead className="h-9 px-5 text-xs font-medium text-zinc-500">Price</TableHead>
+                      <TableHead className="h-9 text-xs font-medium text-zinc-500">Status</TableHead>
+                      <TableHead className="h-9 text-right text-xs font-medium text-zinc-500 pr-5">Action</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {recentListings.length > 0 ? recentListings.map((listing) => (
-                      <TableRow key={listing.id} className="group border-b border-border/40 transition-colors hover:bg-muted/30">
+                      <TableRow key={listing.id} className="group border-b border-zinc-100/80 transition-colors hover:bg-zinc-50/50">
                         <TableCell className="py-3 px-5">
                           <div className="flex items-center gap-3">
-                            <div className="h-9 w-9 shrink-0 overflow-hidden rounded-md border border-border/60 bg-muted">
+                            <div className="h-9 w-9 shrink-0 overflow-hidden rounded-lg border border-zinc-200 bg-zinc-100">
                               <img src={listing.image} alt={listing.title} className="h-full w-full object-cover" />
                             </div>
                             <div className="flex flex-col">
-                              <span className="text-[13px] font-medium text-foreground truncate max-w-[120px]">{listing.title}</span>
-                              <div className="flex items-center gap-1 text-[10px] text-muted-foreground mt-0.5">
-                                 <HugeiconsIcon icon={Location01Icon} strokeWidth={2} className="size-3" /> {listing.locationArea}
+                              <span className="text-xs font-semibold text-zinc-900 truncate max-w-[140px]">{listing.title}</span>
+                              <div className="flex items-center gap-1 text-[11px] text-zinc-400 mt-0.5">
+                                 <HugeiconsIcon icon={Location01Icon} size={13} className="text-zinc-400" /> {listing.locationArea}
                               </div>
                             </div>
                           </div>
                         </TableCell>
                         <TableCell className="py-3 px-5">
-                          <span className="text-[13px] font-semibold text-foreground font-tabular-nums">{formatCurrency(listing.price).replace("GH", "")}</span>
+                          <span className="text-xs font-semibold text-zinc-900 font-tabular-nums">{formatCurrency(listing.price).replace("GH", "")}</span>
                         </TableCell>
-                        <TableCell className="py-3 ">
-                          <Badge variant="secondary" className={`rounded-md px-2 py-0.5 text-[10px] font-medium hover:bg-transparent border-none ${
+                        <TableCell className="py-3">
+                          <Badge variant="secondary" className={`rounded-md px-2 py-0.5 text-[11px] font-medium hover:bg-transparent border-none ${
                             listing.status === "Available" ? "bg-emerald-50 text-emerald-700" :
-                            listing.status === "Pending" ? "bg-zinc-50 text-zinc-700" :
-                            "bg-zinc-100/50 text-zinc-600"
+                            listing.status === "Pending" ? "bg-zinc-100 text-zinc-700" :
+                            "bg-zinc-100 text-zinc-600"
                           }`}>
                             {listing.status}
                           </Badge>
                         </TableCell>
                         <TableCell className="py-3 pr-5 text-right">
                           <Link href={`/admin/properties/${listing.slug}`}>
-                            <Button   className="bg-white px-0 border rounded-lg text-sm text-muted-foreground hover:bg-white hover:text-foreground">
+                            <Button size="sm" variant="outline" className="h-7 px-3 text-xs font-medium text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg border-zinc-200 active:scale-[0.98] transition-colors">
                               View
                             </Button>
                           </Link>
@@ -727,7 +705,7 @@ export default function PortfolioDashboardClient({ data, selectedYear }: Dashboa
                       </TableRow>
                     )) : (
                       <TableRow>
-                        <TableCell colSpan={4} className="text-center py-6 text-xs text-muted-foreground">No recent listings.</TableCell>
+                        <TableCell colSpan={4} className="text-center py-6 text-xs text-zinc-400">No recent listings.</TableCell>
                       </TableRow>
                     )}
                   </TableBody>
@@ -735,42 +713,42 @@ export default function PortfolioDashboardClient({ data, selectedYear }: Dashboa
               </div>
             </div>
 
-            {/* Right 1/3: Table 2 - Due Rents */}
+            {/* Right 1/3: Table 3 - Due Rents */}
             <div className="lg:col-span-4">
-              <div className="h-full overflow-hidden rounded-lg border border-border/60 bg-white shadow-sm">
-                <div className="flex items-center justify-between p-5 border-b border-border/40">
-                  <span className="text-sm font-medium text-foreground">Outstanding Rentals</span>
-                  <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground">
-                    <HugeiconsIcon icon={ArrowUpRight01Icon} strokeWidth={2} className="size-3.5" />
+              <div className="h-full overflow-hidden rounded-xl border border-zinc-200/80 bg-white shadow-xs">
+                <div className="flex items-center justify-between p-4 md:p-5 border-b border-zinc-100">
+                  <span className="text-sm font-semibold tracking-tight text-zinc-900">Outstanding Rentals</span>
+                  <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 active:scale-95 transition-colors">
+                    <HugeiconsIcon icon={ArrowUpRight01Icon} size={15} />
                   </Button>
                 </div>
                 <Table>
                   <TableHeader>
-                    <TableRow className="border-b border-border/40 hover:bg-transparent">
-                      <TableHead className="h-10 px-5 text-xs font-medium text-muted-foreground">Target</TableHead>
-                      <TableHead className="h-10 text-right text-xs font-medium text-muted-foreground">Amount Due</TableHead>
-                      <TableHead className="h-10 px-5 text-right text-xs font-medium text-muted-foreground">Timeline</TableHead>
+                    <TableRow className="border-b border-zinc-100 hover:bg-transparent">
+                      <TableHead className="h-9 px-5 text-xs font-medium text-zinc-500">Target</TableHead>
+                      <TableHead className="h-9 text-right text-xs font-medium text-zinc-500">Amount Due</TableHead>
+                      <TableHead className="h-9 px-5 text-right text-xs font-medium text-zinc-500">Timeline</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {dueRents.length > 0 ? dueRents.map((rent) => (
-                      <TableRow key={rent.id} className="group border-b border-border/40 transition-colors hover:bg-muted/30">
+                      <TableRow key={rent.id} className="group border-b border-zinc-100/80 transition-colors hover:bg-zinc-50/50">
                         <TableCell className="py-3 px-5">
                           <div className="flex flex-col">
-                            <span className="text-[13px] font-medium text-foreground">{rent.tenant}</span>
-                            <div className="flex items-center gap-1 text-[10px] text-muted-foreground mt-0.5">
-                               <HugeiconsIcon icon={LinkSquare01Icon} strokeWidth={2} className="size-3" /> {rent.target}
+                            <span className="text-xs font-medium text-zinc-900">{rent.tenant}</span>
+                            <div className="flex items-center gap-1 text-[11px] text-zinc-400 mt-0.5">
+                               <HugeiconsIcon icon={LinkSquare01Icon} size={13} className="text-zinc-400" /> {rent.target}
                             </div>
                           </div>
                         </TableCell>
                         <TableCell className="py-3 text-right">
-                          <span className="text-[13px] font-semibold text-foreground font-tabular-nums">{formatCurrency(rent.amountDue).replace("GH", "")}</span>
+                          <span className="text-xs font-semibold text-zinc-900 font-tabular-nums">{formatCurrency(rent.amountDue).replace("GH", "")}</span>
                         </TableCell>
                         <TableCell className="py-3 px-5 text-right">
-                          <Badge variant="secondary" className={`rounded-md px-2 py-0.5 text-[10px] font-medium hover:bg-transparent border-none ${
-                            rent.status === "Overdue" ? "bg-zinc-50 text-zinc-700" :
-                            rent.status === "Due_Today" ? "bg-zinc-50 text-zinc-700" :
-                            "bg-zinc-100/50 text-zinc-600"
+                          <Badge variant="secondary" className={`rounded-md px-2 py-0.5 text-[11px] font-medium hover:bg-transparent border-none ${
+                            rent.status === "Overdue" ? "bg-rose-50 text-rose-700" :
+                            rent.status === "Due_Today" ? "bg-amber-50 text-amber-700" :
+                            "bg-zinc-100 text-zinc-600"
                           }`}>
                             {rent.dueDate}
                           </Badge>
@@ -778,7 +756,7 @@ export default function PortfolioDashboardClient({ data, selectedYear }: Dashboa
                       </TableRow>
                     )) : (
                        <TableRow>
-                        <TableCell colSpan={3} className="text-center py-6 text-xs text-muted-foreground">No outstanding rents.</TableCell>
+                        <TableCell colSpan={3} className="text-center py-6 text-xs text-zinc-400">No outstanding rents.</TableCell>
                       </TableRow>
                     )}
                   </TableBody>
@@ -786,62 +764,62 @@ export default function PortfolioDashboardClient({ data, selectedYear }: Dashboa
               </div>
             </div>
             
-            {/* NEW SECTION: Recently Booked Tours */}
+            {/* Recently Booked Tours */}
             <div className="lg:col-span-12 h-full">
-              <div className="h-full flex flex-col overflow-hidden rounded-lg border border-border/60 bg-white shadow-sm">
-                <div className="flex items-center justify-between p-5 border-b border-border/40">
-                  <span className="text-sm font-medium text-foreground">Recently Booked Tours</span>
-                  <Button variant="ghost" size="sm" className="text-xs text-muted-foreground hover:text-foreground" asChild>
+              <div className="h-full flex flex-col overflow-hidden rounded-xl border border-zinc-200/80 bg-white shadow-xs">
+                <div className="flex items-center justify-between p-4 md:p-5 border-b border-zinc-100">
+                  <span className="text-sm font-semibold tracking-tight text-zinc-900">Recently Booked Tours</span>
+                  <Button variant="ghost" size="sm" className="text-xs font-medium text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg active:scale-[0.98] transition-colors" asChild>
                     <Link href="/admin/manage/tours">View All <HugeiconsIcon icon={ArrowRight01Icon} className="ml-1 size-3" /></Link>
                   </Button>
                 </div>
                 <div className="flex-1 overflow-auto">
                   <Table>
                     <TableHeader>
-                      <TableRow className="border-b border-border/40 hover:bg-transparent">
-                        <TableHead className="h-10 px-5 text-xs font-medium text-muted-foreground">Client</TableHead>
-                        <TableHead className="h-10 text-xs font-medium text-muted-foreground">Property</TableHead>
-                        <TableHead className="h-10 text-xs font-medium text-muted-foreground">Date & Time</TableHead>
-                        <TableHead className="h-10 text-xs font-medium text-muted-foreground">Type</TableHead>
-                        <TableHead className="h-10 px-5 text-right text-xs font-medium text-muted-foreground">Status</TableHead>
+                      <TableRow className="border-b border-zinc-100 hover:bg-transparent">
+                        <TableHead className="h-9 px-5 text-xs font-medium text-zinc-500">Client</TableHead>
+                        <TableHead className="h-9 text-xs font-medium text-zinc-500">Property</TableHead>
+                        <TableHead className="h-9 text-xs font-medium text-zinc-500">Date & Time</TableHead>
+                        <TableHead className="h-9 text-xs font-medium text-zinc-500">Type</TableHead>
+                        <TableHead className="h-9 px-5 text-right text-xs font-medium text-zinc-500">Status</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {recentTours.length > 0 ? recentTours.map((tour: any) => (
-                        <TableRow key={tour.id} className="group border-b border-border/40 transition-colors hover:bg-muted/30">
+                        <TableRow key={tour.id} className="group border-b border-zinc-100/80 transition-colors hover:bg-zinc-50/50">
                           <TableCell className="py-3 px-5">
                             <div className="flex items-center gap-3">
-                              <Avatar className="h-8 w-8 border border-border/50">
+                              <Avatar className="h-8 w-8 border border-zinc-200">
                                 <AvatarImage src={tour.clientAvatar || ""} />
-                                <AvatarFallback className="text-[10px] bg-muted">{tour.clientName.charAt(0)}</AvatarFallback>
+                                <AvatarFallback className="text-[11px] bg-zinc-100 font-medium text-zinc-600">{tour.clientName.charAt(0)}</AvatarFallback>
                               </Avatar>
                               <div className="flex flex-col">
-                                <span className="text-[13px] font-medium text-foreground">{tour.clientName}</span>
-                                <span className="text-[11px] text-muted-foreground">{tour.clientEmail}</span>
+                                <span className="text-xs font-semibold text-zinc-900">{tour.clientName}</span>
+                                <span className="text-[11px] text-zinc-400">{tour.clientEmail}</span>
                               </div>
                             </div>
                           </TableCell>
                           <TableCell className="py-3">
-                            <div className="flex flex-col">
-                              <span className="text-[13px] font-medium text-foreground">{tour.propertyTitle}</span>
-                            </div>
+                            <span className="text-xs font-medium text-zinc-900">{tour.propertyTitle}</span>
                           </TableCell>
                           <TableCell className="py-3">
                             <div className="flex flex-col">
-                              <span className="text-[13px] font-medium text-foreground">{tour.tourDate}</span>
-                              <span className="text-[11px] text-muted-foreground flex items-center gap-1"><HugeiconsIcon icon={Clock01Icon} className="size-3" /> {tour.tourTime}</span>
+                              <span className="text-xs font-medium text-zinc-900">{tour.tourDate}</span>
+                              <span className="text-[11px] text-zinc-400 flex items-center gap-1 mt-0.5">
+                                <HugeiconsIcon icon={Clock01Icon} className="size-3 text-zinc-400" /> {tour.tourTime}
+                              </span>
                             </div>
                           </TableCell>
                           <TableCell className="py-3">
-                            <Badge variant="outline" className="rounded-md px-2 py-0.5 text-[10px] font-medium bg-zinc-50">
+                            <Badge variant="outline" className="rounded-md px-2 py-0.5 text-[11px] font-medium bg-zinc-50 border-zinc-200 text-zinc-700">
                               {tour.type === "Virtual" ? "Virtual" : "In-Person"}
                             </Badge>
                           </TableCell>
                           <TableCell className="py-3 px-5 text-right">
-                            <Badge variant="secondary" className={`rounded-md px-2 py-0.5 text-[10px] font-medium hover:bg-transparent border-none ${
-                              tour.status === "Confirmed" ? "bg-emerald-50 text-emerald-600" :
-                              tour.status === "Pending_Time" ? "bg-amber-50 text-amber-600" :
-                              "bg-zinc-100/50 text-zinc-600"
+                            <Badge variant="secondary" className={`rounded-md px-2 py-0.5 text-[11px] font-medium hover:bg-transparent border-none ${
+                              tour.status === "Confirmed" ? "bg-emerald-50 text-emerald-700" :
+                              tour.status === "Pending_Time" ? "bg-amber-50 text-amber-700" :
+                              "bg-zinc-100 text-zinc-600"
                             }`}>
                               {tour.status.replace("_", " ")}
                             </Badge>
@@ -849,7 +827,7 @@ export default function PortfolioDashboardClient({ data, selectedYear }: Dashboa
                         </TableRow>
                       )) : (
                         <TableRow>
-                          <TableCell colSpan={5} className="text-center py-6 text-xs text-muted-foreground">No recent tours booked.</TableCell>
+                          <TableCell colSpan={5} className="text-center py-6 text-xs text-zinc-400">No recent tours booked.</TableCell>
                         </TableRow>
                       )}
                     </TableBody>
@@ -858,55 +836,55 @@ export default function PortfolioDashboardClient({ data, selectedYear }: Dashboa
               </div>
             </div>
 
-            {/* Right Col: Table 4 - Occupancy by Property Type */}
+            {/* Occupancy by Property Type */}
             <div className="lg:col-span-12 h-full">
-              <div className="h-full flex flex-col overflow-hidden rounded-lg border border-border/60 bg-white shadow-sm">
-                <div className="flex items-center justify-between p-5 border-b border-border/40">
-                  <span className="text-sm font-medium text-foreground">Occupancy by Type</span>
-                  <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground">
-                    <HugeiconsIcon icon={ArrowUpRight01Icon} strokeWidth={2} className="size-3.5" />
+              <div className="h-full flex flex-col overflow-hidden rounded-xl border border-zinc-200/80 bg-white shadow-xs">
+                <div className="flex items-center justify-between p-4 md:p-5 border-b border-zinc-100">
+                  <span className="text-sm font-semibold tracking-tight text-zinc-900">Occupancy by Type</span>
+                  <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 active:scale-95 transition-colors">
+                    <HugeiconsIcon icon={ArrowUpRight01Icon} size={15} />
                   </Button>
                 </div>
                 <div className="flex-1 overflow-auto">
                   <Table>
                     <TableHeader>
-                      <TableRow className="border-b border-border/40 hover:bg-transparent">
-                        <TableHead className="h-10 px-5 text-xs font-medium text-muted-foreground">Property Type</TableHead>
-                        <TableHead className="h-10 text-right text-xs font-medium text-muted-foreground">Total</TableHead>
-                        <TableHead className="h-10 px-5 text-right text-xs font-medium text-muted-foreground">Occupancy</TableHead>
+                      <TableRow className="border-b border-zinc-100 hover:bg-transparent">
+                        <TableHead className="h-9 px-5 text-xs font-medium text-zinc-500">Property Type</TableHead>
+                        <TableHead className="h-9 text-right text-xs font-medium text-zinc-500">Total</TableHead>
+                        <TableHead className="h-9 px-5 text-right text-xs font-medium text-zinc-500">Occupancy</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {propertyTypeStats.length > 0 ? propertyTypeStats.map((stat) => {
                         const rate = stat.total > 0 ? Math.round((stat.occupied / stat.total) * 100) : 0;
                         return (
-                          <TableRow key={stat.type} className="group border-b border-border/40 transition-colors hover:bg-muted/30">
+                          <TableRow key={stat.type} className="group border-b border-zinc-100/80 transition-colors hover:bg-zinc-50/50">
                             <TableCell className="py-3 px-5">
                               <div className="flex items-center gap-2">
                                 <HugeiconsIcon 
                                   icon={getPropertyIcon(stat.type)} 
-                                  strokeWidth={2} 
-                                  className="size-4 text-muted-foreground" 
+                                  size={16}
+                                  className="text-zinc-500" 
                                 />
-                                <span className="text-[13px] font-medium text-foreground">{stat.type}</span>
+                                <span className="text-xs font-medium text-zinc-900">{stat.type}</span>
                               </div>
                             </TableCell>
                             <TableCell className="py-3 text-right">
-                              <span className="text-[13px] font-semibold text-foreground font-tabular-nums">{stat.total}</span>
+                              <span className="text-xs font-semibold text-zinc-900 font-tabular-nums">{stat.total}</span>
                             </TableCell>
                             <TableCell className="py-3 px-5 text-right">
                               <div className="flex items-center justify-end gap-3">
-                                <div className="h-1.5 w-16 bg-muted overflow-hidden rounded-full">
-                                  <div className="h-full bg-zinc-950 rounded-full" style={{ width: `${rate}%` }} />
+                                <div className="h-2 w-20 bg-zinc-100 overflow-hidden rounded-full">
+                                  <div className="h-full bg-zinc-900 rounded-full transition-all duration-300" style={{ width: `${rate}%` }} />
                                 </div>
-                                <span className="text-[12px] font-medium text-muted-foreground font-tabular-nums w-8 text-right">{rate}%</span>
+                                <span className="text-xs font-semibold text-zinc-900 font-tabular-nums w-8 text-right">{rate}%</span>
                               </div>
                             </TableCell>
                           </TableRow>
                         )
                       }) : (
                         <TableRow>
-                          <TableCell colSpan={3} className="text-center py-6 text-xs text-muted-foreground">No property data available.</TableCell>
+                          <TableCell colSpan={3} className="text-center py-6 text-xs text-zinc-400">No property data available.</TableCell>
                         </TableRow>
                       )}
                     </TableBody>
@@ -915,99 +893,97 @@ export default function PortfolioDashboardClient({ data, selectedYear }: Dashboa
               </div>
             </div>
 
-            {/* Table 4: Tenant Reviews */}
-            <div className="overflow-hidden rounded-lg lg:col-span-12 border border-border/60 bg-white shadow-sm lg:col-span-2">
-              <div className="flex items-center justify-between p-5 border-b border-border/40">
-                <span className="text-sm font-medium text-foreground">Tenant Feedback & Reviews</span>
-                <Button variant="ghost" size="sm" className="h-7 text-[11px] px-3 font-medium text-muted-foreground border border-border/50">
+            {/* Table: Tenant Reviews */}
+            <div className="overflow-hidden rounded-xl border border-zinc-200/80 bg-white shadow-xs lg:col-span-12">
+              <div className="flex items-center justify-between p-4 md:p-5 border-b border-zinc-100">
+                <span className="text-sm font-semibold tracking-tight text-zinc-900">Tenant Feedback & Reviews</span>
+                <Button variant="outline" size="sm" className="h-7 text-xs px-3 font-medium text-zinc-700 hover:text-zinc-900 rounded-lg border-zinc-200 active:scale-[0.98] transition-colors">
                   View Audit Log
                 </Button>
               </div>
               <Table>
                 <TableHeader>
-                  <TableRow className="border-b border-border/40 hover:bg-transparent">
-                    <TableHead className="h-10 px-5 text-xs font-medium text-muted-foreground w-[220px]">Reviewer</TableHead>
-                    <TableHead className="h-10 text-xs font-medium text-muted-foreground w-[200px]">Property</TableHead>
-                    <TableHead className="h-10 text-xs font-medium text-muted-foreground w-[120px]">Rating</TableHead>
-                    <TableHead className="h-10 text-xs font-medium text-muted-foreground">Feedback</TableHead>
-                    <TableHead className="h-10 text-right text-xs font-medium text-muted-foreground w-[120px]">Date</TableHead>
-                    <TableHead className="h-10 w-[50px]"></TableHead>
+                  <TableRow className="border-b border-zinc-100 hover:bg-transparent">
+                    <TableHead className="h-9 px-5 text-xs font-medium text-zinc-500 w-[220px]">Reviewer</TableHead>
+                    <TableHead className="h-9 text-xs font-medium text-zinc-500 w-[200px]">Property</TableHead>
+                    <TableHead className="h-9 text-xs font-medium text-zinc-500 w-[120px]">Rating</TableHead>
+                    <TableHead className="h-9 text-xs font-medium text-zinc-500">Feedback</TableHead>
+                    <TableHead className="h-9 text-right text-xs font-medium text-zinc-500 w-[120px]">Date</TableHead>
+                    <TableHead className="h-9 w-[50px]"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {recentReviews.length > 0 ? recentReviews.map((review) => (
-                    <TableRow key={review.id} className="group border-b border-border/40 transition-colors hover:bg-muted/30">
+                    <TableRow key={review.id} className="group border-b border-zinc-100/80 transition-colors hover:bg-zinc-50/50">
                       
-                      {/* 1. Reviewer Column */}
-                      <TableCell className="py-4 px-5 align-top">
+                      {/* Reviewer */}
+                      <TableCell className="py-3.5 px-5 align-top">
                         <div className="flex items-start gap-3">
-                          <Avatar className="size-8 border border-border/60 shadow-sm mt-0.5">
+                          <Avatar className="size-8 border border-zinc-200 mt-0.5">
                             <AvatarImage src={review.user.avatar} />
-                            <AvatarFallback className="text-[10px] font-medium bg-muted text-muted-foreground">{review.user.name.charAt(0)}</AvatarFallback>
+                            <AvatarFallback className="text-[11px] font-medium bg-zinc-100 text-zinc-600">{review.user.name.charAt(0)}</AvatarFallback>
                           </Avatar>
                           <div className="flex flex-col">
-                            <span className="text-[13px] font-medium text-foreground leading-tight">{review.user.name}</span>
-                            <span className="text-[11px] text-muted-foreground mt-0.5">{review.user.email}</span>
+                            <span className="text-xs font-semibold text-zinc-900 leading-tight">{review.user.name}</span>
+                            <span className="text-[11px] text-zinc-400 mt-0.5">{review.user.email}</span>
                           </div>
                         </div>
                       </TableCell>
 
-                      {/* 2. Property Column */}
-                      <TableCell className="py-4 align-top">
+                      {/* Property */}
+                      <TableCell className="py-3.5 align-top">
                         <div className="flex flex-col">
-                          <span className="text-[12px] font-semibold text-foreground truncate max-w-[180px]">{review.property.name}</span>
+                          <span className="text-xs font-semibold text-zinc-900 truncate max-w-[180px]">{review.property.name}</span>
                           {review.property.unit && (
-                            <div className="flex items-center gap-1 text-[11px] text-muted-foreground mt-1">
-                              <HugeiconsIcon icon={Door01Icon} strokeWidth={2} className="size-3 shrink-0" /> {review.property.unit}
+                            <div className="flex items-center gap-1 text-[11px] text-zinc-400 mt-0.5">
+                              <HugeiconsIcon icon={Door01Icon} size={13} className="shrink-0 text-zinc-400" /> {review.property.unit}
                             </div>
                           )}
                         </div>
                       </TableCell>
 
-                      {/* 3. Rating Column */}
-                      <TableCell className="py-4 align-top">
-                        <div className="flex flex-col gap-1.5">
+                      {/* Rating */}
+                      <TableCell className="py-3.5 align-top">
+                        <div className="flex flex-col gap-1">
                           {renderStars(review.rating)}
-                          <span className="text-[11px] font-medium text-muted-foreground tabular-nums">
+                          <span className="text-[11px] font-medium text-zinc-500 tabular-nums">
                             {review.rating}.0 / 5.0
                           </span>
                         </div>
                       </TableCell>
 
-                      {/* 4. Feedback Column */}
-                      <TableCell className="py-4 align-top">
-                        <div className="flex items-start gap-2">
-                          <div className="flex flex-col gap-2">
-                            <p className="text-[12px] text-foreground line-clamp-1 leading-relaxed truncate max-w-[250px]">
-                              "{review.comment}"
-                            </p>
-                            {review.status === "Flagged" && (
-                              <Badge variant="outline" className="w-max px-1.5 py-0 text-[9px] uppercase tracking-wider font-bold bg-zinc-100/50 text-zinc-700 border-zinc-200/60">
-                                Requires Attention
-                              </Badge>
-                            )}
-                          </div>
+                      {/* Feedback */}
+                      <TableCell className="py-3.5 align-top">
+                        <div className="flex flex-col gap-1.5">
+                          <p className="text-xs text-zinc-700 line-clamp-1 leading-relaxed truncate max-w-[280px]">
+                            "{review.comment}"
+                          </p>
+                          {review.status === "Flagged" && (
+                            <Badge variant="outline" className="w-max px-1.5 py-0 text-[10px] font-medium bg-rose-50 text-rose-700 border-rose-200">
+                              Requires Attention
+                            </Badge>
+                          )}
                         </div>
                       </TableCell>
 
-                      {/* 5. Date Column */}
-                      <TableCell className="py-4 text-right align-top">
-                        <span className="text-[12px] text-muted-foreground font-tabular-nums">{review.date}</span>
+                      {/* Date */}
+                      <TableCell className="py-3.5 text-right align-top">
+                        <span className="text-xs text-zinc-400 font-tabular-nums">{review.date}</span>
                       </TableCell>
 
-                      {/* 6. Action Column */}
-                      <TableCell className="py-4 pr-5 text-right align-top">
+                      {/* Action */}
+                      <TableCell className="py-3.5 pr-5 text-right align-top">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="size-7 text-muted-foreground hover:bg-muted hover:text-foreground">
-                              <HugeiconsIcon icon={MoreHorizontalIcon} strokeWidth={2} className="size-4" />
+                            <Button variant="ghost" size="icon" className="size-7 rounded-lg text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 active:scale-95 transition-colors">
+                              <HugeiconsIcon icon={MoreHorizontalIcon} size={16} />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-32 rounded-lg">
+                          <DropdownMenuContent align="end" className="w-36 rounded-xl border-zinc-200">
                             <DropdownMenuItem className="text-xs">View Full</DropdownMenuItem>
                             <DropdownMenuItem className="text-xs">Contact Tenant</DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-xs text-zinc-600 focus:text-zinc-700">Delete Review</DropdownMenuItem>
+                            <DropdownMenuItem className="text-xs text-rose-600 focus:text-rose-700">Delete Review</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
@@ -1015,8 +991,7 @@ export default function PortfolioDashboardClient({ data, selectedYear }: Dashboa
                     </TableRow>
                   )) : (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-6 text-xs text-muted-foreground">No tenant feedback yet.</TableCell>
-                      <TableCell colSpan={6} className="text-center py-6 text-xs text-muted-foreground">No tenant feedback yet.</TableCell>
+                      <TableCell colSpan={6} className="text-center py-6 text-xs text-zinc-400">No tenant feedback yet.</TableCell>
                     </TableRow>
                   )}
                 </TableBody>
@@ -1026,27 +1001,27 @@ export default function PortfolioDashboardClient({ data, selectedYear }: Dashboa
 
           {/* ROW 5: Security & Hardware Events */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-            <div className="overflow-hidden rounded-lg lg:col-span-12 border border-border/60 bg-white shadow-sm">
-              <div className="flex items-center justify-between p-5 border-b border-border/40">
-                <span className="text-sm font-medium text-foreground">Recent Security & Access Events</span>
+            <div className="overflow-hidden rounded-xl border border-zinc-200/80 bg-white shadow-xs lg:col-span-12">
+              <div className="flex items-center justify-between p-4 md:p-5 border-b border-zinc-100">
+                <span className="text-sm font-semibold tracking-tight text-zinc-900">Recent Security & Access Events</span>
                 <Link href="/admin/smartlocks">
-                  <Button variant="ghost" size="sm" className="h-7 text-[11px] px-3 font-medium text-muted-foreground border border-border/50">
+                  <Button variant="outline" size="sm" className="h-7 text-xs px-3 font-medium text-zinc-700 hover:text-zinc-900 rounded-lg border-zinc-200 active:scale-[0.98] transition-colors">
                     Manage Fleet
                   </Button>
                 </Link>
               </div>
               <Table>
                 <TableHeader>
-                  <TableRow className="border-b border-border/40 hover:bg-transparent">
-                    <TableHead className="h-10 px-5 text-xs font-medium text-muted-foreground">Actor</TableHead>
-                    <TableHead className="h-10 px-5 text-xs font-medium text-muted-foreground">Event</TableHead>
-                    <TableHead className="h-10 px-5 text-xs font-medium text-muted-foreground">Target Lock</TableHead>
-                    <TableHead className="h-10 text-right text-xs font-medium text-muted-foreground pr-5">Time</TableHead>
+                  <TableRow className="border-b border-zinc-100 hover:bg-transparent">
+                    <TableHead className="h-9 px-5 text-xs font-medium text-zinc-500">Actor</TableHead>
+                    <TableHead className="h-9 px-5 text-xs font-medium text-zinc-500">Event</TableHead>
+                    <TableHead className="h-9 px-5 text-xs font-medium text-zinc-500">Target Lock</TableHead>
+                    <TableHead className="h-9 text-right text-xs font-medium text-zinc-500 pr-5">Time</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {data.recentSecurityEvents && data.recentSecurityEvents.length > 0 ? data.recentSecurityEvents.map((event: any) => (
-                    <TableRow key={event.id} className="group border-b border-border/40 transition-colors hover:bg-muted/30">
+                    <TableRow key={event.id} className="group border-b border-zinc-100/80 transition-colors hover:bg-zinc-50/50">
                       <TableCell className="py-3 px-5">
                         <div className="flex items-center gap-3">
                           <Avatar className="size-8 ring-1 ring-zinc-200 shrink-0">
@@ -1057,11 +1032,11 @@ export default function PortfolioDashboardClient({ data, selectedYear }: Dashboa
                           </Avatar>
                           <div className="flex flex-col">
                             <div className="flex items-center gap-1.5">
-                              <span className="text-[13px] font-semibold text-foreground">{event.actorName}</span>
-                              <span className="text-[9px] text-muted-foreground uppercase tracking-wider font-medium">{event.actorRole || 'System'}</span>
+                              <span className="text-xs font-semibold text-zinc-900">{event.actorName}</span>
+                              <span className="text-[10px] text-zinc-400 uppercase tracking-wider font-medium">{event.actorRole || 'System'}</span>
                             </div>
                             {(event.actorEmail || event.actorPhone) && (
-                              <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground mt-0.5">
+                              <div className="flex items-center gap-1.5 text-[11px] text-zinc-400 mt-0.5">
                                 {event.actorEmail && <span>{event.actorEmail}</span>}
                                 {event.actorEmail && event.actorPhone && <span>•</span>}
                                 {event.actorPhone && <span>{event.actorPhone}</span>}
@@ -1071,22 +1046,22 @@ export default function PortfolioDashboardClient({ data, selectedYear }: Dashboa
                         </div>
                       </TableCell>
                       <TableCell className="py-3 px-5">
-                        <Badge variant="secondary" className={`rounded px-1.5 py-0.5 text-[10px] font-bold border-none tracking-wider ${
-                          event.isAlarm ? 'bg-zinc-100 text-zinc-700' : 'bg-zinc-100/50 text-zinc-700'
+                        <Badge variant="secondary" className={`rounded-md px-2 py-0.5 text-[11px] font-medium border-none ${
+                          event.isAlarm ? 'bg-rose-50 text-rose-700' : 'bg-zinc-100 text-zinc-700'
                         }`}>
                           {event.action.replace(/_/g, ' ')}
                         </Badge>
                       </TableCell>
                       <TableCell className="py-3 px-5">
-                        <span className="text-[12px] font-medium text-foreground">{event.lockName}</span>
+                        <span className="text-xs font-medium text-zinc-900">{event.lockName}</span>
                       </TableCell>
                       <TableCell className="py-3 pr-5 text-right">
-                        <span className="text-[11px] text-muted-foreground font-mono">{event.timestamp}</span>
+                        <span className="text-[11px] text-zinc-400 font-mono">{event.timestamp}</span>
                       </TableCell>
                     </TableRow>
                   )) : (
                     <TableRow>
-                      <TableCell colSpan={4} className="text-center py-6 text-xs text-muted-foreground">No recent security events.</TableCell>
+                      <TableCell colSpan={4} className="text-center py-6 text-xs text-zinc-400">No recent security events.</TableCell>
                     </TableRow>
                   )}
                 </TableBody>
