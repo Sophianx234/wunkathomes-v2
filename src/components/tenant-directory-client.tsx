@@ -25,6 +25,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -177,10 +178,10 @@ const getLeaseBadgeStyle = (status: string) => {
 export default function TenantDirectoryClient({
   data,
   availableProperties,
-  initialTab = "active",
+  initialTab = "all",
 }: TenantDirectoryClientProps) {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"all" | "pending">(initialTab === "active" ? "all" : initialTab as any);
+  const [activeTab, setActiveTab] = useState<TabStage>(initialTab);
   const [searchQuery, setSearchQuery] = useState("");
   const [propertyFilter, setPropertyFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -327,6 +328,10 @@ export default function TenantDirectoryClient({
 
   const requestAction = (action: ActionType, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
+    if (action === "vendorPin") {
+      setVendorPinName("");
+      setVendorPinHours(2);
+    }
     setConfirmAction(action);
   };
 
@@ -375,7 +380,7 @@ export default function TenantDirectoryClient({
     },
     vendorPin: {
       title: "Generate Temp PIN",
-      description: "This will generate a temporary 6-digit PIN valid for the next 2 hours. Use this for maintenance or vendors.",
+      description: "Generate a secure, time-bound temporary PIN for maintenance, visitors, or contractors.",
       confirmText: "Generate PIN",
       confirmClass: "bg-black text-white hover:bg-zinc-800",
     },
@@ -994,7 +999,16 @@ export default function TenantDirectoryClient({
 
       <DocumentViewer imageUrl={expandedImage} onClose={() => setExpandedImage(null)} />
 
-      <AlertDialog open={!!confirmAction} onOpenChange={(open) => !open && setConfirmAction(null)}>
+      <AlertDialog 
+        open={!!confirmAction} 
+        onOpenChange={(open) => {
+          if (!open) {
+            setConfirmAction(null);
+            setVendorPinName("");
+            setVendorPinHours(2);
+          }
+        }}
+      >
         <AlertDialogContent>
           {confirmAction && (
             <>
@@ -1003,6 +1017,53 @@ export default function TenantDirectoryClient({
                 <AlertDialogDescription className="text-[13px] text-zinc-500 leading-relaxed">{dialogContent[confirmAction].description}</AlertDialogDescription>
               </AlertDialogHeader>
               
+              {confirmAction === "vendorPin" && (
+                <div className="mt-4 space-y-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="vendorPinName" className="text-[12px] font-semibold text-zinc-700">
+                      Name / Purpose <span className="text-rose-500">*</span>
+                    </Label>
+                    <Input
+                      id="vendorPinName"
+                      value={vendorPinName}
+                      onChange={(e) => setVendorPinName(e.target.value)}
+                      placeholder="e.g. Cleaner, Maintenance, Plumber"
+                      className="h-10 text-[13px] rounded-lg border-zinc-200/80 focus-visible:ring-1 focus-visible:ring-zinc-900"
+                      autoFocus
+                      disabled={isPending}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && vendorPinName.trim() && !isPending) {
+                          executeConfirmedAction(e as any);
+                        }
+                      }}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="vendorPinHours" className="text-[12px] font-semibold text-zinc-700">
+                      Duration Valid
+                    </Label>
+                    <Select
+                      value={vendorPinHours.toString()}
+                      onValueChange={(v) => setVendorPinHours(Number(v))}
+                      disabled={isPending}
+                    >
+                      <SelectTrigger id="vendorPinHours" className="h-10 text-[13px] rounded-lg border-zinc-200/80">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1">1 Hour</SelectItem>
+                        <SelectItem value="2">2 Hours (Default)</SelectItem>
+                        <SelectItem value="4">4 Hours</SelectItem>
+                        <SelectItem value="8">8 Hours</SelectItem>
+                        <SelectItem value="12">12 Hours</SelectItem>
+                        <SelectItem value="24">24 Hours (1 Day)</SelectItem>
+                        <SelectItem value="48">48 Hours (2 Days)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              )}
+
               {confirmAction === "verifyAndOnboard" && selectedTenant?.user.kycStatus === "Verified" && (
                 <div className="mt-4 p-4 bg-emerald-50 border border-emerald-200/60 rounded-lg">
                   <div className="flex items-start gap-3">
@@ -1019,7 +1080,11 @@ export default function TenantDirectoryClient({
 
               <AlertDialogFooter className="mt-6 gap-2 sm:gap-0">
                 <AlertDialogCancel disabled={isPending} className="h-10 text-[13px] font-semibold border-zinc-200/60 hover:bg-zinc-50 rounded-lg">Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={executeConfirmedAction} disabled={isPending} className={`h-10 text-[13px] font-semibold rounded-lg ${dialogContent[confirmAction].confirmClass}`}>
+                <AlertDialogAction 
+                  onClick={executeConfirmedAction} 
+                  disabled={isPending || (confirmAction === "vendorPin" && !vendorPinName.trim())} 
+                  className={`h-10 text-[13px] font-semibold rounded-lg ${dialogContent[confirmAction].confirmClass}`}
+                >
                   {isPending ? <><HugeiconsIcon icon={Loading03Icon} className="animate-spin mr-2" size={14} /> Processing...</> : 
                    (confirmAction === "verifyAndOnboard" && selectedTenant?.user.kycStatus === "Verified") ? "Approve & Dispatch Keys" : dialogContent[confirmAction].confirmText}
                 </AlertDialogAction>

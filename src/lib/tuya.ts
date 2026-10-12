@@ -165,10 +165,28 @@ export async function deleteTemporaryPin(deviceId: string, passwordId: string) {
 
 /**
  * Sends a remote unlock command to the specific smart lock.
+ * Uses Tuya's official ticket-based password-free open-door API, with fallback.
  */
 export async function remoteUnlock(deviceId: string) {
   if (!deviceId) throw new Error('Device ID is required to remote unlock');
   
+  try {
+    // 1. Obtain temporary password ticket for the lock
+    const ticketPath = `/v1.0/devices/${deviceId}/door-lock/password-ticket`;
+    const ticketRes = await tuyaRequest('POST', ticketPath);
+    const ticketId = ticketRes?.result?.ticket_id;
+
+    if (ticketId) {
+      // 2. Send official password-free remote open door command
+      const openPath = `/v1.1/devices/${deviceId}/door-lock/password-free/open-door`;
+      const openRes = await tuyaRequest('POST', openPath, { ticket_id: ticketId });
+      return openRes.result;
+    }
+  } catch (ticketError) {
+    console.warn('Ticket-based unlock failed, falling back to legacy command:', ticketError);
+  }
+
+  // Fallback for simple devices/switches
   const path = `/v1.0/devices/${deviceId}/commands`;
   const body = {
     commands: [
