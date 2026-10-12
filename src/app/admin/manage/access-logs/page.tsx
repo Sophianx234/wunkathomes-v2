@@ -34,12 +34,17 @@ export default async function AdminAccessLogsPage() {
 
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-[#FAFAFA] p-6 lg:pb-10 font-sans">
-        <div className="max-w-[1400px] mx-auto space-y-6">
+      <div className="min-h-screen bg-zinc-50/50 p-6 md:p-8 font-sans">
+        <div className="max-w-7xl mx-auto space-y-6">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-zinc-200/60 pb-4">
-            <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
-              Access & Security Logs
-            </h1>
+            <div>
+              <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
+                Access & Security Logs
+              </h1>
+              <p className="text-sm text-zinc-500 mt-1">
+                Real-time audit trail of hardware unlocks, temporary PIN issuance, and security telemetry.
+              </p>
+            </div>
           </div>
           <DataTableSkeleton rows={10} />
         </div>
