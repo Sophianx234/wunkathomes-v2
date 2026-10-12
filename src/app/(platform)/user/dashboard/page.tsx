@@ -84,6 +84,12 @@ export default async function DashboardPage() {
       }
     }
 
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const moveInDate = dbLease.startDate ? new Date(dbLease.startDate) : null;
+    if (moveInDate) moveInDate.setHours(0, 0, 0, 0);
+    const isMoveInReached = !moveInDate || today >= moveInDate;
+
     return {
       lease: {
         id: dbLease._id.toString(),
@@ -91,7 +97,7 @@ export default async function DashboardPage() {
         totalRentAmount: dbLease.totalRentAmount,
         startDate: dbLease.startDate ? new Date(dbLease.startDate).toISOString() : new Date().toISOString(),
         endDate: endDate ? new Date(endDate).toISOString() : undefined,
-        smartLockPin: dbLease.smartLockPin,
+        smartLockPin: isMoveInReached ? dbLease.smartLockPin : undefined,
         intentToVacate: dbLease.intentToVacate || false,
         signatureAudit: {
           isSigned: dbLease.signatureAudit?.isSigned || false,

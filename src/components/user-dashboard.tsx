@@ -744,9 +744,17 @@ export function UserDashboard({ user, activeLeases, initialSchedule }: Dashboard
                 </div>
                 {!isRestricted && (
                   <span
-                    className={`text-[8px] md:text-[10px] font-bold uppercase tracking-widest px-2 py-1 md:px-3 md:py-1.5 rounded-full border truncate ml-2 ${lockStatus === "LOCKED" ? "bg-green-500/10 text-green-400 border-green-500/20" : lockStatus === "UNLOCKED" ? "bg-zinc-500/10 text-zinc-400 border-zinc-500/20" : "bg-white/10 text-white border-white/20"}`}
+                    className={`text-[8px] md:text-[10px] font-bold uppercase tracking-widest px-2 py-1 md:px-3 md:py-1.5 rounded-full border truncate ml-2 ${
+                      today < startDate
+                        ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                        : lockStatus === "LOCKED"
+                          ? "bg-green-500/10 text-green-400 border-green-500/20"
+                          : lockStatus === "UNLOCKED"
+                            ? "bg-zinc-500/10 text-zinc-400 border-zinc-500/20"
+                            : "bg-white/10 text-white border-white/20"
+                    }`}
                   >
-                    Door is {lockStatus}
+                    {today < startDate ? "Move-In Pending" : `Door is ${lockStatus}`}
                   </span>
                 )}
               </div>
@@ -760,23 +768,39 @@ export function UserDashboard({ user, activeLeases, initialSchedule }: Dashboard
                   <div className="font-mono text-sm md:text-xl font-bold text-zinc-500 uppercase tracking-[0.1em] truncate">
                     Pending
                   </div>
+                ) : today < startDate ? (
+                  <div className="flex items-center justify-between w-full">
+                    <div>
+                      <div className="text-[10px] md:text-xs font-bold text-amber-400 uppercase tracking-widest flex items-center gap-1.5">
+                        <HugeiconsIcon icon={Clock01Icon} size={14} /> Available on Move-In
+                      </div>
+                      <p className="text-[10px] md:text-xs text-zinc-400 mt-0.5 font-medium">
+                        {startDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                      </p>
+                    </div>
+                    <div className="font-mono text-[10px] md:text-xs font-bold text-zinc-400 uppercase tracking-widest bg-white/5 px-2.5 py-1 rounded border border-white/10">
+                      Locked
+                    </div>
+                  </div>
                 ) : (
                   <>
                     <div className="font-mono text-xl md:text-3xl font-black text-white tracking-[0.2em] truncate">
-                      {showPin ? lease.smartLockPin || "849201" : "••••••"}
+                      {showPin ? lease.smartLockPin || "Pending" : "••••••"}
                     </div>
-                    <button
-                      onClick={() => setShowPin(!showPin)}
-                      className="p-1.5 md:p-2 hover:bg-white/10 rounded-full transition-colors text-zinc-400 hover:text-white shrink-0"
-                      title={showPin ? "Hide PIN" : "Reveal PIN"}
-                    >
-                      <span className="scale-75 md:scale-100 flex items-center">
-                        <HugeiconsIcon
-                          icon={showPin ? ViewOffIcon : ViewIcon}
-                          size={20}
-                        />
-                      </span>
-                    </button>
+                    {lease.smartLockPin && (
+                      <button
+                        onClick={() => setShowPin(!showPin)}
+                        className="p-1.5 md:p-2 hover:bg-white/10 rounded-full transition-colors text-zinc-400 hover:text-white shrink-0"
+                        title={showPin ? "Hide PIN" : "Reveal PIN"}
+                      >
+                        <span className="scale-75 md:scale-100 flex items-center">
+                          <HugeiconsIcon
+                            icon={showPin ? ViewOffIcon : ViewIcon}
+                            size={20}
+                          />
+                        </span>
+                      </button>
+                    )}
                   </>
                 )}
               </div>
