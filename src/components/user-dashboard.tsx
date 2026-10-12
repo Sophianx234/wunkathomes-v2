@@ -554,8 +554,8 @@ export function UserDashboard({ user, activeLeases, initialSchedule }: Dashboard
             </div>
 
             <div className="text-right shrink-0">
-              <div className="flex items-baseline justify-end gap-1.5">
-                <span className="text-2xl md:text-3xl font-bold text-zinc-900 tracking-tight">
+              <div className="flex flex-col items-end justify-center">
+                <span className="text-2xl md:text-3xl font-bold text-zinc-900 tracking-tight font-mono tabular-nums">
                   {daysLeft}
                 </span>
                 <span className="text-xs font-medium text-zinc-500">
