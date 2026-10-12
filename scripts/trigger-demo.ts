@@ -30,22 +30,24 @@ async function triggerDemo() {
         console.error(`❌ User ${targetEmail} not found. Please check the email.`);
         process.exit(1);
       }
-      lease = await Lease.findOne({ userId: user._id, status: 'Active' })
+      lease = await Lease.findOne({ userId: user._id })
+        .sort({ createdAt: -1 })
         .populate('listingId', 'title')
         .populate('userId', 'email name');
     } else {
       // Auto-select the first active lease if no email is provided
-      lease = await Lease.findOne({ status: 'Active' })
+      lease = await Lease.findOne({ status: { $in: ['Active', 'Expired'] } })
+        .sort({ createdAt: -1 })
         .populate('listingId', 'title')
         .populate('userId', 'email name');
         
       if (lease) {
-         console.log(`ℹ️  No email provided. Auto-selected active lease for ${lease.userId.email}`);
+         console.log(`ℹ️  No email provided. Auto-selected lease for ${lease.userId.email}`);
       }
     }
 
     if (!lease) {
-      console.error(`❌ No active lease found to target. Ensure there is at least one 'Active' lease in the DB.`);
+      console.error(`❌ No lease found to target. Ensure there is at least one lease in the DB.`);
       process.exit(1);
     }
 
@@ -54,12 +56,25 @@ async function triggerDemo() {
     yesterday.setDate(yesterday.getDate() - 1);
     
     // Calculate total lease duration to realistically shift the dates
-    const durationMs = lease.endDate.getTime() - lease.startDate.getTime();
+    const durationMs = lease.endDate && lease.startDate 
+      ? (lease.endDate.getTime() - lease.startDate.getTime())
+      : (365 * 24 * 60 * 60 * 1000);
 
     // Initialize reminders object if it doesn't exist
     if (!lease.reminders) lease.reminders = {};
 
     switch (milestoneArg) {
+      case 'movein':
+      case 'pre-movein': {
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        tomorrow.setHours(0, 0, 0, 0);
+
+        lease.startDate = tomorrow;
+        lease.endDate = new Date(tomorrow.getTime() + (durationMs > 0 ? durationMs : 365 * 24 * 60 * 60 * 1000));
+        lease.status = 'Active';
+        break;
+      }
       case '50':
         if (!lease.reminders.milestone1) lease.reminders.milestone1 = {};
         lease.reminders.milestone1.triggerDate = yesterday;
@@ -68,6 +83,7 @@ async function triggerDemo() {
         // Shift dates so we are exactly at 50%
         lease.startDate = new Date(now.getTime() - (durationMs * 0.5));
         lease.endDate = new Date(now.getTime() + (durationMs * 0.5));
+        lease.status = 'Active';
         break;
       case '75':
         if (!lease.reminders.milestone2) lease.reminders.milestone2 = {};
@@ -77,6 +93,7 @@ async function triggerDemo() {
         // Shift dates so we are exactly at 75%
         lease.startDate = new Date(now.getTime() - (durationMs * 0.75));
         lease.endDate = new Date(now.getTime() + (durationMs * 0.25));
+        lease.status = 'Active';
         break;
       case '90':
         if (!lease.reminders.milestone3) lease.reminders.milestone3 = {};
@@ -86,6 +103,7 @@ async function triggerDemo() {
         // Shift dates so we are exactly at 90%
         lease.startDate = new Date(now.getTime() - (durationMs * 0.90));
         lease.endDate = new Date(now.getTime() + (durationMs * 0.10));
+        lease.status = 'Active';
         break;
       case 'expired':
       default:
@@ -100,6 +118,20 @@ async function triggerDemo() {
 
     await lease.save();
     console.log(`✅ Lease for "${lease.listingId.title}" updated in DB for milestone: ${milestoneArg}.`);
+
+    if (milestoneArg === 'movein' || milestoneArg === 'pre-movein') {
+      console.log(`\n🎉 Move-In Demo State Prepared!`);
+      console.log(` - Tenant: ${lease.userId.name} (${lease.userId.email})`);
+      console.log(` - Property: ${lease.listingId.title}`);
+      console.log(` - Lease start date set to TOMORROW: ${lease.startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`);
+      console.log(`\n💡 Open the user dashboard to observe:`);
+      console.log(` • Badge: 'Move-In Pending' / 'Starting Tomorrow'`);
+      console.log(` • Smart Lock PIN: 'Available on Move-In' (Locked, masked on server)`);
+      console.log(` • Remote Unlock: Disabled ('Active on Move-in')`);
+      console.log(` • Guest Passes: Hidden until move-in\n`);
+      await mongoose.disconnect();
+      process.exit(0);
+    }
 
     // 3. Trigger the Cron Route Automatically
     console.log("🚀 Triggering the check-subscriptions cron job...");
