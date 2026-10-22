@@ -73,3 +73,49 @@ This script allows you to easily grant or revoke `Admin` privileges for a specif
   npm run admin revoke user@example.com
   ```
   This demotes the user back to a standard `User` role.
+
+---
+
+## 🔄 Reversing a Room or Property to Default
+
+This script reverses a room (listing) or an entire property back to its default available state, **even if there is a current active subscription/lease on it**.
+
+### Commands:
+
+* **Interactive Selection (Recommended):**
+  ```bash
+  npm run reset
+  ```
+  Inspects the database, presents all currently rented/pending rooms and properties, and prompts you to select which target to reset.
+
+* **Reset a Specific Room / Listing:**
+  ```bash
+  npm run reset:room -- <listingId | slug | "title keyword">
+  ```
+  Example:
+  ```bash
+  npm run reset:room -- "Penthouse"
+  npm run reset:room -- 66e1abcd1234567890ef0001
+  ```
+
+* **Reset an Entire Property (All Rooms inside it):**
+  ```bash
+  npm run reset:property -- <propertyId | "area keyword">
+  ```
+  Example:
+  ```bash
+  npm run reset:property -- "Cantonments"
+  ```
+
+* **Reset All Rented/Occupied Units (Staging / Demo cleanup):**
+  ```bash
+  npm run reset -- --all
+  ```
+
+### What happens under the hood?
+1. **Room Status Reversion**: Target listing `status` is reset to `"Available"`.
+2. **Subscription / Lease Termination**: Active and pending leases on the room are marked `"Cancelled"`, access PINs cleared, and vacation reasons noted. (Pass `--hard` to delete lease documents completely).
+3. **Smart Lock De-provisioning**: Any active temporary PINs registered on the Tuya smart lock hardware are deleted via Tuya OpenAPI, `activeTempPins` are wiped from the database, and a `SYSTEM_LOCKOUT` security entry is appended to `AccessLog`.
+4. **Ancillary Schedules**: Active `CleaningSchedule` bookings are cancelled, and pending `Maintenance` tickets are closed.
+5. **Financial Records**: `Transaction` payment histories and invoices are preserved untouched for auditing.
+
