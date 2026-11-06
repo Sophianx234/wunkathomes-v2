@@ -27,9 +27,10 @@ const serializeListing = (doc: any) => ({
   slug: doc.slug,
   title: doc.title,
   listingType: doc.listingType,
+  roomType: doc.roomType || "Empty",
+  status: doc.status || "Available",
   price: doc.price,
-  images: doc.images || doc.propertyId?.images || [], // <--- ADD THIS LINE
-  // Add other explicitly required fields here...
+  images: doc.images || doc.propertyId?.images || [],
   property: doc.propertyId ? {
     id: doc.propertyId._id.toString(),
     propertyType: doc.propertyId.propertyType,
