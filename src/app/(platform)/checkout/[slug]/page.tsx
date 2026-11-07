@@ -21,6 +21,11 @@ export default async function CheckoutPage({ params }: CheckoutPageProps) {
 
   if (!listing) notFound();
 
+  // If already rented or sold, redirect back to property page
+  if (listing.status === "Rented" || listing.status === "Sold") {
+    redirect(`/properties/${slug}`);
+  }
+
   await connectToDatabase();
 
   // =====================================================================
