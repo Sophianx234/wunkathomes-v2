@@ -420,3 +420,154 @@ export async function processLeaseRenewal(
     };
   }
 }
+
+// ============================================================================
+// 3. MANUAL BANK TRANSFER / MOMO RESERVATION ACTION
+// ============================================================================
+const manualPaymentSchema = z.object({
+  listingId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid Listing ID"),
+  selectedMoveInDate: z.string().refine((val) => !isNaN(Date.parse(val)), {
+    message: "Invalid date format",
+  }),
+  rentDuration: z.number().min(1).default(1),
+  legalName: z.string().min(2, "Legal name must be at least 2 characters").trim(),
+  phone: z.string().min(7, "Invalid phone number").trim(),
+});
+
+export async function createManualBankPaymentAction(payload: {
+  listingId: string;
+  selectedMoveInDate: string;
+  rentDuration: number;
+  legalName: string;
+  phone: string;
+}) {
+  let ip = "unknown";
+
+  try {
+    const headersList = await headers();
+    ip = headersList.get("x-forwarded-for")?.split(",")[0] || "Unknown IP";
+    const userAgent = headersList.get("user-agent") || "Unknown Device";
+
+    const session = await getSession();
+    if (!session || !session.userId) throw new Error("UNAUTHORIZED");
+
+    const validated = manualPaymentSchema.parse(payload);
+
+    await connectToDatabase();
+
+    const listing = await Listing.findById(validated.listingId);
+    if (!listing) return { success: false, message: "Property not found." };
+    if (listing.status === "Rented" || listing.status === "Sold") {
+      return { success: false, message: "This property is already rented or unavailable." };
+    }
+
+    const roomType = listing.roomType || "Empty";
+    const basePrice = listing.price || 0;
+    const isRent = listing.listingType !== "For_Sale";
+
+    const rentSubtotal = basePrice * validated.rentDuration;
+    let securityDeposit = 0;
+    if (isRent) {
+      securityDeposit = basePrice * 2;
+    }
+    const totalAmount = isRent ? rentSubtotal + securityDeposit : basePrice;
+
+    const startDate = new Date(validated.selectedMoveInDate);
+    const endDate = new Date(startDate);
+    if (isRent) {
+      if (roomType === "Furnished") {
+        endDate.setDate(endDate.getDate() + validated.rentDuration);
+      } else {
+        endDate.setMonth(endDate.getMonth() + validated.rentDuration);
+      }
+    } else {
+      endDate.setFullYear(endDate.getFullYear() + 1);
+    }
+
+    const dynamicReminders = calculateMilestones(startDate, endDate);
+
+    // Generate readable unique reference: WNK-XXXXXX
+    const timestamp = new Date();
+    const reference = `WNK-${Date.now().toString().slice(-6)}-${Math.floor(100 + Math.random() * 900)}`;
+
+    const signaturePayload = `${validated.listingId}:${session.userId}:${validated.legalName}:${ip}:${userAgent}:${timestamp.toISOString()}`;
+    const documentHash = crypto.createHash("sha256").update(signaturePayload).digest("hex");
+
+    const dbSession = await mongoose.startSession();
+    await dbSession.withTransaction(async () => {
+      // 1. Create Lease with Pending_Verification status
+      const newLease = await Lease.create(
+        [
+          {
+            listingId: validated.listingId,
+            userId: session.userId,
+            totalRentAmount: totalAmount,
+            startDate,
+            endDate,
+            reminders: dynamicReminders,
+            status: "Pending_Verification",
+            signatureAudit: {
+              isSigned: true,
+              signedAt: timestamp,
+              ipAddress: ip,
+              userAgent: userAgent,
+              typedName: validated.legalName,
+              documentHash: documentHash,
+            },
+          },
+        ],
+        { session: dbSession }
+      );
+
+      // 2. Create Transaction with Pending status & channel "bank"
+      await Transaction.create(
+        [
+          {
+            userId: session.userId,
+            listingId: validated.listingId,
+            leaseId: newLease[0]._id,
+            amount: totalAmount,
+            currency: "GHS",
+            paymentPurpose: isRent ? "Upfront_Rent" : "Purchase",
+            reference,
+            transactionReference: reference,
+            channel: "bank",
+            status: "Pending",
+          },
+        ],
+        { session: dbSession }
+      );
+
+      // 3. Mark Listing as Pending (Reserved hold)
+      await Listing.findByIdAndUpdate(
+        validated.listingId,
+        { status: "Pending" },
+        { session: dbSession }
+      );
+    });
+    await dbSession.endSession();
+
+    revalidatePath("/admin/transactions");
+    revalidatePath("/admin/manage/tenants");
+    revalidatePath("/explore");
+    revalidatePath("/user/dashboard");
+    revalidatePath(`/properties/${listing.slug}`);
+    revalidatePath(`/checkout/${listing.slug}`);
+
+    return {
+      success: true,
+      reference,
+      totalAmount,
+      message: "Reservation initiated successfully.",
+    };
+  } catch (error: any) {
+    if (error.message === "UNAUTHORIZED") {
+      return { success: false, message: "Please log in to complete your reservation." };
+    }
+    console.error(`[MANUAL PAYMENT ERROR] (IP: ${ip}):`, error);
+    return {
+      success: false,
+      message: error?.message || "An unexpected error occurred. Please try again.",
+    };
+  }
+}
