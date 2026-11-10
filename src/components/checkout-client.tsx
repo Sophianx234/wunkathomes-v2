@@ -5,19 +5,9 @@ import { useRouter } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
 import { toast } from "sonner" 
-import { 
-  Lock, 
-  Copy, 
-  Check, 
-  Building2, 
-  Smartphone, 
-  ArrowLeft, 
-  MessageSquare, 
-  ShieldCheck, 
-  Clock,
-  ExternalLink 
-} from "lucide-react"
+import { Lock, Copy, Check, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 
 import { 
   ArrowLeft01Icon, 
@@ -98,6 +88,7 @@ export default function CheckoutClient({
     existingPendingReservation?.reference || ""
   );
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<"bank" | "momo">("bank");
 
   const [formData, setFormData] = useState({
     legalName: currentUser?.name || "",
@@ -232,14 +223,14 @@ export default function CheckoutClient({
           <button 
             type="button"
             onClick={() => setStep("DETAILS")} 
-            className="inline-flex items-center gap-1.5 md:gap-2 text-[10px] md:text-xs font-bold uppercase tracking-widest text-zinc-500 hover:text-black transition-colors"
+            className="group inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-zinc-500 hover:text-black transition-colors"
           >
-            <ArrowLeft size={16} />
+            <ArrowLeft size={14} className="transition-transform duration-160 ease-out group-hover:-translate-x-0.5" />
             Back to Agreement & Details
           </button>
         ) : (
-          <Link href={`/properties/${listing.slug}`} className="inline-flex items-center gap-1 md:gap-2 text-[10px] md:text-xs font-bold uppercase tracking-widest text-zinc-500 hover:text-black transition-colors">
-            <span className="scale-75 md:scale-100 flex items-center">
+          <Link href={`/properties/${listing.slug}`} className="group inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-zinc-500 hover:text-black transition-colors">
+            <span className="scale-75 md:scale-100 flex items-center transition-transform duration-160 ease-out group-hover:-translate-x-0.5">
               <HugeiconsIcon icon={ArrowLeft01Icon} size={16} />
             </span>
             Return to Property
@@ -448,176 +439,180 @@ export default function CheckoutClient({
             /* =================================================================== */
             /* STEP 4: DIRECT BANK TRANSFER & MOMO PAYMENT INSTRUCTIONS           */
             /* =================================================================== */
-            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-3 duration-300">
+            <div className="space-y-5 animate-in fade-in duration-200">
               
               {/* Header */}
               <div>
-                <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-50 border border-amber-200/80 rounded-full text-amber-800 text-[10px] md:text-xs font-bold uppercase tracking-wider mb-2">
-                  <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-                  Reservation Hold Active (24 Hours)
-                </div>
-                <h1 className="text-xl md:text-3xl font-black tracking-tight text-slate-900 mb-1">
+                <p className="text-[11px] font-semibold text-zinc-400 uppercase tracking-widest mb-1.5">
+                  Step 2 of 2 · Transfer & Confirm
+                </p>
+                <h1 className="text-xl md:text-3xl font-bold tracking-tight text-zinc-900 mb-1.5">
                   Payment Instructions
                 </h1>
-                <p className="text-xs md:text-sm text-slate-500 leading-relaxed">
-                  Transfer the exact amount below to our official business account, then tap the WhatsApp button to send your receipt screenshot.
+                <p className="text-xs md:text-sm text-zinc-500 leading-relaxed">
+                  Transfer the exact rent amount using the details below. Once sent, share your payment confirmation on WhatsApp to finalize your tenancy.
                 </p>
               </div>
 
-              {/* 1. Reference & Total Amount Highlight Card */}
-              <div className="bg-zinc-950 text-white rounded-xl p-4 md:p-6 shadow-md border border-zinc-800">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-zinc-800">
+              {/* 1. Essential Summary Card: Amount & Reference */}
+              <div className="rounded-xl border border-zinc-200/80 bg-white p-5 md:p-6 space-y-4 shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-100">
                   <div>
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block mb-1">
-                      Total Amount to Transfer
+                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-1">
+                      Total Amount Due
                     </span>
-                    <span className="text-2xl md:text-3xl font-black text-white">
+                    <span className="text-2xl md:text-3xl font-black text-zinc-900 tracking-tight">
                       GHS {finalTotal.toLocaleString()}
                     </span>
                   </div>
+
                   <div>
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block mb-1">
-                      Your Unique Booking Reference
+                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-1">
+                      Booking Reference
                     </span>
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-base md:text-lg font-bold bg-zinc-800 px-3 py-1 rounded text-green-400 tracking-wider">
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-mono text-sm md:text-base font-bold text-zinc-900 bg-zinc-100 px-3 py-1 rounded-md tracking-wider">
                         {bookingReference}
                       </span>
                       <button
                         type="button"
                         onClick={() => copyToClipboard(bookingReference, "ref")}
-                        className="p-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded transition-colors"
-                        title="Copy Reference"
+                        className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-zinc-700 bg-zinc-100 hover:bg-zinc-200/70 rounded-md transition-transform duration-160 ease-out active:scale-[0.96]"
+                        title="Copy reference code"
                       >
-                        {copiedKey === "ref" ? <Check size={16} className="text-green-400" /> : <Copy size={16} />}
+                        {copiedKey === "ref" ? (
+                          <>
+                            <Check size={12} className="text-emerald-600" />
+                            <span className="text-[11px] text-emerald-600 font-bold">Copied</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy size={12} />
+                            <span className="text-[11px]">Copy</span>
+                          </>
+                        )}
                       </button>
                     </div>
                   </div>
                 </div>
 
-                <div className="mt-3 flex items-start gap-2 text-amber-300 text-xs font-medium">
-                  <ShieldCheck size={16} className="shrink-0 mt-0.5" />
-                  <span>
-                    <strong>Important:</strong> Put <strong>{bookingReference}</strong> in the transfer remarks/narration so your payment is automatically matched to your lease.
-                  </span>
-                </div>
+                <p className="text-xs text-zinc-500 leading-relaxed">
+                  Include <strong className="font-mono text-zinc-900">{bookingReference}</strong> in your transfer description/remarks so we can match your payment instantly.
+                </p>
               </div>
 
-              {/* 2. Official Bank Account Details */}
-              <div className="bg-white p-4 md:p-6 rounded-xl border border-zinc-200/80 shadow-sm space-y-4">
-                <div className="flex items-center gap-2.5 pb-3 border-b border-zinc-100">
-                  <Building2 size={20} className="text-zinc-700" />
-                  <div>
-                    <h3 className="text-xs md:text-sm font-bold uppercase tracking-wider text-slate-900">
-                      Option A: Direct Bank Transfer
-                    </h3>
-                    <p className="text-[10px] text-zinc-500">Instant ACH or Ghana Interbank Payment (GIP)</p>
-                  </div>
+              {/* 2. Refined Segmented Control: Bank Transfer vs Mobile Money */}
+              <div className="rounded-xl border border-zinc-200/80 bg-white p-5 md:p-6 space-y-4 shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
+                <div className="flex p-1 bg-zinc-100 rounded-lg">
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod("bank")}
+                    className={cn(
+                      "flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-md transition-all duration-160 ease-out active:scale-[0.98]",
+                      paymentMethod === "bank"
+                        ? "bg-white text-zinc-900 shadow-sm"
+                        : "text-zinc-500 hover:text-zinc-900"
+                    )}
+                  >
+                    Bank Transfer
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod("momo")}
+                    className={cn(
+                      "flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-md transition-all duration-160 ease-out active:scale-[0.98]",
+                      paymentMethod === "momo"
+                        ? "bg-white text-zinc-900 shadow-sm"
+                        : "text-zinc-500 hover:text-zinc-900"
+                    )}
+                  >
+                    Mobile Money (MoMo)
+                  </button>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                  <div className="p-3 bg-zinc-50 rounded-lg">
-                    <span className="text-[10px] font-bold uppercase text-zinc-400 block">Bank Name</span>
-                    <span className="font-bold text-zinc-800">{BANK_DETAILS.bankName}</span>
-                  </div>
-                  <div className="p-3 bg-zinc-50 rounded-lg">
-                    <span className="text-[10px] font-bold uppercase text-zinc-400 block">Account Name</span>
-                    <span className="font-bold text-zinc-800">{BANK_DETAILS.accountName}</span>
-                  </div>
-                  <div className="p-3 bg-zinc-50 rounded-lg sm:col-span-2 flex items-center justify-between">
-                    <div>
-                      <span className="text-[10px] font-bold uppercase text-zinc-400 block">Account Number</span>
-                      <span className="font-mono font-black text-sm text-zinc-900 tracking-wider">
-                        {BANK_DETAILS.accountNumber}
-                      </span>
+                {paymentMethod === "bank" ? (
+                  <dl className="divide-y divide-zinc-100 text-xs">
+                    <div className="py-3 flex justify-between items-center">
+                      <dt className="text-zinc-500 font-medium">Bank Name</dt>
+                      <dd className="font-bold text-zinc-900">{BANK_DETAILS.bankName}</dd>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => copyToClipboard(BANK_DETAILS.accountNumber.replace(/\s/g, ""), "bank")}
-                      className="px-2.5 py-1.5 bg-white border border-zinc-200 text-zinc-700 hover:text-black hover:border-black rounded text-[11px] font-bold flex items-center gap-1 transition-colors"
-                    >
-                      {copiedKey === "bank" ? <Check size={12} className="text-green-600" /> : <Copy size={12} />}
-                      {copiedKey === "bank" ? "Copied" : "Copy"}
-                    </button>
-                  </div>
-                  <div className="p-3 bg-zinc-50 rounded-lg sm:col-span-2">
-                    <span className="text-[10px] font-bold uppercase text-zinc-400 block">Branch</span>
-                    <span className="font-medium text-zinc-700">{BANK_DETAILS.branch}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* 3. Corporate Mobile Money Details */}
-              <div className="bg-white p-4 md:p-6 rounded-xl border border-zinc-200/80 shadow-sm space-y-4">
-                <div className="flex items-center gap-2.5 pb-3 border-b border-zinc-100">
-                  <Smartphone size={20} className="text-zinc-700" />
-                  <div>
-                    <h3 className="text-xs md:text-sm font-bold uppercase tracking-wider text-slate-900">
-                      Option B: Mobile Money (MoMo)
-                    </h3>
-                    <p className="text-[10px] text-zinc-500">Supported on MTN Mobile Money and Telecel Cash</p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                  <div className="p-3 bg-zinc-50 rounded-lg">
-                    <span className="text-[10px] font-bold uppercase text-zinc-400 block">Merchant Name</span>
-                    <span className="font-bold text-zinc-800">{MOMO_DETAILS.merchantName}</span>
-                  </div>
-                  <div className="p-3 bg-zinc-50 rounded-lg flex items-center justify-between">
-                    <div>
-                      <span className="text-[10px] font-bold uppercase text-zinc-400 block">Merchant / Till ID</span>
-                      <span className="font-mono font-black text-sm text-zinc-900">
-                        {MOMO_DETAILS.merchantId}
-                      </span>
+                    <div className="py-3 flex justify-between items-center">
+                      <dt className="text-zinc-500 font-medium">Account Name</dt>
+                      <dd className="font-bold text-zinc-900">{BANK_DETAILS.accountName}</dd>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => copyToClipboard(MOMO_DETAILS.merchantId, "momo")}
-                      className="px-2.5 py-1.5 bg-white border border-zinc-200 text-zinc-700 hover:text-black hover:border-black rounded text-[11px] font-bold flex items-center gap-1 transition-colors"
-                    >
-                      {copiedKey === "momo" ? <Check size={12} className="text-green-600" /> : <Copy size={12} />}
-                      {copiedKey === "momo" ? "Copied" : "Copy"}
-                    </button>
-                  </div>
-                </div>
+                    <div className="py-3 flex justify-between items-center">
+                      <dt className="text-zinc-500 font-medium">Account Number</dt>
+                      <dd className="flex items-center gap-2">
+                        <span className="font-mono font-bold text-zinc-900 text-sm">
+                          {BANK_DETAILS.accountNumber}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => copyToClipboard(BANK_DETAILS.accountNumber.replace(/\s/g, ""), "bank")}
+                          className="p-1 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded transition-transform duration-160 ease-out active:scale-[0.94]"
+                          title="Copy account number"
+                        >
+                          {copiedKey === "bank" ? <Check size={13} className="text-emerald-600" /> : <Copy size={13} />}
+                        </button>
+                      </dd>
+                    </div>
+                    <div className="py-3 flex justify-between items-center">
+                      <dt className="text-zinc-500 font-medium">Branch</dt>
+                      <dd className="font-medium text-zinc-700">{BANK_DETAILS.branch}</dd>
+                    </div>
+                  </dl>
+                ) : (
+                  <dl className="divide-y divide-zinc-100 text-xs">
+                    <div className="py-3 flex justify-between items-center">
+                      <dt className="text-zinc-500 font-medium">Supported Networks</dt>
+                      <dd className="font-bold text-zinc-900">{MOMO_DETAILS.network}</dd>
+                    </div>
+                    <div className="py-3 flex justify-between items-center">
+                      <dt className="text-zinc-500 font-medium">Merchant Name</dt>
+                      <dd className="font-bold text-zinc-900">{MOMO_DETAILS.merchantName}</dd>
+                    </div>
+                    <div className="py-3 flex justify-between items-center">
+                      <dt className="text-zinc-500 font-medium">Merchant / Till ID</dt>
+                      <dd className="flex items-center gap-2">
+                        <span className="font-mono font-bold text-zinc-900 text-sm">
+                          {MOMO_DETAILS.merchantId}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => copyToClipboard(MOMO_DETAILS.merchantId, "momo")}
+                          className="p-1 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded transition-transform duration-160 ease-out active:scale-[0.94]"
+                          title="Copy merchant ID"
+                        >
+                          {copiedKey === "momo" ? <Check size={13} className="text-emerald-600" /> : <Copy size={13} />}
+                        </button>
+                      </dd>
+                    </div>
+                  </dl>
+                )}
               </div>
 
-              {/* 4. The WhatsApp Receipt Submission Box */}
-              <div className="p-5 md:p-6 bg-gradient-to-br from-emerald-50 to-green-50/40 border-2 border-emerald-500/40 rounded-xl space-y-4">
-                <div>
-                  <div className="flex items-center gap-2 text-emerald-800 font-bold text-sm md:text-base">
-                    <MessageSquare size={18} className="text-emerald-600" />
-                    <span>Submit Your Receipt via WhatsApp</span>
-                  </div>
-                  <p className="text-xs text-emerald-950/70 mt-1 leading-relaxed">
-                    Once you make the transfer, tap the button below. It will open WhatsApp with your booking reference pre-filled so you can simply attach your payment screenshot.
-                  </p>
-                </div>
-
-                {/* Primary WhatsApp Action Button */}
+              {/* 3. Action Block: Single-Focus WhatsApp & Confirmation */}
+              <div className="space-y-3 pt-1">
                 <a
                   href={whatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full py-4 px-6 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm md:text-base rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 transition-all hover:-translate-y-0.5 active:scale-[0.99]"
+                  className="w-full py-4 px-6 bg-zinc-900 hover:bg-black text-white font-bold text-sm rounded-lg flex items-center justify-center gap-2 shadow-sm transition-transform duration-160 ease-out active:scale-[0.98]"
                 >
-                  <MessageSquare size={18} />
-                  <span>Send Receipt on WhatsApp</span>
-                  <ExternalLink size={14} className="opacity-70" />
+                  Send Receipt via WhatsApp
                 </a>
 
-                {/* Secondary Button to advance to success screen */}
                 <Button
                   type="button"
                   onClick={handleConfirmedReceipt}
-                  className="w-full py-5 bg-zinc-900 hover:bg-black text-white font-bold text-xs md:text-sm rounded-xl transition-all cursor-pointer"
+                  variant="outline"
+                  className="w-full py-4 text-xs md:text-sm font-bold rounded-lg border-zinc-200 text-zinc-700 hover:text-zinc-900 hover:bg-zinc-50 transition-transform duration-160 ease-out active:scale-[0.98] cursor-pointer"
                 >
-                  I Have Sent the Receipt — View Confirmation
+                  I Have Sent the Receipt
                 </Button>
 
-                <p className="text-[10px] text-center text-emerald-900/60 font-medium">
-                  Our team verifies receipts within 1–2 hours during business hours. Your digital tenancy agreement and smart lock access instructions will be activated in your dashboard.
+                <p className="text-[10px] text-center text-zinc-400 font-medium leading-relaxed pt-1">
+                  Our team verifies receipts within 1–2 hours. Your digital agreement and access PIN will be activated on your dashboard.
                 </p>
               </div>
 
