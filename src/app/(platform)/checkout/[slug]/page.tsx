@@ -4,7 +4,8 @@ import { notFound, redirect } from "next/navigation";
 import { getSession, SessionPayload } from "@/lib/session";
 import { connectToDatabase } from "@/config/DbConnect";
 import User from "@/models/user";
-import Lease from "@/models/lease"; // 1. Import the Lease model
+import Lease from "@/models/lease";
+import Transaction from "@/models/transaction";
 import CheckoutWrapper from "@/components/checkout-wrapper";
 
 interface CheckoutPageProps {
@@ -29,22 +30,40 @@ export default async function CheckoutPage({ params }: CheckoutPageProps) {
   await connectToDatabase();
 
   // =====================================================================
-  // NEW: GUARD AGAINST DOUBLE PAYMENTS / ACTIVE SUBSCRIPTIONS
+  // GUARD AGAINST DOUBLE PAYMENTS: Only redirect if lease is already Active or Approved
   // =====================================================================
+  let existingPendingReservation = null;
+
   if (session && session.userId) {
-    const activeLease = await Lease.findOne({
+    const finalizedLease = await Lease.findOne({
       userId: session.userId,
       listingId: listing.id,
-      // Check for statuses that indicate they currently hold the property
-      status: { $in: ["Pending_Verification", "Active", "Approved"] },
+      status: { $in: ["Active", "Approved"] },
     })
       .lean()
       .exec();
 
-    // If an active lease is found, they shouldn't be on the checkout page
-    if (activeLease?.signatureAudit?.isSigned) {
-      // Redirect them to their leases dashboard (update this route to match your app's structure if needed)
+    // If an active/approved lease is found, they already own/rent the property
+    if (finalizedLease?.signatureAudit?.isSigned) {
       redirect("/user/dashboard");
+    }
+
+    // Check if the user already has an active pending bank transfer reservation
+    const pendingTx = await Transaction.findOne({
+      userId: session.userId,
+      listingId: listing.id,
+      status: "Pending",
+      channel: "bank",
+    })
+      .sort({ createdAt: -1 })
+      .lean()
+      .exec();
+
+    if (pendingTx) {
+      existingPendingReservation = {
+        reference: pendingTx.reference,
+        amount: pendingTx.amount,
+      };
     }
   }
 
@@ -59,11 +78,17 @@ export default async function CheckoutPage({ params }: CheckoutPageProps) {
         name: userRecord.name || "",
         email: userRecord.email || "",
         phone: userRecord.phone || "",
-        id: userRecord._id.toString(), // Added ID since your client config requires it for metadata
+        id: userRecord._id.toString(),
       };
     }
   }
 
-  // Pass both the listing and the user data down
-  return <CheckoutWrapper listing={listing} currentUser={currentUser} />;
+  // Pass listing, user, and any existing pending reservation down
+  return (
+    <CheckoutWrapper 
+      listing={listing} 
+      currentUser={currentUser} 
+      existingPendingReservation={existingPendingReservation} 
+    />
+  );
 }

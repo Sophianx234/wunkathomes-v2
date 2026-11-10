@@ -38,6 +38,7 @@ import { TenancyDocument } from "@/components/lease-document viewer"
 interface CheckoutClientProps {
   listing: IProperty | any;
   currentUser?: { id: string; name: string; email: string; phone: string } | null;
+  existingPendingReservation?: { reference: string; amount: number } | null;
 }
 
 const BANK_DETAILS = {
@@ -57,7 +58,11 @@ const MOMO_DETAILS = {
 
 const BUSINESS_WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_BUSINESS_WHATSAPP || "233241234567";
 
-export default function CheckoutClient({ listing, currentUser }: CheckoutClientProps) {
+export default function CheckoutClient({ 
+  listing, 
+  currentUser, 
+  existingPendingReservation 
+}: CheckoutClientProps) {
   const router = useRouter()
   
   // Setup default move-in date to tomorrow
@@ -86,8 +91,12 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
     : "Proceed to Payment Instructions";
 
   // --- State ---
-  const [step, setStep] = useState<"DETAILS" | "PAYMENT_INSTRUCTIONS">("DETAILS");
-  const [bookingReference, setBookingReference] = useState("");
+  const [step, setStep] = useState<"DETAILS" | "PAYMENT_INSTRUCTIONS">(
+    existingPendingReservation?.reference ? "PAYMENT_INSTRUCTIONS" : "DETAILS"
+  );
+  const [bookingReference, setBookingReference] = useState(
+    existingPendingReservation?.reference || ""
+  );
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
@@ -664,7 +673,7 @@ export default function CheckoutClient({ listing, currentUser }: CheckoutClientP
               </div>
               <div className="flex justify-between items-center text-xs md:text-sm font-medium text-zinc-600">
                 <span>Payment Processing Fee</span>
-                <span className="text-green-600 font-bold text-[10px] md:text-sm">GHS 0.00 (Direct Transfer)</span>
+                <span className="text-green-600 font-bold text-[10px] md:text-sm">GHS 0.00</span>
               </div>
             </div>
 

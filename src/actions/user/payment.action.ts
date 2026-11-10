@@ -461,6 +461,23 @@ export async function createManualBankPaymentAction(payload: {
       return { success: false, message: "This property is already rented or unavailable." };
     }
 
+    // Check if the user already has an active pending bank transfer reservation for this listing
+    const existingTx = await Transaction.findOne({
+      userId: session.userId,
+      listingId: validated.listingId,
+      status: "Pending",
+      channel: "bank",
+    }).lean();
+
+    if (existingTx) {
+      return {
+        success: true,
+        reference: existingTx.reference,
+        totalAmount: existingTx.amount,
+        message: "Existing reservation found.",
+      };
+    }
+
     const roomType = listing.roomType || "Empty";
     const basePrice = listing.price || 0;
     const isRent = listing.listingType !== "For_Sale";
@@ -552,7 +569,6 @@ export async function createManualBankPaymentAction(payload: {
     revalidatePath("/explore");
     revalidatePath("/user/dashboard");
     revalidatePath(`/properties/${listing.slug}`);
-    revalidatePath(`/checkout/${listing.slug}`);
 
     return {
       success: true,
