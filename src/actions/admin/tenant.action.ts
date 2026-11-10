@@ -110,31 +110,27 @@ export async function verifyAndOnboardTenantAction(formData: FormData) {
     const rawPhone = formData.get("phone") as string;
     const rawUserId = formData.get("userId") as string;
     const rawGhanaCardNumber = formData.get("ghanaCardNumber") as string;
+    const rawAmountPaid = formData.get("amountPaid") as string;
     const facePhotoFile = formData.get("facePhoto") as File | null;
-    const cardScanFile = formData.get("cardScan") as File | null;
     const removeFacePhoto = formData.get("removeFacePhoto") === "true" || formData.get("removeFace") === "true";
-    const removeCardScan = formData.get("removeCardScan") === "true" || formData.get("removeCard") === "true";
+
     if (!rawLeaseId || !rawUserId || !rawGhanaCardNumber || typeof rawGhanaCardNumber !== 'string') {
       throw new Error("Missing required fields or invalid Ghana Card Number.");
     }
 
-    // Process files if present
+    // Process files if present (Face photo only; no Ghana Card image scans to comply with NIA sanctions)
     const { uploadToCloudinary } = await import("@/lib/cloudinary");
     let facePhotoUrl = undefined;
-    let cardScanUrl = undefined;
 
     if (facePhotoFile && facePhotoFile.size > 0) {
       facePhotoUrl = await uploadToCloudinary(facePhotoFile, `wunkathomes/kyc/faces`);
-    }
-
-    if (cardScanFile && cardScanFile.size > 0) {
-      cardScanUrl = await uploadToCloudinary(cardScanFile, `wunkathomes/kyc/cards`);
     }
 
     await connectToDatabase();
     const Lease = (await import("@/models/lease")).default;
     const Listing = (await import("@/models/listing")).default;
     const SmartLock = (await import("@/models/smartlock")).default;
+    const Transaction = (await import("@/models/transaction")).default;
 
     const updatePayload: any = {
       kycStatus: 'Verified',
@@ -144,11 +140,8 @@ export async function verifyAndOnboardTenantAction(formData: FormData) {
     if (rawPhone) updatePayload.phone = rawPhone.trim();
     if (removeFacePhoto) updatePayload.idVerificationPhotoUrl = "";
     else if (facePhotoUrl) updatePayload.idVerificationPhotoUrl = facePhotoUrl;
-    
-    if (removeCardScan) updatePayload.idDocumentUrl = "";
-    else if (cardScanUrl) updatePayload.idDocumentUrl = cardScanUrl;
 
-    // 1. Mark User as Verified and Save the ID Number & Docs
+    // 1. Mark User as Verified and Save the ID Number & Face Photo
     const user = await User.findByIdAndUpdate(
       rawUserId, 
       updatePayload, 
@@ -160,12 +153,45 @@ export async function verifyAndOnboardTenantAction(formData: FormData) {
     const lease = await Lease.findById(rawLeaseId).populate("listingId");
     if (!lease || !lease.listingId) throw new Error("Lease or Listing not found.");
 
-    // 3. Activate Lease
+    // 3. Process & Verify Payment (Manual Bank/MoMo Amount Confirmation)
+    const confirmedAmount = rawAmountPaid ? parseFloat(rawAmountPaid) : undefined;
+    const pendingTx = await Transaction.findOne({
+      leaseId: rawLeaseId,
+      status: "Pending",
+    });
+
+    const finalPaidAmount = (confirmedAmount !== undefined && !isNaN(confirmedAmount) && confirmedAmount > 0)
+      ? confirmedAmount
+      : (pendingTx?.amount || lease.totalRentAmount || 0);
+
+    if (pendingTx) {
+      pendingTx.status = "Success";
+      pendingTx.amount = finalPaidAmount;
+      pendingTx.paidAt = new Date();
+      if (pendingTx.channel === "pending") pendingTx.channel = "bank";
+      await pendingTx.save();
+    } else {
+      await Transaction.create({
+        userId: rawUserId,
+        listingId: lease.listingId._id,
+        leaseId: lease._id,
+        amount: finalPaidAmount,
+        currency: "GHS",
+        paymentPurpose: "Upfront_Rent",
+        reference: `ADM-${Date.now().toString().slice(-6)}`,
+        channel: "bank",
+        status: "Success",
+        paidAt: new Date(),
+      });
+    }
+
+    // 4. Activate Lease
     lease.status = "Active";
+    lease.totalRentAmount = finalPaidAmount;
     await lease.save();
     await Listing.findByIdAndUpdate(lease.listingId._id, { status: "Rented" });
 
-    // 4. Tuya Smart Lock Provisioning
+    // 5. Tuya Smart Lock Provisioning
     let pinStr = "";
     const lock = await SmartLock.findOne({
       $or: [{ propertyId: lease.listingId.propertyId }, { listingId: lease.listingId._id }],
@@ -214,9 +240,7 @@ export async function updateTenantDetailsAction(formData: FormData) {
     const phone = formData.get("phone") as string;
     const ghanaCardNumber = formData.get("ghanaCardNumber") as string;
     const facePhotoFile = formData.get("facePhoto") as File | null;
-    const cardScanFile = formData.get("cardScan") as File | null;
     const removeFacePhoto = formData.get("removeFace") === "true" || formData.get("removeFacePhoto") === "true";
-    const removeCardScan = formData.get("removeCard") === "true" || formData.get("removeCardScan") === "true";
 
     if (!userId) return { success: false, error: "User ID is required." };
 
@@ -238,13 +262,6 @@ export async function updateTenantDetailsAction(formData: FormData) {
     } else if (facePhotoFile && facePhotoFile.size > 0) {
       const facePhotoUrl = await uploadToCloudinary(facePhotoFile, "wunkathomes/kyc/faces");
       user.idVerificationPhotoUrl = facePhotoUrl;
-    }
-
-    if (removeCardScan) {
-      user.idDocumentUrl = "";
-    } else if (cardScanFile && cardScanFile.size > 0) {
-      const cardScanUrl = await uploadToCloudinary(cardScanFile, "wunkathomes/kyc/cards");
-      user.idDocumentUrl = cardScanUrl;
     }
 
     await user.save();
@@ -293,6 +310,13 @@ export async function rejectTenantOnboardingAction(formData: FormData) {
     // Cancel Lease
     lease.status = "Cancelled";
     await lease.save();
+
+    // Mark pending transaction as Failed
+    const Transaction = (await import("@/models/transaction")).default;
+    await Transaction.updateMany(
+      { leaseId: leaseId, status: "Pending" },
+      { status: "Failed" }
+    );
 
     // Free up listing
     if (lease.listingId) {

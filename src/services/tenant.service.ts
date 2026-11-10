@@ -67,7 +67,19 @@ export async function getTenantsData() {
     
     // Calculate Checklist for Onboarding
     const successTxs = txs.filter((tx: any) => tx.status === 'Success');
-    const depositPaid = successTxs.some((tx: any) => ['Upfront_Rent', 'Booking_Deposit'].includes(tx.paymentPurpose));
+    const depositPaid = successTxs.some((tx: any) => ['Upfront_Rent', 'Booking_Deposit', 'Lease_Renewal'].includes(tx.paymentPurpose));
+
+    // Find latest pending transaction for manual transfer verification
+    const pendingTx = txs.find((tx: any) => tx.status === 'Pending') || null;
+    const pendingPayment = pendingTx ? {
+      id: pendingTx._id.toString(),
+      reference: pendingTx.reference || "N/A",
+      amount: pendingTx.amount || lease.totalRentAmount || 0,
+      channel: pendingTx.channel || "bank",
+      status: pendingTx.status || "Pending",
+      purpose: pendingTx.paymentPurpose || "Upfront_Rent",
+      date: new Date(pendingTx.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+    } : null;
     
     const ghanaCardVerified = lease.userId.kycStatus === 'Verified' 
       ? "Verified" 
@@ -138,6 +150,7 @@ export async function getTenantsData() {
         ghanaCardVerified,
         leaseSigned,
       },
+      pendingPayment,
       transactions: recentTxs.map((tx: any) => ({
         id: tx._id.toString(),
         date: new Date(tx.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
