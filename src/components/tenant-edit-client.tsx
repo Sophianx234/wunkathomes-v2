@@ -13,6 +13,7 @@ import {
   ArrowLeft02Icon,
   ViewIcon,
   CheckmarkBadge01Icon,
+  Shield02Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 
@@ -50,10 +51,8 @@ export default function TenantEditClient({ tenant }: { tenant: TenantRecord }) {
   const [editPhone, setEditPhone] = useState(tenant.user.phone || "");
   const [editGhanaCard, setEditGhanaCard] = useState(tenant.user.ghanaCardNumber === "Not Provided" ? "" : (tenant.user.ghanaCardNumber || ""));
   const [editFacePhoto, setEditFacePhoto] = useState<File | null>(null);
-  const [editCardScan, setEditCardScan] = useState<File | null>(null);
   
   const [removeExistingFace, setRemoveExistingFace] = useState(false);
-  const [removeExistingCard, setRemoveExistingCard] = useState(false);
   const [isSavingEdit, setIsSavingEdit] = useState(false);
 
   const saveEditedDetails = async () => {
@@ -62,21 +61,16 @@ export default function TenantEditClient({ tenant }: { tenant: TenantRecord }) {
       const formData = new FormData();
       formData.append("userId", tenant.user.id);
       formData.append("name", editName);
-          formData.append("phone", editPhone);
+      formData.append("phone", editPhone);
       formData.append("ghanaCardNumber", editGhanaCard);
       if (editFacePhoto) formData.append("facePhoto", editFacePhoto);
-      if (editCardScan) formData.append("cardScan", editCardScan);
-      
       formData.append("removeFace", String(removeExistingFace));
-      formData.append("removeCard", String(removeExistingCard));
 
       const res = await updateTenantDetailsAction(formData);
       if (res.success) {
         toast.success("Documents saved successfully.");
         setEditFacePhoto(null);
-        setEditCardScan(null);
         setRemoveExistingFace(false);
-        setRemoveExistingCard(false);
         router.refresh();
       } else {
         toast.error(res.error || "Failed to update documents.");
@@ -89,9 +83,12 @@ export default function TenantEditClient({ tenant }: { tenant: TenantRecord }) {
   };
 
   const hasFacePhoto = (tenant.user.securityPhotoUrl && !removeExistingFace) || !!editFacePhoto;
-  const hasCardScan = (tenant.user.ghanaCardUrl && !removeExistingCard) || !!editCardScan;
-  const hasGhanaCardNumber = editGhanaCard || tenant.user.ghanaCardNumber;
-  const needsDocs = tenant.user.kycStatus !== "Verified" && (!hasFacePhoto || !hasCardScan || !hasGhanaCardNumber || hasGhanaCardNumber === "Not Provided" || hasGhanaCardNumber.length < 15);
+  const hasGhanaCardNumber = Boolean(
+    (editGhanaCard || tenant.user.ghanaCardNumber) &&
+    (editGhanaCard || tenant.user.ghanaCardNumber) !== "Not Provided" &&
+    (editGhanaCard || tenant.user.ghanaCardNumber)!.length >= 10
+  );
+  const needsDocs = tenant.user.kycStatus !== "Verified" && (!hasFacePhoto || !hasGhanaCardNumber);
 
   if (isViewingDocument && tenant) {
     return (
@@ -251,45 +248,36 @@ export default function TenantEditClient({ tenant }: { tenant: TenantRecord }) {
                   )}
                 </div>
                 
-                {/* Card Scan */}
-                <div className="flex-1 p-4 rounded-lg border border-zinc-200/60 bg-zinc-50/50 flex flex-col">
-                  <div className="flex justify-between items-center mb-3">
-                    <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest">Ghana Card Scan</p>
-                    {(tenant.user.ghanaCardUrl || editCardScan) && (
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        className="h-6 px-2 text-[10px] text-zinc-500 hover:text-zinc-600 hover:bg-zinc-50"
-                        onClick={() => {
-                          setEditCardScan(null);
-                          if (tenant.user.ghanaCardUrl) setRemoveExistingCard(true);
-                        }}
-                      >
-                        Remove
-                      </Button>
-                    )}
+                {/* NIA In-Person Check Notice */}
+                <div className="flex-1 p-4 rounded-lg border border-zinc-200/60 bg-zinc-50/50 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest">National ID Check</p>
+                      {editGhanaCard && editGhanaCard.length >= 10 ? (
+                        <span className="text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
+                          <HugeiconsIcon icon={CheckmarkCircle01Icon} size={12} /> Ready
+                        </span>
+                      ) : (
+                        <span className="text-amber-700 bg-amber-50 border border-amber-200/60 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">
+                          Missing ID
+                        </span>
+                      )}
+                    </div>
+                    
+                    <div className="p-3.5 bg-white rounded-lg border border-zinc-200/80 mb-3 space-y-1">
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400 block">ID Number on Record</span>
+                      <p className="font-mono text-base font-semibold text-zinc-900 tracking-wider">
+                        {editGhanaCard || "Not Provided"}
+                      </p>
+                    </div>
                   </div>
-                  
-                  {!editCardScan && (!tenant.user.ghanaCardUrl || removeExistingCard) ? (
-                    <div className="flex-1 flex flex-col justify-center items-center p-6 border-2 border-dashed border-zinc-300 rounded-lg bg-white hover:bg-zinc-50 transition-colors relative cursor-pointer group min-h-[160px]">
-                      <HugeiconsIcon icon={Alert01Icon} size={24} className="text-zinc-400 group-hover:text-zinc-500 mb-3" />
-                      <p className="text-xs font-medium text-zinc-500 text-center">Tap to Scan ID</p>
-                      <Input 
-                        type="file" 
-                        accept="image/*" 
-                        capture="environment"
-                        onChange={(e) => setEditCardScan(e.target.files?.[0] || null)}
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
-                      />
-                    </div>
-                  ) : (
-                    <div className="h-48 w-full bg-zinc-50 rounded-md border border-zinc-200/60 overflow-hidden cursor-pointer hover:opacity-90 transition-opacity relative group" onClick={() => setExpandedImage(editCardScan ? URL.createObjectURL(editCardScan) : tenant.user.ghanaCardUrl!)}>
-                      <img src={editCardScan ? URL.createObjectURL(editCardScan) : tenant.user.ghanaCardUrl} alt="Ghana Card Scan" className="w-full h-full object-contain" />
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <span className="text-white text-xs font-medium bg-black/60 px-3 py-1.5 rounded-md backdrop-blur-sm">Click to Enlarge</span>
-                      </div>
-                    </div>
-                  )}
+
+                  <div className="p-3 bg-zinc-100/70 rounded-lg border border-zinc-200/60 flex items-start gap-2.5">
+                    <HugeiconsIcon icon={Shield02Icon} size={16} className="text-zinc-600 shrink-0 mt-0.5" />
+                    <p className="text-[11px] leading-relaxed text-zinc-600">
+                      <strong className="text-zinc-900 font-semibold">NIA L.I. 2523 Directive:</strong> Institutions in Ghana are prohibited from scanning, photocopying, or retaining physical card images. Inspect the card directly and confirm the National ID number.
+                    </p>
+                  </div>
                 </div>
               </div>
 

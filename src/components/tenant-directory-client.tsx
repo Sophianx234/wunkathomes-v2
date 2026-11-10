@@ -64,7 +64,7 @@ import { formatCurrency } from "./transactions-client";
 import { DocumentViewer } from "./ui/document-viewer";
 import { TenancyDocumentPDFViewer } from "./tenancy-document-pdf-viewer";
 
-import { toggleAccountStatus, verifyAndOnboardTenantAction, updateTenantDetailsAction, processMoveOutAction } from "@/actions/admin/tenant.action";
+import { toggleAccountStatus, verifyAndOnboardTenantAction, updateTenantDetailsAction, processMoveOutAction, rejectTenantOnboardingAction } from "@/actions/admin/tenant.action";
 import {
   activateLeaseAndGeneratePin,
   approveTenantPaperwork,
@@ -79,7 +79,7 @@ import {
 
 // --- TYPES ---
 type TabStage = "all" | "pending";
-type ActionType = "approve" | "reject" | "pin" | "suspend" | "restore" | "remoteUnlock" | "vendorPin" | "resetPin" | "revokePin" | "verifyAndOnboard" | "processMoveOut";
+type ActionType = "approve" | "reject" | "pin" | "suspend" | "restore" | "remoteUnlock" | "vendorPin" | "resetPin" | "revokePin" | "verifyAndOnboard" | "rejectOnboarding" | "processMoveOut";
 
 export interface TenantRecord {
   id: string;
@@ -126,6 +126,15 @@ export interface TenantRecord {
     ghanaCardVerified: "Pending" | "Verified" | "Not_Uploaded" | "Rejected";
     leaseSigned: "Pending" | "Signed";
   };
+  pendingPayment?: {
+    id: string;
+    reference: string;
+    amount: number;
+    channel: string;
+    status: string;
+    purpose?: string;
+    date: string;
+  } | null;
   transactions: Array<{
     id: string;
     date: string;
@@ -209,6 +218,13 @@ export default function TenantDirectoryClient({
   const [isPending, startTransition] = useTransition();
 
   const [unlockCountdown, setUnlockCountdown] = useState<number | null>(null);
+  const [confirmedAmountPaid, setConfirmedAmountPaid] = useState<number | "">("");
+
+  useEffect(() => {
+    if (selectedTenant) {
+      setConfirmedAmountPaid(selectedTenant.pendingPayment?.amount || selectedTenant.lease.totalRentAmount || 0);
+    }
+  }, [selectedTenantId]);
 
   useEffect(() => {
     if (unlockCountdown !== null && unlockCountdown > 0) {
@@ -266,7 +282,24 @@ export default function TenantDirectoryClient({
           formData.append("leaseId", selectedTenant.id);
           formData.append("userId", selectedTenant.user.id);
           formData.append("ghanaCardNumber", selectedTenant.user.ghanaCardNumber || "");
+          const finalAmount = confirmedAmountPaid !== "" && Number(confirmedAmountPaid) > 0 
+            ? Number(confirmedAmountPaid) 
+            : (selectedTenant.pendingPayment?.amount || selectedTenant.lease.totalRentAmount || 0);
+          formData.append("amountPaid", String(finalAmount));
           result = await verifyAndOnboardTenantAction(formData);
+          if (result?.success) {
+            router.refresh();
+          }
+        } else if (confirmAction === "rejectOnboarding") {
+          const formData = new FormData();
+          formData.append("leaseId", selectedTenant.id);
+          formData.append("userId", selectedTenant.user.id);
+          formData.append("reason", "Payment or Identity verification unconfirmed");
+          result = await rejectTenantOnboardingAction(formData);
+          if (result?.success) {
+            setSelectedTenantId(null);
+            router.refresh();
+          }
         } else if (confirmAction === "approve") {
         result = await approveTenantPaperwork(selectedTenant.id, selectedTenant.user.id);
       } else if (confirmAction === "reject") {
@@ -349,10 +382,16 @@ export default function TenantDirectoryClient({
       confirmClass: "bg-black text-white hover:bg-zinc-800",
     },
     verifyAndOnboard: {
-      title: "Verify Identity & Grant Access",
-      description: "You confirm that you have physically verified the tenant's Ghana Card in the office. This will provision the Tuya smart lock, change the lease status to Active, and instantly email the access credentials.",
+      title: "Verify Payment, Identity & Grant Access",
+      description: "Confirm the received bank/MoMo payment and that you have physically verified the tenant's Ghana Card in person. This will activate the lease, record the transaction, and provision Tuya smart lock credentials.",
       confirmText: "Verify & Grant Access",
-      confirmClass: "bg-black text-white hover:bg-zinc-800",
+      confirmClass: "bg-zinc-900 text-white hover:bg-zinc-800 duration-160 ease-out active:scale-[0.98]",
+    },
+    rejectOnboarding: {
+      title: "Reject Onboarding & Cancel Lease",
+      description: "Are you sure you want to reject this onboarding? This will cancel the pending lease, mark any pending transaction as failed, free up the listing unit, and notify the tenant.",
+      confirmText: "Reject & Cancel Lease",
+      confirmClass: "bg-rose-600 text-white hover:bg-rose-700 duration-160 ease-out active:scale-[0.98]",
     },
     pin: {
       title: "Activate Lease & Generate PIN",
@@ -700,44 +739,51 @@ export default function TenantDirectoryClient({
                     <div className="space-y-3">
                       
 
-                      {/* ID Card */}
-                      <div className="flex items-center justify-between p-3.5 rounded-lg border border-zinc-200/60 bg-white">
-                        <div className="flex items-center gap-4 w-full">
-                          
-                          <div className="w-full">
-                            <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest mb-0.5">National ID</p>
-                            <p className="font-mono text-[13px] font-medium text-zinc-900 tracking-tight">{selectedTenant.user.ghanaCardNumber || "Not Provided"}</p>
-                          </div>
-                        </div>
-                      </div>
-  
-                      {/* Identity Photos */}
+                      {/* Identity Verification (NIA Compliant) */}
                       <div className="flex flex-col sm:flex-row gap-3 mb-6 mt-3">
                         <div className="flex-1 p-3.5 rounded-lg border border-zinc-200/60 bg-white flex flex-col">
-                          <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest mb-2.5">Identity Photo</p>
+                          <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest mb-2.5">Security Photo (Face)</p>
                           {selectedTenant.user.securityPhotoUrl ? (
-                            <div className="h-40 w-full bg-zinc-50 rounded-md border border-zinc-200/60 overflow-hidden cursor-pointer hover:opacity-90" onClick={() => setExpandedImage(selectedTenant.user.securityPhotoUrl!)}>
+                            <div className="h-40 w-full bg-zinc-50 rounded-md border border-zinc-200/60 overflow-hidden cursor-pointer hover:opacity-90 transition-opacity" onClick={() => setExpandedImage(selectedTenant.user.securityPhotoUrl!)}>
                               <img src={selectedTenant.user.securityPhotoUrl} alt="Face" className="w-full h-full object-contain" />
                             </div>
                           ) : (
                             <div className="h-40 w-full flex flex-col items-center justify-center bg-zinc-50 rounded-md border border-zinc-200/60 border-dashed">
                               <HugeiconsIcon icon={Alert01Icon} size={20} className="text-zinc-400 mb-2" />
-                              <p className="text-[10px] font-medium text-zinc-500">Not Uploaded</p>
+                              <p className="text-[10px] font-medium text-zinc-500">Selfie Not Uploaded</p>
                             </div>
                           )}
                         </div>
-                        <div className="flex-1 p-3.5 rounded-lg border border-zinc-200/60 bg-white flex flex-col">
-                          <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest mb-2.5">Ghana Card </p>
-                          {selectedTenant.user.ghanaCardUrl ? (
-                            <div className="h-40 w-full bg-zinc-50 rounded-md border border-zinc-200/60 overflow-hidden cursor-pointer hover:opacity-90" onClick={() => setExpandedImage(selectedTenant.user.ghanaCardUrl!)}>
-                              <img src={selectedTenant.user.ghanaCardUrl} alt="Card Scan" className="w-full h-full object-cover" />
+                        <div className="flex-1 p-3.5 rounded-lg border border-zinc-200/60 bg-white flex flex-col justify-between">
+                          <div>
+                            <div className="flex items-center justify-between mb-2.5">
+                              <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest">National ID (Ghana Card)</p>
+                              {selectedTenant.user.ghanaCardNumber && selectedTenant.user.ghanaCardNumber !== "Not Provided" ? (
+                                <Badge variant="outline" className="text-[10px] font-medium text-emerald-700 bg-emerald-50 border-emerald-200/60 px-2 py-0">
+                                  Inspected
+                                </Badge>
+                              ) : (
+                                <Badge variant="outline" className="text-[10px] font-medium text-amber-700 bg-amber-50 border-amber-200/60 px-2 py-0">
+                                  Missing
+                                </Badge>
+                              )}
                             </div>
-                          ) : (
-                            <div className="h-40 w-full flex flex-col items-center justify-center bg-zinc-50 rounded-md border border-zinc-200/60 border-dashed">
-                              <HugeiconsIcon icon={Alert01Icon} size={20} className="text-zinc-400 mb-2" />
-                              <p className="text-[10px] font-medium text-zinc-500">Not Uploaded</p>
+                            <div className="p-3 bg-zinc-50 rounded-md border border-zinc-200/60 mb-3">
+                              <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400 block mb-0.5">ID Number</span>
+                              <p className="font-mono text-sm font-semibold text-zinc-900 tracking-wider">
+                                {selectedTenant.user.ghanaCardNumber || "Not Provided"}
+                              </p>
                             </div>
-                          )}
+                          </div>
+
+                          <div className="p-2.5 rounded-md bg-zinc-50/70 border border-zinc-200/50">
+                            <div className="flex items-start gap-2">
+                              <HugeiconsIcon icon={Shield02Icon} size={14} className="text-zinc-500 shrink-0 mt-0.5" />
+                              <p className="text-[10px] leading-relaxed text-zinc-500">
+                                <strong className="text-zinc-700 font-medium">NIA L.I. 2523 Compliant:</strong> Card verified in person. Physical card scans are not stored pursuant to National Identification Authority regulations.
+                              </p>
+                            </div>
+                          </div>
                         </div>
                       </div>
                       
@@ -772,53 +818,132 @@ export default function TenantDirectoryClient({
                 {/* DYNAMIC SECTIONS BASED ON STAGE */}
                 {selectedTenant.pipelineStage === "pending" && (
                   <section>
-                    <div className="p-5 rounded-lg border border-zinc-200/60 bg-zinc-50/50">
-                      <p className="text-[13px] text-zinc-600 leading-relaxed mb-5">
-                        <strong className="text-zinc-900 block mb-1">Final Review & Identity Verification</strong>
-                        Please review the signed Tenancy Agreement below. Ensure the tenant is physically present in the office with their original Ghana Card. Verify their identity to activate the lease and provision digital access for <span className="font-semibold text-zinc-900">{selectedTenant.lease.propertyName} ({selectedTenant.lease.unitNumber})</span>.
-                      </p>
+                    <div className="p-5 rounded-lg border border-zinc-200/60 bg-zinc-50/50 space-y-4">
+                      <div>
+                        <strong className="text-[13px] font-semibold text-zinc-900 block mb-1">Payment & Onboarding Verification</strong>
+                        <p className="text-[12px] text-zinc-500 leading-relaxed">
+                          Verify the tenant's transaction (Bank Transfer / MoMo) and inspect their original Ghana Card. Approving will activate the lease, record the transaction, and provision Tuya smart lock access for <span className="font-semibold text-zinc-900">{selectedTenant.lease.propertyName} ({selectedTenant.lease.unitNumber})</span>.
+                        </p>
+                      </div>
+
+                      {/* Payment Verification Box */}
+                      <div className="p-4 rounded-lg border border-zinc-200/80 bg-white space-y-3">
+                        <div className="flex items-center justify-between pb-2.5 border-b border-zinc-100">
+                          <div>
+                            <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400 block">Payment Channel</span>
+                            <span className="text-xs font-semibold text-zinc-800 capitalize">
+                              {selectedTenant.pendingPayment?.channel === "mobile_money" ? "Mobile Money" : "Bank Transfer"}
+                            </span>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400 block">Expected Rent</span>
+                            <span className="text-xs font-semibold font-tabular-nums text-zinc-900">
+                              {formatCurrency(selectedTenant.lease.totalRentAmount)}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-zinc-500 text-[11px]">Booking Reference</span>
+                          <span className="font-mono font-medium text-zinc-800 select-all">
+                            {selectedTenant.pendingPayment?.reference || "Pending"}
+                          </span>
+                        </div>
+
+                        {/* Confirmed Amount Input */}
+                        <div className="pt-2 border-t border-zinc-100 space-y-1.5">
+                          <Label htmlFor="tenantDirAmount" className="text-[11px] font-semibold text-zinc-700">
+                            Confirmed Amount Received (GHS) <span className="text-rose-500">*</span>
+                          </Label>
+                          <div className="relative">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-zinc-400">GH₵</span>
+                            <Input
+                              id="tenantDirAmount"
+                              type="number"
+                              step="0.01"
+                              min="1"
+                              value={confirmedAmountPaid}
+                              onChange={(e) => setConfirmedAmountPaid(e.target.value === "" ? "" : Number(e.target.value))}
+                              placeholder="0.00"
+                              className="pl-11 h-9 text-xs font-mono font-tabular-nums rounded-lg bg-zinc-50/50 focus-visible:ring-1 focus-visible:ring-zinc-900"
+                            />
+                          </div>
+                          <p className="text-[10px] text-zinc-400">
+                            Adjust if the tenant paid a different amount or deposit.
+                          </p>
+                        </div>
+                      </div>
                       
-                      <div className="mb-6">
                       {/* Lease Agreement */}
-                    <div className="flex items-center justify-between p-3.5 rounded-lg border border-zinc-200/60 bg-white">
-                      <div className="flex items-center gap-4">
-                        <div className="h-12 w-12 bg-zinc-50 rounded-md border border-zinc-200/60 flex items-center justify-center">
-                          <HugeiconsIcon icon={FileDownloadIcon} size={18} className="text-zinc-400" />
+                      <div className="flex items-center justify-between p-3.5 rounded-lg border border-zinc-200/60 bg-white">
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 bg-zinc-50 rounded-md border border-zinc-200/60 flex items-center justify-center">
+                            <HugeiconsIcon icon={FileDownloadIcon} size={16} className="text-zinc-400" />
+                          </div>
+                          <div>
+                            <p className="text-[10px] font-semibold text-zinc-500 uppercase tracking-widest mb-0.5">Tenancy Agreement</p>
+                            <button
+                              onClick={() => setIsViewingDocument(true)}
+                              disabled={selectedTenant.checklist.leaseSigned !== "Signed"}
+                              className="text-xs font-medium text-zinc-900 hover:text-zinc-700 underline underline-offset-2 disabled:no-underline disabled:opacity-50 disabled:pointer-events-none"
+                            >
+                              {selectedTenant.checklist.leaseSigned === "Signed" ? "View Signed Agreement" : "Awaiting Tenant Signature"}
+                            </button>
+                          </div>
                         </div>
                         <div>
-                          <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest mb-1">Tenancy Agreement</p>
-                          <button
-                            onClick={() => setIsViewingDocument(true)}
-                            disabled={selectedTenant.checklist.leaseSigned !== "Signed"}
-                            className="text-xs font-medium text-zinc-900 hover:text-zinc-700 bg-zinc-100 hover:bg-zinc-200/80 px-3 py-1.5 rounded-lg active:scale-95 transition-all disabled:opacity-50 disabled:pointer-events-none shadow-2xs"
-                          >
-                            {selectedTenant.checklist.leaseSigned === "Signed" ? "View Signed Agreement" : "Awaiting Tenant Signature"}
-                          </button>
+                          {selectedTenant.checklist.leaseSigned === "Signed" ? (
+                            <HugeiconsIcon icon={CheckmarkCircle01Icon} size={18} className="text-emerald-600" />
+                          ) : (
+                            <HugeiconsIcon icon={Clock01Icon} size={18} className="text-zinc-400" />
+                          )}
                         </div>
                       </div>
-                      <div>{selectedTenant.checklist.leaseSigned === "Signed" ? <HugeiconsIcon icon={CheckmarkCircle01Icon} size={18} /> : <HugeiconsIcon icon={Clock01Icon} size={18} />}</div>
-                    </div>
-                      </div>
-                      {(() => {
-                        const needsDocs = selectedTenant.user.kycStatus !== "Verified" && (!selectedTenant.user.ghanaCardUrl || !selectedTenant.user.securityPhotoUrl);
-                        return (
-                          <div className="flex flex-col sm:flex-row gap-3">
-                            {!needsDocs && (
-                              <Button 
-                                className="flex-1 h-10 bg-zinc-900 text-white hover:bg-zinc-800 text-[13px] font-medium rounded-lg shadow-sm" 
-                                onClick={() => requestAction("verifyAndOnboard")}
-                              >
-                                Verify & Grant Access
-                              </Button>
-                            )}
 
-                            <Button 
-                              variant={needsDocs ? "default" : "outline"}
-                              className={`flex-1 sm:flex-none sm:w-auto h-10 text-[13px] font-medium rounded-lg shadow-sm ${needsDocs ? "bg-zinc-900 text-white hover:bg-zinc-800 border-transparent" : "bg-white border-zinc-200/80 hover:bg-zinc-50 text-zinc-700"}`} 
-                              onClick={() => router.push(`/admin/manage/tenants/${selectedTenant.id}/${selectedTenant.pipelineStage === "pending" ? "onboarding" : "edit"}`)}
-                            >
-                              {needsDocs ? "Capture ID Documents" : "Update Documents"}
-                            </Button>
+                      {/* Action Buttons: Verify & Grant Access, Reject, or Capture ID */}
+                      {(() => {
+                        const hasFacePhoto = Boolean(selectedTenant.user.securityPhotoUrl);
+                        const hasGhanaCardNumber = Boolean(
+                          selectedTenant.user.ghanaCardNumber &&
+                          selectedTenant.user.ghanaCardNumber !== "Not Provided" &&
+                          selectedTenant.user.ghanaCardNumber.length >= 10
+                        );
+                        const needsDocs = selectedTenant.user.kycStatus !== "Verified" && (!hasFacePhoto || !hasGhanaCardNumber);
+                        return (
+                          <div className="flex flex-col sm:flex-row gap-2.5 pt-1">
+                            {!needsDocs ? (
+                              <>
+                                <Button 
+                                  className="flex-1 h-10 bg-zinc-900 hover:bg-zinc-800 text-white text-[13px] font-medium rounded-lg duration-160 ease-out active:scale-[0.98] transition-all shadow-sm" 
+                                  onClick={() => requestAction("verifyAndOnboard")}
+                                >
+                                  Verify Payment & Grant Access
+                                </Button>
+                                <Button 
+                                  variant="outline"
+                                  className="h-10 border-rose-200 text-rose-600 hover:bg-rose-50 hover:text-rose-700 text-[13px] font-medium rounded-lg duration-160 ease-out active:scale-[0.98] transition-all" 
+                                  onClick={() => requestAction("rejectOnboarding")}
+                                >
+                                  Reject
+                                </Button>
+                              </>
+                            ) : (
+                              <div className="flex flex-col sm:flex-row gap-2.5 w-full">
+                                <Button 
+                                  className="flex-1 h-10 bg-zinc-900 hover:bg-zinc-800 text-white text-[13px] font-medium rounded-lg duration-160 ease-out active:scale-[0.98] transition-all shadow-sm" 
+                                  onClick={() => router.push(`/admin/manage/tenants/${selectedTenant.id}/onboarding`)}
+                                >
+                                  Capture ID & Details
+                                </Button>
+                                <Button 
+                                  variant="outline"
+                                  className="h-10 border-rose-200 text-rose-600 hover:bg-rose-50 hover:text-rose-700 text-[13px] font-medium rounded-lg duration-160 ease-out active:scale-[0.98] transition-all" 
+                                  onClick={() => requestAction("rejectOnboarding")}
+                                >
+                                  Reject
+                                </Button>
+                              </div>
+                            )}
                           </div>
                         );
                       })()}
@@ -1059,6 +1184,52 @@ export default function TenantDirectoryClient({
                         <SelectItem value="48">48 Hours (2 Days)</SelectItem>
                       </SelectContent>
                     </Select>
+                  </div>
+                </div>
+              )}
+
+              {confirmAction === "verifyAndOnboard" && (
+                <div className="mt-4 space-y-3">
+                  <div className="p-3.5 rounded-lg border border-zinc-200/80 bg-zinc-50/70 space-y-2">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-zinc-500">Booking Reference</span>
+                      <span className="font-mono font-medium text-zinc-900">{selectedTenant?.pendingPayment?.reference || "Pending"}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-zinc-500">Payment Channel</span>
+                      <span className="capitalize font-medium text-zinc-900">
+                        {selectedTenant?.pendingPayment?.channel === "mobile_money" ? "Mobile Money" : "Bank Transfer"}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-zinc-500">Expected Total Rent</span>
+                      <span className="font-semibold text-zinc-900 font-tabular-nums">
+                        {formatCurrency(selectedTenant?.lease.totalRentAmount || 0)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="dialogConfirmedAmount" className="text-[12px] font-semibold text-zinc-700">
+                      Confirmed Amount Received (GHS) <span className="text-rose-500">*</span>
+                    </Label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-zinc-400">GH₵</span>
+                      <Input
+                        id="dialogConfirmedAmount"
+                        type="number"
+                        step="0.01"
+                        min="1"
+                        value={confirmedAmountPaid}
+                        onChange={(e) => setConfirmedAmountPaid(e.target.value === "" ? "" : Number(e.target.value))}
+                        placeholder="0.00"
+                        className="pl-11 h-10 text-[13px] font-mono rounded-lg border-zinc-200/80 focus-visible:ring-1 focus-visible:ring-zinc-900 font-tabular-nums"
+                        disabled={isPending}
+                      />
+                    </div>
+                    <p className="text-[11px] text-zinc-500">
+                      Enter the exact amount confirmed from the WhatsApp receipt or bank statement.
+                    </p>
                   </div>
                 </div>
               )}

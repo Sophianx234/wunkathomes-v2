@@ -13,6 +13,7 @@ import {
   ArrowLeft02Icon,
   ViewIcon,
   CheckmarkBadge01Icon,
+  Shield02Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 
@@ -31,6 +32,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
+import { formatCurrency } from "./transactions-client";
 import { DocumentViewer } from "@/components/ui/document-viewer";
 import { TenancyDocumentPDFViewer } from "./tenancy-document-pdf-viewer";
 import { verifyAndOnboardTenantAction, updateTenantDetailsAction, rejectTenantOnboardingAction } from "@/actions/admin/tenant.action";
@@ -49,15 +51,18 @@ export default function TenantOnboardClient({ tenant }: { tenant: TenantRecord }
   const [expandedImage, setExpandedImage] = useState<string | null>(null);
   const [isViewingDocument, setIsViewingDocument] = useState(false);
 
+  // Payment Verification State
+  const [amountPaid, setAmountPaid] = useState<number | "">(
+    tenant.pendingPayment?.amount || tenant.lease.totalRentAmount || 0
+  );
+
   // Identity Form State (Always visible)
   const [editName, setEditName] = useState(tenant.user.name || "");
   const [editPhone, setEditPhone] = useState(tenant.user.phone || "");
   const [editGhanaCard, setEditGhanaCard] = useState(tenant.user.ghanaCardNumber === "Not Provided" ? "" : (tenant.user.ghanaCardNumber || ""));
   const [editFacePhoto, setEditFacePhoto] = useState<File | null>(null);
-  const [editCardScan, setEditCardScan] = useState<File | null>(null);
   
   const [removeExistingFace, setRemoveExistingFace] = useState(false);
-  const [removeExistingCard, setRemoveExistingCard] = useState(false);
   const [isSavingEdit, setIsSavingEdit] = useState(false);
 
   const executeConfirmedAction = () => {
@@ -71,11 +76,15 @@ export default function TenantOnboardClient({ tenant }: { tenant: TenantRecord }
           formData.append("name", editName);
           formData.append("phone", editPhone);
           if (editFacePhoto) formData.append("facePhoto", editFacePhoto);
-          if (editCardScan) formData.append("cardScan", editCardScan);
           formData.append("removeFace", String(removeExistingFace));
-          formData.append("removeCard", String(removeExistingCard));
           formData.append("userId", tenant.user.id);
           formData.append("ghanaCardNumber", editGhanaCard || tenant.user.ghanaCardNumber || "");
+          
+          // Amount paid confirmed by admin
+          const finalAmount = amountPaid !== "" && Number(amountPaid) > 0 
+            ? Number(amountPaid) 
+            : (tenant.pendingPayment?.amount || tenant.lease.totalRentAmount || 0);
+          formData.append("amountPaid", String(finalAmount));
           
           const res = await verifyAndOnboardTenantAction(formData);
           if (res.success) {
@@ -123,24 +132,19 @@ export default function TenantOnboardClient({ tenant }: { tenant: TenantRecord }
       const formData = new FormData();
       formData.append("userId", tenant.user.id);
       formData.append("name", editName);
-          formData.append("phone", editPhone);
+      formData.append("phone", editPhone);
       formData.append("ghanaCardNumber", editGhanaCard);
       if (editFacePhoto) formData.append("facePhoto", editFacePhoto);
-      if (editCardScan) formData.append("cardScan", editCardScan);
-      
       formData.append("removeFace", String(removeExistingFace));
-      formData.append("removeCard", String(removeExistingCard));
 
       const res = await updateTenantDetailsAction(formData);
       if (res.success) {
-        toast.success("Documents saved successfully.");
+        toast.success("Identity details saved successfully.");
         setEditFacePhoto(null);
-        setEditCardScan(null);
         setRemoveExistingFace(false);
-        setRemoveExistingCard(false);
         router.refresh();
       } else {
-        toast.error(res.error || "Failed to update documents.");
+        toast.error(res.error || "Failed to update details.");
       }
     } catch (e) {
       toast.error("Failed to update details.");
@@ -150,9 +154,12 @@ export default function TenantOnboardClient({ tenant }: { tenant: TenantRecord }
   };
 
   const hasFacePhoto = (tenant.user.securityPhotoUrl && !removeExistingFace) || !!editFacePhoto;
-  const hasCardScan = (tenant.user.ghanaCardUrl && !removeExistingCard) || !!editCardScan;
-  const hasGhanaCardNumber = editGhanaCard || tenant.user.ghanaCardNumber;
-  const needsDocs = tenant.user.kycStatus !== "Verified" && (!hasFacePhoto || !hasCardScan || !hasGhanaCardNumber || hasGhanaCardNumber === "Not Provided" || hasGhanaCardNumber.length < 15);
+  const hasGhanaCardNumber = Boolean(
+    (editGhanaCard || tenant.user.ghanaCardNumber) &&
+    (editGhanaCard || tenant.user.ghanaCardNumber) !== "Not Provided" &&
+    (editGhanaCard || tenant.user.ghanaCardNumber)!.length >= 10
+  );
+  const needsDocs = tenant.user.kycStatus !== "Verified" && (!hasFacePhoto || !hasGhanaCardNumber);
 
   if (isViewingDocument && tenant) {
     return (
@@ -205,7 +212,7 @@ export default function TenantOnboardClient({ tenant }: { tenant: TenantRecord }
               </div>
               <div className="h-px bg-zinc-200 flex-1"></div>
               <div className={`h-8 flex items-center justify-center rounded-full ${tenant.checklist.ghanaCardVerified === "Verified" ? "bg-emerald-50 text-emerald-700 border-emerald-200/60" : "bg-white text-zinc-500 border-zinc-200/60 "} px-4 text-[11px] font-bold border`}>
-                {tenant.checklist.ghanaCardVerified === "Verified" && <HugeiconsIcon icon={CheckmarkCircle01Icon} size={14} className="mr-1.5" />} ID Uploaded
+                {tenant.checklist.ghanaCardVerified === "Verified" && <HugeiconsIcon icon={CheckmarkCircle01Icon} size={14} className="mr-1.5" />} Physical ID Verified (NIA)
               </div>
               <div className="h-px bg-zinc-200 flex-1"></div>
               <div className="h-8 flex items-center justify-center rounded-full bg-zinc-50 text-zinc-400 px-4 text-[11px] font-bold border border-zinc-200/60">
@@ -216,11 +223,11 @@ export default function TenantOnboardClient({ tenant }: { tenant: TenantRecord }
         </div>
 
         {/* Card 2: Identity & Documents */}
-        <div className="bg-white border border-zinc-200/80  rounded-xl p-6 md:p-8">
+        <div className="bg-white border border-zinc-200/80 rounded-xl p-6 md:p-8">
           <section>
             <div className="mb-6">
-              <h3 className="text-base font-bold text-zinc-900 tracking-tight mb-1"> Identity Capture & Documents</h3>
-              <p className="text-[14px] text-zinc-500">Capture or update the tenant's physical identification documents. These are required before granting access.</p>
+              <h3 className="text-base font-bold text-zinc-900 tracking-tight mb-1">Identity Verification (NIA Compliant)</h3>
+              <p className="text-[14px] text-zinc-500">Inspect the tenant's original Ghana Card in-person and record their live security selfie. Physical card images are not stored per NIA regulations.</p>
             </div>
             
             <div className="space-y-6">
@@ -247,7 +254,7 @@ export default function TenantOnboardClient({ tenant }: { tenant: TenantRecord }
                 <div className="p-4 rounded-lg border border-zinc-200/60 bg-zinc-50/50">
                   <label className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest mb-2 flex items-center justify-between">
                     <span>National ID Number</span>
-                    {tenant.user.ghanaCardNumber && tenant.user.ghanaCardNumber !== "Not Provided" && (
+                    {editGhanaCard && editGhanaCard.length >= 10 && (
                       <span className="text-emerald-600 flex items-center gap-1 text-[9px]"><HugeiconsIcon icon={CheckmarkCircle01Icon} size={12} /> VERIFIED</span>
                     )}
                   </label>
@@ -312,54 +319,112 @@ export default function TenantOnboardClient({ tenant }: { tenant: TenantRecord }
                   )}
                 </div>
                 
-                {/* Card Scan */}
-                <div className="flex-1 p-4 rounded-lg border border-zinc-200/60 bg-zinc-50/50 flex flex-col">
-                  <div className="flex justify-between items-center mb-3">
-                    <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest">Ghana Card Scan</p>
-                    {(tenant.user.ghanaCardUrl || editCardScan) && (
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        className="h-6 px-2 text-[10px] text-zinc-500 hover:text-zinc-600 hover:bg-zinc-50"
-                        onClick={() => {
-                          setEditCardScan(null);
-                          if (tenant.user.ghanaCardUrl) setRemoveExistingCard(true);
-                        }}
-                      >
-                        Remove
-                      </Button>
-                    )}
+                {/* NIA In-Person Check Notice */}
+                <div className="flex-1 p-4 rounded-lg border border-zinc-200/60 bg-zinc-50/50 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <p className="text-[11px] font-semibold text-zinc-500 uppercase tracking-widest">National ID Check</p>
+                      {editGhanaCard && editGhanaCard.length >= 10 ? (
+                        <span className="text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
+                          <HugeiconsIcon icon={CheckmarkCircle01Icon} size={12} /> Ready
+                        </span>
+                      ) : (
+                        <span className="text-amber-700 bg-amber-50 border border-amber-200/60 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">
+                          Missing ID
+                        </span>
+                      )}
+                    </div>
+                    
+                    <div className="p-3.5 bg-white rounded-lg border border-zinc-200/80 mb-3 space-y-1">
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400 block">ID Number on Record</span>
+                      <p className="font-mono text-base font-semibold text-zinc-900 tracking-wider">
+                        {editGhanaCard || "Not Provided"}
+                      </p>
+                    </div>
                   </div>
-                  
-                  {!editCardScan && (!tenant.user.ghanaCardUrl || removeExistingCard) ? (
-                    <div className="flex-1 flex flex-col justify-center items-center p-6 border-2 border-dashed border-zinc-300 rounded-lg bg-white hover:bg-zinc-50 transition-colors relative cursor-pointer group min-h-[160px]">
-                      <HugeiconsIcon icon={Alert01Icon} size={24} className="text-zinc-400 group-hover:text-zinc-500 mb-3" />
-                      <p className="text-xs font-medium text-zinc-500 text-center">Tap to Scan ID</p>
-                      <Input 
-                        type="file" 
-                        accept="image/*" 
-                        capture="environment"
-                        onChange={(e) => setEditCardScan(e.target.files?.[0] || null)}
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
-                      />
-                    </div>
-                  ) : (
-                    <div className="h-48 w-full bg-zinc-50 rounded-md border border-zinc-200/60 overflow-hidden cursor-pointer hover:opacity-90 transition-opacity relative group" onClick={() => setExpandedImage(editCardScan ? URL.createObjectURL(editCardScan) : tenant.user.ghanaCardUrl!)}>
-                      <img src={editCardScan ? URL.createObjectURL(editCardScan) : tenant.user.ghanaCardUrl} alt="Ghana Card Scan" className="w-full h-full object-contain" />
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <span className="text-white text-xs font-medium bg-black/60 px-3 py-1.5 rounded-md backdrop-blur-sm">Click to Enlarge</span>
-                      </div>
-                    </div>
-                  )}
+
+                  <div className="p-3 bg-zinc-100/70 rounded-lg border border-zinc-200/60 flex items-start gap-2.5">
+                    <HugeiconsIcon icon={Shield02Icon} size={16} className="text-zinc-600 shrink-0 mt-0.5" />
+                    <p className="text-[11px] leading-relaxed text-zinc-600">
+                      <strong className="text-zinc-900 font-semibold">NIA L.I. 2523 Directive:</strong> Institutions in Ghana are prohibited from scanning, photocopying, or retaining physical card images. Inspect the card directly and confirm the National ID number.
+                    </p>
+                  </div>
                 </div>
               </div>
 
+              <div className="flex justify-end pt-2">
+                <Button 
+                  onClick={saveEditedDetails}
+                  disabled={isSavingEdit}
+                  variant="outline"
+                  className="h-9 px-4 text-xs font-medium border-zinc-200 text-zinc-800 hover:bg-zinc-50 duration-160 ease-out active:scale-[0.98]"
+                >
+                  {isSavingEdit ? "Saving..." : "Save Identity Changes"}
+                </Button>
+              </div>
+
+            </div>
+          </section>
+        </div>
+
+        {/* Card 2B: Manual Payment Verification */}
+        <div className="bg-white border border-zinc-200/80 rounded-xl p-6 md:p-8">
+          <section>
+            <div className="mb-6">
+              <h3 className="text-base font-bold text-zinc-900 tracking-tight mb-1">Manual Payment Verification</h3>
+              <p className="text-[14px] text-zinc-500">
+                Confirm the bank transfer or Mobile Money payment received from the tenant (e.g. from WhatsApp screenshot or bank statement).
+              </p>
+            </div>
+            
+            <div className="p-5 rounded-lg border border-zinc-200/60 bg-zinc-50/50 space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pb-4 border-b border-zinc-200/60">
+                <div>
+                  <span className="text-[10px] font-semibold text-zinc-500 uppercase tracking-widest block mb-1">Booking Reference</span>
+                  <span className="font-mono text-[13px] font-semibold text-zinc-900 select-all">
+                    {tenant.pendingPayment?.reference || "Pending"}
+                  </span>
                 </div>
-            </section>
-          </div>
+                <div>
+                  <span className="text-[10px] font-semibold text-zinc-500 uppercase tracking-widest block mb-1">Payment Channel</span>
+                  <span className="text-[13px] font-medium text-zinc-900 capitalize">
+                    {tenant.pendingPayment?.channel === "mobile_money" ? "Mobile Money" : "Bank Transfer"}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[10px] font-semibold text-zinc-500 uppercase tracking-widest block mb-1">Expected Rent</span>
+                  <span className="font-semibold text-[13px] font-tabular-nums text-zinc-900">
+                    {formatCurrency(tenant.lease.totalRentAmount)}
+                  </span>
+                </div>
+              </div>
+
+              <div className="max-w-md space-y-1.5 pt-1">
+                <label className="text-[12px] font-semibold text-zinc-700 block">
+                  Confirmed Amount Received (GHS) <span className="text-rose-500">*</span>
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-semibold text-zinc-400">GH₵</span>
+                  <Input 
+                    type="number"
+                    step="0.01"
+                    min="1"
+                    value={amountPaid}
+                    onChange={(e) => setAmountPaid(e.target.value === "" ? "" : Number(e.target.value))}
+                    className="pl-12 h-10 text-[14px] font-mono font-tabular-nums rounded-lg bg-white border-zinc-300 focus-visible:ring-1 focus-visible:ring-zinc-900"
+                    placeholder="0.00"
+                  />
+                </div>
+                <p className="text-[11px] text-zinc-500">
+                  Input the exact confirmed deposit or rent amount shown on the transfer receipt.
+                </p>
+              </div>
+            </div>
+          </section>
+        </div>
 
         {/* Card 3: Tenancy Agreement */}
-        <div className="bg-white border border-zinc-200/80  rounded-xl p-6 md:p-8">
+        <div className="bg-white border border-zinc-200/80 rounded-xl p-6 md:p-8">
           <section>
             <div className="mb-6">
               <h3 className="text-base font-bold text-zinc-900 tracking-tight mb-1">Tenancy Agreement</h3>
@@ -368,7 +433,7 @@ export default function TenantOnboardClient({ tenant }: { tenant: TenantRecord }
             
             <div className="flex items-center justify-between p-5 rounded-lg border border-zinc-200/60 bg-zinc-50/50">
               <div className="flex items-center gap-4">
-                <div className="h-12 w-12 bg-white rounded-md border border-zinc-200/80  flex items-center justify-center">
+                <div className="h-12 w-12 bg-white rounded-md border border-zinc-200/80 flex items-center justify-center">
                   <HugeiconsIcon icon={FileDownloadIcon} size={18} className="text-zinc-600" />
                 </div>
                 <div>
@@ -378,7 +443,7 @@ export default function TenantOnboardClient({ tenant }: { tenant: TenantRecord }
                     disabled={tenant.checklist.leaseSigned !== "Signed"}
                     className="flex items-center gap-1.5 text-[14px] font-medium text-zinc-900 hover:underline underline-offset-4 disabled:no-underline disabled:text-zinc-400"
                   >
-                    {tenant.checklist.leaseSigned === "Signed" ? "View  Document" : "Awaiting Tenant Signature"}
+                    {tenant.checklist.leaseSigned === "Signed" ? "View Document" : "Awaiting Tenant Signature"}
                   </button>
                 </div>
               </div>
@@ -388,24 +453,27 @@ export default function TenantOnboardClient({ tenant }: { tenant: TenantRecord }
         </div>
 
         {/* Card 4: Final Verification */}
-        <div className="bg-white border border-zinc-200/80  rounded-xl p-6 md:p-8">
+        <div className="bg-white border border-zinc-200/80 rounded-xl p-6 md:p-8">
           <section>
             <div className="mb-6">
               <h3 className="text-base font-bold text-zinc-900 tracking-tight mb-1">Final Review & Grant Access</h3>
-              <p className="text-[14px] text-zinc-500 leading-relaxed">Ensure the tenant is physically present in the office with their original Ghana Card. Verify their identity to activate the lease and provision property access (digital or physical keys) for <strong className="text-zinc-900 font-semibold">{tenant.lease.propertyName} ({tenant.lease.unitNumber})</strong>.</p>
+              <p className="text-[14px] text-zinc-500 leading-relaxed">
+                Confirm that the tenant is physically present in the office with their original Ghana Card and that the payment of <strong className="text-zinc-900 font-semibold font-tabular-nums">GH₵ {Number(amountPaid || tenant.lease.totalRentAmount).toLocaleString("en-US", { minimumFractionDigits: 2 })}</strong> has been verified. Approving will activate the lease and provision property access (digital or physical keys) for <strong className="text-zinc-900 font-semibold">{tenant.lease.propertyName} ({tenant.lease.unitNumber})</strong>.
+              </p>
             </div>
             
             <div className="pt-2 flex flex-col sm:flex-row gap-3">
               <Button 
-                disabled={needsDocs}
-                className="w-full sm:flex-1 h-14 bg-zinc-900 text-white hover:bg-zinc-800 text-[15px] font-semibold rounded-xl  transition-all disabled:opacity-50" 
+                disabled={needsDocs || isPending}
+                className="w-full sm:flex-1 h-12 bg-zinc-900 hover:bg-zinc-800 text-white text-[14px] font-medium rounded-lg duration-160 ease-out active:scale-[0.98] transition-all disabled:opacity-50 shadow-sm" 
                 onClick={() => setConfirmAction("verifyAndOnboard")}
               >
-                {needsDocs ? "Complete Identity Capture to Continue" : (tenant.smartLock?.tuyaDeviceId || tenant.lease.smartLockCode ? "Verify & Grant Smart Lock Access" : "Verify & Complete Onboarding")}
+                {needsDocs ? "Complete Identity Verification to Continue" : "Verify Payment & Grant Access"}
               </Button>
               <Button 
                 variant="outline"
-                className="w-full sm:w-auto h-14 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 text-[15px] font-semibold rounded-xl transition-all" 
+                disabled={isPending}
+                className="w-full sm:w-auto h-12 border-rose-200 text-rose-600 hover:bg-rose-50 hover:text-rose-700 text-[14px] font-medium rounded-lg duration-160 ease-out active:scale-[0.98] transition-all" 
                 onClick={() => setConfirmAction("rejectOnboarding")}
               >
                 Reject Application
@@ -422,14 +490,35 @@ export default function TenantOnboardClient({ tenant }: { tenant: TenantRecord }
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="text-lg font-bold text-zinc-900">
-              {confirmAction === "verifyAndOnboard" ? "Verify Identity & Dispatch Keys" : "Reject Application"}
+              {confirmAction === "verifyAndOnboard" ? "Verify Payment & Dispatch Keys" : "Reject Application"}
             </AlertDialogTitle>
             <AlertDialogDescription className="text-[13px] text-zinc-500 leading-relaxed">
               {confirmAction === "verifyAndOnboard" 
-                ? "By confirming, you verify that the tenant's physical Ghana Card matches the person present in the office. This action will activate their lease and dispatch property access credentials (via Smart Lock PIN or Physical Keys)."
-                : "This action will cancel the lease, free up the property listing, and notify the user."}
+                ? "By confirming, you verify that the tenant's physical Ghana Card matches the person present and that the payment is confirmed. This will activate their lease, record the transaction, and dispatch property credentials."
+                : "This action will cancel the lease, mark the pending transaction as failed, free up the property listing, and notify the user."}
             </AlertDialogDescription>
           </AlertDialogHeader>
+
+          {confirmAction === "verifyAndOnboard" && (
+            <div className="mt-4 p-4 rounded-lg border border-zinc-200/80 bg-zinc-50/70 space-y-2 text-xs">
+              <div className="flex justify-between">
+                <span className="text-zinc-500">Booking Reference</span>
+                <span className="font-mono font-medium text-zinc-900">{tenant.pendingPayment?.reference || "Pending"}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-zinc-500">Payment Channel</span>
+                <span className="capitalize font-medium text-zinc-900">
+                  {tenant.pendingPayment?.channel === "mobile_money" ? "Mobile Money" : "Bank Transfer"}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-zinc-500">Confirmed Amount Received</span>
+                <span className="font-semibold text-zinc-900 font-tabular-nums">
+                  GH₵ {Number(amountPaid || tenant.lease.totalRentAmount).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                </span>
+              </div>
+            </div>
+          )}
           
           {confirmAction === "verifyAndOnboard" && tenant.user.kycStatus === "Verified" && (
             <div className="mt-4 p-4 bg-emerald-50 border border-emerald-200/60 rounded-lg">
@@ -438,7 +527,7 @@ export default function TenantOnboardClient({ tenant }: { tenant: TenantRecord }
                 <div>
                   <h4 className="text-[13px] font-bold text-emerald-900 mb-1">VIP Fast-Track Available</h4>
                   <p className="text-[11px] text-emerald-700/90 leading-relaxed">
-                    This tenant is already verified with a valid Ghana Card on file. You do not need to re-upload their documents.
+                    This tenant is already verified with a valid Ghana Card on file.
                   </p>
                 </div>
               </div>
@@ -455,9 +544,9 @@ export default function TenantOnboardClient({ tenant }: { tenant: TenantRecord }
                   onChange={(e) => setRejectReason(e.target.value)}
                 >
                   <option value="Fraudulent Documents">Fraudulent Documents</option>
+                  <option value="Payment Failed">Payment Failed</option>
                   <option value="Suspicious Activity">Suspicious Activity</option>
                   <option value="Tenant Withdrew">Tenant Withdrew</option>
-                  <option value="Payment Failed">Payment Failed</option>
                   <option value="Other">Other</option>
                 </select>
               </div>
@@ -480,11 +569,10 @@ export default function TenantOnboardClient({ tenant }: { tenant: TenantRecord }
             <AlertDialogAction 
               onClick={executeConfirmedAction} 
               disabled={isPending} 
-              className={`h-10 text-[13px] font-semibold rounded-lg ${confirmAction === "rejectOnboarding" ? "bg-red-600 hover:bg-red-700 text-white" : "bg-zinc-900 hover:bg-zinc-800 text-white"}`}
+              className={`h-10 text-[13px] font-semibold rounded-lg duration-160 ease-out active:scale-[0.98] ${confirmAction === "rejectOnboarding" ? "bg-rose-600 hover:bg-rose-700 text-white" : "bg-zinc-900 hover:bg-zinc-800 text-white"}`}
             >
               {isPending ? <><HugeiconsIcon icon={Loading03Icon} className="animate-spin mr-2" size={14} /> Processing...</> : 
-               confirmAction === "rejectOnboarding" ? "Confirm Rejection" :
-               (tenant.user.kycStatus === "Verified") ? "Approve & Dispatch Keys" : (tenant.smartLock?.tuyaDeviceId || tenant.lease.smartLockCode ? "Verify & Grant Smart Lock Access" : "Verify & Complete Onboarding")}
+               confirmAction === "rejectOnboarding" ? "Confirm Rejection" : "Verify Payment & Dispatch Keys"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
