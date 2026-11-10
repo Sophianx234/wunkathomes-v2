@@ -587,3 +587,97 @@ export async function createManualBankPaymentAction(payload: {
     };
   }
 }
+
+/**
+ * Initiate manual bank transfer or mobile money for a lease renewal.
+ * Generates an RNW- reference and creates a Pending Transaction.
+ */
+export async function createManualRenewalPaymentAction(
+  rawLeaseId: string,
+  rawRentDuration: number
+) {
+  let ip = "unknown";
+  try {
+    const headersList = await headers();
+    ip = headersList.get("x-forwarded-for")?.split(",")[0] || "Unknown IP";
+
+    const session = await getSession();
+    if (!session || !session.userId) throw new Error("UNAUTHORIZED");
+
+    const leaseId = String(rawLeaseId).trim();
+    const rentDuration = Math.max(1, Number(rawRentDuration) || 1);
+
+    await connectToDatabase();
+
+    const existingLease = await Lease.findOne({
+      _id: leaseId,
+      userId: session.userId,
+    }).populate("listingId");
+
+    if (!existingLease || !existingLease.listingId) {
+      return { success: false, message: "Lease record not found or unauthorized." };
+    }
+
+    const listing = existingLease.listingId as any;
+    const basePrice = listing.price || 0;
+    const listingType = listing.listingType || listing.propertyId?.type || "Rent";
+    const isRent = listingType !== "Sale" && listingType !== "For_Sale";
+    const finalTotal = isRent ? basePrice * rentDuration : basePrice;
+
+    // Check for an existing pending renewal transaction
+    const existingTx = await Transaction.findOne({
+      userId: session.userId,
+      leaseId: existingLease._id,
+      paymentPurpose: "Lease_Renewal",
+      status: "Pending",
+    });
+
+    if (existingTx) {
+      if (existingTx.amount !== finalTotal) {
+        existingTx.amount = finalTotal;
+        await existingTx.save();
+      }
+      return {
+        success: true,
+        reference: existingTx.reference,
+        totalAmount: finalTotal,
+        message: "Existing renewal pending.",
+      };
+    }
+
+    // Generate readable unique reference: RNW-XXXXXX-XXX
+    const reference = `RNW-${Date.now().toString().slice(-6)}-${Math.floor(100 + Math.random() * 900)}`;
+
+    await Transaction.create({
+      userId: session.userId,
+      listingId: listing._id,
+      leaseId: existingLease._id,
+      amount: finalTotal,
+      currency: "GHS",
+      paymentPurpose: "Lease_Renewal",
+      reference,
+      transactionReference: reference,
+      channel: "bank",
+      status: "Pending",
+    });
+
+    revalidatePath("/admin/transactions");
+    revalidatePath("/user/dashboard");
+
+    return {
+      success: true,
+      reference,
+      totalAmount: finalTotal,
+      message: "Renewal initiated successfully.",
+    };
+  } catch (error: any) {
+    if (error.message === "UNAUTHORIZED") {
+      return { success: false, message: "Please log in to complete your renewal." };
+    }
+    console.error(`[MANUAL RENEWAL ERROR] (IP: ${ip}):`, error);
+    return {
+      success: false,
+      message: error?.message || "An unexpected error occurred. Please try again.",
+    };
+  }
+}

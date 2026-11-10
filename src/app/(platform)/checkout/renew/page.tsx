@@ -5,6 +5,7 @@ import User from "@/models/user";
 import Lease from "@/models/lease";
 import Listing from "@/models/listing";
 import Property from "@/models/property";
+import Transaction from "@/models/transaction";
 import RenewClient from "@/components/renew-client";
 
 interface RenewPageProps {
@@ -39,6 +40,13 @@ export default async function RenewPage({ searchParams }: RenewPageProps) {
 
   const userRecord = await User.findById(session.userId).lean().exec();
 
+  const existingPendingTx = await Transaction.findOne({
+    leaseId: existingLease._id,
+    userId: session.userId,
+    paymentPurpose: "Lease_Renewal",
+    status: "Pending",
+  }).lean();
+
   const serializedData = {
     leaseId: existingLease._id.toString(),
     rentAmount: existingLease.totalRentAmount || existingLease.listingId.price,
@@ -60,6 +68,12 @@ export default async function RenewPage({ searchParams }: RenewPageProps) {
       roomType: existingLease.listingId.roomType || "Empty",
       listingType: existingLease.listingId.listingType || existingLease.listingId.propertyId?.type || "Rent",
     },
+    existingPendingRenewal: existingPendingTx
+      ? {
+          reference: existingPendingTx.reference,
+          amount: existingPendingTx.amount,
+        }
+      : null,
   };
 
   return <RenewClient data={serializedData} />;
