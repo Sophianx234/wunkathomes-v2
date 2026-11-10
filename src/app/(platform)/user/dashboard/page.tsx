@@ -48,6 +48,21 @@ export default async function DashboardPage() {
     kycStatus: dbUser.kycStatus || "Unverified",
   };
 
+  const leaseIds = dbLeases.map((l: any) => l._id);
+  const { default: Transaction } = await import("@/models/transaction");
+  const txns = await Transaction.find({
+    leaseId: { $in: leaseIds },
+  })
+    .select("leaseId reference")
+    .lean();
+
+  const txnMap = new Map<string, string>();
+  txns.forEach((t: any) => {
+    if (t.leaseId && t.reference) {
+      txnMap.set(t.leaseId.toString(), t.reference);
+    }
+  });
+
   const serializedActiveLeases = await Promise.all(dbLeases.map(async (dbLease: any) => {
     let endDate = dbLease.endDate;
     if (!endDate && dbLease.startDate) {
@@ -94,10 +109,11 @@ export default async function DashboardPage() {
       lease: {
         id: dbLease._id.toString(),
         status: dbLease.status,
+        reference: txnMap.get(dbLease._id.toString()) || "",
         totalRentAmount: dbLease.totalRentAmount,
         startDate: dbLease.startDate ? new Date(dbLease.startDate).toISOString() : new Date().toISOString(),
         endDate: endDate ? new Date(endDate).toISOString() : undefined,
-        smartLockPin: isMoveInReached ? dbLease.smartLockPin : undefined,
+        smartLockPin: (isMoveInReached && dbLease.status === "Active") ? dbLease.smartLockPin : undefined,
         intentToVacate: dbLease.intentToVacate || false,
         signatureAudit: {
           isSigned: dbLease.signatureAudit?.isSigned || false,

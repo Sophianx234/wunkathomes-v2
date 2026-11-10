@@ -70,6 +70,7 @@ export interface DashboardProps {
     lease: {
       id: string;
       status: string;
+      reference?: string;
       totalRentAmount: number;
       startDate: string;
       endDate?: string;
@@ -158,8 +159,9 @@ export function UserDashboard({ user, activeLeases, initialSchedule }: Dashboard
   const isRejected = user.kycStatus === "Rejected";
   const needsKyc = user.kycStatus === "Unverified" || user.kycStatus === "Pending";
   const needsSignature = !lease.signatureAudit.isSigned;
+  const isPendingVerification = lease.status === "Pending_Verification";
   const isPendingAdmin = lease.status === "Awaiting_Admin_Approval";
-  const isRestricted = needsKyc || needsSignature || isPendingAdmin || isRejected;
+  const isRestricted = needsKyc || needsSignature || isPendingVerification || isPendingAdmin || isRejected;
 
   useEffect(() => {
     setShowPin(false);
@@ -187,7 +189,7 @@ export function UserDashboard({ user, activeLeases, initialSchedule }: Dashboard
   if (isRestricted) {
     daysLeft = "--";
     progressPercentage = 0;
-    statusText = "Action Required";
+    statusText = isPendingVerification ? "Payment Under Review" : "Action Required";
   } else if (today < startDate) {
     const daysUntilMoveIn = getDaysDifference(today, startDate);
     daysLeft = totalDays;
@@ -279,14 +281,22 @@ export function UserDashboard({ user, activeLeases, initialSchedule }: Dashboard
           <div className="hidden md:flex items-center gap-2 bg-zinc-900/90 px-3.5 py-1.5 rounded-full border border-zinc-800 text-xs font-medium text-zinc-300 shrink-0">
             <span
               className={`w-1.5 h-1.5 rounded-full ${
-                isRestricted
-                  ? "bg-zinc-500"
-                  : lockStatus === "LOCKED"
-                    ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]"
-                    : "bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.4)]"
+                isPendingVerification
+                  ? "bg-amber-400"
+                  : isRestricted
+                    ? "bg-zinc-500"
+                    : lockStatus === "LOCKED"
+                      ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]"
+                      : "bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.4)]"
               }`}
             />
-            <span>{isRestricted ? "Access Restricted" : `Door ${lockStatus.toLowerCase()}`}</span>
+            <span>
+              {isPendingVerification
+                ? "Payment Under Review"
+                : isRestricted
+                  ? "Access Restricted"
+                  : `Door ${lockStatus.toLowerCase()}`}
+            </span>
           </div>
         </div>
 
@@ -331,6 +341,41 @@ export function UserDashboard({ user, activeLeases, initialSchedule }: Dashboard
                 </p>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* 1A. BANK TRANSFER VERIFICATION BANNER */}
+        {isPendingVerification && !isRejected && (
+          <div className="bg-white border border-zinc-200/80 p-4 md:p-5 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative w-full box-border shadow-xs">
+            <div className="flex items-start sm:items-center gap-3.5 min-w-0">
+              <div className="w-9 h-9 bg-zinc-100 text-zinc-700 border border-zinc-200/60 rounded-lg flex items-center justify-center shrink-0">
+                <HugeiconsIcon icon={Clock01Icon} size={18} />
+              </div>
+              <div className="min-w-0">
+                <h4 className="text-sm font-semibold text-zinc-900 tracking-tight">
+                  Bank Transfer Verification In Progress
+                </h4>
+                <p className="text-xs md:text-sm text-zinc-600 font-normal leading-relaxed mt-0.5">
+                  Your reservation is held. Our accounts team is verifying your payment{lease.reference ? ` (Ref: ${lease.reference})` : ""}. Your smart lock PIN and digital access controls will activate automatically once verified.
+                </p>
+              </div>
+            </div>
+            <a
+              href={`https://wa.me/${(process.env.NEXT_PUBLIC_BUSINESS_WHATSAPP || "233241234567").replace(/[^0-9]/g, "")}?text=${[
+                "Hello Wunkat Homes, checking on bank receipt verification for my reservation.",
+                "",
+                lease.reference ? `Booking Ref: ${lease.reference}` : "",
+                `Property: ${currentData.listing.title}`,
+                `Tenant Name: ${user.name}`,
+                "",
+                "Attached is my transfer receipt/screenshot."
+              ].filter(Boolean).map(l => encodeURIComponent(l)).join("%0A")}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="shrink-0 inline-flex items-center justify-center gap-2 px-3.5 py-2 bg-zinc-900 hover:bg-black text-white text-xs font-medium rounded-lg transition-transform duration-150 active:scale-[0.98]"
+            >
+              Send Receipt via WhatsApp
+            </a>
           </div>
         )}
 
@@ -582,11 +627,13 @@ export function UserDashboard({ user, activeLeases, initialSchedule }: Dashboard
           <div className="flex justify-between text-xs font-medium text-zinc-400 mt-2.5 w-full box-border">
             <span>Move-In</span>
             <span className="text-zinc-600 font-medium">
-              {isRestricted
-                ? "Action Required"
-                : today < startDate
-                  ? "Pending"
-                  : `${Math.round(progressPercentage)}% Completed`}
+              {isPendingVerification
+                ? "Payment Under Review"
+                : isRestricted
+                  ? "Action Required"
+                  : today < startDate
+                    ? "Pending"
+                    : `${Math.round(progressPercentage)}% Completed`}
             </span>
             <span>
               {lease.intentToVacate ? "Move-Out Date" : "Expiration"}
@@ -612,7 +659,12 @@ export function UserDashboard({ user, activeLeases, initialSchedule }: Dashboard
                     {listing.propertyType}
                   </span>
 
-                  {isRestricted ? (
+                  {isPendingVerification ? (
+                    <span className="text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200/60 px-2.5 py-1 rounded-md flex items-center gap-1.5">
+                      <HugeiconsIcon icon={Clock01Icon} size={12} />
+                      <span>Payment Under Review</span>
+                    </span>
+                  ) : isRestricted ? (
                     <span className="text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200/60 px-2.5 py-1 rounded-md flex items-center gap-1.5">
                       <HugeiconsIcon icon={Clock01Icon} size={12} />
                       <span>Action Required</span>
@@ -709,7 +761,11 @@ export function UserDashboard({ user, activeLeases, initialSchedule }: Dashboard
                 </span>
 
                 <div className="flex items-center justify-between gap-3 mb-5 pb-4 border-b border-zinc-800/80 w-full box-border min-w-0">
-                  {isRestricted ? (
+                  {isPendingVerification ? (
+                    <div className="font-mono text-sm md:text-base font-semibold text-zinc-500 uppercase tracking-widest truncate py-1">
+                      Payment Under Review
+                    </div>
+                  ) : isRestricted ? (
                     <div className="font-mono text-sm md:text-base font-semibold text-zinc-500 uppercase tracking-widest truncate py-1">
                       Pending Verification
                     </div>
@@ -777,6 +833,8 @@ export function UserDashboard({ user, activeLeases, initialSchedule }: Dashboard
                       <HugeiconsIcon icon={SignatureIcon} size={16} />
                       <span className="truncate">Sign Lease</span>
                     </>
+                  ) : isPendingVerification ? (
+                    <span className="truncate">Awaiting Payment Verification</span>
                   ) : isPendingAdmin ? (
                     <span className="truncate">Provisioning...</span>
                   ) : today < startDate ? (

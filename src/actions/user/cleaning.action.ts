@@ -18,7 +18,7 @@ export async function getCleaningSchedule() {
     // Find the active lease
     const activeLease = await Lease.findOne({
       userId: session.userId,
-      status: { $in: ["Active", "Awaiting_Admin_Approval", "Pending_Verification"] }
+      status: "Active"
     }).sort({ createdAt: -1 });
 
     if (!activeLease) {
@@ -67,7 +67,7 @@ export async function updateCleaningSchedule(data: {
     // Find the active lease
     const activeLease = await Lease.findOne({
       userId: session.userId,
-      status: { $in: ["Active", "Awaiting_Admin_Approval", "Pending_Verification"] }
+      status: "Active"
     }).sort({ createdAt: -1 });
 
     if (!activeLease) {
