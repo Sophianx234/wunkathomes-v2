@@ -124,8 +124,17 @@ export default function SuccessReceipt({ transaction }: SuccessReceiptProps) {
         <div className="absolute top-6 md:top-10 inset-x-0">
           <div className="max-w-5xl mx-auto px-6 md:px-10 w-full flex">
             <div className="bg-white/95 backdrop-blur-md px-4 py-2 rounded-full flex items-center gap-2 shadow-lg">
-              <HugeiconsIcon icon={CheckmarkBadge01Icon} size={16} className="text-green-600" />
-              <span className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-zinc-900">Payment Confirmed</span>
+              {transaction.status === "Pending" ? (
+                <>
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
+                  <span className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-zinc-900">Payment Under Review</span>
+                </>
+              ) : (
+                <>
+                  <HugeiconsIcon icon={CheckmarkBadge01Icon} size={16} className="text-green-600" />
+                  <span className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-zinc-900">Payment Confirmed</span>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -151,10 +160,33 @@ export default function SuccessReceipt({ transaction }: SuccessReceiptProps) {
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2, type: "spring", stiffness: 200, damping: 25 }}
         >
+          {transaction.status === "Pending" && (
+            <div className="mb-8 p-5 bg-amber-50/90 border border-amber-200 rounded-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-amber-900 mb-1">
+                  Payment Verification In Progress
+                </h4>
+                <p className="text-xs text-amber-800 leading-relaxed">
+                  Our accounts team is matching your transfer with Booking Ref: <strong className="font-mono">{transaction.reference}</strong>. If you haven&apos;t sent your receipt screenshot yet, you can send it directly to our official WhatsApp line below.
+                </p>
+              </div>
+              <a
+                href={`https://wa.me/233241234567?text=${encodeURIComponent(
+                  `Hello Wunkat Homes, checking on receipt verification for Booking Ref: ${transaction.reference} (${transaction.listingId?.title || "Property"}).`
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="shrink-0 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
+              >
+                Send Receipt on WhatsApp
+              </a>
+            </div>
+          )}
+
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 pb-10 border-b border-zinc-200/80 gap-6">
             <div>
               <p className="text-xs md:text-sm font-bold text-zinc-500 uppercase tracking-widest mb-2">
-                Amount Paid
+                {transaction.status === "Pending" ? "Amount Transferred" : "Amount Paid"}
               </p>
               <h2 className="text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter text-zinc-900">
                 GHS {transaction.amount?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
