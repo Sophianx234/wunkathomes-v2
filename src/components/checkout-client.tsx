@@ -198,15 +198,18 @@ export default function CheckoutClient({
     }
   };
 
-  // Construct Pre-filled WhatsApp message
-  const whatsappMessage = encodeURIComponent(
-    `Hello Wunkat Homes, I have made payment for my reservation.\n\n` +
-    `📌 Booking Ref: ${bookingReference}\n` +
-    `🏠 Property: ${listing?.title || "Property"}\n` +
-    `👤 Tenant Name: ${formData.legalName}\n` +
-    `💰 Amount: GHS ${finalTotal.toLocaleString()}\n\n` +
-    `Attached is my payment transfer receipt/screenshot.`
-  );
+  // Construct Pre-filled WhatsApp message (no emojis, guaranteed %0A line breaks)
+  const whatsappLines = [
+    "Hello Wunkat Homes, I have made payment for my reservation.",
+    "",
+    `Booking Ref: ${bookingReference}`,
+    `Property: ${listing?.title || "Property"}`,
+    `Tenant Name: ${formData.legalName || currentUser?.name || "Tenant"}`,
+    `Amount: GHS ${finalTotal.toLocaleString()}`,
+    "",
+    "Attached is my payment transfer receipt/screenshot."
+  ];
+  const whatsappMessage = whatsappLines.map(line => encodeURIComponent(line)).join("%0A");
   const whatsappUrl = `https://wa.me/${BUSINESS_WHATSAPP_NUMBER.replace(/[^0-9]/g, "")}?text=${whatsappMessage}`;
 
   const handleConfirmedReceipt = () => {
@@ -510,7 +513,7 @@ export default function CheckoutClient({
                     className={cn(
                       "flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-md transition-all duration-160 ease-out active:scale-[0.98]",
                       paymentMethod === "bank"
-                        ? "bg-white text-zinc-900 shadow-sm"
+                        ? "bg-white text-zinc-900 shadow"
                         : "text-zinc-500 hover:text-zinc-900"
                     )}
                   >
@@ -522,11 +525,11 @@ export default function CheckoutClient({
                     className={cn(
                       "flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-md transition-all duration-160 ease-out active:scale-[0.98]",
                       paymentMethod === "momo"
-                        ? "bg-white text-zinc-900 shadow-sm"
+                        ? "bg-white text-zinc-900 shadow"
                         : "text-zinc-500 hover:text-zinc-900"
                     )}
                   >
-                    Mobile Money (MoMo)
+                    Mobile Money
                   </button>
                 </div>
 
