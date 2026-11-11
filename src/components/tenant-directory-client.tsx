@@ -778,7 +778,6 @@ export default function TenantDirectoryClient({
 
                           <div className="p-2.5 rounded-md bg-zinc-50/70 border border-zinc-200/50">
                             <div className="flex items-start gap-2">
-                              <HugeiconsIcon icon={Shield02Icon} size={14} className="text-zinc-500 shrink-0 mt-0.5" />
                               <p className="text-[10px] leading-relaxed text-zinc-500">
                                 <strong className="text-zinc-700 font-medium">NIA L.I. 2523 Compliant:</strong> Card verified in person. Physical card scans are not stored pursuant to National Identification Authority regulations.
                               </p>
@@ -820,7 +819,7 @@ export default function TenantDirectoryClient({
                   <section>
                     <div className="p-5 rounded-lg border border-zinc-200/60 bg-zinc-50/50 space-y-4">
                       <div>
-                        <strong className="text-[13px] font-semibold text-zinc-900 block mb-1">Payment & Onboarding Verification</strong>
+                        <strong className="text-[13px] font-semibold text-zinc-900 block mb-1">Payment Verification</strong>
                         <p className="text-[12px] text-zinc-500 leading-relaxed">
                           Verify the tenant's transaction (Bank Transfer / MoMo) and inspect their original Ghana Card. Approving will activate the lease, record the transaction, and provision Tuya smart lock access for <span className="font-semibold text-zinc-900">{selectedTenant.lease.propertyName} ({selectedTenant.lease.unitNumber})</span>.
                         </p>

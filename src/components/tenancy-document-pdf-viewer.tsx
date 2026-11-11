@@ -53,7 +53,7 @@ export function TenancyDocumentPDFViewer({
         <div className="flex items-center gap-3 md:gap-4 min-w-0">
           <button
             onClick={onBack}
-            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-zinc-100 text-zinc-500 hover:text-zinc-900 active:scale-95 transition-all shrink-0 border border-zinc-200/60 shadow-2xs"
+            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-zinc-100 text-zinc-500 hover:text-zinc-900 active:scale-95 transition-all shrink-0  "
             title="Back to Tenant Directory"
             aria-label="Back to Tenant Directory"
           >
@@ -63,9 +63,7 @@ export function TenancyDocumentPDFViewer({
           <div className="h-4 w-px bg-zinc-200 hidden sm:block shrink-0" />
           
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-lg bg-zinc-100 flex items-center justify-center shrink-0 text-zinc-600 border border-zinc-200/60">
-              <FileText className="w-4 h-4" />
-            </div>
+            
             <div className="min-w-0">
               <h1 className="text-xs md:text-sm font-semibold tracking-tight text-zinc-900 truncate">
                 Tenancy Agreement PDF Preview
@@ -79,13 +77,11 @@ export function TenancyDocumentPDFViewer({
 
         <div className="flex items-center gap-2 shrink-0">
           {isSigned ? (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200/60 shadow-2xs">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Signed & Verified</span>
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium   ">
+              <span>Signed</span>
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-zinc-100 text-zinc-600 border border-zinc-200/60">
-              <Clock className="w-3.5 h-3.5 text-zinc-400" />
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium  ">
               <span>Awaiting Signature</span>
             </span>
           )}
