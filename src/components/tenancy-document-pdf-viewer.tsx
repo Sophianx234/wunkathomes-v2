@@ -66,11 +66,9 @@ export function TenancyDocumentPDFViewer({
             
             <div className="min-w-0">
               <h1 className="text-xs md:text-sm font-semibold tracking-tight text-zinc-900 truncate">
-                Tenancy Agreement PDF Preview
+                Tenancy Agreement PDF 
               </h1>
-              <p className="text-[11px] text-zinc-400 font-mono truncate hidden sm:block">
-                {mappedActivation.lease.propertyName} • {mappedActivation.user.name}
-              </p>
+              
             </div>
           </div>
         </div>

@@ -173,7 +173,7 @@ export default function TenantOnboardClient({ tenant }: { tenant: TenantRecord }
 
   return (
     <div className="min-h-screen bg-zinc-50/60 p-4 sm:p-6 lg:p-8 font-sans">
-      <div className="max-w-3xl mx-auto space-y-6">
+      <div className="max-w-5xl mx-auto space-y-6">
         
         {/* Navigation & Header */}
         <div className="space-y-1">
