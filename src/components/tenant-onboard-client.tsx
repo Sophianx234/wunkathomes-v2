@@ -435,9 +435,8 @@ export default function TenantOnboardClient({ tenant }: { tenant: TenantRecord }
               size="sm"
               onClick={() => setIsViewingDocument(true)}
               disabled={tenant.checklist.leaseSigned !== "Signed"}
-              className="h-8 text-xs font-medium border-zinc-200 text-zinc-800 hover:bg-zinc-50 duration-160 ease-out active:scale-[0.98]"
+              className="h-8 text-xs rounded-sm font-medium border-zinc-200 text-zinc-800 hover:bg-zinc-50 duration-160 ease-out active:scale-[0.98]"
             >
-              <HugeiconsIcon icon={FileDownloadIcon} size={14} className="mr-1.5 text-zinc-500" />
               View Agreement
             </Button>
           </div>
@@ -449,7 +448,7 @@ export default function TenantOnboardClient({ tenant }: { tenant: TenantRecord }
               variant="outline"
               disabled={isPending}
               onClick={() => setConfirmAction("rejectOnboarding")}
-              className="h-9 px-4 text-xs font-medium border-zinc-200 text-rose-600 hover:bg-rose-50 hover:border-rose-200 duration-160 ease-out active:scale-[0.98]"
+              className="h-9 px-4 text-xs rounded-sm font-medium border-zinc-200 text-rose-600 hover:bg-rose-50 hover:border-rose-200 duration-160 ease-out active:scale-[0.98]"
             >
               Reject Application
             </Button>

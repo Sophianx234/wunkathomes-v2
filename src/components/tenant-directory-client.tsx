@@ -776,13 +776,7 @@ export default function TenantDirectoryClient({
                             </div>
                           </div>
 
-                          <div className="p-2.5 rounded-md bg-zinc-50/70 border border-zinc-200/50">
-                            <div className="flex items-start gap-2">
-                              <p className="text-[10px] leading-relaxed text-zinc-500">
-                                <strong className="text-zinc-700 font-medium">NIA L.I. 2523 Compliant:</strong> Card verified in person. Physical card scans are not stored pursuant to National Identification Authority regulations.
-                              </p>
-                            </div>
-                          </div>
+                          
                         </div>
                       </div>
                       
