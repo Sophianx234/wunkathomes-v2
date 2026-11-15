@@ -9,10 +9,13 @@ This folder contains utility scripts for database management and application dem
 These scripts are used to populate your database with realistic mock properties and listings, or to wipe them clean.
 
 * **`npm run seed`**  
-  Connects to your MongoDB database and populates it with realistic mock data (Properties and Listings). Useful for local development and fresh environments.
+  Connects to your MongoDB database and populates it with 25 realistic properties and listings in Accra, plus pre-configured demo accounts:
+  - **Admin Manager**: `admin@wunkathomes.com` / `Password123!` (Role: `Admin`)
+  - **Pending Onboarding Tenant**: `tenant@example.com` / `Password123!` (Role: `User`, Ghana Card: `GHA-712345678-9`, manual bank transfer pending verification)
+  - **Active Tenant**: `active.tenant@example.com` / `Password123!` (Role: `User`, active lease with smart lock PIN for instant lifecycle demos)
 
 * **`npm run seed:destroy`**  
-  Wipes the existing mock data from your database (Properties and Listings). Use with caution!
+  Wipes all mock properties, listings, test leases, and test transactions from your database. Use with caution!
 
 ---
 

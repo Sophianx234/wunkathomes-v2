@@ -1,21 +1,17 @@
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
-import User from '@/models/user';
-import Property from '@/models/property';
-import Listing from '@/models/listing';
-import Lease from '@/models/lease';
-import Transaction from '@/models/transaction';
-import Review from '@/models/review';
-import { connectToDatabase } from '@/config/DbConnect';
+import * as dotenv from 'dotenv';
+import path from 'path';
 
-// Load environment variables from .env.local
-dotenv.config();
-
-
+// Load environment variables FIRST before importing database connections
+dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 
 const importData = async () => {
   try {
-    await connectToDatabase();
+    const { connectToDatabase } = await import('@/config/DbConnect');
+    const mongoose = (await import('mongoose')).default;
+    const User = (await import('@/models/user')).default;
+    const Property = (await import('@/models/property')).default;
+    const Listing = (await import('@/models/listing')).default;
 
     // 1. Clear database to prevent duplicates
     // await User.deleteMany();
@@ -122,6 +118,15 @@ const importData = async () => {
 
 const destroyData = async () => {
   try {
+    const { connectToDatabase } = await import('@/config/DbConnect');
+    const mongoose = (await import('mongoose')).default;
+    const User = (await import('@/models/user')).default;
+    const Property = (await import('@/models/property')).default;
+    const Listing = (await import('@/models/listing')).default;
+    const Lease = (await import('@/models/lease')).default;
+    const Transaction = (await import('@/models/transaction')).default;
+    const Review = (await import('@/models/review')).default;
+
     await connectToDatabase();
 
     await User.deleteMany();
@@ -132,7 +137,8 @@ const destroyData = async () => {
     await Review.deleteMany();
 
     console.log('Data Destroyed!');
-    process.exit();
+    await mongoose.disconnect();
+    process.exit(0);
   } catch (error) {
     console.error(`Error destroying data: ${error}`);
     process.exit(1);

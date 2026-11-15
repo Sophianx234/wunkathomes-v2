@@ -35,14 +35,16 @@ async function triggerDemo() {
         .populate('listingId', 'title')
         .populate('userId', 'email name');
     } else {
-      // Auto-select the first active lease if no email is provided
-      lease = await Lease.findOne({ status: { $in: ['Active', 'Expired'] } })
+      // Auto-select the most relevant lease (Active, Pending Verification, or Expired) if no email is provided
+      lease = await Lease.findOne({
+        status: { $in: ['Active', 'Pending_Verification', 'Awaiting_Admin_Approval', 'Expired'] },
+      })
         .sort({ createdAt: -1 })
         .populate('listingId', 'title')
         .populate('userId', 'email name');
         
       if (lease) {
-         console.log(`ℹ️  No email provided. Auto-selected lease for ${lease.userId.email}`);
+         console.log(`ℹ️  No email provided. Auto-selected lease for ${lease.userId?.email || 'Unknown'} (Status: ${lease.status})`);
       }
     }
 
@@ -107,6 +109,8 @@ async function triggerDemo() {
         break;
       case 'expired':
       default:
+        // Ensure status is Active so the check-subscriptions cron query { status: 'Active' } processes it
+        lease.status = 'Active';
         lease.endDate = yesterday;
         lease.startDate = new Date(yesterday.getTime() - durationMs); // Keep total duration same
         

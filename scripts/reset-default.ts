@@ -85,6 +85,7 @@ async function run() {
   const AccessLog = (await import('../src/models/accesslog')).default;
   const CleaningSchedule = (await import('../src/models/cleaning')).default;
   const Maintenance = (await import('../src/models/maintenance')).default;
+  const Transaction = (await import('../src/models/transaction')).default;
 
   let deleteTemporaryPinFn: ((deviceId: string, passwordId: string) => Promise<any>) | null = null;
   try {
@@ -279,6 +280,10 @@ async function run() {
   if (options.hard) {
     const deleteResult = await Lease.deleteMany({ listingId: { $in: targetListingIds } });
     stats.leasesPurged = deleteResult.deletedCount || 0;
+    await Transaction.updateMany(
+      { leaseId: { $in: associatedLeases.map((l) => l._id) }, status: 'Pending' },
+      { $set: { status: 'Failed' } }
+    );
     console.log(`   🗑️  Hard purged ${stats.leasesPurged} lease record(s).`);
   } else {
     for (const lease of associatedLeases) {
@@ -298,7 +303,11 @@ async function run() {
         stats.leasesCancelled++;
       }
     }
-    console.log(`   ✅ Cancelled & cleared ${stats.leasesCancelled} active/pending lease(s).`);
+    await Transaction.updateMany(
+      { leaseId: { $in: associatedLeases.map((l) => l._id) }, status: 'Pending' },
+      { $set: { status: 'Failed' } }
+    );
+    console.log(`   ✅ Cancelled & cleared ${stats.leasesCancelled} active/pending lease(s) and marked pending transactions failed.`);
   }
 
   // --------------------------------------------------------------------------

@@ -582,41 +582,200 @@ const mockData = [
 // ---------------------------------------------------------
 async function runSeed() {
   try {
-    console.log("🌱 Starting Database Seed...");
-    
+    const isDestroy = process.argv.includes('-d') || process.argv.includes('--destroy');
+
     // Dynamically import models so process.env is ready for DbConnect
     const mongoose = (await import('mongoose')).default;
     const { connectToDatabase } = await import('../src/config/DbConnect');
     const Property = (await import('../src/models/property')).default;
     const Listing = (await import('../src/models/listing')).default;
+    const User = (await import('../src/models/user')).default;
+    const Lease = (await import('../src/models/lease')).default;
+    const Transaction = (await import('../src/models/transaction')).default;
+    const bcrypt = (await import('bcryptjs')).default;
 
     // 1. Connect to MongoDB
     await connectToDatabase();
     console.log("✅ Successfully connected to MongoDB.");
 
+    if (isDestroy) {
+      console.log("🧹 Destroying mock seed data...");
+      await Property.deleteMany({});
+      await Listing.deleteMany({});
+      await Lease.deleteMany({});
+      await Transaction.deleteMany({});
+      console.log("🧹 Cleared Properties, Listings, Leases, and Transactions.");
+      console.log("🗑️  Seed data destroyed successfully.");
+      await mongoose.disconnect();
+      console.log("🔌 Disconnected from MongoDB.");
+      process.exit(0);
+    }
+
+    console.log("🌱 Starting Database Seed with Properties, Listings & Onboarding Demo Data...");
+
     // 2. Wipe existing data safely
     await Property.deleteMany({});
     await Listing.deleteMany({});
-    console.log("🧹 Cleared existing Properties and Listings collections.");
+    await Lease.deleteMany({});
+    await Transaction.deleteMany({});
+    console.log("🧹 Cleared existing Properties, Listings, Leases, and Transactions.");
 
     // 3. Iterate through mock data and populate
-    let count = 0;
+    const createdListings: any[] = [];
     for (const item of mockData) {
-      // Create the Property document first
       const newProperty = new Property(item.property);
       const savedProperty = await newProperty.save();
 
-      // Create the Listing, mapping propertyId to the newly created Property's _id
       const newListing = new Listing({
         ...item.listing,
         propertyId: savedProperty._id,
       });
-      await newListing.save();
-      
-      count++;
+      const savedListing = await newListing.save();
+      createdListings.push(savedListing);
+    }
+    console.log(`🎉 Seeded ${createdListings.length} realistic properties and listings.`);
+
+    // 4. Create or update Base Admin
+    const defaultPassword = await bcrypt.hash('Password123!', 10);
+    await User.findOneAndUpdate(
+      { email: 'admin@wunkathomes.com' },
+      {
+        name: 'Admin Manager',
+        email: 'admin@wunkathomes.com',
+        phone: '+233500000000',
+        password: defaultPassword,
+        role: 'Admin',
+        kycStatus: 'Verified',
+        accountStatus: 'Active',
+      },
+      { upsert: true, new: true }
+    );
+    console.log("👑 Base Admin ready: admin@wunkathomes.com / Password123!");
+
+    // 5. Create Test Pending Tenant (Ready for Admin Onboarding Flow)
+    if (createdListings.length >= 2) {
+      const pendingTenant = await User.findOneAndUpdate(
+        { email: 'tenant@example.com' },
+        {
+          name: 'Kofi Mensah',
+          email: 'tenant@example.com',
+          phone: '+233500000001',
+          password: defaultPassword,
+          role: 'User',
+          kycStatus: 'Pending',
+          legalName: 'Kofi Mensah',
+          idDocumentType: 'GHA',
+          idDocumentNumber: 'GHA-712345678-9',
+          idVerificationPhotoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&auto=format&fit=crop',
+          accountStatus: 'Active',
+        },
+        { upsert: true, new: true }
+      );
+
+      const targetListing = createdListings[0];
+      const pendingRent = targetListing.price || 2500;
+      const now = new Date();
+      const oneYearLater = new Date();
+      oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
+
+      const pendingLease = await Lease.create({
+        listingId: targetListing._id,
+        userId: pendingTenant._id,
+        startDate: now,
+        endDate: oneYearLater,
+        totalRentAmount: pendingRent,
+        status: 'Pending_Verification',
+        reminders: {
+          milestone1: { triggerDate: new Date(now.getTime() + 180 * 86400000), sent: false },
+          milestone2: { triggerDate: new Date(now.getTime() + 270 * 86400000), sent: false },
+          milestone3: { triggerDate: new Date(now.getTime() + 330 * 86400000), sent: false },
+          expired: { sent: false },
+        },
+      });
+
+      targetListing.status = 'Pending';
+      await targetListing.save();
+
+      await Transaction.create({
+        userId: pendingTenant._id,
+        listingId: targetListing._id,
+        leaseId: pendingLease._id,
+        amount: pendingRent,
+        currency: 'GHS',
+        paymentPurpose: 'Upfront_Rent',
+        reference: `BNK-SEED-${Date.now().toString().slice(-4)}`,
+        channel: 'bank',
+        status: 'Pending',
+      });
+
+      console.log(`📋 Seeded Pending Tenant for Onboarding:`);
+      console.log(`   • User: Kofi Mensah (tenant@example.com / Password123!)`);
+      console.log(`   • National ID: GHA-712345678-9 (In-person verification ready)`);
+      console.log(`   • Payment: GHS ${pendingRent} via Manual Bank Transfer (Pending Verification)`);
+      console.log(`   • Target Listing: "${targetListing.title}" [Status: Pending]`);
+
+      // 6. Create Active Tenant (Ready for Lifecycle Demo Scripts)
+      const activeTenant = await User.findOneAndUpdate(
+        { email: 'active.tenant@example.com' },
+        {
+          name: 'Ama Serwaa',
+          email: 'active.tenant@example.com',
+          phone: '+233500000002',
+          password: defaultPassword,
+          role: 'User',
+          kycStatus: 'Verified',
+          legalName: 'Ama Serwaa',
+          idDocumentType: 'GHA',
+          idDocumentNumber: 'GHA-890123456-1',
+          accountStatus: 'Active',
+        },
+        { upsert: true, new: true }
+      );
+
+      const activeListing = createdListings[1];
+      const activeRent = activeListing.price || 4000;
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000);
+      const elevenMonthsLater = new Date(Date.now() + 335 * 86400000);
+
+      const activeLease = await Lease.create({
+        listingId: activeListing._id,
+        userId: activeTenant._id,
+        startDate: thirtyDaysAgo,
+        endDate: elevenMonthsLater,
+        totalRentAmount: activeRent,
+        status: 'Active',
+        smartLockPin: '482910',
+        reminders: {
+          milestone1: { triggerDate: new Date(Date.now() + 150 * 86400000), sent: false },
+          milestone2: { triggerDate: new Date(Date.now() + 240 * 86400000), sent: false },
+          milestone3: { triggerDate: new Date(Date.now() + 300 * 86400000), sent: false },
+          expired: { sent: false },
+        },
+      });
+
+      activeListing.status = 'Rented';
+      await activeListing.save();
+
+      await Transaction.create({
+        userId: activeTenant._id,
+        listingId: activeListing._id,
+        leaseId: activeLease._id,
+        amount: activeRent,
+        currency: 'GHS',
+        paymentPurpose: 'Upfront_Rent',
+        reference: `BNK-ACT-${Date.now().toString().slice(-4)}`,
+        channel: 'bank',
+        status: 'Success',
+        paidAt: thirtyDaysAgo,
+      });
+
+      console.log(`🔑 Seeded Active Tenant for Lifecycle & Expiry Demos:`);
+      console.log(`   • User: Ama Serwaa (active.tenant@example.com / Password123!)`);
+      console.log(`   • Lease: Active (Unit: "${activeListing.title}") with SmartLock PIN configured`);
     }
 
-    console.log(`🎉 Successfully seeded ${count} highly realistic properties and their listings into the database!`);
+    console.log("\n✅ Database seed completed successfully!");
+    console.log("👉 Admin Onboarding URL: http://localhost:3000/admin/manage/tenants");
     await mongoose.disconnect();
     console.log("🔌 Disconnected from MongoDB.");
     
