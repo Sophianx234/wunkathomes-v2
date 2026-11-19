@@ -14,21 +14,16 @@ export async function syncLocksFromCloud() {
   try {
     await connectToDatabase();
     
-    // Fetch all devices from Tuya Cloud
+    // Clean up any legacy development mock locks
+    await SmartLock.deleteMany({
+      $or: [
+        { tuyaDeviceId: { $regex: /_mock_/i } },
+        { name: { $regex: /\(Mock/i } }
+      ]
+    });
+
+    // Fetch all real devices from Tuya Cloud across all configured accounts
     const tuyaDevices = await getDevicesByUser();
-    
-    // --- DEV ONLY: Duplicate the first lock 14 times for UI testing ---
-    if (tuyaDevices.length > 0 && process.env.NODE_ENV === 'development') {
-      const realDevice = tuyaDevices[0];
-      for (let i = 1; i <= 14; i++) {
-        tuyaDevices.push({
-          ...realDevice,
-          id: `${realDevice.id}_mock_${i}`,
-          name: `${realDevice.name} (Mock ${i})`,
-        });
-      }
-    }
-    // ------------------------------------------------------------------
     
     let newLocksAdded = 0;
 
