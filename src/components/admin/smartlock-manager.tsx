@@ -4,12 +4,23 @@ import { useState, useTransition, useCallback, useRef, useEffect, useMemo } from
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { getPusherClient } from '@/lib/pusher-client';
-import { syncLocksFromCloud, renameSmartLock } from '@/actions/admin/smartlock.action';
+import { syncLocksFromCloud, renameSmartLock, deleteSmartLockAction, clearAllSmartLocksAction } from '@/actions/admin/smartlock.action';
 import { SmartLockManageDialog } from './smartlock-manage-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
-import { MoreHorizontal, Battery, BatteryWarning, Wifi, WifiOff, Lock, Unlock, DoorOpen, DoorClosed, Settings2, Edit2, Link as LinkIcon, Loader2, Radio } from 'lucide-react';
+import { MoreHorizontal, Battery, BatteryWarning, Wifi, WifiOff, Lock, Unlock, DoorOpen, DoorClosed, Settings2, Edit2, Link as LinkIcon, Loader2, Radio, Trash2, AlertTriangle } from 'lucide-react';
 
 export default function SmartLockManager({ 
   allLocks,
@@ -74,6 +85,12 @@ export default function SmartLockManager({
   // State for managing
   const [manageLockId, setManageLockId] = useState<string | null>(null);
 
+  // State for deleting a single lock or clearing all locks
+  const [lockToDelete, setLockToDelete] = useState<any | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [clearAllOpen, setClearAllOpen] = useState(false);
+  const [clearAllLoading, setClearAllLoading] = useState(false);
+
   // State for search input
   const [searchTerm, setSearchTerm] = useState(initialSearch);
   const debounceTimerRef = useRef<NodeJS.Timeout>(null);
@@ -135,6 +152,39 @@ export default function SmartLockManager({
     }
     setRenameLoading(false);
   };
+
+  const handleDeleteLock = async () => {
+    if (!lockToDelete) return;
+    setDeleteLoading(true);
+    const res = await deleteSmartLockAction(lockToDelete._id);
+    if (res.success) {
+      toast.success(res.message || 'Smart lock deleted.');
+      if (manageLockId === lockToDelete._id) {
+        setManageLockId(null);
+      }
+      setLockToDelete(null);
+      router.refresh();
+    } else {
+      toast.error(res.error || 'Failed to delete smart lock.');
+    }
+    setDeleteLoading(false);
+  };
+
+  const handleClearAllLocks = async () => {
+    setClearAllLoading(true);
+    const res = await clearAllSmartLocksAction();
+    if (res.success) {
+      toast.success(res.message || 'All smart locks cleared.');
+      setManageLockId(null);
+      setClearAllOpen(false);
+      router.refresh();
+    } else {
+      toast.error(res.error || 'Failed to clear smart locks.');
+    }
+    setClearAllLoading(false);
+  };
+
+  const assignedLocksCount = allLocks.filter(l => l.listingId || l.propertyId).length;
 
   const offlineLocks = allLocks.filter(l => l.status === 'offline');
   const lowBatteryLocks = allLocks.filter(l => l.batteryLevel === 'low');
@@ -254,6 +304,14 @@ export default function SmartLockManager({
                 ) : (
                   'Sync Locks'
                 )}
+              </button>
+              <button
+                onClick={() => setClearAllOpen(true)}
+                disabled={allLocks.length === 0 || syncLoading || clearAllLoading}
+                className="bg-white hover:bg-rose-50 text-rose-600 border border-rose-200 hover:border-rose-300 px-3.5 h-9 rounded-lg text-xs font-medium disabled:opacity-40 disabled:cursor-not-allowed shrink-0 inline-flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all shadow-xs"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                <span>Clear All</span>
               </button>
               {syncMessage && (
                 <p className="text-xs text-zinc-600 bg-zinc-50 border border-zinc-200/60 px-2.5 py-1 rounded-md hidden md:block">
@@ -444,6 +502,14 @@ export default function SmartLockManager({
                               </Link>
                             </DropdownMenuItem>
                           )}
+                          <DropdownMenuSeparator className="my-1 bg-zinc-100" />
+                          <DropdownMenuItem
+                            onClick={() => setLockToDelete(lock)}
+                            className="cursor-pointer flex items-center gap-2 text-xs rounded-lg px-2.5 py-1.5 text-rose-600 focus:text-rose-700 focus:bg-rose-50"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                            <span>Delete Lock</span>
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </td>
@@ -734,6 +800,14 @@ export default function SmartLockManager({
                             <Settings2 className="h-3.5 w-3.5 text-zinc-500" />
                             <span>Manage Access</span>
                           </DropdownMenuItem>
+                          <DropdownMenuSeparator className="my-1 bg-zinc-100" />
+                          <DropdownMenuItem
+                            onClick={() => setLockToDelete(lock)}
+                            className="cursor-pointer flex items-center gap-2 text-xs rounded-lg px-2.5 py-1.5 text-rose-600 focus:text-rose-700 focus:bg-rose-50"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                            <span>Delete Lock</span>
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </td>
@@ -749,6 +823,126 @@ export default function SmartLockManager({
           onClose={() => setManageLockId(null)}
           lock={manageLockId ? liveLocks.find(l => l._id === manageLockId) : null}
         />
+
+        {/* Single Smart Lock Delete Warning Modal */}
+        <AlertDialog open={!!lockToDelete} onOpenChange={(open) => { if (!open && !deleteLoading) setLockToDelete(null); }}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2 text-zinc-900">
+                <AlertTriangle className="h-5 w-5 text-rose-600 shrink-0" />
+                <span>Delete Smart Lock?</span>
+              </AlertDialogTitle>
+              <AlertDialogDescription asChild>
+                <div className="space-y-3 text-sm text-zinc-600 pt-1">
+                  <p>
+                    You are about to remove <span className="font-semibold text-zinc-900">{lockToDelete?.name}</span>{' '}
+                    (<span className="font-mono text-xs">{lockToDelete?.tuyaDeviceId}</span>) from the Wunkat Homes database.
+                  </p>
+
+                  {(lockToDelete?.listingId || lockToDelete?.propertyId) ? (
+                    <div className="rounded-lg border border-rose-200 bg-rose-50/80 p-3 text-xs text-rose-900 space-y-1.5">
+                      <p className="font-semibold text-rose-800">
+                        Warning: This lock is currently tied to{' '}
+                        {lockToDelete?.listingId?.title ? `"${lockToDelete.listingId.title}"` : 'a property or room'}.
+                      </p>
+                      <ul className="list-disc pl-4 space-y-1 text-rose-800/90">
+                        <li>It will be immediately unlinked from this property/room.</li>
+                        <li>Remote unlocking, temporary/vendor PIN generation, tenant PIN resets, and access logs for this unit will stop working until a lock is re-synced and re-assigned.</li>
+                        <li>All recorded access logs for this lock will be permanently deleted.</li>
+                      </ul>
+                    </div>
+                  ) : (
+                    <div className="rounded-lg border border-amber-200 bg-amber-50/80 p-3 text-xs text-amber-900 space-y-1">
+                      <p>
+                        This will permanently delete the lock record and its access logs from the dashboard.
+                      </p>
+                    </div>
+                  )}
+
+                  <p className="text-xs text-zinc-500">
+                    Note: If the device is still paired in your Tuya Cloud account, clicking <strong>Sync Locks</strong> later will re-import it as unassigned.
+                  </p>
+                </div>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={deleteLoading}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleDeleteLock();
+                }}
+                disabled={deleteLoading}
+                className="bg-rose-600 hover:bg-rose-700 text-white dark:bg-rose-600 dark:hover:bg-rose-700"
+              >
+                {deleteLoading ? (
+                  <span className="inline-flex items-center gap-2">
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    Deleting...
+                  </span>
+                ) : (
+                  'Delete Smart Lock'
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Clear All Smart Locks Warning Modal */}
+        <AlertDialog open={clearAllOpen} onOpenChange={(open) => { if (!open && !clearAllLoading) setClearAllOpen(false); }}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2 text-zinc-900">
+                <AlertTriangle className="h-5 w-5 text-rose-600 shrink-0" />
+                <span>Clear All Smart Locks?</span>
+              </AlertDialogTitle>
+              <AlertDialogDescription asChild>
+                <div className="space-y-3 text-sm text-zinc-600 pt-1">
+                  <p>
+                    You are about to permanently remove all <span className="font-semibold text-zinc-900">{allLocks.length}</span> smart lock{allLocks.length === 1 ? '' : 's'} and their access logs from the Wunkat Homes database.
+                  </p>
+
+                  {assignedLocksCount > 0 && (
+                    <div className="rounded-lg border border-rose-200 bg-rose-50/80 p-3 text-xs text-rose-900 space-y-1.5">
+                      <p className="font-semibold text-rose-800">
+                        Warning: {assignedLocksCount} lock{assignedLocksCount === 1 ? ' is' : 's are'} currently tied to properties or rooms!
+                      </p>
+                      <ul className="list-disc pl-4 space-y-1 text-rose-800/90">
+                        <li>Every assigned lock will be unlinked from its property or room.</li>
+                        <li>Remote unlock, tenant PIN resets, and temporary/vendor PIN management will stop working for those units until locks are re-synced and re-assigned.</li>
+                        <li>All lock audit/access logs will be permanently deleted.</li>
+                      </ul>
+                    </div>
+                  )}
+
+                  <p className="text-xs text-zinc-500">
+                    Note: Running <strong>Sync Locks</strong> later will re-import devices still paired in Tuya Cloud as unassigned, so property assignments will need to be configured again.
+                  </p>
+                </div>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={clearAllLoading}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleClearAllLocks();
+                }}
+                disabled={clearAllLoading}
+                className="bg-rose-600 hover:bg-rose-700 text-white dark:bg-rose-600 dark:hover:bg-rose-700"
+              >
+                {clearAllLoading ? (
+                  <span className="inline-flex items-center gap-2">
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    Clearing...
+                  </span>
+                ) : (
+                  'Clear All Locks'
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </Tabs>
     </div>
   );

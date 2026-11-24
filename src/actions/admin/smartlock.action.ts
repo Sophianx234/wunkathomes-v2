@@ -368,3 +368,54 @@ export async function getLockAuditLogs(lockId: string) {
   }
 }
 
+/**
+ * Deletes a single smart lock and its access logs from the database.
+ */
+export async function deleteSmartLockAction(lockId: string) {
+  try {
+    await connectToDatabase();
+
+    const lock = await SmartLock.findById(lockId);
+    if (!lock) {
+      return { success: false, error: 'Smart lock not found.' };
+    }
+
+    await AccessLog.deleteMany({ lockId: lock._id });
+    await SmartLock.findByIdAndDelete(lockId);
+
+    revalidatePath('/admin/smartlocks');
+    revalidatePath('/admin/properties');
+    revalidatePath('/admin/manage/tenants');
+
+    return { success: true, message: `Smart lock "${lock.name}" deleted.` };
+  } catch (error: any) {
+    console.error('Failed to delete smart lock:', error);
+    return { success: false, error: error.message || 'Failed to delete smart lock' };
+  }
+}
+
+/**
+ * Clears all smart locks and their access logs from the database.
+ */
+export async function clearAllSmartLocksAction() {
+  try {
+    await connectToDatabase();
+
+    await AccessLog.deleteMany({});
+    const result = await SmartLock.deleteMany({});
+
+    revalidatePath('/admin/smartlocks');
+    revalidatePath('/admin/properties');
+    revalidatePath('/admin/manage/tenants');
+
+    return {
+      success: true,
+      deletedCount: result.deletedCount,
+      message: `Cleared ${result.deletedCount} smart lock${result.deletedCount === 1 ? '' : 's'}.`
+    };
+  } catch (error: any) {
+    console.error('Failed to clear all smart locks:', error);
+    return { success: false, error: error.message || 'Failed to clear smart locks' };
+  }
+}
+
