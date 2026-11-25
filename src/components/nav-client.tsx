@@ -324,9 +324,9 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                     <div className="text-left text-[12px] font-medium text-zinc-900">
                       {user.name}
                     </div>
-                    <div className="text-[10px] text-zinc-500">
+                    {/* <div className="text-[10px] text-zinc-500">
                       {user.email}
-                    </div>
+                    </div> */}
                   </div>
                 </button>
 
