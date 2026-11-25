@@ -467,7 +467,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
               <>
                 <button
                   onClick={toggleProfile}
-                  className="flex items-center gap-2 border pr-6 border-zinc-200/60 rounded-full p-1.5 transition-all bg-white focus:outline-none  relative"
+                  className="flex items-center gap-2 border-none pr-6  p-1.5 transition-all bg-white focus:outline-none  relative"
                 >
                   <div className="bg-zinc-100/50 p-1 rounded-full text-zinc-600">
                     <HugeiconsIcon icon={UserCircleIcon} size={24} />
