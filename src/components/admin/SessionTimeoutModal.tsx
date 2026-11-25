@@ -4,8 +4,8 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import { logoutAction } from "@/actions/user/auth.action";
 import { LogOut, UserCheck } from "lucide-react";
 
-// Total session before logout (10 minutes)
-const SESSION_TIMEOUT_MS = 10 * 60 * 1000;
+// Total session before logout (30 minutes - industry standard for admin portals)
+const SESSION_TIMEOUT_MS = 30 * 60 * 1000;
 // When to show the warning modal (2 minutes before expiration)
 const WARNING_BEFORE_MS = 2 * 60 * 1000; 
 

@@ -99,7 +99,7 @@ export async function proxy(request: NextRequest) {
           })
           .setProtectedHeader({ alg: 'HS256' })
           .setIssuedAt()
-          .setExpirationTime('10m')
+          .setExpirationTime('30m')
           .sign(secret);
       }
     } catch (error) {
@@ -132,7 +132,7 @@ export async function proxy(request: NextRequest) {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: 'lax',
-        maxAge: 10 * 60, // 10 minutes
+        maxAge: 30 * 60, // 30 minutes
         path: '/',
       });
     }
