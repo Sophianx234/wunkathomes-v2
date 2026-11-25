@@ -304,7 +304,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                 >
                   <div className="relative">
                     {user.profilePicture ? (
-                      <div className="relative size-8 rounded-full overflow-hidden border border-zinc-200/60">
+                      <div className="relative size-8 rounded-full overflow-hidden ">
                         <Image
                           src={user.profilePicture}
                           alt={user.name}
